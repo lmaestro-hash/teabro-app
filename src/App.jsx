@@ -46,51 +46,51 @@ const WISDOMS = [
   { text: "Чай заваривают дважды: руками и вниманием.", mood: "general" },
   { text: "Пока все ищут дофамин — мы завариваем пуэр.", mood: "general" },
   { text: "Тишина — это тоже ответ.", mood: "general" },
-  { text: "Ты становишься тем, на что тратишь своё внимание.", mood: "general" },
+  { text: "Ты становишься тем, на что тратишь свое внимание.", mood: "general" },
   { text: "Самое сложное сегодня — остаться наедине со своими мыслями.", mood: "general" },
   { text: "Усталость не всегда от работы. Иногда — от потока информации.", mood: "general" },
   { text: "Настоящая жизнь редко происходит внутри экрана.", mood: "general" },
   { text: "Иногда тишина лечит лучше, чем очередной скроллинг.", mood: "general" },
   { text: "Самая дорогая валюта сегодня — внимание.", mood: "general" },
   { text: "Чем больше шума вокруг — тем дальше человек от себя.", mood: "general" },
-  { text: "Не всё, что привлекает внимание, заслуживает его.", mood: "general" },
+  { text: "Не все, что привлекает внимание, заслуживает его.", mood: "general" },
   { text: "Один тихий час лучше десяти шумных дней.", mood: "general" },
-  { text: "Тревога приходит, когда ты живёшь в будущем. Вернись сюда.", mood: "bai" },
+  { text: "Тревога приходит, когда ты живешь в будущем. Вернись сюда.", mood: "bai" },
   { text: "Выдохни. Прямо сейчас. Медленно.", mood: "bai" },
-  { text: "Не всё, что пугает — опасно. Иногда это просто неизвестность.", mood: "bai" },
-  { text: "Белый чай не борется с тревогой. Он просто создаёт другой ритм.", mood: "bai" },
-  { text: "Тревога — это не ты. Это погода внутри. Она пройдёт.", mood: "bai" },
+  { text: "Не все, что пугает — опасно. Иногда это просто неизвестность.", mood: "bai" },
+  { text: "Белый чай не борется с тревогой. Он просто создает другой ритм.", mood: "bai" },
+  { text: "Тревога — это не ты. Это погода внутри. Она пройдет.", mood: "bai" },
   { text: "Одна чашка чая. Один вдох. Один момент. Больше ничего не нужно.", mood: "bai" },
   { text: "Самое тревожное время — между делами. Займи руки чаем.", mood: "bai" },
   { text: "Позволь мыслям идти мимо. Ты не обязан за каждой бежать.", mood: "bai" },
   { text: "Когда внутри шумно — замедли внешнее. Тело успокаивает голову.", mood: "bai" },
   { text: "Три вдоха медленнее, чем обычно. Это уже практика.", mood: "bai" },
-  { text: "Всё, что ты сейчас чувствуешь — временно. Даже это.", mood: "bai" },
+  { text: "Все, что ты сейчас чувствуешь — временно. Даже это.", mood: "bai" },
   { text: "Не решай сегодня то, что можно решить завтра со свежей головой.", mood: "bai" },
-  { text: "Твоё тело не враг. Оно просто сигнализирует. Прислушайся.", mood: "bai" },
+  { text: "Твое тело не враг. Оно просто сигнализирует. Прислушайся.", mood: "bai" },
   { text: "Иногда достаточно просто сесть и не делать ничего важного.", mood: "bai" },
   { text: "Тревога любит темноту. Зажги свет. Завари чай.", mood: "bai" },
   { text: "Раздражение — это сигнал. Что-то важное требует внимания.", mood: "shu" },
-  { text: "Шу пуэр тяжёлый и земляной. Он тянет вниз — и это то, что нужно.", mood: "shu" },
-  { text: "Злость — это энергия. Вопрос только куда её направить.", mood: "shu" },
-  { text: "Когда всё раздражает — обычно дело не в людях. Дело в усталости.", mood: "shu" },
+  { text: "Шу пуэр тяжелый и земляной. Он тянет вниз — и это то, что нужно.", mood: "shu" },
+  { text: "Злость — это энергия. Вопрос только куда ее направить.", mood: "shu" },
+  { text: "Когда все раздражает — обычно дело не в людях. Дело в усталости.", mood: "shu" },
   { text: "Не отвечай, пока не остынешь. Чай помогает остыть.", mood: "shu" },
   { text: "Позволь себе быть не в духе. Без объяснений.", mood: "shu" },
   { text: "Тело зажато — значит что-то долго держишь. Можно отпустить.", mood: "shu" },
-  { text: "Иногда лучшее что можно сделать со злостью — переждать её.", mood: "shu" },
-  { text: "Первый глоток тёмного пуэра. Тяжёлый. Тёплый. Заземляет.", mood: "shu" },
+  { text: "Иногда лучшее что можно сделать со злостью — переждать ее.", mood: "shu" },
+  { text: "Первый глоток темного пуэра. Тяжелый. Теплый. Заземляет.", mood: "shu" },
   { text: "Ты не обязан быть добрым когда внутри огонь. Просто не обожги других.", mood: "shu" },
   { text: "Раздражение часто прячет за собой боль. Что болит на самом деле?", mood: "shu" },
   { text: "Сделай паузу прежде чем говорить. Пять секунд меняют многое.", mood: "shu" },
-  { text: "Жар внутри просит выхода. Движение, воздух, тёплый чай.", mood: "shu" },
+  { text: "Жар внутри просит выхода. Движение, воздух, теплый чай.", mood: "shu" },
   { text: "Не каждый конфликт нужно выигрывать. Некоторые — просто пережить.", mood: "shu" },
-  { text: "После раздражения всегда приходит тишина. Подожди её.", mood: "shu" },
+  { text: "После раздражения всегда приходит тишина. Подожди ее.", mood: "shu" },
   { text: "Туман в голове — это не глупость. Это сигнал: нужен отдых.", mood: "sheng" },
   { text: "Шэн пуэр горьковатый и живой. Он открывает окно в голове.", mood: "sheng" },
   { text: "Не пытайся думать через туман. Сначала — стакан воды и тишина.", mood: "sheng" },
   { text: "Одна задача. Не список. Одна.", mood: "sheng" },
   { text: "Рассеянность — это усталый мозг. Не ленивый.", mood: "sheng" },
-  { text: "Иногда ясность приходит не когда думаешь, а когда перестаёшь.", mood: "sheng" },
+  { text: "Иногда ясность приходит не когда думаешь, а когда перестаешь.", mood: "sheng" },
   { text: "Первый пролив — слей. Со второго начинается настоящий чай.", mood: "sheng" },
   { text: "Выйди на воздух. Пять минут. Мозгу нужен кислород, не кофе.", mood: "sheng" },
   { text: "Туман рассеивается сам. Твоя задача — не мешать.", mood: "sheng" },
@@ -99,7 +99,7 @@ const WISDOMS = [
   { text: "Чай без спешки. Мысли — тоже без спешки.", mood: "sheng" },
   { text: "Иногда нужно просто сидеть с чашкой и смотреть в одну точку.", mood: "sheng" },
   { text: "Усталый ум ищет стимуляции. Ему нужна тишина.", mood: "sheng" },
-  { text: "После тумана всегда приходит момент когда всё встаёт на место.", mood: "sheng" },
+  { text: "После тумана всегда приходит момент когда все встает на место.", mood: "sheng" },
   { text: "Пустота — это не конец. Это пространство перед чем-то новым.", mood: "dahong" },
   { text: "Да Хун Пао греет изнутри. Медленно. Он не кричит — вставай.", mood: "dahong" },
   { text: "Когда нет сил — не нужно их искать. Просто не трать то, что есть.", mood: "dahong" },
@@ -108,9 +108,9 @@ const WISDOMS = [
   { text: "Тело помнит радость даже когда голова забыла. Дай ему тепло.", mood: "dahong" },
   { text: "Не заставляй себя хотеть. Позволь желанию прийти само.", mood: "dahong" },
   { text: "Солнце. Вода. Тепло чашки в руках. Этого уже достаточно.", mood: "dahong" },
-  { text: "В пустоте можно найти себя. Если не бежать от неё.", mood: "dahong" },
+  { text: "В пустоте можно найти себя. Если не бежать от нее.", mood: "dahong" },
   { text: "Ты не сломан. Ты на паузе. Разница огромная.", mood: "dahong" },
-  { text: "Жареный тёплый вкус Да Хун Пао. Это вкус возвращения.", mood: "dahong" },
+  { text: "Жареный теплый вкус Да Хун Пао. Это вкус возвращения.", mood: "dahong" },
   { text: "Иногда нужно просто дать себе разрешение ничего не чувствовать.", mood: "dahong" },
   { text: "После пустоты всегда что-то прорастает. Всегда.", mood: "dahong" },
   { text: "Не оценивай себя в плохие дни. Просто переживи их.", mood: "dahong" },
@@ -134,7 +134,7 @@ const EMOTIONS = [
   { id: "joy",      emoji: "😊", label: "Радость",          mood: "general", score: 9 },
   { id: "calm",     emoji: "😌", label: "Спокойствие",      mood: "general", score: 8 },
   { id: "inspired", emoji: "💪", label: "Воодушевление",    mood: "general", score: 9 },
-  { id: "unclear",  emoji: "🤔", label: "Неопределённость", mood: "sheng",   score: 5 },
+  { id: "unclear",  emoji: "🤔", label: "Неопределенность", mood: "sheng",   score: 5 },
   { id: "anxiety",  emoji: "😟", label: "Тревога",          mood: "bai",     score: 3 },
   { id: "angry",    emoji: "😡", label: "Раздражение",      mood: "shu",     score: 2 },
   { id: "tired",    emoji: "😴", label: "Усталость",        mood: "tguan",   score: 3 },
@@ -149,7 +149,7 @@ const TITLES = [
   { days: 21,  emoji: "🌿", name: "Практик",          desc: "21 день — это уже привычка." },
   { days: 40,  emoji: "🍵", name: "Хранитель тишины", desc: "40 дней практики." },
   { days: 90,  emoji: "🌕", name: "Мастер паузы",     desc: "90 дней — редкость." },
-  { days: 365, emoji: "✦",  name: "Путь чая",         desc: "Год. Это всё." },
+  { days: 365, emoji: "✦",  name: "Путь чая",         desc: "Год. Это все." },
 ];
 
 function getCurrentTitle(streak) {
@@ -173,14 +173,14 @@ const ARCHETYPES = [
     id: "seeker",
     emoji: "🔥",
     name: "Искатель перемен",
-    desc: "Ты живёшь интенсивно. Тревога и воодушевление — твои частые спутники. Энергия есть — важно куда её.",
+    desc: "Ты живешь интенсивно. Тревога и воодушевление — твои частые спутники. Энергия есть — важно куда ее.",
     condition: (stats) => (stats.anxiety + stats.inspired + stats.angry) / stats.total > 0.5,
   },
   {
     id: "analyst",
     emoji: "🧭",
     name: "Аналитик",
-    desc: "Много неопределённости и тумана. Ты думаешь глубже большинства — иногда слишком глубоко.",
+    desc: "Много неопределенности и тумана. Ты думаешь глубже большинства — иногда слишком глубоко.",
     condition: (stats) => stats.unclear / stats.total > 0.3,
   },
   {
@@ -202,26 +202,26 @@ function getArchetype(emotionCounts, total) {
 // ОПРОСНИК
 // ─────────────────────────────────────────────
 const QUESTIONS_QUIZ = [
-  { id: 1, category: "УТРО", text: "Как начинается твоё утро в последнее время?", options: [
+  { id: 1, category: "УТРО", text: "Как начинается твое утро в последнее время?", options: [
     { text: "Просыпаюсь — и несколько минут просто лежу. Слушаю тишину.", score: 3 },
     { text: "Встаю нормально, но первое, что делаю — беру телефон.", score: 2 },
     { text: "Будильник звенит несколько раз. Встаю уже на бегу.", score: 1 },
     { text: "Утро ощущается как насилие. Я уже что-то должен.", score: 0 },
   ]},
   { id: 2, category: "ТИШИНА", text: "Когда ты последний раз был наедине с собой — без музыки, экрана?", options: [
-    { text: "Часто. Мне нужна тишина — я намеренно её ищу.", score: 3 },
+    { text: "Часто. Мне нужна тишина — я намеренно ее ищу.", score: 3 },
     { text: "Иногда бывает. Но долго не выдерживаю.", score: 2 },
     { text: "Редко. Тишина стала некомфортной.", score: 1 },
     { text: "Не помню. Фоновый шум стал нормой.", score: 0 },
   ]},
-  { id: 3, category: "ТЕЛО", text: "Как ты ощущаешь своё тело прямо сейчас?", options: [
+  { id: 3, category: "ТЕЛО", text: "Как ты ощущаешь свое тело прямо сейчас?", options: [
     { text: "Чувствую себя живым. Двигаюсь, дышу, замечаю ощущения.", score: 3 },
     { text: "Нормально, но устаю больше обычного.", score: 2 },
     { text: "Тело как будто чужое. Усталость стала фоном.", score: 1 },
     { text: "Тело меня раздражает или я его не замечаю.", score: 0 },
   ]},
-  { id: 4, category: "СМЫСЛ", text: "Есть ли что-то, ради чего ты с удовольствием встаёшь?", options: [
-    { text: "Да. Есть дело, человек, процесс — что-то тянет вперёд.", score: 3 },
+  { id: 4, category: "СМЫСЛ", text: "Есть ли что-то, ради чего ты с удовольствием встаешь?", options: [
+    { text: "Да. Есть дело, человек, процесс — что-то тянет вперед.", score: 3 },
     { text: "Скорее да, но это притупилось.", score: 2 },
     { text: "Трудно ответить. Дни похожи, мотивация плавает.", score: 1 },
     { text: "Нет. Встаю по инерции.", score: 0 },
@@ -236,7 +236,7 @@ const QUESTIONS_QUIZ = [
 
 const QUIZ_RESULTS = [
   { range: [0,4],   emoji: "🌫", title: "Очень далеко",  subtitle: "Туман поглотил дорогу",          color: "#6B7B8D", text: "Ты бежишь уже давно. Так давно, что забыл от чего. Связь с собой — тонкая, почти оборванная. Начни с одной чашки. Без телефона. Просто сиди." },
-  { range: [5,8],   emoji: "🌿", title: "На полпути",    subtitle: "Ты чувствуешь, что сбился",       color: "#7A9E7E", text: "Что-то внутри уже знает, что не так. Это важно — ты ещё слышишь себя. Суета взяла своё, но не всё. Войди в зазор — медленно." },
+  { range: [5,8],   emoji: "🌿", title: "На полпути",    subtitle: "Ты чувствуешь, что сбился",       color: "#7A9E7E", text: "Что-то внутри уже знает, что не так. Это важно — ты еще слышишь себя. Суета взяла свое, но не все. Войди в зазор — медленно." },
   { range: [9,11],  emoji: "🍵", title: "Почти здесь",  subtitle: "Ты возвращаешься",                 color: "#C8A97E", text: "Ты чувствуешь разницу между суетой и тишиной — и иногда выбираешь тишину. Это уже много. Осталось сделать это привычкой." },
   { range: [12,15], emoji: "🌕", title: "Ты здесь",     subtitle: "Чашка стынет — ты не торопишься", color: "#D4B896", text: "Ты умеешь быть там, где ты есть. Это редкость. Не потому что ты особенный — а потому что ты это выбираешь. Снова и снова." },
 ];
@@ -246,7 +246,7 @@ const QUIZ_RESULTS = [
 // ─────────────────────────────────────────────
 const TEA_QUESTIONS = [
   { id: 1, category: "СОСТОЯНИЕ", text: "Что сейчас происходит внутри?", options: [
-    { text: "Всё раздражает. Внутри жар, хочется чтобы все отстали.", teas: { shu:2, bai:0, tguan:0, sheng:0, dahong:0 } },
+    { text: "Все раздражает. Внутри жар, хочется чтобы все отстали.", teas: { shu:2, bai:0, tguan:0, sheng:0, dahong:0 } },
     { text: "Туман. Мысли путаются, сложно сосредоточиться.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:0 } },
     { text: "Тревога. Мысли не останавливаются, внутри сжато.", teas: { shu:0, bai:2, tguan:0, sheng:0, dahong:0 } },
     { text: "Пустота. Нет энергии, нет желания.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2 } },
@@ -263,11 +263,11 @@ const TEA_QUESTIONS = [
     { text: "Взвинчен. Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
     { text: "Рассеяна. Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0 } },
     { text: "На нуле. Даже встать было трудно.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2 } },
-    { text: "Тихая. Не хочу тратить её на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0 } },
+    { text: "Тихая. Не хочу тратить ее на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0 } },
     { text: "Нормальная, но хочется ясности в голове.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1 } },
   ]},
   { id: 4, category: "МЫСЛИ", text: "Как ведут себя твои мысли прямо сейчас?", options: [
-    { text: "Острые. Всё задевает, цепляю каждую мелочь.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
+    { text: "Острые. Все задевает, цепляю каждую мелочь.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
     { text: "Хаотичные. Скачут с одного на другое.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0 } },
     { text: "Тревожные. Прокручиваю одно и то же по кругу.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0 } },
     { text: "Нет мыслей. Пустота или безразличие.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2 } },
@@ -283,11 +283,11 @@ const TEA_QUESTIONS = [
 ];
 
 const TEA_RESULTS = {
-  shu:    { emoji:"✦", name:"Шу пуэр",      tag:"Заземление",  color:"#8B6E4E", text:"Внутри сейчас жар — раздражение, зажатость, острые края. Шу пуэр не борется с этим. Он просто тяжёлый, земляной, тёмный. Он тянет вниз — и это хорошо. Первый глоток немного притупляет края. К третьему начинаешь дышать.", note:"Заваривай горячим, пей медленно. Без телефона." },
+  shu:    { emoji:"✦", name:"Шу пуэр",      tag:"Заземление",  color:"#8B6E4E", text:"Внутри сейчас жар — раздражение, зажатость, острые края. Шу пуэр не борется с этим. Он просто тяжелый, земляной, темный. Он тянет вниз — и это хорошо. Первый глоток немного притупляет края. К третьему начинаешь дышать.", note:"Заваривай горячим, пей медленно. Без телефона." },
   sheng:  { emoji:"✦", name:"Шэн пуэр",     tag:"Ясность",     color:"#6B8E6B", text:"Голова в тумане, мысли не собрать. Шэн пуэр — это как открыть окно. Он не бодрит резко, он проясняет. Горьковатый, живой, чуть дикий. После него думается иначе — чище, без лишнего.", note:"Первый пролив — слей. Со второго начинается настоящий чай." },
-  bai:    { emoji:"✦", name:"Белый чай",    tag:"Тишина",      color:"#A89880", text:"Тревога — это когда мысли бегут быстрее тебя. Белый чай не останавливает их силой. Он просто создаёт другой ритм. Нежный, почти незаметный. Пьёшь — и замечаешь, что немного выдохнул.", note:"Заваривай при 80°C — и он раскроется." },
-  dahong: { emoji:"✦", name:"Да Хун Пао",   tag:"Пробуждение", color:"#B87333", text:"Нет сил, пустота, апатия — тело знает, что устало. Да Хун Пао не кричит «вставай». Он греет. Медленно, изнутри. Жареный, тёплый, с глубиной. Он возвращает ощущение, что ты живой.", note:"Пей тёплым, не спеша. Это не кофе — это другая история." },
-  tguan:  { emoji:"✦", name:"Те Гуань Инь", tag:"Уединение",   color:"#7A9E7E", text:"Ты устал от людей. От их слов, энергии, ожиданий. Те Гуань Инь — цветочный, лёгкий, уводит внутрь. Он не требует ничего. Просто сиди с ним. Это чай для того, чтобы снова стать собой.", note:"Закрой дверь. Этот чай не любит компании." },
+  bai:    { emoji:"✦", name:"Белый чай",    tag:"Тишина",      color:"#A89880", text:"Тревога — это когда мысли бегут быстрее тебя. Белый чай не останавливает их силой. Он просто создает другой ритм. Нежный, почти незаметный. Пьешь — и замечаешь, что немного выдохнул.", note:"Заваривай при 80°C — и он раскроется." },
+  dahong: { emoji:"✦", name:"Да Хун Пао",   tag:"Пробуждение", color:"#B87333", text:"Нет сил, пустота, апатия — тело знает, что устало. Да Хун Пао не кричит «вставай». Он греет. Медленно, изнутри. Жареный, теплый, с глубиной. Он возвращает ощущение, что ты живой.", note:"Пей теплым, не спеша. Это не кофе — это другая история." },
+  tguan:  { emoji:"✦", name:"Те Гуань Инь", tag:"Уединение",   color:"#7A9E7E", text:"Ты устал от людей. От их слов, энергии, ожиданий. Те Гуань Инь — цветочный, легкий, уводит внутрь. Он не требует ничего. Просто сиди с ним. Это чай для того, чтобы снова стать собой.", note:"Закрой дверь. Этот чай не любит компании." },
 };
 
 // ─────────────────────────────────────────────
@@ -369,7 +369,10 @@ function WisdomScreen({ onBack, currentMood }) {
 
   return (
     <div style={S.screen}>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.hintBtn} title="3 совета в день, подобранных под твое состояние. Обновляются в полночь.">ℹ</div>
+      </div>
       <div style={S.wisdomContainer}>
         <div style={S.teaIcon}>🍵</div>
         <div style={{ display:"flex", gap:"6px", marginBottom:"20px" }}>
@@ -428,7 +431,10 @@ function QuizScreen({ onBack }) {
   }
   return (
     <div style={S.screen}>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.hintBtn} title="5 вопросов — честный ответ о том, насколько ты далеко от себя.">ℹ</div>
+      </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current+1} / {QUESTIONS_QUIZ.length}</span></div>
       <div style={S.progressTrack}>{QUESTIONS_QUIZ.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{q.text}</p>
@@ -492,7 +498,10 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
   }
   return (
     <div style={S.screen}>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.hintBtn} title="5 вопросов о твоем состоянии — подберем чай, который нужен именно сейчас.">ℹ</div>
+      </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current+1} / {TEA_QUESTIONS.length}</span></div>
       <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{q.text}</p>
@@ -576,7 +585,7 @@ function MoodScreen({ onBack }) {
     setAllData(prev => { const n=[...prev]; n[364]=emotion; return n; });
   };
 
-  // Подсчёт статистики
+  // Подсчет статистики
   function calcStats(data) {
     const filled = data.filter(Boolean);
     const total = filled.length;
@@ -650,7 +659,10 @@ function MoodScreen({ onBack }) {
 
   return (
     <div style={S.screen}>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.hintBtn} title="Отмечай эмоцию каждый день. Серии, титулы, архетип — твой путь к себе.">ℹ</div>
+      </div>
 
       {/* Титул */}
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
@@ -718,6 +730,17 @@ function MoodScreen({ onBack }) {
             ))}
           </div>
           <StatBlock data={weekData.map(d => d.data)} label="неделю" />
+          {(() => { const ws = calcStats(weekData.map(d => d.data)); return ws ? (
+            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Итог недели</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ws.total} из 7 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ws.avgScore}/10</p>
+              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              <div style={{ marginTop:"12px" }}>
+                <ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" />
+              </div>
+            </div>
+          ) : null; })()}
         </div>
       )}
 
@@ -725,6 +748,17 @@ function MoodScreen({ onBack }) {
         <div>
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>ПОСЛЕДНИЕ 30 ДНЕЙ</p>
           <StatBlock data={monthData} label="месяц" />
+          {(() => { const ms = calcStats(monthData); return ms ? (
+            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Итог месяца</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ms.total} из 30 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ms.avgScore}/10</p>
+              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              <div style={{ marginTop:"12px" }}>
+                <ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" />
+              </div>
+            </div>
+          ) : null; })()}
         </div>
       )}
 
@@ -734,7 +768,7 @@ function MoodScreen({ onBack }) {
           <StatBlock data={allData} label="год" />
           {allStats && (
             <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
-              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Годовой отчёт</p>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Годовой отчет</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {allStats.avgScore}/10</p>
               {allStats.total > 0 && (() => {
@@ -743,7 +777,7 @@ function MoodScreen({ onBack }) {
                 return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>;
               })()}
               <div style={{ marginTop:"12px" }}>
-                <ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчётом ↗" />
+                <ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчетом ↗" />
               </div>
             </div>
           )}
@@ -759,7 +793,10 @@ function MoodScreen({ onBack }) {
 function ShopScreen({ onBack }) {
   return (
     <div style={S.screen}>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.hintBtn} title="Здесь скоро появятся чаи, которые мы выбираем сами.">ℹ</div>
+      </div>
       <div style={S.wisdomContainer}>
         <div style={{ fontSize:"48px", marginBottom:"20px" }}>🫖</div>
         <p style={{ ...S.wisdomText, fontSize:"22px", marginBottom:"12px" }}>Чайная лавка</p>
@@ -809,15 +846,15 @@ export default function App() {
       <div style={S.homeHeader}>
         <div style={S.moonIcon}>🌕</div>
         <h1 style={S.homeTitle}>Tea Bro</h1>
-        <p style={S.homeSubtitle}>茶道 · твоё личное пространство</p>
+        <p style={S.homeSubtitle}>茶道 · твое личное пространство</p>
       </div>
       <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
       <div style={S.menuList}>
         {[
           { id:"quiz",    title:"Далеко ли ты от себя?",    desc:"5 вопросов · 3 минуты · честный ответ" },
-          { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твоё состояние" },
+          { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твое состояние" },
           { id:"teaquiz", title:"Какой чай тебе нужен?",    desc:"5 вопросов · подбор под состояние" },
-          { id:"mood",    title:"Моё состояние",            desc:"Эмоция дня · серии · твой путь" },
+          { id:"mood",    title:"Мое состояние",            desc:"Эмоция дня · серии · твой путь" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
             <div style={S.menuCardIcon}>✦</div>
@@ -831,7 +868,7 @@ export default function App() {
         <a href="https://t.me/TeaBroLife" style={{ ...S.menuCard, textDecoration:"none" }}>
           <div style={S.menuCardIcon}>✦</div>
           <div style={S.menuCardContent}>
-            <p style={S.menuCardTitle}>Канал @TeaBroLife</p>
+            <p style={S.menuCardTitle}>В чайную</p>
             <p style={S.menuCardDesc}>Пуэр, медитация, медленная жизнь</p>
           </div>
           <span style={S.menuCardArrow}>→</span>
@@ -849,7 +886,9 @@ export default function App() {
 // ─────────────────────────────────────────────
 const S = {
   screen: { minHeight:"100vh", backgroundColor:"#0F0D0B", color:"#E8E0D4", fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box" },
+  screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
   backBtn: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+  hintBtn: { background:"none", border:"1px solid #2A2520", color:"#4A4036", fontSize:"12px", cursor:"default", width:"22px", height:"22px", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginBottom:"20px" },
   homeHeader: { textAlign:"center", paddingTop:"32px", paddingBottom:"8px" },
   moonIcon: { fontSize:"40px", marginBottom:"12px" },
   homeTitle: { fontSize:"32px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.1em", color:"#E8E0D4" },
