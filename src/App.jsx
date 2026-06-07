@@ -1010,6 +1010,99 @@ function ShopScreen({ onBack }) {
 }
 
 // ─────────────────────────────────────────────
+// ЭКРАН: АДМИНКА
+// ─────────────────────────────────────────────
+const ADMIN_ID = 5175467398;
+
+function AdminScreen({ onBack }) {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood"];
+        const [opens, quiz, tea, mood] = await Promise.all(keys.map(k => CS.get(k)));
+        const todayOpens = await CS.get("admin_opens_" + getTodayKey());
+        const todayQuiz = await CS.get("admin_quiz_" + getTodayKey());
+
+        // Загружаем все эмоции за все время
+        const allEntries = [];
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(); d.setDate(d.getDate() - i);
+          const raw = await CS.get("mood_" + getDateKey(d));
+          if (raw) allEntries.push(JSON.parse(raw));
+        }
+        const emotionCounts = {};
+        EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
+        allEntries.forEach(e => { if (emotionCounts[e.id] !== undefined) emotionCounts[e.id]++; });
+        const topEmotions = Object.entries(emotionCounts)
+          .sort((a,b) => b[1]-a[1])
+          .slice(0,3)
+          .map(([id, count]) => ({ ...EMOTIONS.find(e => e.id === id), count }));
+
+        setStats({
+          totalOpens: opens || "0",
+          totalQuiz: quiz || "0",
+          totalTea: tea || "0",
+          totalMood: mood || "0",
+          todayOpens: todayOpens || "0",
+          todayQuiz: todayQuiz || "0",
+          topEmotions,
+          allEntries: allEntries.length,
+        });
+      } catch(e) {
+        setStats({ error: true });
+      }
+      setLoading(false);
+    }
+    loadStats();
+  }, []);
+
+  const row = (label, value) => (
+    <div style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #1A1713" }}>
+      <span style={{ fontSize:"13px", color:"#7A6E62" }}>{label}</span>
+      <span style={{ fontSize:"13px", color:"#C8A97E" }}>{value}</span>
+    </div>
+  );
+
+  return (
+    <div style={S.screen}>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+      </div>
+      <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"20px" }}>ПАНЕЛЬ АДМИНИСТРАТОРА</p>
+      {loading ? (
+        <p style={{ color:"#4A4036", fontStyle:"italic" }}>Загружаю статистику...</p>
+      ) : stats?.error ? (
+        <p style={{ color:"#8B4A4A" }}>Ошибка загрузки</p>
+      ) : (
+        <>
+          <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
+            <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>СЕГОДНЯ</p>
+            {row("Открытий бота", stats.todayOpens)}
+            {row("Прошли опросник", stats.todayQuiz)}
+          </div>
+          <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
+            <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ВСЕГО</p>
+            {row("Открытий", stats.totalOpens)}
+            {row("Опросник", stats.totalQuiz)}
+            {row("Тест чая", stats.totalTea)}
+            {row("Записей эмоций", stats.allEntries)}
+          </div>
+          {stats.topEmotions?.length > 0 && (
+            <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px" }}>
+              <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ТОП ЭМОЦИЙ</p>
+              {stats.topEmotions.map((e,i) => e && row(`${e.emoji} ${e.label}`, `${e.count} раз`))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ГЛАВНЫЙ ЭКРАН
 // ─────────────────────────────────────────────
 export default function App() {
@@ -1019,7 +1112,13 @@ export default function App() {
   useEffect(() => {
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
     async function loadMood() {
+      // Счётчик открытий
+      const totalOpens = parseInt(await CS.get("admin_opens") || "0") + 1;
+      await CS.set("admin_opens", String(totalOpens));
       const todayKey = getTodayKey();
+      const todayOpens = parseInt(await CS.get("admin_opens_" + todayKey) || "0") + 1;
+      await CS.set("admin_opens_" + todayKey, String(todayOpens));
+
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }
       const teaRaw = await CS.get("tea_" + todayKey);
@@ -1038,6 +1137,11 @@ export default function App() {
   if (screen === "teaquiz") return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   if (screen === "mood")    return <MoodScreen onBack={() => setScreen("home")} />;
   if (screen === "shop")    return <ShopScreen onBack={() => setScreen("home")} />;
+  if (screen === "admin")   return <AdminScreen onBack={() => setScreen("home")} />;
+
+  // Проверка доступа к админке
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const isAdmin = tgUser?.id === ADMIN_ID;
 
   return (
     <div style={S.screen}>
@@ -1075,6 +1179,11 @@ export default function App() {
       <div style={{ marginTop:"16px" }}>
         <button onClick={() => setScreen("shop")} style={S.shopBtn}>🫖 Чайная лавка</button>
       </div>
+      {isAdmin && (
+        <div style={{ marginTop:"12px" }}>
+          <button onClick={() => setScreen("admin")} style={{ ...S.shopBtn, color:"#4A4036", fontSize:"12px" }}>⚙️ Админка</button>
+        </div>
+      )}
     </div>
   );
 }
