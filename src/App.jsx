@@ -125,6 +125,19 @@ const WISDOMS = [
   { text: "Интроверт или экстраверт — всем нужна пауза от мира.", mood: "tguan" },
   { text: "Сегодня можно никуда не торопиться и ни перед кем не отчитываться.", mood: "tguan" },
   { text: "Чашка чая в тишине. Только ты. Этого достаточно.", mood: "tguan" },
+  { text: "Энергия есть — но она ищет берег. Габа помогает ей найти русло.", mood: "gaba" },
+  { text: "Не каждый подъём нужно куда-то направлять. Иногда просто побудь в нём.", mood: "gaba" },
+  { text: "Много идей, много желаний — это богатство. Одна чашка помогает выбрать главное.", mood: "gaba" },
+  { text: "Габа не замедляет. Она выравнивает. Разница огромная.", mood: "gaba" },
+  { text: "Скорость без направления — это просто шум. Остановись на минуту.", mood: "gaba" },
+  { text: "Хорошее состояние тоже требует внимания. Не трать его впустую.", mood: "gaba" },
+  { text: "Ты на подъёме — значит сейчас хорошее время для важного.", mood: "gaba" },
+  { text: "Сила и покой не противоречат друг другу. Они могут быть одновременно.", mood: "gaba" },
+  { text: "Радость — это тоже состояние, которое стоит замечать. Не только боль.", mood: "general" },
+  { text: "Хороший день — это не случайность. Это что-то в тебе сделало его таким.", mood: "general" },
+  { text: "Когда внутри светло — не торопись это объяснять. Просто живи в этом.", mood: "general" },
+  { text: "Воодушевление — редкий гость. Встреть его без спешки.", mood: "general" },
+  { text: "Спокойствие — не скука. Это высшая форма присутствия.", mood: "general" },
 ];
 
 // ─────────────────────────────────────────────
@@ -448,39 +461,44 @@ const BURNOUT_LEVELS = [
 // ─────────────────────────────────────────────
 const TEA_QUESTIONS = [
   { id: 1, category: "СОСТОЯНИЕ", text: "Что сейчас происходит внутри?", options: [
-    { text: "Все раздражает. Внутри жар, хочется чтобы все отстали.", teas: { shu:2, bai:0, tguan:0, sheng:0, dahong:0 } },
-    { text: "Туман. Мысли путаются, сложно сосредоточиться.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:0 } },
-    { text: "Тревога. Мысли не останавливаются, внутри сжато.", teas: { shu:0, bai:2, tguan:0, sheng:0, dahong:0 } },
-    { text: "Пустота. Нет энергии, нет желания.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2 } },
-    { text: "Устал от всех. Хочу тишины и быть одному.", teas: { shu:0, bai:0, tguan:2, sheng:0, dahong:0 } },
+    { text: "Все раздражает. Внутри жар, хочется чтобы все отстали.", teas: { shu:2, bai:0, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Туман. Мысли путаются, сложно сосредоточиться.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:0, gaba:1 } },
+    { text: "Тревога. Мысли не останавливаются, внутри сжато.", teas: { shu:0, bai:2, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Пустота. Нет энергии, нет желания.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
+    { text: "Устал от всех. Хочу тишины и быть одному.", teas: { shu:0, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
+    { text: "Подъём. Энергия есть, но немного хаотична.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 2, category: "ТЕЛО", text: "Где чаще всего ощущаешь напряжение?", options: [
-    { text: "Шея и плечи — зажаты, почти всегда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
-    { text: "Голова — тяжесть или туман.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0 } },
-    { text: "Грудь или живот — что-то сжимает изнутри.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0 } },
-    { text: "Нет напряжения — просто нет сил вообще.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2 } },
-    { text: "Не чувствую тело. Оно где-то есть, но не замечаю.", teas: { shu:1, bai:0, tguan:2, sheng:1, dahong:0 } },
+    { text: "Шея и плечи — зажаты, почти всегда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Голова — тяжесть или туман.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0, gaba:1 } },
+    { text: "Грудь или живот — что-то сжимает изнутри.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
+    { text: "Нет напряжения — просто нет сил вообще.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2, gaba:0 } },
+    { text: "Не чувствую тело. Оно где-то есть, но не замечаю.", teas: { shu:1, bai:0, tguan:2, sheng:1, dahong:0, gaba:0 } },
+    { text: "Тело в тонусе, но внутри лёгкий гул — не могу остановиться.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 3, category: "ЭНЕРГИЯ", text: "Какой у тебя сейчас уровень энергии?", options: [
-    { text: "Взвинчен. Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
-    { text: "Рассеяна. Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0 } },
-    { text: "На нуле. Даже встать было трудно.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2 } },
-    { text: "Тихая. Не хочу тратить ее на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0 } },
-    { text: "Нормальная, но хочется ясности в голове.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1 } },
+    { text: "Взвинчен. Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Рассеяна. Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0, gaba:0 } },
+    { text: "На нуле. Даже встать было трудно.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
+    { text: "Тихая. Не хочу тратить ее на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0, gaba:0 } },
+    { text: "Нормальная, но хочется ясности в голове.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1, gaba:0 } },
+    { text: "Высокая. Много идей, хочется всё и сразу.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 4, category: "МЫСЛИ", text: "Как ведут себя твои мысли прямо сейчас?", options: [
-    { text: "Острые. Все задевает, цепляю каждую мелочь.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
-    { text: "Хаотичные. Скачут с одного на другое.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0 } },
-    { text: "Тревожные. Прокручиваю одно и то же по кругу.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0 } },
-    { text: "Нет мыслей. Пустота или безразличие.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2 } },
-    { text: "Много мыслей о других людях. Устал от этого.", teas: { shu:1, bai:0, tguan:2, sheng:0, dahong:0 } },
+    { text: "Острые. Все задевает, цепляю каждую мелочь.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Хаотичные. Скачут с одного на другое.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0, gaba:1 } },
+    { text: "Тревожные. Прокручиваю одно и то же по кругу.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
+    { text: "Нет мыслей. Пустота или безразличие.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2, gaba:0 } },
+    { text: "Много мыслей о других людях. Устал от этого.", teas: { shu:1, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
+    { text: "Живые и быстрые. Идеи рождаются, но сложно выбрать одну.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
   ]},
   { id: 5, category: "ПОТРЕБНОСТЬ", text: "Чего тебе сейчас больше всего не хватает?", options: [
-    { text: "Покоя. Хочу чтобы внутри наконец стало тихо.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0 } },
-    { text: "Ясности. Хочу думать чисто и видеть суть.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1 } },
-    { text: "Безопасности. Хочу чтобы тревога отпустила.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0 } },
-    { text: "Энергии. Хочу снова чувствовать жизнь.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2 } },
-    { text: "Одиночества. Хочу побыть только с собой.", teas: { shu:0, bai:0, tguan:2, sheng:1, dahong:0 } },
+    { text: "Покоя. Хочу чтобы внутри наконец стало тихо.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Ясности. Хочу думать чисто и видеть суть.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1, gaba:0 } },
+    { text: "Безопасности. Хочу чтобы тревога отпустила.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
+    { text: "Энергии. Хочу снова чувствовать жизнь.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
+    { text: "Одиночества. Хочу побыть только с собой.", teas: { shu:0, bai:0, tguan:2, sheng:1, dahong:0, gaba:0 } },
+    { text: "Фокуса. Энергия есть — хочу направить её в одно место.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
   ]},
 ];
 
@@ -490,6 +508,7 @@ const TEA_RESULTS = {
   bai:    { emoji:"✦", name:"Белый чай",    tag:"Тишина",      color:"#A89880", text:"Тревога — это когда мысли бегут быстрее тебя. Белый чай не останавливает их силой. Он просто создает другой ритм. Нежный, почти незаметный. Пьешь — и замечаешь, что немного выдохнул.", note:"Заваривай при 80°C — и он раскроется." },
   dahong: { emoji:"✦", name:"Да Хун Пао",   tag:"Пробуждение", color:"#B87333", text:"Нет сил, пустота, апатия — тело знает, что устало. Да Хун Пао не кричит «вставай». Он греет. Медленно, изнутри. Жареный, теплый, с глубиной. Он возвращает ощущение, что ты живой.", note:"Пей теплым, не спеша. Это не кофе — это другая история." },
   tguan:  { emoji:"✦", name:"Те Гуань Инь", tag:"Уединение",   color:"#7A9E7E", text:"Ты устал от людей. От их слов, энергии, ожиданий. Те Гуань Инь — цветочный, легкий, уводит внутрь. Он не требует ничего. Просто сиди с ним. Это чай для того, чтобы снова стать собой.", note:"Закрой дверь. Этот чай не любит компании." },
+  gaba:   { emoji:"✦", name:"Габа улун",    tag:"Равновесие",  color:"#7B9E87", text:"Энергия есть — но она ищет берег. Ты на подъёме, внутри много всего, идеи рождаются быстрее чем успеваешь их поймать. Габа не тормозит этот поток. Она выравнивает его. Мягкий, чуть фруктовый, без резкости. После него хочется не больше — а точнее.", note:"Заваривай при 85°C. Пей не торопясь — дай себе выбрать главное." },
 };
 
 // ─────────────────────────────────────────────
@@ -687,7 +706,7 @@ function QuizScreen({ onBack }) {
 // ─────────────────────────────────────────────
 function TeaQuizScreen({ onBack, onTeaResult }) {
   const [current, setCurrent] = useState(0);
-  const [teaScores, setTeaScores] = useState({ shu:0, sheng:0, bai:0, dahong:0, tguan:0 });
+  const [teaScores, setTeaScores] = useState({ shu:0, sheng:0, bai:0, dahong:0, tguan:0, gaba:0 });
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [finished, setFinished] = useState(false);
   const [winner, setWinner] = useState(null);
@@ -723,7 +742,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           <div style={S.teaNoteBox}><p style={S.teaNoteText}>🍵 {result.note}</p></div>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
-          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0 }); setFinished(false); setWinner(null); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); }} style={S.ghostBtn}>Пройти заново</button>
         </div>
       </div>
     );
