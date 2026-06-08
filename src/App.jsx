@@ -1039,7 +1039,11 @@ function AdminScreen({ onBack }) {
         const topEmotions = Object.entries(emotionCounts)
           .sort((a,b) => b[1]-a[1])
           .slice(0,3)
-          .map(([id, count]) => ({ ...EMOTIONS.find(e => e.id === id), count }));
+          .map(([id, count]) => {
+            const em = EMOTIONS.find(e => e.id === id);
+            return em ? { ...em, count } : null;
+          })
+          .filter(Boolean);
 
         setStats({
           totalOpens: opens || "0",
