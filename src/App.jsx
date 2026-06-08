@@ -199,6 +199,81 @@ function getArchetype(emotionCounts, total) {
 }
 
 // ─────────────────────────────────────────────
+// ТРАЕКТОРИИ ЖИЗНИ
+// ─────────────────────────────────────────────
+const TRAJECTORIES = [
+  {
+    id: "opening",
+    emoji: "🌅",
+    name: "Жизнь открывается",
+    dominantIds: ["joy", "inspired"],
+    verdict: (top) => `Последнее время ты чаще в ${top[0].label.toLowerCase()} и ${top[1]?.label.toLowerCase() || "воодушевлении"}. Жизнь движется в сторону раскрытия.`,
+    question: "Что именно сейчас дает тебе эту энергию? Стоит это беречь.",
+  },
+  {
+    id: "deepening",
+    emoji: "🌊",
+    name: "Жизнь углубляется",
+    dominantIds: ["calm", "unclear"],
+    verdict: () => "Преобладает спокойствие и тишина. Ты движешься внутрь — это ценный период.",
+    question: "Что ты сейчас понимаешь о себе, чего не понимал раньше?",
+  },
+  {
+    id: "signal",
+    emoji: "🕯️",
+    name: "Жизнь сигналит",
+    dominantIds: ["anxiety", "tired", "angry"],
+    verdict: (top) => `${top[0].label} — твой преобладающий фон. Жизнь даёт сигнал: что-то требует внимания.`,
+    question: "Что в твоей жизни сейчас просит остановки или изменения?",
+  },
+  {
+    id: "searching",
+    emoji: "🌿",
+    name: "Жизнь ищет себя",
+    dominantIds: [],
+    verdict: () => "Состояния меняются без явного паттерна. Ты в поиске — и это честная фаза.",
+    question: "Что сейчас по-настоящему твоё — и что просто шум вокруг?",
+  },
+];
+
+function getTrend(weekStats, monthStats) {
+  if (!weekStats || !monthStats) return null;
+  const diff = parseFloat(weekStats.avgScore) - parseFloat(monthStats.avgScore);
+  if (diff >= 0.8) return { arrow: "↑", label: "растёт", color: "#7FB77E" };
+  if (diff <= -0.8) return { arrow: "↓", label: "снижается", color: "#B77E7E" };
+  return { arrow: "→", label: "стабильно", color: "#C8A97E" };
+}
+
+function getTrajectory(stats) {
+  if (!stats || stats.total < 7) return null;
+  const sorted = Object.entries(stats.counts).sort((a, b) => b[1] - a[1]);
+  const topIds = sorted.filter(([, v]) => v > 0).slice(0, 2).map(([id]) => id);
+  const topEmotions = topIds.map(id => EMOTIONS.find(e => e.id === id)).filter(Boolean);
+
+  // Проверяем сигнал
+  const signalCount = (stats.counts.anxiety || 0) + (stats.counts.tired || 0) + (stats.counts.angry || 0);
+  if (signalCount / stats.total > 0.45) {
+    const t = TRAJECTORIES.find(t => t.id === "signal");
+    return { ...t, topEmotions };
+  }
+  // Открытие
+  const openCount = (stats.counts.joy || 0) + (stats.counts.inspired || 0);
+  if (openCount / stats.total > 0.45) {
+    const t = TRAJECTORIES.find(t => t.id === "opening");
+    return { ...t, topEmotions };
+  }
+  // Углубление
+  const deepCount = (stats.counts.calm || 0) + (stats.counts.unclear || 0);
+  if (deepCount / stats.total > 0.4) {
+    const t = TRAJECTORIES.find(t => t.id === "deepening");
+    return { ...t, topEmotions };
+  }
+  // Поиск
+  const t = TRAJECTORIES.find(t => t.id === "searching");
+  return { ...t, topEmotions };
+}
+
+// ─────────────────────────────────────────────
 // ОПРОСНИК
 // ─────────────────────────────────────────────
 const QUESTIONS_QUIZ = [
@@ -676,10 +751,122 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
 }
 
 // ─────────────────────────────────────────────
+// ЭКРАН: МОЯ ТРАЕКТОРИЯ
+// ─────────────────────────────────────────────
+function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
+  function calcStats(data) {
+    const filled = data.filter(Boolean);
+    const total = filled.length;
+    if (total === 0) return null;
+    const counts = {};
+    EMOTIONS.forEach(e => { counts[e.id] = 0; });
+    filled.forEach(e => { if (counts[e.id] !== undefined) counts[e.id]++; });
+    const avgScore = filled.reduce((s, e) => s + (e.score || 5), 0) / total;
+    return { total, counts, avgScore: avgScore.toFixed(1) };
+  }
+
+  const weekStats = calcStats(weekData.map(d => d.data));
+  const monthStats = calcStats(monthData);
+  const yearStats = calcStats(allData);
+
+  const analysisStats = yearStats || monthStats || weekStats;
+  const trajectory = getTrajectory(analysisStats);
+  const trend = getTrend(weekStats, monthStats);
+  const periodLabel = yearStats ? "год" : monthStats ? "месяц" : "неделю";
+
+  const scaleLabels = [
+    { label: "Неделя", desc: "Слишком мало для выводов. Это ещё не ты — это погода." },
+    { label: "Месяц", desc: "Уже виден паттерн. Тенденция начинает проясняться." },
+    { label: "Квартал", desc: "Это близко к правде. Здесь виден характер периода." },
+    { label: "Год", desc: "Это уже зеркало. Здесь видно кем ты становишься." },
+  ];
+
+  const totalEntries = yearStats?.total || monthStats?.total || weekStats?.total || 0;
+  const scaleIdx = totalEntries >= 90 ? (totalEntries >= 300 ? 3 : 2) : totalEntries >= 30 ? 1 : 0;
+
+  if (!trajectory) {
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"20px 0" }}>
+          <div style={{ fontSize:"48px", marginBottom:"20px" }}>🌱</div>
+          <p style={{ fontSize:"18px", color:"#C8A97E", margin:"0 0 12px" }}>Ещё мало данных</p>
+          <p style={{ fontSize:"14px", color:"#7A6E62", lineHeight:1.7, fontStyle:"italic" }}>
+            Отметь хотя бы 7 дней —<br />и траектория начнёт проявляться.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const verdictText = trajectory.verdict(trajectory.topEmotions);
+
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>← назад</button>
+
+      <div style={{ textAlign:"center", marginBottom:"24px" }}>
+        <div style={{ fontSize:"40px", marginBottom:"10px" }}>{trajectory.emoji}</div>
+        <p style={{ margin:"0 0 4px", fontSize:"20px", color:"#C8A97E", letterSpacing:"0.05em" }}>{trajectory.name}</p>
+        <p style={{ margin:0, fontSize:"11px", color:"#4A4036", letterSpacing:"0.1em" }}>на основе данных за {periodLabel}</p>
+      </div>
+
+      <div style={S.wisdomLine} />
+
+      {/* Слой 1: Вывод */}
+      <div style={{ margin:"20px 0", padding:"18px", background:"rgba(200,169,126,0.05)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>КУДА ДВИЖЕТСЯ ЖИЗНЬ</p>
+        <p style={{ margin:0, fontSize:"15px", color:"#E8E0D4", lineHeight:1.8, fontStyle:"italic" }}>{verdictText}</p>
+      </div>
+
+      {/* Слой 2: Тенденция */}
+      {trend && (
+        <div style={{ margin:"0 0 20px", padding:"14px 18px", background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"12px", display:"flex", alignItems:"center", gap:"14px" }}>
+          <span style={{ fontSize:"32px", color:trend.color, lineHeight:1 }}>{trend.arrow}</span>
+          <div>
+            <p style={{ margin:"0 0 2px", fontSize:"11px", letterSpacing:"0.15em", color:"#7A6E62" }}>ДИНАМИКА</p>
+            <p style={{ margin:0, fontSize:"14px", color:trend.color }}>Средний балл {trend.label}</p>
+            <p style={{ margin:"2px 0 0", fontSize:"11px", color:"#4A4036" }}>
+              Неделя: {weekStats?.avgScore}/10 · Месяц: {monthStats?.avgScore || "—"}/10
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Слой 3: Вопрос */}
+      <div style={{ margin:"0 0 24px", padding:"18px", background:"rgba(255,255,255,0.015)", border:"1px dashed #2A2520", borderRadius:"12px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#7A6E62" }}>ВОПРОС ДЛЯ РАЗМЫШЛЕНИЯ</p>
+        <p style={{ margin:0, fontSize:"15px", color:"#C0B8AC", lineHeight:1.8, fontStyle:"italic" }}>«{trajectory.question}»</p>
+      </div>
+
+      {/* Шкала масштаба */}
+      <div style={{ padding:"14px", background:"rgba(200,169,126,0.03)", border:"1px solid #1A1713", borderRadius:"10px", marginBottom:"20px" }}>
+        <p style={{ margin:"0 0 10px", fontSize:"10px", letterSpacing:"0.15em", color:"#4A4036" }}>МАСШТАБ ПРАВДЫ</p>
+        {scaleLabels.map((s, i) => (
+          <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:"8px", marginBottom:"6px" }}>
+            <span style={{ fontSize:"10px", color: i === scaleIdx ? "#C8A97E" : "#3A3028", flexShrink:0, marginTop:"2px" }}>{i === scaleIdx ? "◉" : "○"}</span>
+            <div>
+              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#C8A97E" : "#4A4036" }}>{s.label}: </span>
+              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#7A6E62" : "#3A3028" }}>{s.desc}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <ShareButton
+        text={`${trajectory.emoji} Моя траектория — «${trajectory.name}»\n\n«${verdictText}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`}
+        label="Поделиться траекторией ↗"
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ЭКРАН: МОЁ СОСТОЯНИЕ
 // ─────────────────────────────────────────────
 function MoodScreen({ onBack }) {
   const [tab, setTab] = useState("today"); // today | week | month | year
+  const [showTrajectory, setShowTrajectory] = useState(false);
   const [todayEmotion, setTodayEmotion] = useState(null);
   const [streak, setStreak] = useState(0);
   const [weekData, setWeekData] = useState([]);
@@ -814,6 +1001,15 @@ function MoodScreen({ onBack }) {
     </div>
   );
 
+  if (showTrajectory) return (
+    <TrajectoryScreen
+      onBack={() => setShowTrajectory(false)}
+      weekData={weekData}
+      monthData={monthData}
+      allData={allData}
+    />
+  );
+
   return (
     <div style={S.screen}>
       <div style={S.screenHeader}>
@@ -843,6 +1039,14 @@ function MoodScreen({ onBack }) {
           </div>
         </div>
       )}
+
+      {/* Кнопка Траектория */}
+      <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:"#C8A97E", fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+        <span>🧭</span>
+        <span>Моя траектория</span>
+        <span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
+      </button>
+      <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>куда движется твоя жизнь</p>
 
       {/* Эмоция дня */}
       <div style={{ margin:"16px 0" }}>
