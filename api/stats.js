@@ -34,6 +34,7 @@ function defaultStats() {
     totalQuiz: 0,
     totalTea: 0,
     totalMood: 0,
+    totalMeditation: 0,
     uniqueTotal: 0,
     byDay: {},
   };
@@ -97,12 +98,19 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    if (action === "meditation") {
+      stats.totalMeditation = (stats.totalMeditation || 0) + 1;
+      await writeStats(stats);
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === "get") {
       return res.status(200).json({
         totalOpens: stats.totalOpens || 0,
         totalQuiz: stats.totalQuiz || 0,
         totalTea: stats.totalTea || 0,
         totalMood: stats.totalMood || 0,
+        totalMeditation: stats.totalMeditation || 0,
         uniqueTotal: stats.uniqueTotal || 0,
         todayOpens: today.opens || 0,
         todayQuiz: today.quiz || 0,

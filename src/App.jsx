@@ -22,6 +22,22 @@ const CS = {
 };
 
 // ─────────────────────────────────────────────
+// СЕРВЕРНАЯ СТАТИСТИКА
+// ─────────────────────────────────────────────
+const STATS_URL = "https://teabro-app.vercel.app/api/stats";
+
+async function statEvent(action, uid) {
+  try {
+    const body = uid ? { action, uid: String(uid) } : { action };
+    await fetch(STATS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {}
+}
+
+// ─────────────────────────────────────────────
 // 100 СОВЕТОВ ДНЯ
 // ─────────────────────────────────────────────
 const WISDOMS = [
@@ -994,8 +1010,7 @@ function QuizScreen({ onBack }) {
 
   useEffect(() => {
     if (finished) {
-      CS.get("admin_quiz").then(v => CS.set("admin_quiz", String(parseInt(v||"0")+1)));
-      CS.get("admin_quiz_" + getTodayKey()).then(v => CS.set("admin_quiz_" + getTodayKey(), String(parseInt(v||"0")+1)));
+      statEvent("quiz");
     }
   }, [finished]);
 
@@ -1088,7 +1103,7 @@ function MeditationQuizScreen({ onBack }) {
         const w = Object.entries(ns).sort((a,b) => b[1]-a[1])[0][0];
         setWinner(w);
         setFinished(true);
-        CS.get("admin_meditation").then(v => CS.set("admin_meditation", String(parseInt(v||"0")+1)));
+        statEvent("meditation");
       } else {
         setCurrent(c => c+1);
       }
@@ -1397,6 +1412,7 @@ function MoodScreen({ onBack }) {
     const todayKey = getTodayKey();
     await CS.set("mood_" + todayKey, JSON.stringify(emotion));
     setTodayEmotion(emotion);
+    statEvent("mood");
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     const yRaw = await CS.get("mood_" + getDateKey(yesterday));
     const newStreak = yRaw ? streak + 1 : 1;
@@ -1657,11 +1673,11 @@ function AdminScreen({ onBack }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood", "admin_unique_total", "admin_meditation"];
-        const [opens, quiz, tea, mood, uniqueTotal, meditation] = await Promise.all(keys.map(k => CS.get(k)));
-        const todayOpens = await CS.get("admin_opens_" + getTodayKey());
-        const todayQuiz = await CS.get("admin_quiz_" + getTodayKey());
-        const todayUnique = await CS.get("admin_unique_" + getTodayKey());
+        // Серверная статистика
+        const res = await fetch(`${STATS_URL}?action=get`);
+        const serverStats = res.ok ? await res.json() : {};
+
+        // Личные данные эмоций — из CS (они у каждого свои)
         const allEntries = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
@@ -1675,7 +1691,20 @@ function AdminScreen({ onBack }) {
           const em = EMOTIONS.find(e => e.id === id);
           return em ? { ...em, count } : null;
         }).filter(Boolean);
-        setStats({ totalOpens: opens || "0", totalQuiz: quiz || "0", totalTea: tea || "0", totalMood: mood || "0", totalMeditation: meditation || "0", todayOpens: todayOpens || "0", todayQuiz: todayQuiz || "0", todayUnique: todayUnique || "0", uniqueTotal: uniqueTotal || "0", topEmotions, allEntries: allEntries.length });
+
+        setStats({
+          totalOpens:     serverStats.totalOpens     ?? 0,
+          totalQuiz:      serverStats.totalQuiz      ?? 0,
+          totalTea:       serverStats.totalTea       ?? 0,
+          totalMood:      serverStats.totalMood      ?? 0,
+          totalMeditation:serverStats.totalMeditation?? 0,
+          uniqueTotal:    serverStats.uniqueTotal    ?? 0,
+          todayOpens:     serverStats.todayOpens     ?? 0,
+          todayQuiz:      serverStats.todayQuiz      ?? 0,
+          todayUnique:    serverStats.todayUnique    ?? 0,
+          topEmotions,
+          allEntries: allEntries.length,
+        });
       } catch(e) { setStats({ error: true }); }
       setLoading(false);
     }
@@ -1763,20 +1792,13 @@ export default function App() {
   useEffect(() => {
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
     async function loadMood() {
+      // Серверная статистика открытий
+      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const uid = tgUser?.id || null;
+      statEvent("open", uid);
+
+      // Личные данные — остаются в CS
       const todayKey = getTodayKey();
-      const totalOpens = parseInt(await CS.get("admin_opens") || "0") + 1;
-      await CS.set("admin_opens", String(totalOpens));
-      const todayOpens = parseInt(await CS.get("admin_opens_" + todayKey) || "0") + 1;
-      await CS.set("admin_opens_" + todayKey, String(todayOpens));
-      const uniqueKey = "admin_unique_" + todayKey;
-      const alreadyCounted = await CS.get(uniqueKey + "_self");
-      if (!alreadyCounted) {
-        await CS.set(uniqueKey + "_self", "1");
-        const todayUnique = parseInt(await CS.get(uniqueKey) || "0") + 1;
-        await CS.set(uniqueKey, String(todayUnique));
-        const totalUnique = parseInt(await CS.get("admin_unique_total") || "0") + 1;
-        await CS.set("admin_unique_total", String(totalUnique));
-      }
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }
       const teaRaw = await CS.get("tea_" + todayKey);
@@ -1788,8 +1810,7 @@ export default function App() {
   const handleTeaResult = useCallback(async (winner) => {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
-    const totalTea = parseInt(await CS.get("admin_tea") || "0") + 1;
-    await CS.set("admin_tea", String(totalTea));
+    statEvent("tea");
   }, []);
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
