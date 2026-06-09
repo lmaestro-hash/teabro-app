@@ -680,7 +680,7 @@ function QuizScreen({ onBack }) {
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
         // v2.4: статистика на сервер
-        fetch("/api/stats", {
+        fetch("https://teabro-app.vercel.app/api/stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "quiz" }),
@@ -1283,7 +1283,7 @@ function AdminScreen({ onBack }) {
     async function loadStats() {
       try {
         // v2.4: читаем статистику с сервера (единая для ТГ и браузера)
-        const res = await fetch("/api/stats?action=get");
+        const res = await fetch("https://teabro-app.vercel.app/api/stats?action=get");
         if (!res.ok) throw new Error("fetch failed");
         const data = await res.json();
 
@@ -1384,7 +1384,7 @@ export default function App() {
             localStorage.setItem("tb_uid", uid);
           }
         }
-        fetch("/api/stats", {
+        fetch("https://teabro-app.vercel.app/api/stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "open", uid: String(uid) }),
@@ -1403,7 +1403,7 @@ export default function App() {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
     // v2.4: статистика на сервер
-    fetch("/api/stats", {
+    fetch("https://teabro-app.vercel.app/api/stats", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "tea" }),
