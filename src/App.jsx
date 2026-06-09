@@ -667,7 +667,7 @@ function QuizScreen({ onBack }) {
   const q = QUESTIONS_QUIZ[current];
   const total = scores.reduce((a,b) => a+b, 0);
   const burnoutTotal = burnouts.reduce((a,b) => a+b, 0);
-  const burnoutMax = QUESTIONS_QUIZ.filter(q => q.category === "ВЫГОРАНИЕ").length * 3;
+  const burnoutMax = 75;
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
   const handleNext = () => {
