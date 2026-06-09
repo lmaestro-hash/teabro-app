@@ -670,6 +670,18 @@ function QuizScreen({ onBack }) {
   const burnoutMax = 75;
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
+
+  // v2.4: счётчик квиза через useEffect — надёжно работает в ТГ
+  useEffect(() => {
+    if (finished) {
+      fetch("https://teabro-app.vercel.app/api/stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "quiz" }),
+      }).catch(() => {});
+    }
+  }, [finished]);
+
   const handleNext = () => {
     if (selected === null) return;
     setAnimating(true);
@@ -679,12 +691,6 @@ function QuizScreen({ onBack }) {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
-        // v2.4: статистика на сервер
-        fetch("https://teabro-app.vercel.app/api/stats", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "quiz" }),
-        }).catch(() => {});
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
