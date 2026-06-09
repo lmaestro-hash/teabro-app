@@ -172,7 +172,7 @@ function getCurrentTitle(streak) {
 }
 
 // ─────────────────────────────────────────────
-// АРХЕТИПЫ (после 30+ записей)
+// АРХЕТИПЫ
 // ─────────────────────────────────────────────
 const ARCHETYPES = [
   {
@@ -262,26 +262,12 @@ function getTrajectory(stats) {
   const sorted = Object.entries(stats.counts).sort((a, b) => b[1] - a[1]);
   const topIds = sorted.filter(([, v]) => v > 0).slice(0, 2).map(([id]) => id);
   const topEmotions = topIds.map(id => EMOTIONS.find(e => e.id === id)).filter(Boolean);
-
-  // Проверяем сигнал
   const signalCount = (stats.counts.anxiety || 0) + (stats.counts.tired || 0) + (stats.counts.angry || 0);
-  if (signalCount / stats.total > 0.45) {
-    const t = TRAJECTORIES.find(t => t.id === "signal");
-    return { ...t, topEmotions };
-  }
-  // Открытие
+  if (signalCount / stats.total > 0.45) { const t = TRAJECTORIES.find(t => t.id === "signal"); return { ...t, topEmotions }; }
   const openCount = (stats.counts.joy || 0) + (stats.counts.inspired || 0);
-  if (openCount / stats.total > 0.45) {
-    const t = TRAJECTORIES.find(t => t.id === "opening");
-    return { ...t, topEmotions };
-  }
-  // Углубление
+  if (openCount / stats.total > 0.45) { const t = TRAJECTORIES.find(t => t.id === "opening"); return { ...t, topEmotions }; }
   const deepCount = (stats.counts.calm || 0) + (stats.counts.unclear || 0);
-  if (deepCount / stats.total > 0.4) {
-    const t = TRAJECTORIES.find(t => t.id === "deepening");
-    return { ...t, topEmotions };
-  }
-  // Поиск
+  if (deepCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "deepening"); return { ...t, topEmotions }; }
   const t = TRAJECTORIES.find(t => t.id === "searching");
   return { ...t, topEmotions };
 }
@@ -537,6 +523,341 @@ const TEA_RESULTS = {
 };
 
 // ─────────────────────────────────────────────
+// ТЕСТ МЕДИТАЦИЙ — 20 ВОПРОСОВ, 9 ПРАКТИК
+// ─────────────────────────────────────────────
+// shamatha, vipassana, metta, tummo, nidra, tonglen, b478, box, coherent
+
+const MEDITATION_QUESTIONS = [
+  { id: 1, category: "СОСТОЯНИЕ", text: "Что сейчас происходит у тебя внутри?", options: [
+    { text: "Тревога. Мысли крутятся по кругу, не останавливаются.", p: { shamatha:2, b478:2, vipassana:1 } },
+    { text: "Туман. Не понимаю себя, живу как на автопилоте.", p: { vipassana:2, shamatha:1, coherent:1 } },
+    { text: "Пусто и холодно. Нет сил, нет желания.", p: { tummo:2, metta:1, b478:1 } },
+    { text: "Устал от людей. Хочется тишины и одиночества.", p: { metta:2, nidra:1, shamatha:1 } },
+    { text: "Перегруз. Много всего, голова как котёл.", p: { box:2, coherent:2, b478:1 } },
+    { text: "Подъём. Энергия есть — хочу направить её глубже.", p: { tonglen:2, coherent:1, vipassana:1 } },
+  ]},
+  { id: 2, category: "ТЕЛО", text: "Как тело чувствует себя прямо сейчас?", options: [
+    { text: "Грудь сжата. Дышу поверхностно.", p: { b478:2, coherent:2, shamatha:1 } },
+    { text: "Плечи и шея зажаты. Напряжение хроническое.", p: { box:2, nidra:2, coherent:1 } },
+    { text: "Тело как вата. Тяжёлое, без сил.", p: { tummo:2, nidra:1, metta:1 } },
+    { text: "Тело будто чужое. Не замечаю его.", p: { vipassana:2, nidra:2, shamatha:1 } },
+    { text: "Тело в тонусе. Есть приятная живость.", p: { tonglen:2, coherent:1, vipassana:1 } },
+    { text: "Дрожь или лёгкая паника внутри.", p: { b478:2, shamatha:2, box:1 } },
+  ]},
+  { id: 3, category: "ДЫХАНИЕ", text: "Как ты сейчас дышишь?", options: [
+    { text: "Поверхностно и часто. Замечаю когда вспоминаю.", p: { b478:2, coherent:2, shamatha:1 } },
+    { text: "Задерживаю дыхание не замечая.", p: { box:2, b478:1, coherent:1 } },
+    { text: "Нормально, но хочется дышать глубже.", p: { coherent:2, tummo:1, shamatha:1 } },
+    { text: "Тяжело. Как будто что-то давит.", p: { b478:2, nidra:1, coherent:2 } },
+    { text: "Ровно и спокойно. Дыхание не беспокоит.", p: { vipassana:2, tonglen:2, metta:1 } },
+    { text: "Глубоко. Тело само дышит хорошо.", p: { tonglen:2, tummo:1, vipassana:1 } },
+  ]},
+  { id: 4, category: "МЫСЛИ", text: "Что происходит с твоими мыслями?", options: [
+    { text: "Прокручиваю одно и то же. Не могу остановить.", p: { shamatha:2, b478:1, vipassana:1 } },
+    { text: "Мысли скачут хаотично. Нет фокуса.", p: { shamatha:2, box:1, coherent:1 } },
+    { text: "Туман. Мысли есть, но расплывчатые.", p: { vipassana:2, shamatha:1, coherent:1 } },
+    { text: "Думаю о других людях — их боли, проблемах.", p: { tonglen:2, metta:2, vipassana:1 } },
+    { text: "Пустота. Мысли почти не приходят.", p: { tummo:1, nidra:2, metta:1 } },
+    { text: "Мысли живые и быстрые. Идей много.", p: { tonglen:2, coherent:1, vipassana:1 } },
+  ]},
+  { id: 5, category: "ВРЕМЯ", text: "Сколько времени ты готов уделить практике прямо сейчас?", options: [
+    { text: "2–3 минуты. Совсем немного.", p: { b478:2, box:2, coherent:1 } },
+    { text: "5–10 минут.", p: { shamatha:2, tummo:2, box:1 } },
+    { text: "10–15 минут.", p: { vipassana:2, metta:2, tonglen:1 } },
+    { text: "15–20 минут.", p: { vipassana:2, shamatha:1, tonglen:2 } },
+    { text: "20–40 минут. Хочу по-настоящему погрузиться.", p: { nidra:2, vipassana:1, tonglen:1 } },
+    { text: "Нет предпочтений. Сколько нужно.", p: { shamatha:1, vipassana:1, nidra:1, tonglen:1 } },
+  ]},
+  { id: 6, category: "МЕСТО", text: "Где ты сейчас будешь практиковать?", options: [
+    { text: "На рабочем месте. Незаметно для окружающих.", p: { box:2, coherent:2, b478:1 } },
+    { text: "Дома. Могу сесть как удобно.", p: { shamatha:2, vipassana:2, metta:1 } },
+    { text: "Лёжа. Устал, хочу горизонталь.", p: { nidra:2, metta:1, b478:1 } },
+    { text: "В транспорте или на ходу.", p: { coherent:2, box:2, b478:1 } },
+    { text: "В тихом уединённом месте.", p: { tonglen:2, vipassana:1, shamatha:1 } },
+    { text: "Неважно где. Главное — попробовать.", p: { shamatha:1, b478:1, box:1, coherent:1 } },
+  ]},
+  { id: 7, category: "ОПЫТ", text: "Есть ли у тебя опыт медитации?", options: [
+    { text: "Нет. Первый раз.", p: { b478:2, box:2, coherent:2 } },
+    { text: "Пробовал пару раз, но нерегулярно.", p: { shamatha:2, b478:1, coherent:1 } },
+    { text: "Есть базовая практика.", p: { vipassana:2, metta:1, shamatha:1 } },
+    { text: "Практикую регулярно.", p: { tonglen:2, vipassana:1, tummo:1 } },
+    { text: "Знаком с буддийскими практиками.", p: { tonglen:2, tummo:2, vipassana:1 } },
+    { text: "Мне ближе дыхательные техники.", p: { b478:2, box:2, coherent:2 } },
+  ]},
+  { id: 8, category: "ЦЕЛЬ", text: "Чего ты хочешь от практики прямо сейчас?", options: [
+    { text: "Остановить мысли. Просто тишина внутри.", p: { shamatha:2, b478:1, coherent:1 } },
+    { text: "Понять себя лучше. Что-то прояснить.", p: { vipassana:2, tonglen:1, shamatha:1 } },
+    { text: "Почувствовать тепло. Вернуть себя.", p: { metta:2, tummo:2, nidra:1 } },
+    { text: "Успокоиться быстро. Здесь и сейчас.", p: { b478:2, box:2, coherent:1 } },
+    { text: "Глубокое расслабление. Отпустить всё.", p: { nidra:2, coherent:1, metta:1 } },
+    { text: "Войти глубже. Не поверхность — суть.", p: { tonglen:2, tummo:1, vipassana:1 } },
+  ]},
+  { id: 9, category: "ЭМОЦИЯ", text: "Какая эмоция сейчас самая сильная?", options: [
+    { text: "Тревога или страх.", p: { shamatha:2, b478:2, vipassana:1 } },
+    { text: "Раздражение или злость.", p: { box:2, coherent:2, b478:1 } },
+    { text: "Грусть или одиночество.", p: { metta:2, nidra:1, tonglen:1 } },
+    { text: "Опустошённость или апатия.", p: { tummo:2, metta:1, nidra:1 } },
+    { text: "Воодушевление или внутренний подъём.", p: { tonglen:2, coherent:1, vipassana:1 } },
+    { text: "Спокойствие. Эмоций почти нет.", p: { vipassana:2, shamatha:1, tonglen:1 } },
+  ]},
+  { id: 10, category: "СОН", text: "Как ты спишь последнее время?", options: [
+    { text: "Плохо. Засыпаю долго, мысли не останавливаются.", p: { b478:2, shamatha:1, nidra:1 } },
+    { text: "Прерывисто. Просыпаюсь ночью.", p: { coherent:2, b478:1, nidra:2 } },
+    { text: "Сплю, но не высыпаюсь. Встаю разбитым.", p: { nidra:2, tummo:1, metta:1 } },
+    { text: "Нормально. Сон не проблема.", p: { vipassana:1, tonglen:1, shamatha:1 } },
+    { text: "Хорошо. Сплю глубоко.", p: { tonglen:2, vipassana:1, coherent:1 } },
+    { text: "Слишком много сплю. Нет сил вставать.", p: { tummo:2, box:1, coherent:1 } },
+  ]},
+  { id: 11, category: "ЛЮДИ", text: "Как ты себя чувствуешь в контакте с людьми?", options: [
+    { text: "Устал от всех. Хочу побыть один.", p: { metta:2, nidra:1, shamatha:1 } },
+    { text: "Чувствую чужую боль и усталость сильнее своей.", p: { tonglen:2, metta:2, b478:1 } },
+    { text: "Раздражение. Люди выводят из себя.", p: { box:2, coherent:1, shamatha:1 } },
+    { text: "Одиноко среди людей. Нет настоящего контакта.", p: { metta:2, vipassana:1, tonglen:1 } },
+    { text: "Нормально. Общение не беспокоит.", p: { vipassana:1, coherent:1, shamatha:1 } },
+    { text: "Тепло. Хочу больше близости и открытости.", p: { metta:2, tonglen:2, vipassana:1 } },
+  ]},
+  { id: 12, category: "ТЕЛО-2", text: "Как ты относишься к своему телу прямо сейчас?", options: [
+    { text: "Не чувствую его. Всё в голове.", p: { vipassana:2, nidra:2, shamatha:1 } },
+    { text: "Тело напряжено. Хочу его расслабить.", p: { nidra:2, coherent:2, b478:1 } },
+    { text: "Тело холодное или вялое. Нет тонуса.", p: { tummo:2, box:1, coherent:1 } },
+    { text: "Тело в порядке, но дышу зажато.", p: { b478:2, coherent:2, box:1 } },
+    { text: "Чувствую тело хорошо. Есть приятная живость.", p: { tonglen:2, vipassana:1, tummo:1 } },
+    { text: "Есть боль или дискомфорт в конкретном месте.", p: { vipassana:2, nidra:2, b478:1 } },
+  ]},
+  { id: 13, category: "РИТМ", text: "Какой темп тебе нужен прямо сейчас?", options: [
+    { text: "Очень медленный. Хочу буквально остановиться.", p: { nidra:2, shamatha:2, metta:1 } },
+    { text: "Медленный и тихий. Без усилий.", p: { shamatha:2, coherent:1, metta:1 } },
+    { text: "Структурированный. Чёткие шаги.", p: { box:2, vipassana:1, b478:1 } },
+    { text: "Ритмичный. Что-то успокаивающее и повторяющееся.", p: { coherent:2, b478:1, box:1 } },
+    { text: "Активный. Что-то, что даст энергию.", p: { tummo:2, tonglen:1, box:1 } },
+    { text: "Неважно. Главное — что-то делать.", p: { shamatha:1, b478:1, coherent:1 } },
+  ]},
+  { id: 14, category: "ГЛУБИНА", text: "Насколько ты готов погрузиться?", options: [
+    { text: "Хочу просто успокоиться. Без глубины.", p: { b478:2, box:2, coherent:1 } },
+    { text: "Готов немного — понаблюдать за собой.", p: { shamatha:2, vipassana:1, coherent:1 } },
+    { text: "Хочу по-настоящему расслабиться и отпустить.", p: { nidra:2, metta:1, b478:1 } },
+    { text: "Готов исследовать что внутри.", p: { vipassana:2, tonglen:1, shamatha:1 } },
+    { text: "Хочу тепла — для себя или кого-то.", p: { metta:2, tonglen:2, nidra:1 } },
+    { text: "Готов к самой глубокой практике.", p: { tonglen:2, tummo:2, vipassana:1 } },
+  ]},
+  { id: 15, category: "ВНУТРИ", text: "Есть ли ощущение холода или пустоты внутри?", options: [
+    { text: "Да. Внутри холодно и пусто.", p: { tummo:2, metta:2, b478:1 } },
+    { text: "Скорее да. Что-то погасло.", p: { tummo:2, nidra:1, metta:1 } },
+    { text: "Нет. Внутри нейтрально.", p: { vipassana:1, shamatha:1, coherent:1 } },
+    { text: "Нет. Внутри тепло и спокойно.", p: { tonglen:2, vipassana:1, metta:1 } },
+    { text: "Нет. Внутри скорее перегруз и жар.", p: { box:2, coherent:2, b478:1 } },
+    { text: "Трудно определить. Что-то смешанное.", p: { vipassana:2, shamatha:1, nidra:1 } },
+  ]},
+  { id: 16, category: "ТРЕВОГА", text: "Как часто ты замечаешь тревогу в теле?", options: [
+    { text: "Почти постоянно. Это мой фон.", p: { b478:2, shamatha:2, coherent:1 } },
+    { text: "Часто. Особенно перед сном или в тишине.", p: { b478:2, coherent:1, nidra:1 } },
+    { text: "Иногда. Волнами.", p: { shamatha:1, box:1, coherent:1 } },
+    { text: "Редко. Тревоги почти нет.", p: { vipassana:1, tonglen:1, tummo:1 } },
+    { text: "Нет тревоги. Скорее апатия или пустота.", p: { tummo:2, metta:1, nidra:1 } },
+    { text: "Нет тревоги. Я в ресурсе.", p: { tonglen:2, vipassana:1, coherent:1 } },
+  ]},
+  { id: 17, category: "ОТДЫХ", text: "Как ты отдыхаешь?", options: [
+    { text: "Сложно расслабиться. Тело держит напряжение даже в покое.", p: { nidra:2, coherent:2, b478:1 } },
+    { text: "Засыпаю перед экраном. Это мой отдых.", p: { nidra:2, vipassana:1, shamatha:1 } },
+    { text: "Отдых помогает, но ненадолго.", p: { vipassana:1, metta:1, nidra:1 } },
+    { text: "Хорошо восстанавливаюсь в тишине.", p: { shamatha:2, vipassana:1, tonglen:1 } },
+    { text: "Отдыхаю через движение или активность.", p: { tummo:1, box:1, coherent:1 } },
+    { text: "Отдыхаю хорошо. Сон глубокий.", p: { tonglen:2, vipassana:1, tummo:1 } },
+  ]},
+  { id: 18, category: "СЕРДЦЕ", text: "Что сейчас с твоим сердцем — в переносном смысле?", options: [
+    { text: "Закрыто. Защищаюсь.", p: { metta:2, tonglen:2, vipassana:1 } },
+    { text: "Болит. За кого-то или за себя.", p: { metta:2, tonglen:2, b478:1 } },
+    { text: "Пусто. Не чувствую ничего особенного.", p: { metta:2, tummo:1, nidra:1 } },
+    { text: "Тревожится. Стучит быстро.", p: { b478:2, coherent:2, shamatha:1 } },
+    { text: "Спокойно. В равновесии.", p: { vipassana:2, tonglen:1, shamatha:1 } },
+    { text: "Открыто. Есть тепло и готовность.", p: { tonglen:2, metta:2, vipassana:1 } },
+  ]},
+  { id: 19, category: "СЕЙЧАС", text: "Что тебе нужно прямо сейчас больше всего?", options: [
+    { text: "Быстро успокоиться. Здесь и сейчас.", p: { b478:2, box:2, coherent:1 } },
+    { text: "Почувствовать себя. Вернуть контакт.", p: { vipassana:2, nidra:1, shamatha:1 } },
+    { text: "Тепло. Изнутри или снаружи.", p: { metta:2, tummo:2, nidra:1 } },
+    { text: "Тишина внутри головы.", p: { shamatha:2, coherent:1, b478:1 } },
+    { text: "Глубокий отдых. Раствориться.", p: { nidra:2, metta:1, coherent:1 } },
+    { text: "Глубина. Выйти за пределы поверхности.", p: { tonglen:2, tummo:1, vipassana:1 } },
+  ]},
+  { id: 20, category: "ГОТОВНОСТЬ", text: "Какое слово лучше всего описывает тебя сейчас?", options: [
+    { text: "Тревожный.", p: { shamatha:2, b478:2, coherent:1 } },
+    { text: "Опустошённый.", p: { tummo:2, metta:1, nidra:1 } },
+    { text: "Напряжённый.", p: { box:2, nidra:1, coherent:2 } },
+    { text: "Потерянный.", p: { vipassana:2, shamatha:1, metta:1 } },
+    { text: "Уставший.", p: { nidra:2, b478:1, metta:1 } },
+    { text: "Живой.", p: { tonglen:2, coherent:1, vipassana:1 } },
+  ]},
+];
+
+const MEDITATION_RESULTS = {
+  shamatha: {
+    emoji: "🌙",
+    name: "Шаматха",
+    fullName: "Шаматха (Śamatha)",
+    tag: "Покой",
+    tradition: "Тибетский буддизм · Базовая практика успокоения ума",
+    color: "#8B9EB0",
+    why: "Твои мысли сейчас бегут быстрее тебя — тревога, хаос, внутренний шум. Шаматха не останавливает их силой. Она учит одному: возвращаться. Снова и снова. Это и есть практика.",
+    steps: [
+      "Сядь прямо — на стул или на пол. Руки на коленях ладонями вниз.",
+      "Глаза чуть приоткрыты, взгляд вниз под 45° — так меньше сонливости.",
+      "Найди ощущение дыхания на кончике носа. Прохлада на вдохе. Тепло на выдохе. Это твой якорь.",
+      "Когда мысль уведёт — а она уведёт, это нормально — просто заметь и без раздражения вернись к носу.",
+      "Каждое возвращение и есть медитация. Не борьба. Возвращение.",
+    ],
+    duration: "10–15 минут · каждый день важнее чем долго",
+    source: "Калу Ринпоче «Основы тибетского буддизма» · Шамар Ринпоче «Путь к освобождению»",
+  },
+  vipassana: {
+    emoji: "👁",
+    name: "Випассана",
+    fullName: "Випассана (Vipassanā)",
+    tag: "Ясность",
+    tradition: "Традиция Тхеравада · Практика прямого видения",
+    color: "#7A9E7E",
+    why: "Ты сейчас в тумане — делаешь, но не чувствуешь. Живёшь, но будто смотришь через стекло. Випассана возвращает прямой контакт с реальностью. Не через мысли о ней — а напрямую.",
+    steps: [
+      "Сядь удобно, закрой глаза. Замечай подъём и опускание живота при дыхании.",
+      "Мысленно называй: «подъём... опускание... подъём...»",
+      "Появился звук — «слышу». Мысль — «думаю». Ощущение — «чувствую».",
+      "Ты не анализируешь — только регистрируешь что есть прямо сейчас.",
+      "Называние не даёт провалиться внутрь мысли. Ты остаёшься наблюдателем. Туман начнёт редеть.",
+    ],
+    duration: "15–20 минут · первые дни мыслей может быть больше — практика всё равно работает",
+    source: "С.Н. Гоенка — 10-дневные ретриты Випассаны (по всему миру, бесплатно)",
+  },
+  metta: {
+    emoji: "🤍",
+    name: "Метта",
+    fullName: "Метта (Mettā)",
+    tag: "Тепло",
+    tradition: "Буддийская традиция · Практика любящей доброты",
+    color: "#C8A97E",
+    why: "Ты устал от людей — или от одиночества среди них. Внутри что-то затвердело. Метта не заставляет любить всех. Она начинается с себя — с маленького тепла которое уже есть внутри.",
+    steps: [
+      "Сядь удобно. Положи правую руку на грудь — туда где сердце.",
+      "Вспомни любой момент когда тебе было хорошо — даже совсем маленький. Почувствуй это тепло.",
+      "Мысленно скажи себе — медленно, с паузами:\n«Пусть я буду счастлив.»\n«Пусть я буду в покое.»\n«Пусть мне будет хорошо.»",
+      "Не нужно верить. Просто говори и замечай что происходит в груди.",
+      "Потом то же самое — близкому человеку. Потом нейтральному. Потом всем.",
+    ],
+    duration: "10–15 минут · можно начинать только с себя — это честнее",
+    source: "Шарон Зальцберг «Loving-Kindness» · Тит Нат Хан «Искусство любить»",
+  },
+  tummo: {
+    emoji: "🔥",
+    name: "Тумо",
+    fullName: "Тумо (gTum-mo)",
+    tag: "Огонь",
+    tradition: "Тибетский буддизм · Шесть йог Наропы",
+    color: "#B87333",
+    why: "Внутри сейчас пусто и холодно — нет сил, нет желания, всё на паузе. Тумо не требует от тебя ничего снаружи. Она разжигает огонь изнутри. Тебе нужно просто снова почувствовать тепло.",
+    steps: [
+      "Сядь прямо, руки на коленях.",
+      "Полный вдох через нос — сначала наполни живот, потом грудь. Задержи на 3–4 секунды.",
+      "Выдыхай через рот медленно — губы чуть сжаты, лёгкое усилие.",
+      "Пока выдыхаешь — представляй: в области пупка маленький огонёк. С каждым выдохом он разгорается. Поднимается по позвоночнику. Наполняет грудь теплом.",
+      "20–30 циклов. Не торопись. После — полежи минуту, почувствуй тело.",
+    ],
+    duration: "10–15 минут",
+    source: "Чогьям Трунгпа «Шесть йог Наропы» · Исследования Герберта Бенсона, Harvard Medical School, 1982",
+  },
+  nidra: {
+    emoji: "🌊",
+    name: "Нидра",
+    fullName: "Йога-нидра (Yoga Nidra)",
+    tag: "Растворение",
+    tradition: "Йогическая традиция · Свами Сатьянанда Сарасвати",
+    color: "#7B9EB0",
+    why: "Ты истощён — не физически, а глубже. Тело держит напряжение даже когда ты «отдыхаешь». Нидра — это состояние между сном и бодрствованием. Ты не засыпаешь и не думаешь. Ты просто позволяешь.",
+    steps: [
+      "Ляг на спину. Руки чуть в стороны, ладони вверх. Три медленных вдоха.",
+      "Медленно веди внимание по телу — не напрягай, просто касайся вниманием и отпускай:",
+      "Правый большой палец → пальцы → ладонь → запястье → предплечье → локоть → плечо → шея → ухо → глаз → щека → губы → подбородок...",
+      "И так по всему телу. На каждой точке — секунда.",
+      "В конце почувствуй всё тело сразу — тяжёлое, тёплое, единое.",
+    ],
+    duration: "20–40 минут · можно под аудиогид — на YouTube тысячи записей бесплатно",
+    source: "Свами Сатьянанда «Йога-нидра» · Приложение Insight Timer",
+  },
+  tonglen: {
+    emoji: "🌑",
+    name: "Тонглен",
+    fullName: "Тонглен (Tonglen)",
+    tag: "Равновесие",
+    tradition: "Тибетский буддизм · Атиша, XI век",
+    color: "#9E7AB0",
+    why: "Ты сейчас в ресурсе — энергия есть, внутри светло. Тонглен — это практика для тех кто готов идти глубже. Парадоксальная: ты вдыхаешь тяжёлое и выдыхаешь лёгкое. Это не про жертву. Это про бесстрашие сердца.",
+    steps: [
+      "Сядь удобно, закрой глаза. Несколько вдохов — просто успокойся.",
+      "На вдохе — представляй тёмный густой дым который входит в тебя. Это боль — чья-то или твоя прошлая. Не бойся. Ты принимаешь её в сердце.",
+      "На выдохе — из сердца выходит чистый белый свет. Тепло. Пространство. Ты отдаёшь его — себе, кому-то конкретному, всем.",
+      "Вдох — тёмное. Выдох — светлое. Ритмично. Без усилия.",
+      "Это не истощает — это открывает. Чогьям Трунгпа называл это «лекарством от страха».",
+    ],
+    duration: "10–15 минут",
+    source: "Пема Чодрон «Когда всё рушится» · Чогьям Трунгпа «Тренировка ума» · Патрул Ринпоче",
+  },
+  b478: {
+    emoji: "🫁",
+    name: "4-7-8",
+    fullName: "Дыхание 4-7-8",
+    tag: "Тишина",
+    tradition: "Доктор Эндрю Вейл · Аюрведическая традиция пранаямы",
+    color: "#8BA89E",
+    why: "Тревога, паника, не можешь заснуть — это всё про нервную систему в режиме тревоги. Дыхание 4-7-8 активирует парасимпатику — буквально выключает этот режим на физиологическом уровне. Работает за 4 цикла.",
+    steps: [
+      "Сядь или ляг. Кончик языка у верхних зубов — держи так всё время.",
+      "Выдохни полностью через рот с лёгким звуком.",
+      "Вдохни через нос, считая до 4.",
+      "Задержи дыхание, считая до 7.",
+      "Выдыхай через рот со звуком, считая до 8.",
+      "Это один цикл. Сделай 4 цикла — не больше в первый раз, может закружиться голова.",
+    ],
+    duration: "2–3 минуты · эффект заметен сразу · перед сном особенно сильно",
+    source: "Dr. Andrew Weil «Breathing: The Master Key to Self Healing»",
+  },
+  box: {
+    emoji: "⬜",
+    name: "Квадрат",
+    fullName: "Квадратное дыхание (Box Breathing)",
+    tag: "Баланс",
+    tradition: "Методика ВМС США · Navy SEALs",
+    color: "#9E9E8A",
+    why: "Стресс, перегруз, нужно выровняться прямо сейчас — в любом месте, незаметно для окружающих. Эту технику используют бойцы спецназа перед операциями и хирурги перед сложными вмешательствами. Четыре равные стороны — симметрия успокаивает нервную систему.",
+    steps: [
+      "Представь квадрат. Каждая сторона — 4 секунды.",
+      "Вдох через нос — 4 секунды.",
+      "Задержка — 4 секунды.",
+      "Выдох через рот — 4 секунды.",
+      "Задержка — 4 секунды.",
+      "Повтори 4–6 раз. Можно делать прямо на рабочем месте — никто не заметит.",
+    ],
+    duration: "2–4 минуты · можно в любом месте и положении",
+    source: "Mark Divine «Unbeatable Mind» · Исследования Stanford Neuroscience, 2023",
+  },
+  coherent: {
+    emoji: "〰️",
+    name: "Когерентное",
+    fullName: "Когерентное дыхание (Coherent Breathing)",
+    tag: "Поток",
+    tradition: "Стивен Эллиот · Институт HeartMath · Сердечная когерентность",
+    color: "#8E9E8A",
+    why: "Фоновое напряжение, раздражение, сбитый внутренний ритм — это про рассинхрон систем тела. 5 вдохов в минуту синхронизируют сердечный ритм, дыхание и мозговые волны. Учёные называют это когерентностью — когда все системы работают вместе.",
+    steps: [
+      "Сядь удобно. Дыши только через нос.",
+      "Вдох — 5 секунд.",
+      "Выдох — 5 секунд.",
+      "Без пауз. Непрерывно. Плавно. Как волна.",
+      "Первые минуты кажется медленно — это нормально. К 3-й минуте тело начнёт подстраиваться. К 5-й — почувствуешь ровность.",
+    ],
+    duration: "5–10 минут · можно делать ежедневно утром",
+    source: "Stephen Elliott «The New Science of Breath» · Институт HeartMath",
+  },
+};
+
+// ─────────────────────────────────────────────
 // УТИЛИТЫ
 // ─────────────────────────────────────────────
 function getTodayKey() {
@@ -671,14 +992,10 @@ function QuizScreen({ onBack }) {
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
 
-  // v2.4: счётчик квиза через useEffect — надёжно работает в ТГ
   useEffect(() => {
     if (finished) {
-      fetch("https://teabro-app.vercel.app/api/stats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "quiz" }),
-      }).catch(() => {});
+      CS.get("admin_quiz").then(v => CS.set("admin_quiz", String(parseInt(v||"0")+1)));
+      CS.get("admin_quiz_" + getTodayKey()).then(v => CS.set("admin_quiz_" + getTodayKey(), String(parseInt(v||"0")+1)));
     }
   }, [finished]);
 
@@ -689,12 +1006,12 @@ function QuizScreen({ onBack }) {
     const nb = [...burnouts, selected.burnout];
     setTimeout(() => {
       setScores(ns); setBurnouts(nb); setSelected(null);
-      if (current+1 >= QUESTIONS_QUIZ.length) {
-        setFinished(true);
-      } else { setCurrent(c => c+1); }
+      if (current+1 >= QUESTIONS_QUIZ.length) { setFinished(true); }
+      else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
   };
+
   if (finished && result) {
     const maxScore = QUESTIONS_QUIZ.length * 3;
     const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutTotal >= b.range[0] && burnoutTotal <= b.range[1]) || BURNOUT_LEVELS[0];
@@ -741,6 +1058,128 @@ function QuizScreen({ onBack }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selected===null} style={{ ...S.primaryBtn, opacity: selected===null ? 0.3 : 1 }}>{current+1===QUESTIONS_QUIZ.length ? "Узнать результат" : "Следующий вопрос"}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ЭКРАН: ТЕСТ МЕДИТАЦИЙ
+// ─────────────────────────────────────────────
+function MeditationQuizScreen({ onBack }) {
+  const [current, setCurrent] = useState(0);
+  const [scores, setScores] = useState({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 });
+  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [finished, setFinished] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [animating, setAnimating] = useState(false);
+  const [showFull, setShowFull] = useState(false);
+  const q = MEDITATION_QUESTIONS[current];
+
+  const handleNext = () => {
+    if (selectedIdx === null) return;
+    setAnimating(true);
+    const ns = { ...scores };
+    const pts = q.options[selectedIdx].p;
+    Object.keys(pts).forEach(k => { ns[k] = (ns[k] || 0) + pts[k]; });
+    setTimeout(() => {
+      setScores(ns);
+      setSelectedIdx(null);
+      if (current + 1 >= MEDITATION_QUESTIONS.length) {
+        const w = Object.entries(ns).sort((a,b) => b[1]-a[1])[0][0];
+        setWinner(w);
+        setFinished(true);
+        CS.get("admin_meditation").then(v => CS.set("admin_meditation", String(parseInt(v||"0")+1)));
+      } else {
+        setCurrent(c => c+1);
+      }
+      setAnimating(false);
+    }, 300);
+  };
+
+  if (finished && winner) {
+    const r = MEDITATION_RESULTS[winner];
+    const shareMsg = `Моя практика — ${r.name} · ${r.tag}\n\n«${r.why.slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.resultContainer}>
+          {/* Шапка */}
+          <div style={{ fontSize:"18px", letterSpacing:"0.3em", color:r.color, marginBottom:"8px" }}>✦ ✦ ✦</div>
+          <div style={{ fontSize:"40px", marginBottom:"8px" }}>{r.emoji}</div>
+          <p style={{ ...S.resultTitle, color:r.color, fontSize:"22px", margin:"0 0 4px" }}>{r.fullName}</p>
+          <p style={{ fontSize:"12px", color:r.color, opacity:0.7, margin:"0 0 6px", letterSpacing:"0.1em" }}>{r.tag}</p>
+          <p style={{ fontSize:"11px", color:"#4A4036", margin:"0 0 20px", fontStyle:"italic" }}>{r.tradition}</p>
+          <div style={{ ...S.progressBar, marginBottom:"20px" }}><div style={{ ...S.progressFill, width:"100%", backgroundColor:r.color }} /></div>
+
+          {/* Почему именно эта */}
+          <div style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
+            <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>ПОЧЕМУ ИМЕННО ЭТА</p>
+            <p style={{ margin:0, fontSize:"14px", color:"#D0C8BC", lineHeight:1.7, fontStyle:"italic" }}>{r.why}</p>
+          </div>
+
+          {/* Кнопка развернуть инструкцию */}
+          <button
+            onClick={() => setShowFull(v => !v)}
+            style={{ width:"100%", padding:"14px", background: showFull ? "rgba(200,169,126,0.1)" : "rgba(255,255,255,0.03)", border:`1px solid ${showFull ? r.color+"60" : "#2A2520"}`, borderRadius:"12px", color: showFull ? r.color : "#C8A97E", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"16px", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center" }}
+          >
+            <span>Как практиковать</span>
+            <span>{showFull ? "↑" : "↓"}</span>
+          </button>
+
+          {showFull && (
+            <div style={{ width:"100%", background:"rgba(255,255,255,0.02)", border:`1px solid ${r.color}30`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
+              {r.steps.map((step, i) => (
+                <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < r.steps.length-1 ? "14px" : "0" }}>
+                  <span style={{ fontSize:"11px", color:r.color, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                  <p style={{ margin:0, fontSize:"13px", color:"#C0B8AC", lineHeight:1.7, whiteSpace:"pre-line" }}>{step}</p>
+                </div>
+              ))}
+              <div style={{ marginTop:"16px", paddingTop:"14px", borderTop:"1px solid #2A2520" }}>
+                <p style={{ margin:"0 0 6px", fontSize:"11px", color:"#7A6E62" }}>⏱ {r.duration}</p>
+                <p style={{ margin:0, fontSize:"11px", color:"#4A4036", fontStyle:"italic" }}>🔍 {r.source}</p>
+              </div>
+            </div>
+          )}
+
+          {!showFull && (
+            <div style={{ width:"100%", marginBottom:"16px", textAlign:"left" }}>
+              <p style={{ margin:"0 0 4px", fontSize:"11px", color:"#7A6E62" }}>⏱ {r.duration}</p>
+            </div>
+          )}
+
+          <ShareButton text={shareMsg} />
+          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
+          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setShowFull(false); }} style={S.ghostBtn}>Пройти заново</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={S.screen}>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <HintPopup text="20 вопросов — подберём медитацию или дыхательную практику под твоё состояние." />
+      </div>
+      <div style={S.quizProgress}>
+        <span style={S.quizCategory}>{q.category}</span>
+        <span style={S.quizCounter}>{current+1} / {MEDITATION_QUESTIONS.length}</span>
+      </div>
+      <div style={S.progressTrack}>
+        {MEDITATION_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#8B9EB0" : i === current ? "#B0C8D8" : "#2A2520" }} />)}
+      </div>
+      <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{q.text}</p>
+      <div style={S.optionsList}>
+        {q.options.map((opt,i) => (
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, borderColor: selectedIdx===i ? "#8B9EB0" : "#2A2520", backgroundColor: selectedIdx===i ? "rgba(139,158,176,0.08)" : "rgba(255,255,255,0.02)" }}>
+            <span style={{ ...S.optionRadio, color:"#8B9EB0" }}>{selectedIdx===i ? "◉" : "○"}</span>
+            <span style={S.optionText}>{opt.text}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={handleNext} disabled={selectedIdx===null} style={{ ...S.primaryBtn, opacity: selectedIdx===null ? 0.3 : 1, backgroundColor:"#8B9EB0" }}>
+        {current+1===MEDITATION_QUESTIONS.length ? "Узнать практику" : "Следующий вопрос"}
+      </button>
     </div>
   );
 }
@@ -831,7 +1270,6 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
   const weekStats = calcStats(weekData.map(d => d.data));
   const monthStats = calcStats(monthData);
   const yearStats = calcStats(allData);
-
   const analysisStats = yearStats || monthStats || weekStats;
   const trajectory = getTrajectory(analysisStats);
   const trend = getTrend(weekStats, monthStats);
@@ -867,42 +1305,30 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>← назад</button>
-
       <div style={{ textAlign:"center", marginBottom:"24px" }}>
         <div style={{ fontSize:"40px", marginBottom:"10px" }}>{trajectory.emoji}</div>
         <p style={{ margin:"0 0 4px", fontSize:"20px", color:"#C8A97E", letterSpacing:"0.05em" }}>{trajectory.name}</p>
         <p style={{ margin:0, fontSize:"11px", color:"#4A4036", letterSpacing:"0.1em" }}>на основе данных за {periodLabel}</p>
       </div>
-
       <div style={S.wisdomLine} />
-
-      {/* Слой 1: Вывод */}
       <div style={{ margin:"20px 0", padding:"18px", background:"rgba(200,169,126,0.05)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>КУДА ДВИЖЕТСЯ ЖИЗНЬ</p>
         <p style={{ margin:0, fontSize:"15px", color:"#E8E0D4", lineHeight:1.8, fontStyle:"italic" }}>{verdictText}</p>
       </div>
-
-      {/* Слой 2: Тенденция */}
       {trend && (
         <div style={{ margin:"0 0 20px", padding:"14px 18px", background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"12px", display:"flex", alignItems:"center", gap:"14px" }}>
           <span style={{ fontSize:"32px", color:trend.color, lineHeight:1 }}>{trend.arrow}</span>
           <div>
             <p style={{ margin:"0 0 2px", fontSize:"11px", letterSpacing:"0.15em", color:"#7A6E62" }}>ДИНАМИКА</p>
             <p style={{ margin:0, fontSize:"14px", color:trend.color }}>Средний балл {trend.label}</p>
-            <p style={{ margin:"2px 0 0", fontSize:"11px", color:"#4A4036" }}>
-              Неделя: {weekStats?.avgScore}/10 · Месяц: {monthStats?.avgScore || "—"}/10
-            </p>
+            <p style={{ margin:"2px 0 0", fontSize:"11px", color:"#4A4036" }}>Неделя: {weekStats?.avgScore}/10 · Месяц: {monthStats?.avgScore || "—"}/10</p>
           </div>
         </div>
       )}
-
-      {/* Слой 3: Вопрос */}
       <div style={{ margin:"0 0 24px", padding:"18px", background:"rgba(255,255,255,0.015)", border:"1px dashed #2A2520", borderRadius:"12px" }}>
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#7A6E62" }}>ВОПРОС ДЛЯ РАЗМЫШЛЕНИЯ</p>
         <p style={{ margin:0, fontSize:"15px", color:"#C0B8AC", lineHeight:1.8, fontStyle:"italic" }}>«{trajectory.question}»</p>
       </div>
-
-      {/* Шкала масштаба */}
       <div style={{ padding:"14px", background:"rgba(200,169,126,0.03)", border:"1px solid #1A1713", borderRadius:"10px", marginBottom:"20px" }}>
         <p style={{ margin:"0 0 10px", fontSize:"10px", letterSpacing:"0.15em", color:"#4A4036" }}>МАСШТАБ ПРАВДЫ</p>
         {scaleLabels.map((s, i) => (
@@ -915,11 +1341,6 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
           </div>
         ))}
       </div>
-
-      <ShareButton
-        text={`${trajectory.emoji} Моя траектория — «${trajectory.name}»\n\n«${verdictText}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`}
-        label="Поделиться траекторией ↗"
-      />
     </div>
   );
 }
@@ -928,51 +1349,45 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
 // ЭКРАН: МОЁ СОСТОЯНИЕ
 // ─────────────────────────────────────────────
 function MoodScreen({ onBack }) {
-  const [tab, setTab] = useState("today"); // today | week | month | year
-  const [showTrajectory, setShowTrajectory] = useState(false);
   const [todayEmotion, setTodayEmotion] = useState(null);
   const [streak, setStreak] = useState(0);
   const [weekData, setWeekData] = useState([]);
   const [monthData, setMonthData] = useState([]);
   const [allData, setAllData] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [tab, setTab] = useState("today");
+  const [showTrajectory, setShowTrajectory] = useState(false);
 
   useEffect(() => {
     async function load() {
       const todayKey = getTodayKey();
-      const todayRaw = await CS.get("mood_" + todayKey);
-      if (todayRaw) setTodayEmotion(JSON.parse(todayRaw));
-      const streakRaw = await CS.get("streak");
-      setStreak(streakRaw ? parseInt(streakRaw) : 0);
-
-      // Неделя
+      const raw = await CS.get("mood_" + todayKey);
+      if (raw) setTodayEmotion(JSON.parse(raw));
+      const s = await CS.get("streak");
+      setStreak(parseInt(s || "0"));
       const week = [];
+      const days = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const raw = await CS.get("mood_" + getDateKey(d));
-        const days = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
-        week.push({ day: days[d.getDay()], data: raw ? JSON.parse(raw) : null });
+        const r = await CS.get("mood_" + getDateKey(d));
+        week.push({ day: days[d.getDay()], data: r ? JSON.parse(r) : null });
       }
       setWeekData(week);
-
-      // Месяц (30 дней)
       const month = [];
       for (let i = 29; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const raw = await CS.get("mood_" + getDateKey(d));
-        month.push(raw ? JSON.parse(raw) : null);
+        const r = await CS.get("mood_" + getDateKey(d));
+        month.push(r ? JSON.parse(r) : null);
       }
       setMonthData(month);
-
-      // Год (365 дней)
       const all = [];
       for (let i = 364; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const raw = await CS.get("mood_" + getDateKey(d));
-        all.push(raw ? JSON.parse(raw) : null);
+        const r = await CS.get("mood_" + getDateKey(d));
+        all.push(r ? JSON.parse(r) : null);
       }
       setAllData(all);
-      setLoaded(false); // trick to re-render
+      setLoaded(false);
       setLoaded(true);
     }
     load();
@@ -992,7 +1407,6 @@ function MoodScreen({ onBack }) {
     setAllData(prev => { const n=[...prev]; n[364]=emotion; return n; });
   };
 
-  // Подсчет статистики
   function calcStats(data) {
     const filled = data.filter(Boolean);
     const total = filled.length;
@@ -1007,8 +1421,6 @@ function MoodScreen({ onBack }) {
   const title = getCurrentTitle(streak);
   const nextTitle = TITLES.find(t => t.days > streak);
   const shareTitle = `${title.emoji} Мой титул — «${title.name}»\n${title.desc}\n${streak} дней практики\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
-
-  // Архетип
   const allStats = calcStats(allData);
   const archetype = allStats ? getArchetype(allStats.counts, allStats.total) : null;
 
@@ -1026,14 +1438,8 @@ function MoodScreen({ onBack }) {
     return (
       <div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"16px" }}>
-          <div style={S.statCard}>
-            <p style={S.statNum}>{stats.total}</p>
-            <p style={S.statLabel}>из {daysInPeriod} дней</p>
-          </div>
-          <div style={S.statCard}>
-            <p style={S.statNum}>{stats.avgScore}</p>
-            <p style={S.statLabel}>средний балл</p>
-          </div>
+          <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>из {daysInPeriod} дней</p></div>
+          <div style={S.statCard}><p style={S.statNum}>{stats.avgScore}</p><p style={S.statLabel}>средний балл</p></div>
         </div>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"10px" }}>СОСТОЯНИЯ</p>
         {sorted.map(([id, count]) => {
@@ -1065,12 +1471,7 @@ function MoodScreen({ onBack }) {
   );
 
   if (showTrajectory) return (
-    <TrajectoryScreen
-      onBack={() => setShowTrajectory(false)}
-      weekData={weekData}
-      monthData={monthData}
-      allData={allData}
-    />
+    <TrajectoryScreen onBack={() => setShowTrajectory(false)} weekData={weekData} monthData={monthData} allData={allData} />
   );
 
   return (
@@ -1079,8 +1480,6 @@ function MoodScreen({ onBack }) {
         <button onClick={onBack} style={S.backBtn}>← назад</button>
         <HintPopup text="Отмечай эмоцию каждый день. Серии, титулы, архетип — твой путь к себе." />
       </div>
-
-      {/* Титул */}
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
         <p style={{ margin:0, fontSize:"18px", color:"#C8A97E", letterSpacing:"0.05em" }}>{title.name}</p>
@@ -1088,10 +1487,7 @@ function MoodScreen({ onBack }) {
         {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:"#4A4036" }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
         <div style={{ marginTop:"10px" }}><ShareButton text={shareTitle} label="Поделиться титулом ↗" /></div>
       </div>
-
       <div style={S.wisdomLine} />
-
-      {/* Архетип */}
       {archetype && (
         <div style={{ ...S.teaNoteBox, margin:"16px 0", textAlign:"center" }}>
           <p style={{ margin:"0 0 4px", fontSize:"22px" }}>{archetype.emoji}</p>
@@ -1102,16 +1498,10 @@ function MoodScreen({ onBack }) {
           </div>
         </div>
       )}
-
-      {/* Кнопка Траектория */}
       <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:"#C8A97E", fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-        <span>🧭</span>
-        <span>Моя траектория</span>
-        <span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
+        <span>🧭</span><span>Моя траектория</span><span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
       </button>
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>куда движется твоя жизнь</p>
-
-      {/* Эмоция дня */}
       <div style={{ margin:"16px 0" }}>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>
           {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
@@ -1132,23 +1522,18 @@ function MoodScreen({ onBack }) {
           </div>
         )}
       </div>
-
-      {/* Табы статистики */}
       <div style={{ display:"flex", gap:"6px", margin:"16px 0 14px" }}>
         <TabBtn id="today" label="Неделя" />
         <TabBtn id="month" label="Месяц" />
         <TabBtn id="year"  label="Год" />
       </div>
-
       {tab === "today" && (
         <div>
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА НЕДЕЛИ</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"6px", marginBottom:"16px" }}>
             {weekData.map((d,i) => (
               <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:"1px solid #2A2520", background: d.data ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>
-                  {d.data ? d.data.emoji : ""}
-                </div>
+                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:"1px solid #2A2520", background: d.data ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>{d.data ? d.data.emoji : ""}</div>
                 <span style={{ fontSize:"10px", color:"#4A4036" }}>{d.day}</span>
               </div>
             ))}
@@ -1160,14 +1545,11 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ws.avgScore}/10</p>
               {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}>
-                <ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" />
-              </div>
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
             </div>
           ) : null; })()}
         </div>
       )}
-
       {tab === "month" && (
         <div>
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА МЕСЯЦА</p>
@@ -1177,9 +1559,7 @@ function MoodScreen({ onBack }) {
               const date = new Date(); date.setDate(date.getDate() - daysAgo);
               return (
                 <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"3px" }}>
-                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:"1px solid #2A2520", background: d ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>
-                    {d ? d.emoji : ""}
-                  </div>
+                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:"1px solid #2A2520", background: d ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>{d ? d.emoji : ""}</div>
                   <span style={{ fontSize:"9px", color:"#3A3028" }}>{date.getDate()}</span>
                 </div>
               );
@@ -1192,14 +1572,11 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ms.avgScore}/10</p>
               {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}>
-                <ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" />
-              </div>
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
             </div>
           ) : null; })()}
         </div>
       )}
-
       {tab === "year" && (
         <div>
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА ГОДА</p>
@@ -1220,9 +1597,7 @@ function MoodScreen({ onBack }) {
                 const mIdx = (new Date().getMonth() - 11 + mi + 12) % 12;
                 return (
                   <div key={mi} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:"1px solid #2A2520", background: filled.length > 0 ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>
-                      {topEmoji}
-                    </div>
+                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:"1px solid #2A2520", background: filled.length > 0 ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
                     <span style={{ fontSize:"9px", color:"#4A4036" }}>{months[mIdx]}</span>
                     <span style={{ fontSize:"8px", color:"#3A3028" }}>{filled.length}д</span>
                   </div>
@@ -1236,14 +1611,8 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Годовой отчет</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {allStats.avgScore}/10</p>
-              {allStats.total > 0 && (() => {
-                const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0];
-                const topEm = EMOTIONS.find(e => e.id === top[0]);
-                return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>;
-              })()}
-              <div style={{ marginTop:"12px" }}>
-                <ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчетом ↗" />
-              </div>
+              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчетом ↗" /></div>
             </div>
           )}
         </div>
@@ -1288,12 +1657,11 @@ function AdminScreen({ onBack }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        // v2.4: читаем статистику с сервера (единая для ТГ и браузера)
-        const res = await fetch("https://teabro-app.vercel.app/api/stats?action=get");
-        if (!res.ok) throw new Error("fetch failed");
-        const data = await res.json();
-
-        // Загружаем эмоции из CloudStorage (они личные, остаются там)
+        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood", "admin_unique_total", "admin_meditation"];
+        const [opens, quiz, tea, mood, uniqueTotal, meditation] = await Promise.all(keys.map(k => CS.get(k)));
+        const todayOpens = await CS.get("admin_opens_" + getTodayKey());
+        const todayQuiz = await CS.get("admin_quiz_" + getTodayKey());
+        const todayUnique = await CS.get("admin_unique_" + getTodayKey());
         const allEntries = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
@@ -1303,19 +1671,12 @@ function AdminScreen({ onBack }) {
         const emotionCounts = {};
         EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
         allEntries.forEach(e => { if (emotionCounts[e.id] !== undefined) emotionCounts[e.id]++; });
-        const topEmotions = Object.entries(emotionCounts)
-          .sort((a,b) => b[1]-a[1])
-          .slice(0,3)
-          .map(([id, count]) => {
-            const em = EMOTIONS.find(e => e.id === id);
-            return em ? { ...em, count } : null;
-          })
-          .filter(Boolean);
-
-        setStats({ ...data, topEmotions, allEntries: allEntries.length });
-      } catch(e) {
-        setStats({ error: true });
-      }
+        const topEmotions = Object.entries(emotionCounts).sort((a,b) => b[1]-a[1]).slice(0,3).map(([id, count]) => {
+          const em = EMOTIONS.find(e => e.id === id);
+          return em ? { ...em, count } : null;
+        }).filter(Boolean);
+        setStats({ totalOpens: opens || "0", totalQuiz: quiz || "0", totalTea: tea || "0", totalMood: mood || "0", totalMeditation: meditation || "0", todayOpens: todayOpens || "0", todayQuiz: todayQuiz || "0", todayUnique: todayUnique || "0", uniqueTotal: uniqueTotal || "0", topEmotions, allEntries: allEntries.length });
+      } catch(e) { setStats({ error: true }); }
       setLoading(false);
     }
     loadStats();
@@ -1330,9 +1691,7 @@ function AdminScreen({ onBack }) {
 
   return (
     <div style={S.screen}>
-      <div style={S.screenHeader}>
-        <button onClick={onBack} style={S.backBtn}>← назад</button>
-      </div>
+      <div style={S.screenHeader}><button onClick={onBack} style={S.backBtn}>← назад</button></div>
       <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"20px" }}>ПАНЕЛЬ АДМИНИСТРАТОРА</p>
       {loading ? (
         <p style={{ color:"#4A4036", fontStyle:"italic" }}>Загружаю статистику...</p>
@@ -1352,6 +1711,7 @@ function AdminScreen({ onBack }) {
             {row("Уникальных пользователей", stats.uniqueTotal)}
             {row("Опросник", stats.totalQuiz)}
             {row("Тест чая", stats.totalTea)}
+            {row("Тест медитаций", stats.totalMeditation)}
             {row("Записей эмоций", stats.allEntries)}
           </div>
           {stats.topEmotions?.length > 0 && (
@@ -1361,6 +1721,33 @@ function AdminScreen({ onBack }) {
             </div>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ПОПАП АНОНИМНОСТИ
+// ─────────────────────────────────────────────
+function AnonPopup() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
+        <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
+        <span style={{ fontSize:"12px", color:"#3A3028", letterSpacing:"0.05em" }}>Анонимность</span>
+      </button>
+      {open && (
+        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", zIndex:100 }}>
+          <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>О ТВОИХ ДАННЫХ</p>
+          <p style={{ margin:0, fontSize:"12px", color:"#7A6E62", lineHeight:1.8, fontStyle:"italic" }}>
+            Твой путь — только твой.<br />
+            Твои данные хранятся только у тебя.<br />
+            Никто кроме тебя их не видит.<br />
+            Бот полностью анонимный.
+          </p>
+          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
+        </div>
       )}
     </div>
   );
@@ -1377,26 +1764,19 @@ export default function App() {
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
     async function loadMood() {
       const todayKey = getTodayKey();
-
-      // v2.4: статистика на сервер (единая для ТГ и браузера)
-      try {
-        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        // Если нет tgId — генерируем fingerprint для браузера
-        let uid = tgId;
-        if (!uid) {
-          uid = localStorage.getItem("tb_uid");
-          if (!uid) {
-            uid = "b_" + Math.random().toString(36).slice(2) + Date.now();
-            localStorage.setItem("tb_uid", uid);
-          }
-        }
-        fetch("https://teabro-app.vercel.app/api/stats", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "open", uid: String(uid) }),
-        }).catch(() => {});
-      } catch {}
-
+      const totalOpens = parseInt(await CS.get("admin_opens") || "0") + 1;
+      await CS.set("admin_opens", String(totalOpens));
+      const todayOpens = parseInt(await CS.get("admin_opens_" + todayKey) || "0") + 1;
+      await CS.set("admin_opens_" + todayKey, String(todayOpens));
+      const uniqueKey = "admin_unique_" + todayKey;
+      const alreadyCounted = await CS.get(uniqueKey + "_self");
+      if (!alreadyCounted) {
+        await CS.set(uniqueKey + "_self", "1");
+        const todayUnique = parseInt(await CS.get(uniqueKey) || "0") + 1;
+        await CS.set(uniqueKey, String(todayUnique));
+        const totalUnique = parseInt(await CS.get("admin_unique_total") || "0") + 1;
+        await CS.set("admin_unique_total", String(totalUnique));
+      }
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }
       const teaRaw = await CS.get("tea_" + todayKey);
@@ -1408,25 +1788,21 @@ export default function App() {
   const handleTeaResult = useCallback(async (winner) => {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
-    // v2.4: статистика на сервер
-    fetch("https://teabro-app.vercel.app/api/stats", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "tea" }),
-    }).catch(() => {});
+    const totalTea = parseInt(await CS.get("admin_tea") || "0") + 1;
+    await CS.set("admin_tea", String(totalTea));
   }, []);
 
-  if (screen === "quiz")    return <QuizScreen onBack={() => setScreen("home")} />;
-  if (screen === "wisdom")  return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
-  if (screen === "teaquiz") return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
-  if (screen === "mood")    return <MoodScreen onBack={() => setScreen("home")} />;
-  if (screen === "shop")    return <ShopScreen onBack={() => setScreen("home")} />;
-  if (screen === "admin")   return <AdminScreen onBack={() => setScreen("home")} />;
-
-  // Проверка доступа к админке
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const urlParams = new URLSearchParams(window.location.search);
   const isAdmin = tgUser?.id === ADMIN_ID || urlParams.get("admin") === "teabro_admin_2024";
+
+  if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
+  if (screen === "meditation") return <MeditationQuizScreen onBack={() => setScreen("home")} />;
+  if (screen === "wisdom")     return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
+  if (screen === "teaquiz")    return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
+  if (screen === "mood")       return <MoodScreen onBack={() => setScreen("home")} />;
+  if (screen === "shop")       return <ShopScreen onBack={() => setScreen("home")} />;
+  if (screen === "admin")      return <AdminScreen onBack={() => setScreen("home")} />;
 
   return (
     <div style={S.screen}>
@@ -1438,10 +1814,11 @@ export default function App() {
       <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
       <div style={S.menuList}>
         {[
-          { id:"quiz",    title:"Честный разговор с собой", desc:"Самооценка · выгорание · два теста" },
-          { id:"teaquiz", title:"Какой чай тебе нужен?",    desc:"5 вопросов · подбор под состояние" },
-          { id:"mood",    title:"Мое состояние",            desc:"Эмоция дня · серии · твой путь" },
-          { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твое состояние" },
+          { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · два теста" },
+          { id:"meditation", title:"Какая практика тебе нужна?", desc:"20 вопросов · медитация или дыхание" },
+          { id:"teaquiz",    title:"Какой чай тебе нужен?",      desc:"5 вопросов · подбор под состояние" },
+          { id:"mood",       title:"Мое состояние",              desc:"Эмоция дня · серии · твой путь" },
+          { id:"wisdom",     title:"Совет дня",                  desc:"3 совета · под твое состояние" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
             <div style={S.menuCardIcon}>✦</div>
@@ -1470,30 +1847,6 @@ export default function App() {
         </div>
       )}
       <AnonPopup />
-    </div>
-  );
-}
-
-function AnonPopup() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
-        <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
-        <span style={{ fontSize:"12px", color:"#3A3028", letterSpacing:"0.05em" }}>Анонимность</span>
-      </button>
-      {open && (
-        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", zIndex:100 }}>
-          <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>О ТВОИХ ДАННЫХ</p>
-          <p style={{ margin:0, fontSize:"12px", color:"#7A6E62", lineHeight:1.8, fontStyle:"italic" }}>
-            Твой путь — только твой.<br />
-            Твои данные хранятся только у тебя.<br />
-            Никто кроме тебя их не видит.<br />
-            Бот полностью анонимный.
-          </p>
-          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
-        </div>
-      )}
     </div>
   );
 }
