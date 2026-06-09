@@ -1425,7 +1425,7 @@ export default function App() {
       <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
       <div style={S.menuList}>
         {[
-          { id:"quiz",    title:"Далеко ли ты от себя?",    desc:"25 вопросов · самооценка · индекс выгорания" },
+          { id:"quiz",    title:"Честный разговор с собой", desc:"Самооценка · выгорание · два теста" },
           { id:"teaquiz", title:"Какой чай тебе нужен?",    desc:"5 вопросов · подбор под состояние" },
           { id:"mood",    title:"Мое состояние",            desc:"Эмоция дня · серии · твой путь" },
           { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твое состояние" },
@@ -1456,15 +1456,31 @@ export default function App() {
           <button onClick={() => setScreen("admin")} style={{ ...S.shopBtn, color:"#4A4036", fontSize:"12px" }}>⚙️ Админка</button>
         </div>
       )}
-      <div style={{ marginTop:"24px", display:"flex", alignItems:"flex-start", gap:"10px", padding:"14px", background:"rgba(255,255,255,0.015)", border:"1px solid #1A1713", borderRadius:"10px" }}>
-        <span style={{ fontSize:"13px", color:"#3A3028", flexShrink:0, marginTop:"1px" }}>ℹ</span>
-        <p style={{ margin:0, fontSize:"12px", color:"#4A4036", lineHeight:1.8, fontStyle:"italic" }}>
-          Твой путь — только твой.<br />
-          Твои данные хранятся только у тебя.<br />
-          Никто кроме тебя их не видит.<br />
-          Бот полностью анонимный.
-        </p>
-      </div>
+      <AnonPopup />
+    </div>
+  );
+}
+
+function AnonPopup() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", fontSize:"13px", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
+        <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
+        <span style={{ fontSize:"12px", color:"#3A3028", letterSpacing:"0.05em" }}>Анонимность</span>
+      </button>
+      {open && (
+        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", zIndex:100 }}>
+          <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>О ТВОИХ ДАННЫХ</p>
+          <p style={{ margin:0, fontSize:"12px", color:"#7A6E62", lineHeight:1.8, fontStyle:"italic" }}>
+            Твой путь — только твой.<br />
+            Твои данные хранятся только у тебя.<br />
+            Никто кроме тебя их не видит.<br />
+            Бот полностью анонимный.
+          </p>
+          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
+        </div>
+      )}
     </div>
   );
 }
