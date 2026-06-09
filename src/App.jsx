@@ -679,9 +679,12 @@ function QuizScreen({ onBack }) {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
-        // Счётчик опросника
-        CS.get("admin_quiz").then(v => CS.set("admin_quiz", String(parseInt(v||"0")+1)));
-        CS.get("admin_quiz_" + getTodayKey()).then(v => CS.set("admin_quiz_" + getTodayKey(), String(parseInt(v||"0")+1)));
+        // v2.4: статистика на сервер
+        fetch("/api/stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "quiz" }),
+        }).catch(() => {});
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
@@ -1279,13 +1282,12 @@ function AdminScreen({ onBack }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood", "admin_unique_total"];
-        const [opens, quiz, tea, mood, uniqueTotal] = await Promise.all(keys.map(k => CS.get(k)));
-        const todayOpens = await CS.get("admin_opens_" + getTodayKey());
-        const todayQuiz = await CS.get("admin_quiz_" + getTodayKey());
-        const todayUnique = await CS.get("admin_unique_" + getTodayKey());
+        // v2.4: читаем статистику с сервера (единая для ТГ и браузера)
+        const res = await fetch("/api/stats?action=get");
+        if (!res.ok) throw new Error("fetch failed");
+        const data = await res.json();
 
-        // Загружаем все эмоции за все время
+        // Загружаем эмоции из CloudStorage (они личные, остаются там)
         const allEntries = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
@@ -1304,18 +1306,7 @@ function AdminScreen({ onBack }) {
           })
           .filter(Boolean);
 
-        setStats({
-          totalOpens: opens || "0",
-          totalQuiz: quiz || "0",
-          totalTea: tea || "0",
-          totalMood: mood || "0",
-          todayOpens: todayOpens || "0",
-          todayQuiz: todayQuiz || "0",
-          todayUnique: todayUnique || "0",
-          uniqueTotal: uniqueTotal || "0",
-          topEmotions,
-          allEntries: allEntries.length,
-        });
+        setStats({ ...data, topEmotions, allEntries: allEntries.length });
       } catch(e) {
         setStats({ error: true });
       }
@@ -1381,23 +1372,24 @@ export default function App() {
     async function loadMood() {
       const todayKey = getTodayKey();
 
-      // Счётчик открытий (каждое)
-      const totalOpens = parseInt(await CS.get("admin_opens") || "0") + 1;
-      await CS.set("admin_opens", String(totalOpens));
-      const todayOpens = parseInt(await CS.get("admin_opens_" + todayKey) || "0") + 1;
-      await CS.set("admin_opens_" + todayKey, String(todayOpens));
-
-      // Уникальные пользователи — считаем по user ID, раз в сутки
-      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-      const uniqueKey = "admin_unique_" + todayKey;
-      const alreadyCounted = await CS.get(uniqueKey + "_self");
-      if (!alreadyCounted) {
-        await CS.set(uniqueKey + "_self", "1");
-        const todayUnique = parseInt(await CS.get(uniqueKey) || "0") + 1;
-        await CS.set(uniqueKey, String(todayUnique));
-        const totalUnique = parseInt(await CS.get("admin_unique_total") || "0") + 1;
-        await CS.set("admin_unique_total", String(totalUnique));
-      }
+      // v2.4: статистика на сервер (единая для ТГ и браузера)
+      try {
+        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        // Если нет tgId — генерируем fingerprint для браузера
+        let uid = tgId;
+        if (!uid) {
+          uid = localStorage.getItem("tb_uid");
+          if (!uid) {
+            uid = "b_" + Math.random().toString(36).slice(2) + Date.now();
+            localStorage.setItem("tb_uid", uid);
+          }
+        }
+        fetch("/api/stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "open", uid: String(uid) }),
+        }).catch(() => {});
+      } catch {}
 
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }
@@ -1410,8 +1402,12 @@ export default function App() {
   const handleTeaResult = useCallback(async (winner) => {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
-    const totalTea = parseInt(await CS.get("admin_tea") || "0") + 1;
-    await CS.set("admin_tea", String(totalTea));
+    // v2.4: статистика на сервер
+    fetch("/api/stats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "tea" }),
+    }).catch(() => {});
   }, []);
 
   if (screen === "quiz")    return <QuizScreen onBack={() => setScreen("home")} />;
