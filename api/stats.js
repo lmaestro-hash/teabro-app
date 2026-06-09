@@ -2,7 +2,7 @@
 // Серверная статистика через Vercel Blob
 // Единый источник данных для ТГ и браузера
 
-import { put, head, getDownloadUrl } from "@vercel/blob";
+import { put, head } from "@vercel/blob";
 
 const STATS_KEY = "teabro-stats.json";
 
@@ -10,7 +10,10 @@ async function readStats() {
   try {
     const info = await head(STATS_KEY);
     if (!info) return defaultStats();
-    const res = await fetch(info.downloadUrl);
+    // Для private store читаем через fetch с токеном
+    const res = await fetch(info.downloadUrl, {
+      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+    });
     if (!res.ok) return defaultStats();
     return await res.json();
   } catch {
@@ -20,7 +23,7 @@ async function readStats() {
 
 async function writeStats(data) {
   await put(STATS_KEY, JSON.stringify(data), {
-    access: "public",
+    access: "private",
     allowOverwrite: true,
   });
 }
@@ -32,7 +35,7 @@ function defaultStats() {
     totalTea: 0,
     totalMood: 0,
     uniqueTotal: 0,
-    byDay: {},      // { "2024-1-1": { opens, quiz, uniqueIds: [] } }
+    byDay: {},
   };
 }
 
@@ -42,7 +45,6 @@ function getTodayKey() {
 }
 
 export default async function handler(req, res) {
-  // CORS — нужен для fetch из браузера и ТГ
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -60,23 +62,18 @@ export default async function handler(req, res) {
   try {
     const stats = await readStats();
 
-    // Инициализируем сегодняшний день если нет
     if (!stats.byDay[todayKey]) {
       stats.byDay[todayKey] = { opens: 0, quiz: 0, tea: 0, uniqueIds: [] };
     }
     const today = stats.byDay[todayKey];
 
     if (action === "open") {
-      // Каждое открытие
       stats.totalOpens = (stats.totalOpens || 0) + 1;
       today.opens = (today.opens || 0) + 1;
-
-      // Уникальный пользователь — по uid (tgId или fingerprint)
       if (uid && !today.uniqueIds.includes(String(uid))) {
         today.uniqueIds.push(String(uid));
         stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
       }
-
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
@@ -101,7 +98,6 @@ export default async function handler(req, res) {
     }
 
     if (action === "get") {
-      // Для админки — возвращаем всю статистику
       return res.status(200).json({
         totalOpens: stats.totalOpens || 0,
         totalQuiz: stats.totalQuiz || 0,
