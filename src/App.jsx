@@ -693,7 +693,8 @@ function QuizScreen({ onBack }) {
           <p style={S.resultText}>{result.text}</p>
           <div style={{ width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:`1px solid ${burnoutLevel.color}60`, borderRadius:"10px", padding:"14px", marginBottom:"20px" }}>
             <p style={{ margin:"0 0 6px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>ИНДЕКС ВЫГОРАНИЯ</p>
-            <div style={{ ...S.progressBar, marginBottom:"8px" }}><div style={{ ...S.progressFill, width:`${(burnoutTotal/75)*100}%`, backgroundColor:burnoutLevel.color }} /></div>
+            <div style={{ ...S.progressBar, marginBottom:"4px" }}><div style={{ ...S.progressFill, width:`${(burnoutTotal/75)*100}%`, backgroundColor:burnoutLevel.color }} /></div>
+            <p style={{ ...S.progressLabel, marginBottom:"8px" }}>{burnoutTotal} / 75 · <span style={{ color:burnoutLevel.color }}>{burnoutPct}%</span></p>
             <p style={{ margin:"0 0 6px", fontSize:"14px", color:burnoutLevel.color }}>{burnoutLevel.label}</p>
             <p style={{ margin:0, fontSize:"13px", color:"#B0A090", lineHeight:1.6 }}>{burnoutLevel.text}</p>
           </div>
@@ -1424,10 +1425,10 @@ export default function App() {
       <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
       <div style={S.menuList}>
         {[
-          { id:"quiz",    title:"Далеко ли ты от себя?",    desc:"5 вопросов · 3 минуты · честный ответ" },
-          { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твое состояние" },
+          { id:"quiz",    title:"Далеко ли ты от себя?",    desc:"25 вопросов · самооценка · индекс выгорания" },
           { id:"teaquiz", title:"Какой чай тебе нужен?",    desc:"5 вопросов · подбор под состояние" },
           { id:"mood",    title:"Мое состояние",            desc:"Эмоция дня · серии · твой путь" },
+          { id:"wisdom",  title:"Совет дня",                desc:"3 совета · под твое состояние" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
             <div style={S.menuCardIcon}>✦</div>
