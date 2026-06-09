@@ -290,155 +290,180 @@ function getTrajectory(stats) {
 // ОПРОСНИК
 // ─────────────────────────────────────────────
 const QUESTIONS_QUIZ = [
-  { id: 1, category: "УТРО", text: "Как начинается твое утро в последнее время?", options: [
-    { text: "Просыпаюсь — и несколько минут просто лежу. Слушаю тишину.", score: 3, burnout: 0 },
-    { text: "Встаю нормально, но первое, что делаю — беру телефон.", score: 2, burnout: 1 },
-    { text: "Будильник звенит несколько раз. Встаю уже на бегу.", score: 1, burnout: 2 },
+  { id: 1, category: "УТРО", text: "Как начинается твоё утро в последнее время?", options: [
+    { text: "Просыпаюсь с предвкушением. Хочется начать день.", score: 3, burnout: 0 },
+    { text: "Встаю спокойно. Несколько минут просто лежу, слушаю тишину.", score: 3, burnout: 0 },
+    { text: "Встаю нормально, но первое что делаю — беру телефон.", score: 2, burnout: 1 },
+    { text: "Будильник несколько раз. Встаю уже на бегу.", score: 1, burnout: 2 },
     { text: "Утро ощущается как насилие. Я уже что-то должен.", score: 0, burnout: 3 },
   ]},
-  { id: 2, category: "ТИШИНА", text: "Когда ты последний раз был наедине с собой — без музыки, экрана?", options: [
-    { text: "Часто. Мне нужна тишина — я намеренно ее ищу.", score: 3, burnout: 0 },
-    { text: "Иногда бывает. Но долго не выдерживаю.", score: 2, burnout: 1 },
-    { text: "Редко. Тишина стала некомфортной.", score: 1, burnout: 2 },
-    { text: "Не помню. Фоновый шум стал нормой.", score: 0, burnout: 3 },
+  { id: 2, category: "ТИШИНА", text: "Как ты себя чувствуешь наедине с собой — без музыки, экрана?", options: [
+    { text: "Хорошо. Это моё любимое время — я его намеренно ищу.", score: 3, burnout: 0 },
+    { text: "Нормально. Иногда бываю, не избегаю.", score: 3, burnout: 0 },
+    { text: "Иногда тянет к шуму. Долго в тишине не выдерживаю.", score: 2, burnout: 1 },
+    { text: "Тишина стала некомфортной. Предпочитаю фон.", score: 1, burnout: 2 },
+    { text: "Не помню когда был наедине с собой. Фоновый шум — норма.", score: 0, burnout: 3 },
   ]},
-  { id: 3, category: "ТЕЛО", text: "Как ты ощущаешь свое тело прямо сейчас?", options: [
-    { text: "Чувствую себя живым. Двигаюсь, дышу, замечаю ощущения.", score: 3, burnout: 0 },
+  { id: 3, category: "ТЕЛО", text: "Как ты ощущаешь своё тело прямо сейчас?", options: [
+    { text: "Легко и живо. Чувствую энергию, хочется двигаться.", score: 3, burnout: 0 },
+    { text: "Спокойно. Дышу, замечаю ощущения, всё в порядке.", score: 3, burnout: 0 },
     { text: "Нормально, но устаю больше обычного.", score: 2, burnout: 1 },
     { text: "Тело как будто чужое. Усталость стала фоном.", score: 1, burnout: 2 },
-    { text: "Тело меня раздражает или я его не замечаю.", score: 0, burnout: 3 },
+    { text: "Тело раздражает или я его совсем не замечаю.", score: 0, burnout: 3 },
   ]},
-  { id: 4, category: "СМЫСЛ", text: "Есть ли что-то, ради чего ты с удовольствием встаешь?", options: [
-    { text: "Да. Есть дело, человек, процесс — что-то тянет вперед.", score: 3, burnout: 0 },
-    { text: "Скорее да, но это притупилось.", score: 2, burnout: 1 },
+  { id: 4, category: "СМЫСЛ", text: "Есть ли что-то, ради чего ты с удовольствием встаёшь?", options: [
+    { text: "Да, и это горит. Жду возможности заниматься этим.", score: 3, burnout: 0 },
+    { text: "Да. Есть дело или человек — что-то тянет вперёд.", score: 3, burnout: 0 },
+    { text: "Скорее да, но это немного притупилось.", score: 2, burnout: 1 },
     { text: "Трудно ответить. Дни похожи, мотивация плавает.", score: 1, burnout: 2 },
-    { text: "Нет. Встаю по инерции.", score: 0, burnout: 3 },
+    { text: "Нет. Встаю по инерции, без понимания зачем.", score: 0, burnout: 3 },
   ]},
   { id: 5, category: "НАСТОЯЩЕЕ", text: "Где ты находишься прямо сейчас — внутри?", options: [
-    { text: "Здесь. Замечаю этот момент. Мне не нужно никуда бежать.", score: 3, burnout: 0 },
+    { text: "Здесь, и это ощущается как поток. Я в моменте.", score: 3, burnout: 0 },
+    { text: "Здесь. Замечаю этот момент, мне не нужно никуда бежать.", score: 3, burnout: 0 },
     { text: "Скорее здесь, но мысли иногда утягивают.", score: 2, burnout: 1 },
     { text: "Чаще где угодно, только не здесь.", score: 1, burnout: 2 },
-    { text: "Я не знаю где. Ощущение, что меня нет в собственной жизни.", score: 0, burnout: 3 },
+    { text: "Не знаю где. Ощущение, что меня нет в собственной жизни.", score: 0, burnout: 3 },
   ]},
   { id: 6, category: "ЭНЕРГИЯ", text: "Как ты чувствуешь себя в начале рабочего дня?", options: [
-    { text: "Есть настрой. Готов работать.", score: 3, burnout: 0 },
+    { text: "Заряжен. Есть предвкушение, хочется начать.", score: 3, burnout: 0 },
+    { text: "Есть настрой. Спокойно готов к работе.", score: 3, burnout: 0 },
     { text: "Нейтрально. Не в восторге, но ок.", score: 2, burnout: 1 },
     { text: "Уже устал, не начав.", score: 1, burnout: 2 },
     { text: "Внутри сопротивление. Хочется сбежать.", score: 0, burnout: 3 },
   ]},
   { id: 7, category: "ЭНЕРГИЯ", text: "Хватает ли тебе сил на себя после основных дел?", options: [
-    { text: "Да. Вечером есть время и желание на что-то свое.", score: 3, burnout: 0 },
+    { text: "Да, и с запасом. Вечером есть энергия на то, что нравится.", score: 3, burnout: 0 },
+    { text: "Да. Вечером есть время и желание на что-то своё.", score: 3, burnout: 0 },
     { text: "Иногда. Не всегда, но бывает.", score: 2, burnout: 1 },
     { text: "Редко. Вечером — только лечь.", score: 1, burnout: 2 },
     { text: "Никогда. Сил хватает только дожить до подушки.", score: 0, burnout: 3 },
   ]},
   { id: 8, category: "ЭНЕРГИЯ", text: "Как ты восстанавливаешься после нагрузки?", options: [
-    { text: "Быстро. Ночь сна — и снова в строю.", score: 3, burnout: 0 },
+    { text: "Быстро. Иногда нагрузка сама по себе заряжает.", score: 3, burnout: 0 },
+    { text: "Хорошо. Ночь сна — и снова в строю.", score: 3, burnout: 0 },
     { text: "Чуть дольше обычного, но восстанавливаюсь.", score: 2, burnout: 1 },
-    { text: "Медленно. Уикенд не помогает.", score: 1, burnout: 2 },
-    { text: "Не восстанавливаюсь. Усталость накапливается.", score: 0, burnout: 3 },
+    { text: "Медленно. Выходные не помогают.", score: 1, burnout: 2 },
+    { text: "Не восстанавливаюсь. Усталость только накапливается.", score: 0, burnout: 3 },
   ]},
   { id: 9, category: "ЭНЕРГИЯ", text: "Как ты реагируешь на новые задачи или просьбы?", options: [
+    { text: "С интересом. Новое — это возможность, не обуза.", score: 3, burnout: 0 },
     { text: "Нормально. Могу взять, если важно.", score: 3, burnout: 0 },
     { text: "С осторожностью. Смотрю, потяну ли.", score: 2, burnout: 1 },
     { text: "С раздражением. Опять что-то новое.", score: 1, burnout: 2 },
     { text: "С паникой или полным безразличием.", score: 0, burnout: 3 },
   ]},
-  { id: 10, category: "ЭНЕРГИЯ", text: "Как часто ты чувствуешь себя опустошенным к вечеру?", options: [
-    { text: "Редко. Обычно есть силы на себя.", score: 3, burnout: 0 },
-    { text: "Иногда. Зависит от дня.", score: 2, burnout: 1 },
-    { text: "Часто. Вечером — как выжатый лимон.", score: 1, burnout: 2 },
-    { text: "Всегда. Просыпаюсь уже уставшим.", score: 0, burnout: 3 },
+  { id: 10, category: "ЭНЕРГИЯ", text: "Каким ты бываешь к вечеру?", options: [
+    { text: "Наполненным. День прошёл хорошо, есть удовлетворение.", score: 3, burnout: 0 },
+    { text: "Немного устал, но в норме. Силы на себя есть.", score: 3, burnout: 0 },
+    { text: "По-разному. Зависит от дня.", score: 2, burnout: 1 },
+    { text: "Часто опустошён. Вечером — как выжатый лимон.", score: 1, burnout: 2 },
+    { text: "Всегда на нуле. Просыпаюсь уже уставшим.", score: 0, burnout: 3 },
   ]},
   { id: 11, category: "МОТИВАЦИЯ", text: "Как ты относишься к своей работе или основному делу?", options: [
+    { text: "С огнём. Это моё — мне это важно и интересно.", score: 3, burnout: 0 },
     { text: "С интересом. Есть энергия и желание.", score: 3, burnout: 0 },
-    { text: "Нейтрально. Делаю, но без огня.", score: 2, burnout: 1 },
+    { text: "Нейтрально. Делаю, но без особого огня.", score: 2, burnout: 1 },
     { text: "Через силу. Раньше нравилось — сейчас нет.", score: 1, burnout: 2 },
     { text: "Отвращение или полное безразличие.", score: 0, burnout: 3 },
   ]},
-  { id: 12, category: "МОТИВАЦИЯ", text: "Есть ли у тебя ощущение, что стараешься всё больше, а результата всё меньше?", options: [
-    { text: "Нет. Вижу отдачу от усилий.", score: 3, burnout: 0 },
-    { text: "Иногда такое чувство, но не постоянно.", score: 2, burnout: 1 },
-    { text: "Часто. КПД упал, хотя трачу всё больше.", score: 1, burnout: 2 },
-    { text: "Да. Полное ощущение бега на месте.", score: 0, burnout: 3 },
+  { id: 12, category: "МОТИВАЦИЯ", text: "Видишь ли ты отдачу от своих усилий?", options: [
+    { text: "Да, и это вдохновляет. Результаты видны и радуют.", score: 3, burnout: 0 },
+    { text: "В целом да. Вижу связь между усилием и результатом.", score: 3, burnout: 0 },
+    { text: "Иногда кажется что стараюсь больше, а выхлоп тот же.", score: 2, burnout: 1 },
+    { text: "Часто — КПД упал, хотя трачу всё больше.", score: 1, burnout: 2 },
+    { text: "Полное ощущение бега на месте. Смысла не вижу.", score: 0, burnout: 3 },
   ]},
   { id: 13, category: "МОТИВАЦИЯ", text: "Когда ты последний раз делал что-то с настоящим удовольствием?", options: [
+    { text: "Сегодня или вчера. Таких моментов много.", score: 3, burnout: 0 },
     { text: "Недавно. Есть вещи, которые заряжают.", score: 3, burnout: 0 },
-    { text: "Было, но не часто.", score: 2, burnout: 1 },
+    { text: "Было, но нечасто.", score: 2, burnout: 1 },
     { text: "Не помню когда. Всё стало обязанностью.", score: 1, burnout: 2 },
     { text: "Уже не помню что такое удовольствие от дела.", score: 0, burnout: 3 },
   ]},
-  { id: 14, category: "МОТИВАЦИЯ", text: "Думаешь ли ты о работе или делах в нерабочее время?", options: [
-    { text: "Редко. Умею отключаться.", score: 3, burnout: 0 },
-    { text: "Иногда. Особенно перед сном.", score: 2, burnout: 1 },
-    { text: "Часто. Голова не выключается.", score: 1, burnout: 2 },
-    { text: "Постоянно. Даже во сне.", score: 0, burnout: 3 },
+  { id: 14, category: "МОТИВАЦИЯ", text: "Умеешь ли ты отключаться от дел в нерабочее время?", options: [
+    { text: "Да. Умею переключаться — и это приносит удовольствие.", score: 3, burnout: 0 },
+    { text: "В целом да. Голова отдыхает когда нужно.", score: 3, burnout: 0 },
+    { text: "Иногда мысли о делах всплывают, особенно перед сном.", score: 2, burnout: 1 },
+    { text: "Редко. Голова не выключается почти никогда.", score: 1, burnout: 2 },
+    { text: "Нет. Думаю о работе постоянно, даже во сне.", score: 0, burnout: 3 },
   ]},
-  { id: 15, category: "МОТИВАЦИЯ", text: "Как ты относишься к людям вокруг — коллегам, близким?", options: [
-    { text: "С теплом. Они важны, общение дает силы.", score: 3, burnout: 0 },
+  { id: 15, category: "МОТИВАЦИЯ", text: "Как ты себя чувствуешь в общении с людьми?", options: [
+    { text: "Хорошо. Люди дают энергию, мне интересно с ними.", score: 3, burnout: 0 },
+    { text: "С теплом. Близкие важны, общение даёт силы.", score: 3, burnout: 0 },
     { text: "Нормально, но иногда нужна пауза.", score: 2, burnout: 1 },
     { text: "Устал. Большинство общения — трата сил.", score: 1, burnout: 2 },
-    { text: "Раздражение или полная отстраненность.", score: 0, burnout: 3 },
+    { text: "Раздражение или полная отстранённость.", score: 0, burnout: 3 },
   ]},
-  { id: 16, category: "ЭМОЦИИ", text: "Как часто ты раздражаешься без явной причины?", options: [
-    { text: "Редко. Обычно понимаю почему злюсь.", score: 3, burnout: 0 },
-    { text: "Иногда. Бывает, но не постоянно.", score: 2, burnout: 1 },
-    { text: "Часто. Мелочи выводят из себя.", score: 1, burnout: 2 },
-    { text: "Почти всегда. Внутри постоянное напряжение.", score: 0, burnout: 3 },
+  { id: 16, category: "ЭМОЦИИ", text: "Как ты себя чувствуешь эмоционально в последнее время?", options: [
+    { text: "Живо и тепло. Много радости, интереса, лёгкости.", score: 3, burnout: 0 },
+    { text: "Стабильно. Без особых перепадов, в своём ритме.", score: 3, burnout: 0 },
+    { text: "По-разному. Иногда раздражение без причины.", score: 2, burnout: 1 },
+    { text: "Часто на взводе. Мелочи выводят из себя.", score: 1, burnout: 2 },
+    { text: "Постоянное напряжение или полная пустота.", score: 0, burnout: 3 },
   ]},
-  { id: 17, category: "ЭМОЦИИ", text: "Как ты реагируешь на ошибки — свои или чужие?", options: [
-    { text: "Спокойно. Ошибки — часть процесса.", score: 3, burnout: 0 },
-    { text: "Немного расстраиваюсь, но отпускаю.", score: 2, burnout: 1 },
+  { id: 17, category: "ЭМОЦИИ", text: "Как ты относишься к ошибкам — своим или чужим?", options: [
+    { text: "Легко. Ошибки — это информация, не катастрофа.", score: 3, burnout: 0 },
+    { text: "Спокойно. Ошибки — часть процесса, отпускаю быстро.", score: 3, burnout: 0 },
+    { text: "Немного расстраиваюсь, но в целом отпускаю.", score: 2, burnout: 1 },
     { text: "Сильно переживаю. Долго не могу отпустить.", score: 1, burnout: 2 },
-    { text: "Либо взрываюсь, либо мне всё равно.", score: 0, burnout: 3 },
+    { text: "Либо взрываюсь, либо мне уже всё равно.", score: 0, burnout: 3 },
   ]},
-  { id: 18, category: "ЭМОЦИИ", text: "Есть ли у тебя ощущение внутренней пустоты или бессмысленности?", options: [
-    { text: "Нет. Есть смысл и наполненность.", score: 3, burnout: 0 },
-    { text: "Иногда бывает, но проходит.", score: 2, burnout: 1 },
-    { text: "Часто. Делаю всё на автопилоте.", score: 1, burnout: 2 },
-    { text: "Почти всегда. Зачем — непонятно.", score: 0, burnout: 3 },
+  { id: 18, category: "ЭМОЦИИ", text: "Есть ли у тебя ощущение смысла и наполненности?", options: [
+    { text: "Да, сильно. Жизнь ощущается насыщенной и нужной.", score: 3, burnout: 0 },
+    { text: "В целом да. Есть смысл и ощущение правильности.", score: 3, burnout: 0 },
+    { text: "Иногда бывает пустота, но проходит.", score: 2, burnout: 1 },
+    { text: "Часто делаю всё на автопилоте, без смысла.", score: 1, burnout: 2 },
+    { text: "Почти всегда пустота. Зачем — непонятно.", score: 0, burnout: 3 },
   ]},
-  { id: 19, category: "ЭМОЦИИ", text: "Как ты чувствуешь себя после выходных или отпуска?", options: [
-    { text: "Отдохнул. Есть желание действовать.", score: 3, burnout: 0 },
+  { id: 19, category: "ЭМОЦИИ", text: "Как ты себя чувствуешь после отдыха — выходных или отпуска?", options: [
+    { text: "Отлично. Отдых восстанавливает полностью, с запасом.", score: 3, burnout: 0 },
+    { text: "Хорошо. Есть желание действовать и энергия.", score: 3, burnout: 0 },
     { text: "Чуть лучше, но быстро снова устаю.", score: 2, burnout: 1 },
-    { text: "Почти не помогает. Слишком мало.", score: 1, burnout: 2 },
-    { text: "Отпуск не помог. Возвращаюсь уже уставшим.", score: 0, burnout: 3 },
+    { text: "Почти не помогает. Отдых кажется слишком коротким.", score: 1, burnout: 2 },
+    { text: "Отдых не помогает. Возвращаюсь уже уставшим.", score: 0, burnout: 3 },
   ]},
-  { id: 20, category: "ЭМОЦИИ", text: "Присутствует ли у тебя тревога или страх без понятной причины?", options: [
-    { text: "Редко. Обычно тревога предметная.", score: 3, burnout: 0 },
-    { text: "Иногда. Фоновое беспокойство бывает.", score: 2, burnout: 1 },
-    { text: "Часто. Что-то тревожит, но не могу назвать что.", score: 1, burnout: 2 },
-    { text: "Постоянно. Тревога стала фоном жизни.", score: 0, burnout: 3 },
+  { id: 20, category: "ЭМОЦИИ", text: "Как ты относишься к будущему прямо сейчас?", options: [
+    { text: "С предвкушением. Есть планы, есть желание.", score: 3, burnout: 0 },
+    { text: "Спокойно. Без тревоги, есть ощущение опоры.", score: 3, burnout: 0 },
+    { text: "Иногда тревожно. Фоновое беспокойство бывает.", score: 2, burnout: 1 },
+    { text: "Часто тревожно. Что-то давит, но не могу назвать что.", score: 1, burnout: 2 },
+    { text: "Тревога стала фоном. Будущее пугает или безразлично.", score: 0, burnout: 3 },
   ]},
   { id: 21, category: "ГРАНИЦА", text: "Умеешь ли ты говорить «нет» когда не хочешь что-то делать?", options: [
-    { text: "Да. Свои границы важны — отстаиваю их.", score: 3, burnout: 0 },
+    { text: "Да, легко. Мои границы — моя ответственность.", score: 3, burnout: 0 },
+    { text: "Да. Свои границы важны — умею их отстаивать.", score: 3, burnout: 0 },
     { text: "Иногда. Но часто соглашаюсь через силу.", score: 2, burnout: 1 },
-    { text: "Редко. Трудно отказывать, потом жалею.", score: 1, burnout: 2 },
+    { text: "Редко. Трудно отказывать — потом жалею.", score: 1, burnout: 2 },
     { text: "Нет. Беру всё подряд, потом ненавижу себя.", score: 0, burnout: 3 },
   ]},
   { id: 22, category: "ГРАНИЦА", text: "Есть ли у тебя время и пространство только для себя?", options: [
+    { text: "Да, достаточно. Это время — основа моего ритма.", score: 3, burnout: 0 },
     { text: "Да. Это важно — я его защищаю.", score: 3, burnout: 0 },
-    { text: "Иногда. Бывает, но не всегда.", score: 2, burnout: 1 },
+    { text: "Иногда бывает, но не всегда.", score: 2, burnout: 1 },
     { text: "Редко. Всё время кто-то или что-то нужно.", score: 1, burnout: 2 },
     { text: "Нет. Я постоянно доступен для других.", score: 0, burnout: 3 },
   ]},
-  { id: 23, category: "ГРАНИЦА", text: "Чувствуешь ли ты вину, когда отдыхаешь или ничего не делаешь?", options: [
-    { text: "Нет. Отдых — это часть жизни.", score: 3, burnout: 0 },
-    { text: "Иногда. Стараюсь не поддаваться.", score: 2, burnout: 1 },
-    { text: "Часто. Трудно просто быть без дела.", score: 1, burnout: 2 },
-    { text: "Всегда. Не делаешь — значит теряешь.", score: 0, burnout: 3 },
+  { id: 23, category: "ГРАНИЦА", text: "Как ты относишься к отдыху и паузам?", options: [
+    { text: "Как к необходимости и удовольствию. Умею отдыхать.", score: 3, burnout: 0 },
+    { text: "Нормально. Отдых — часть жизни, вины нет.", score: 3, burnout: 0 },
+    { text: "Иногда чувствую вину. Стараюсь не поддаваться.", score: 2, burnout: 1 },
+    { text: "Часто с виной. Трудно просто быть без дела.", score: 1, burnout: 2 },
+    { text: "Всегда с виной. Не делаешь — значит теряешь.", score: 0, burnout: 3 },
   ]},
   { id: 24, category: "ГРАНИЦА", text: "Насколько твои действия совпадают с тем, чего ты реально хочешь?", options: [
+    { text: "Сильно совпадают. Живу в согласии с собой.", score: 3, burnout: 0 },
     { text: "В основном живу так, как хочу.", score: 3, burnout: 0 },
     { text: "Частично. Есть компромиссы, но они осознанные.", score: 2, burnout: 1 },
     { text: "Мало. Делаю в основном то, что «надо».", score: 1, burnout: 2 },
     { text: "Не помню чего хочу. Живу на автомате.", score: 0, burnout: 3 },
   ]},
-  { id: 25, category: "ГРАНИЦА", text: "Есть ли у тебя ощущение, что ты потерял себя в потоке обязательств?", options: [
-    { text: "Нет. Знаю кто я и что мне важно.", score: 3, burnout: 0 },
-    { text: "Иногда возникает, но быстро нахожу опору.", score: 2, burnout: 1 },
+  { id: 25, category: "ГРАНИЦА", text: "Чувствуешь ли ты себя собой — в своей жизни?", options: [
+    { text: "Да, отчётливо. Знаю кто я, что важно, куда иду.", score: 3, burnout: 0 },
+    { text: "Да. Знаю кто я и что мне важно.", score: 3, burnout: 0 },
+    { text: "Иногда теряюсь, но быстро нахожу опору.", score: 2, burnout: 1 },
     { text: "Часто. Не помню когда последний раз думал о себе.", score: 1, burnout: 2 },
-    { text: "Да. Ощущение что меня нет — есть только функция.", score: 0, burnout: 3 },
+    { text: "Ощущение что меня нет — есть только функция.", score: 0, burnout: 3 },
   ]},
 ];
 
@@ -1244,10 +1269,11 @@ function AdminScreen({ onBack }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood"];
-        const [opens, quiz, tea, mood] = await Promise.all(keys.map(k => CS.get(k)));
+        const keys = ["admin_opens", "admin_quiz", "admin_tea", "admin_mood", "admin_unique_total"];
+        const [opens, quiz, tea, mood, uniqueTotal] = await Promise.all(keys.map(k => CS.get(k)));
         const todayOpens = await CS.get("admin_opens_" + getTodayKey());
         const todayQuiz = await CS.get("admin_quiz_" + getTodayKey());
+        const todayUnique = await CS.get("admin_unique_" + getTodayKey());
 
         // Загружаем все эмоции за все время
         const allEntries = [];
@@ -1275,6 +1301,8 @@ function AdminScreen({ onBack }) {
           totalMood: mood || "0",
           todayOpens: todayOpens || "0",
           todayQuiz: todayQuiz || "0",
+          todayUnique: todayUnique || "0",
+          uniqueTotal: uniqueTotal || "0",
           topEmotions,
           allEntries: allEntries.length,
         });
@@ -1308,11 +1336,13 @@ function AdminScreen({ onBack }) {
           <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
             <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>СЕГОДНЯ</p>
             {row("Открытий бота", stats.todayOpens)}
+            {row("Уникальных пользователей", stats.todayUnique)}
             {row("Прошли опросник", stats.todayQuiz)}
           </div>
           <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
             <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ВСЕГО</p>
             {row("Открытий", stats.totalOpens)}
+            {row("Уникальных пользователей", stats.uniqueTotal)}
             {row("Опросник", stats.totalQuiz)}
             {row("Тест чая", stats.totalTea)}
             {row("Записей эмоций", stats.allEntries)}
@@ -1339,12 +1369,25 @@ export default function App() {
   useEffect(() => {
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
     async function loadMood() {
-      // Счётчик открытий
+      const todayKey = getTodayKey();
+
+      // Счётчик открытий (каждое)
       const totalOpens = parseInt(await CS.get("admin_opens") || "0") + 1;
       await CS.set("admin_opens", String(totalOpens));
-      const todayKey = getTodayKey();
       const todayOpens = parseInt(await CS.get("admin_opens_" + todayKey) || "0") + 1;
       await CS.set("admin_opens_" + todayKey, String(todayOpens));
+
+      // Уникальные пользователи — считаем по user ID, раз в сутки
+      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+      const uniqueKey = "admin_unique_" + todayKey;
+      const alreadyCounted = await CS.get(uniqueKey + "_self");
+      if (!alreadyCounted) {
+        await CS.set(uniqueKey + "_self", "1");
+        const todayUnique = parseInt(await CS.get(uniqueKey) || "0") + 1;
+        await CS.set(uniqueKey, String(todayUnique));
+        const totalUnique = parseInt(await CS.get("admin_unique_total") || "0") + 1;
+        await CS.set("admin_unique_total", String(totalUnique));
+      }
 
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }
@@ -1412,6 +1455,15 @@ export default function App() {
           <button onClick={() => setScreen("admin")} style={{ ...S.shopBtn, color:"#4A4036", fontSize:"12px" }}>⚙️ Админка</button>
         </div>
       )}
+      <div style={{ marginTop:"24px", display:"flex", alignItems:"flex-start", gap:"10px", padding:"14px", background:"rgba(255,255,255,0.015)", border:"1px solid #1A1713", borderRadius:"10px" }}>
+        <span style={{ fontSize:"13px", color:"#3A3028", flexShrink:0, marginTop:"1px" }}>ℹ</span>
+        <p style={{ margin:0, fontSize:"12px", color:"#4A4036", lineHeight:1.8, fontStyle:"italic" }}>
+          Твой путь — только твой.<br />
+          Твои данные хранятся только у тебя.<br />
+          Никто кроме тебя их не видит.<br />
+          Бот полностью анонимный.
+        </p>
+      </div>
     </div>
   );
 }
