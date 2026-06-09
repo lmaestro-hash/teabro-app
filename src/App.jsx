@@ -1008,12 +1008,6 @@ function QuizScreen({ onBack }) {
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
 
-  useEffect(() => {
-    if (finished) {
-      statEvent("quiz");
-    }
-  }, [finished]);
-
   const handleNext = () => {
     if (selected === null) return;
     setAnimating(true);
@@ -1021,8 +1015,10 @@ function QuizScreen({ onBack }) {
     const nb = [...burnouts, selected.burnout];
     setTimeout(() => {
       setScores(ns); setBurnouts(nb); setSelected(null);
-      if (current+1 >= QUESTIONS_QUIZ.length) { setFinished(true); }
-      else { setCurrent(c => c+1); }
+      if (current+1 >= QUESTIONS_QUIZ.length) {
+        statEvent("quiz");
+        setFinished(true);
+      } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
   };
