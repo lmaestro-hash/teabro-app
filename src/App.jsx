@@ -486,44 +486,44 @@ const BURNOUT_LEVELS = [
 // ─────────────────────────────────────────────
 const TEA_QUESTIONS = [
   { id: 1, category: "СОСТОЯНИЕ", text: "Что сейчас происходит внутри?", options: [
+    { text: "Подъём. Энергия есть, но немного хаотична.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
     { text: "Все раздражает. Внутри жар, хочется чтобы все отстали.", teas: { shu:2, bai:0, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Туман. Мысли путаются, сложно сосредоточиться.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:0, gaba:1 } },
     { text: "Тревога. Мысли не останавливаются, внутри сжато.", teas: { shu:0, bai:2, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Пустота. Нет энергии, нет желания.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
     { text: "Устал от всех. Хочу тишины и быть одному.", teas: { shu:0, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
-    { text: "Подъём. Энергия есть, но немного хаотична.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 2, category: "ТЕЛО", text: "Где чаще всего ощущаешь напряжение?", options: [
+    { text: "Тело в тонусе, но внутри лёгкий гул — не могу остановиться.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
     { text: "Шея и плечи — зажаты, почти всегда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Голова — тяжесть или туман.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0, gaba:1 } },
     { text: "Грудь или живот — что-то сжимает изнутри.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
     { text: "Нет напряжения — просто нет сил вообще.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2, gaba:0 } },
     { text: "Не чувствую тело. Оно где-то есть, но не замечаю.", teas: { shu:1, bai:0, tguan:2, sheng:1, dahong:0, gaba:0 } },
-    { text: "Тело в тонусе, но внутри лёгкий гул — не могу остановиться.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 3, category: "ЭНЕРГИЯ", text: "Какой у тебя сейчас уровень энергии?", options: [
+    { text: "Высокая. Много идей, хочется всё и сразу.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
     { text: "Взвинчен. Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Рассеяна. Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0, gaba:0 } },
     { text: "На нуле. Даже встать было трудно.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
     { text: "Тихая. Не хочу тратить ее на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0, gaba:0 } },
     { text: "Нормальная, но хочется ясности в голове.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1, gaba:0 } },
-    { text: "Высокая. Много идей, хочется всё и сразу.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
   ]},
   { id: 4, category: "МЫСЛИ", text: "Как ведут себя твои мысли прямо сейчас?", options: [
+    { text: "Живые и быстрые. Идеи рождаются, но сложно выбрать одну.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
     { text: "Острые. Все задевает, цепляю каждую мелочь.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Хаотичные. Скачут с одного на другое.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0, gaba:1 } },
     { text: "Тревожные. Прокручиваю одно и то же по кругу.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
     { text: "Нет мыслей. Пустота или безразличие.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2, gaba:0 } },
     { text: "Много мыслей о других людях. Устал от этого.", teas: { shu:1, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
-    { text: "Живые и быстрые. Идеи рождаются, но сложно выбрать одну.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
   ]},
   { id: 5, category: "ПОТРЕБНОСТЬ", text: "Чего тебе сейчас больше всего не хватает?", options: [
+    { text: "Фокуса. Энергия есть — хочу направить её в одно место.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
     { text: "Покоя. Хочу чтобы внутри наконец стало тихо.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Ясности. Хочу думать чисто и видеть суть.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1, gaba:0 } },
     { text: "Безопасности. Хочу чтобы тревога отпустила.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
     { text: "Энергии. Хочу снова чувствовать жизнь.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
     { text: "Одиночества. Хочу побыть только с собой.", teas: { shu:0, bai:0, tguan:2, sheng:1, dahong:0, gaba:0 } },
-    { text: "Фокуса. Энергия есть — хочу направить её в одно место.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
   ]},
 ];
 
@@ -675,7 +675,16 @@ function QuizScreen({ onBack }) {
     setAnimating(true);
     const ns = [...scores, selected.score];
     const nb = [...burnouts, selected.burnout];
-    setTimeout(() => { setScores(ns); setBurnouts(nb); setSelected(null); if (current+1 >= QUESTIONS_QUIZ.length) setFinished(true); else setCurrent(c => c+1); setAnimating(false); }, 300);
+    setTimeout(() => {
+      setScores(ns); setBurnouts(nb); setSelected(null);
+      if (current+1 >= QUESTIONS_QUIZ.length) {
+        setFinished(true);
+        // Счётчик опросника
+        CS.get("admin_quiz").then(v => CS.set("admin_quiz", String(parseInt(v||"0")+1)));
+        CS.get("admin_quiz_" + getTodayKey()).then(v => CS.set("admin_quiz_" + getTodayKey(), String(parseInt(v||"0")+1)));
+      } else { setCurrent(c => c+1); }
+      setAnimating(false);
+    }, 300);
   };
   if (finished && result) {
     const maxScore = QUESTIONS_QUIZ.length * 3;
@@ -1401,6 +1410,8 @@ export default function App() {
   const handleTeaResult = useCallback(async (winner) => {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
+    const totalTea = parseInt(await CS.get("admin_tea") || "0") + 1;
+    await CS.set("admin_tea", String(totalTea));
   }, []);
 
   if (screen === "quiz")    return <QuizScreen onBack={() => setScreen("home")} />;
@@ -1465,7 +1476,7 @@ function AnonPopup() {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", fontSize:"13px", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
         <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
         <span style={{ fontSize:"12px", color:"#3A3028", letterSpacing:"0.05em" }}>Анонимность</span>
       </button>
