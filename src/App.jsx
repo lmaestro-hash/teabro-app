@@ -1009,6 +1009,8 @@ function QuizScreen({ onBack }) {
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
 
+  const quizStatSent = useRef(false);
+
   const handleNext = () => {
     if (selected === null) return;
     setAnimating(true);
@@ -1017,7 +1019,6 @@ function QuizScreen({ onBack }) {
     setTimeout(() => {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
-        statEvent("quiz");
         setFinished(true);
       } else { setCurrent(c => c+1); }
       setAnimating(false);
@@ -1025,6 +1026,10 @@ function QuizScreen({ onBack }) {
   };
 
   if (finished && result) {
+    if (!quizStatSent.current) {
+      quizStatSent.current = true;
+      statEvent("quiz");
+    }
     const maxScore = QUESTIONS_QUIZ.length * 3;
     const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutTotal >= b.range[0] && burnoutTotal <= b.range[1]) || BURNOUT_LEVELS[0];
     const shareMsg = `${result.emoji} ${result.title}\n«${result.subtitle}»\n\nВыгорание: ${burnoutLevel.label}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
