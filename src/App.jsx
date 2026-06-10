@@ -28,13 +28,10 @@ const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
 async function statEvent(action, uid) {
   try {
-    const body = uid ? { action, uid: String(uid) } : { action };
-    await fetch(STATS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      keepalive: true,
-    });
+    const url = uid
+      ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
+      : `${STATS_URL}?action=${action}`;
+    await fetch(url, { keepalive: true });
   } catch {}
 }
 
