@@ -71,9 +71,19 @@ export default async function handler(req, res) {
     if (action === "open") {
       stats.totalOpens = (stats.totalOpens || 0) + 1;
       today.opens = (today.opens || 0) + 1;
-      if (uid && !today.uniqueIds.includes(String(uid))) {
-        today.uniqueIds.push(String(uid));
-        stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
+      if (uid) {
+        // ТГ пользователь — по uid
+        if (!today.uniqueIds.includes(String(uid))) {
+          today.uniqueIds.push(String(uid));
+          stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
+        }
+      } else {
+        // Браузер без uid — считаем как уникального (каждый новый открытие без uid)
+        const browserKey = "browser";
+        if (!today.uniqueIds.includes(browserKey)) {
+          today.uniqueIds.push(browserKey);
+          stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
+        }
       }
       await writeStats(stats);
       return res.status(200).json({ ok: true });
