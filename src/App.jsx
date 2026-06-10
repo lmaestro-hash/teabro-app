@@ -482,6 +482,64 @@ const BURNOUT_LEVELS = [
 ];
 
 // ─────────────────────────────────────────────
+// СОВЕТЫ ПО ВЫГОРАНИЮ
+// ─────────────────────────────────────────────
+const BURNOUT_ADVICE = {
+  none: {
+    label: "Ты в ресурсе — сохрани это",
+    color: "#7A9E7E",
+    why: "Ресурс — не данность. Ты сейчас в хорошей точке, и это результат того, как ты обращаешься с собой. Задача сейчас — не растратить это впустую.",
+    steps: [
+      "Каждый день — хотя бы 20 минут только для себя. Не для задач, не для людей. Для восстановления.",
+      "Проверяй свои границы регулярно. Что тебя заряжает? Что — тихо тянет вниз?",
+      "Фиксируй, что даёт тебе энергию. Дневник, заметки, голосовые — формат не важен. Важно замечать.",
+      "Не жди выгорания чтобы замедлиться. Профилактика в сто раз легче восстановления.",
+      "Один раз в месяц задай себе вопрос: «Живу ли я так, как хочу?» Ответ многое покажет.",
+    ],
+    duration: "Практика осознанности · 5 минут в день",
+  },
+  mild: {
+    label: "Начинается — поймай сейчас",
+    color: "#C8A97E",
+    why: "Ты чувствуешь усталость, которая не проходит после сна. Это сигнал — не катастрофа, но важный. Сейчас самый лёгкий момент для разворота. Потом потребуется больше сил.",
+    steps: [
+      "Три вещи прямо сейчас: убери одно дело из списка, ляг спать на час раньше, откажись от одного необязательного «да».",
+      "Найди источник утечки. Что высасывает энергию больше всего — работа, люди, соцсети, ожидания? Запиши честно.",
+      "Введи «час тишины» — хотя бы три раза в неделю. Без экранов, без задач. Чай, прогулка, ничего.",
+      "Посмотри на своё расписание. Есть ли в нём вообще место для тебя? Если нет — вставь насильно.",
+      "Поговори с кем-то, кому доверяешь. Не советоваться — просто выговориться. Это уже разгружает.",
+    ],
+    duration: "2–3 недели мягкого режима · заметите разницу",
+  },
+  medium: {
+    label: "Нужна настоящая пауза",
+    color: "#B87333",
+    why: "Ты работаешь в долг. Тело и психика уже посылают сигналы — и ты их, скорее всего, знаешь. Здесь не поможет «ещё один выходной». Нужна настоящая остановка и пересмотр ритма.",
+    steps: [
+      "Сначала тело. Сон — минимум 8 часов. Не как роскошь, а как лечение. Без переговоров.",
+      "Сократи список. Возьми лист бумаги и напиши всё, что на тебе висит. Выдели 3 важных. Остальное — отложи, делегируй, отмени.",
+      "Каждый день — что-то только для удовольствия. Не «полезное». Именно бессмысленное: прогулка, кино, вкусная еда.",
+      "Прекрати объяснять себе почему ты устал. Просто устал — и этого достаточно. Вина за усталость только усиливает её.",
+      "Поговори с врачом или психологом. Выгорание средней степени — медицинская история, не слабость. Это честнее и быстрее, чем справляться в одиночку.",
+    ],
+    duration: "4–8 недель восстановления · не пытайся сделать быстрее",
+  },
+  deep: {
+    label: "Остановиться — это единственное",
+    color: "#8B4A4A",
+    why: "Ресурс на нуле. Это не про силу воли — это физиология. Продолжать в том же ритме — всё равно что бежать на сломанной ноге. Тело возьмёт своё силой, если ты не дашь ему это сейчас.",
+    steps: [
+      "Первое и главное: скажи кому-то рядом — партнёру, другу, специалисту — что тебе плохо. Не героизируй. Это не слабость, это необходимость.",
+      "Убери всё, что можно убрать. Глубокое выгорание — не время для подвигов. Минимум задач, минимум обязательств. Буквально.",
+      "Сон, еда, движение на свежем воздухе — это сейчас важнее всего остального. Не метафора. Физиология восстанавливается именно так.",
+      "Обратись к психологу или врачу. Это не крайняя мера — это то, что работает. Можно начать с онлайн-формата, если сложно выйти из дома.",
+      "Не ставь срок восстановления. Вопрос «когда я снова буду в норме» создаёт давление. Просто живи сегодняшним днём.",
+    ],
+    duration: "Месяцы, не недели · доверяй своему темпу",
+  },
+};
+
+// ─────────────────────────────────────────────
 // ТЕСТ ЧАЯ
 // ─────────────────────────────────────────────
 const TEA_QUESTIONS = [
@@ -999,6 +1057,7 @@ function QuizScreen({ onBack }) {
   const [burnouts, setBurnouts] = useState([]);
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [showAdvice, setShowAdvice] = useState(false);
   const q = QUESTIONS_QUIZ[current];
   const total = scores.reduce((a,b) => a+b, 0);
   const burnoutTotal = burnouts.reduce((a,b) => a+b, 0);
@@ -1029,6 +1088,8 @@ function QuizScreen({ onBack }) {
     }
     const maxScore = QUESTIONS_QUIZ.length * 3;
     const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutTotal >= b.range[0] && burnoutTotal <= b.range[1]) || BURNOUT_LEVELS[0];
+    const adviceKey = burnoutPct <= 26 ? "none" : burnoutPct <= 53 ? "mild" : burnoutPct <= 73 ? "medium" : "deep";
+    const advice = BURNOUT_ADVICE[adviceKey];
     const shareMsg = `${result.emoji} ${result.title}\n«${result.subtitle}»\n\nВыгорание: ${burnoutLevel.label}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
@@ -1040,16 +1101,45 @@ function QuizScreen({ onBack }) {
           <div style={S.progressBar}><div style={{ ...S.progressFill, width:`${(total/maxScore)*100}%`, backgroundColor:result.color }} /></div>
           <p style={S.progressLabel}>{total} / {maxScore} · <span style={{ color:result.color }}>{Math.round((total/maxScore)*100)}%</span></p>
           <p style={S.resultText}>{result.text}</p>
-          <div style={{ width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:`1px solid ${burnoutLevel.color}60`, borderRadius:"10px", padding:"14px", marginBottom:"20px" }}>
+          <div style={{ width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:`1px solid ${burnoutLevel.color}60`, borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
             <p style={{ margin:"0 0 6px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>ИНДЕКС ВЫГОРАНИЯ</p>
             <div style={{ ...S.progressBar, marginBottom:"4px" }}><div style={{ ...S.progressFill, width:`${(burnoutTotal/75)*100}%`, backgroundColor:burnoutLevel.color }} /></div>
             <p style={{ ...S.progressLabel, marginBottom:"8px" }}>{burnoutTotal} / 75 · <span style={{ color:burnoutLevel.color }}>{burnoutPct}%</span></p>
             <p style={{ margin:"0 0 6px", fontSize:"14px", color:burnoutLevel.color }}>{burnoutLevel.label}</p>
             <p style={{ margin:0, fontSize:"13px", color:"#B0A090", lineHeight:1.6 }}>{burnoutLevel.text}</p>
           </div>
+
+          {/* Блок советов — раскрывающийся */}
+          <div style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${advice.color}40`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
+            <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>ЧТО ДЕЛАТЬ</p>
+            <p style={{ margin:0, fontSize:"14px", color:"#D0C8BC", lineHeight:1.7, fontStyle:"italic" }}>{advice.why}</p>
+          </div>
+
+          <button
+            onClick={() => setShowAdvice(v => !v)}
+            style={{ width:"100%", padding:"14px", background: showAdvice ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.03)", border:`1px solid ${showAdvice ? advice.color : "#2A2520"}`, borderRadius:"12px", color: showAdvice ? advice.color : "#C8A97E", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"16px", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center" }}
+          >
+            <span>{advice.label}</span>
+            <span>{showAdvice ? "↑" : "↓"}</span>
+          </button>
+
+          {showAdvice && (
+            <div style={{ width:"100%", background:"rgba(255,255,255,0.02)", border:`1px solid ${advice.color}30`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
+              {advice.steps.map((step, i) => (
+                <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "14px" : "0" }}>
+                  <span style={{ fontSize:"11px", color:advice.color, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                  <p style={{ margin:0, fontSize:"13px", color:"#C0B8AC", lineHeight:1.7 }}>{step}</p>
+                </div>
+              ))}
+              <div style={{ marginTop:"16px", paddingTop:"14px", borderTop:"1px solid #2A2520" }}>
+                <p style={{ margin:0, fontSize:"11px", color:"#7A6E62" }}>⏱ {advice.duration}</p>
+              </div>
+            </div>
+          )}
+
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
-          <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>Пройти заново</button>
         </div>
       </div>
     );
