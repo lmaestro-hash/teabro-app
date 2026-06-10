@@ -54,9 +54,19 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { action, uid } = req.method === "POST"
-    ? req.body
-    : req.query;
+  let action, uid;
+  if (req.method === "POST") {
+    try {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+      action = body?.action;
+      uid = body?.uid;
+    } catch {
+      action = undefined;
+    }
+  } else {
+    action = req.query?.action;
+    uid = req.query?.uid;
+  }
 
   const todayKey = getTodayKey();
 
