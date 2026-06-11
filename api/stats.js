@@ -54,19 +54,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  let action, uid;
-  if (req.method === "POST") {
-    try {
-      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-      action = body?.action;
-      uid = body?.uid;
-    } catch {
-      action = undefined;
-    }
-  } else {
-    action = req.query?.action;
-    uid = req.query?.uid;
-  }
+  const { action, uid } = req.method === "POST"
+    ? req.body
+    : req.query;
 
   const todayKey = getTodayKey();
 
@@ -81,19 +71,9 @@ export default async function handler(req, res) {
     if (action === "open") {
       stats.totalOpens = (stats.totalOpens || 0) + 1;
       today.opens = (today.opens || 0) + 1;
-      if (uid) {
-        // ТГ пользователь — по uid
-        if (!today.uniqueIds.includes(String(uid))) {
-          today.uniqueIds.push(String(uid));
-          stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
-        }
-      } else {
-        // Браузер без uid — считаем как уникального (каждый новый открытие без uid)
-        const browserKey = "browser";
-        if (!today.uniqueIds.includes(browserKey)) {
-          today.uniqueIds.push(browserKey);
-          stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
-        }
+      if (uid && !today.uniqueIds.includes(String(uid))) {
+        today.uniqueIds.push(String(uid));
+        stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
       }
       await writeStats(stats);
       return res.status(200).json({ ok: true });
@@ -112,14 +92,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    if (action === "mood") {
-      stats.totalMood = (stats.totalMood || 0) + 1;
+    if (action === "meditation") {
+      stats.totalMeditation = (stats.totalMeditation || 0) + 1;
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
 
-    if (action === "meditation") {
-      stats.totalMeditation = (stats.totalMeditation || 0) + 1;
+    if (action === "mood") {
+      stats.totalMood = (stats.totalMood || 0) + 1;
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
