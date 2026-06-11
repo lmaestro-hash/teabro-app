@@ -35,7 +35,6 @@ async function statEvent(action, uid) {
       const res = await fetch(url, { keepalive: true });
       if (res.ok) return;
     } catch {}
-    await new Promise(r => setTimeout(r, 1000));
   }
 }
 
