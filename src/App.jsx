@@ -27,12 +27,16 @@ const CS = {
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
 async function statEvent(action, uid) {
-  try {
-    const url = uid
-      ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
-      : `${STATS_URL}?action=${action}`;
-    await fetch(url, { keepalive: true });
-  } catch {}
+  const url = uid
+    ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
+    : `${STATS_URL}?action=${action}`;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await fetch(url, { keepalive: true });
+      if (res.ok) return;
+    } catch {}
+    await new Promise(r => setTimeout(r, 1000));
+  }
 }
 
 // ─────────────────────────────────────────────
