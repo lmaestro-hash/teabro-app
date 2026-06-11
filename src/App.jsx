@@ -1065,8 +1065,6 @@ function QuizScreen({ onBack }) {
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
 
-  const quizStatSent = useRef(false);
-
   const handleNext = () => {
     if (selected === null) return;
     setAnimating(true);
@@ -1076,16 +1074,13 @@ function QuizScreen({ onBack }) {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
+        statEvent("quiz");
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
   };
 
   if (finished && result) {
-    if (!quizStatSent.current) {
-      quizStatSent.current = true;
-      statEvent("quiz");
-    }
     const maxScore = QUESTIONS_QUIZ.length * 3;
     const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutTotal >= b.range[0] && burnoutTotal <= b.range[1]) || BURNOUT_LEVELS[0];
     const adviceKey = burnoutPct <= 26 ? "none" : burnoutPct <= 53 ? "mild" : burnoutPct <= 73 ? "medium" : "deep";
@@ -1309,7 +1304,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
       setSelectedIdx(null);
       if (current+1 >= TEA_QUESTIONS.length) {
         const w = Object.entries(ns).sort((a,b) => b[1]-a[1])[0][0];
-        setWinner(w); onTeaResult(w); setFinished(true);
+        setWinner(w); setFinished(true); statEvent("tea"); onTeaResult(w);
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
@@ -1899,7 +1894,6 @@ export default function App() {
   const handleTeaResult = useCallback(async (winner) => {
     await CS.set("tea_" + getTodayKey(), winner);
     setCurrentMood(winner);
-    statEvent("tea");
   }, []);
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
