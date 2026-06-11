@@ -1246,6 +1246,12 @@ function MeditationQuizScreen({ onBack }) {
             </div>
           )}
 
+          <a
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(r.fullName + " медитация")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ ...S.shareBtn, display:"block", textAlign:"center", textDecoration:"none" }}
+          >▶ Найти на YouTube</a>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setShowFull(false); }} style={S.ghostBtn}>Пройти заново</button>
