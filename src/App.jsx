@@ -2158,8 +2158,12 @@ function MyPathScreen({ onBack }) {
   const hasQuiz = quizAvg !== null;
   const assemblyPct = hasQuiz ? Math.round(quizAvg.avgScore) : 0;
   const burnoutPct = hasQuiz ? Math.round(quizAvg.avgBurnout) : 0;
-  const assemblyResult = QUIZ_RESULTS.find(r => assemblyPct >= r.range[0] && assemblyPct <= r.range[1]) || QUIZ_RESULTS[0];
-  const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutPct >= b.range[0] && burnoutPct <= b.range[1]) || BURNOUT_LEVELS[0];
+  // QUIZ_RESULTS и BURNOUT_LEVELS заданы в диапазонах 0–75 (сырые баллы),
+  // а assemblyPct/burnoutPct — это % (0–100). Переводим % обратно в шкалу 0–75 для поиска.
+  const assemblyRaw = Math.round((assemblyPct / 100) * 75);
+  const burnoutRaw = Math.round((burnoutPct / 100) * 75);
+  const assemblyResult = QUIZ_RESULTS.find(r => assemblyRaw >= r.range[0] && assemblyRaw <= r.range[1]) || QUIZ_RESULTS[0];
+  const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutRaw >= b.range[0] && burnoutRaw <= b.range[1]) || BURNOUT_LEVELS[0];
   const assemblyScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
   const assemblyHiIndex = assemblyPct <= 25 ? 0 : assemblyPct <= 50 ? 1 : assemblyPct <= 75 ? 2 : 3;
 
