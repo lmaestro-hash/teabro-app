@@ -13,10 +13,12 @@ async function readStats() {
     // Для private store читаем через fetch с токеном
     const res = await fetch(info.downloadUrl, {
       headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+      cache: "no-store",
     });
     if (!res.ok) return defaultStats();
     return await res.json();
-  } catch {
+  } catch (err) {
+    console.error("readStats error:", err);
     return defaultStats();
   }
 }
@@ -25,6 +27,7 @@ async function writeStats(data) {
   await put(STATS_KEY, JSON.stringify(data), {
     access: "private",
     allowOverwrite: true,
+    addRandomSuffix: false,
   });
 }
 
