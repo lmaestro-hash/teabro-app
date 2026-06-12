@@ -785,7 +785,7 @@ const MEDITATION_RESULTS = {
     source: "Калу Ринпоче «Основы тибетского буддизма» · Шамар Ринпоче «Путь к освобождению»",
   },
   vipassana: {
-    emoji: "👁",
+    emoji: "✦",
     name: "Випассана",
     fullName: "Випассана (Vipassanā)",
     tag: "Ясность",
@@ -803,7 +803,7 @@ const MEDITATION_RESULTS = {
     source: "С.Н. Гоенка — 10-дневные ретриты Випассаны (по всему миру, бесплатно)",
   },
   metta: {
-    emoji: "🤍",
+    emoji: "🕯️",
     name: "Метта",
     fullName: "Метта (Mettā)",
     tag: "Тепло",
@@ -875,7 +875,7 @@ const MEDITATION_RESULTS = {
     source: "Пема Чодрон «Когда всё рушится» · Чогьям Трунгпа «Тренировка ума» · Патрул Ринпоче",
   },
   b478: {
-    emoji: "🫁",
+    emoji: "🌬️",
     name: "4-7-8",
     fullName: "Дыхание 4-7-8",
     tag: "Тишина",
@@ -913,7 +913,7 @@ const MEDITATION_RESULTS = {
     source: "Mark Divine «Unbeatable Mind» · Исследования Stanford Neuroscience, 2023",
   },
   coherent: {
-    emoji: "〰️",
+    emoji: "🌀",
     name: "Когерентное",
     fullName: "Когерентное дыхание (Coherent Breathing)",
     tag: "Поток",
@@ -971,6 +971,202 @@ function HintPopup({ text }) {
       )}
     </div>
   );
+}
+
+// ─────────────────────────────────────────────
+// ИНФО-КНОПКА (ⓘ) С ТУЛТИПОМ — для метрик
+// ─────────────────────────────────────────────
+function InfoButton({ text }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [open]);
+  return (
+    <div ref={ref} style={{ position:"relative", flexShrink:0 }}>
+      <button onClick={() => setOpen(o => !o)} style={S.infoBtn}>i</button>
+      {open && (
+        <div style={S.infoTooltip}>
+          <p style={{ margin:0 }}>{text}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// УНИВЕРСАЛЬНЫЙ МЕТРИК-БЛОК
+// большое число % + шкала с маркером + подпись справа
+// ─────────────────────────────────────────────
+function MetricBlock({ value, rightName, rightSub, fillFrom, fillTo, scaleLabels, hiIndex, quote, numColor, dotColor, borderColor, others, animKey }) {
+  const [animVal, setAnimVal] = useState(0);
+  const [animWidth, setAnimWidth] = useState(0);
+  useEffect(() => {
+    setAnimVal(0);
+    setAnimWidth(0);
+    const t1 = setTimeout(() => {
+      setAnimWidth(value);
+      let n = 0;
+      const step = Math.max(1, Math.ceil(value / 40));
+      const t = setInterval(() => {
+        n = Math.min(n + step, value);
+        setAnimVal(n);
+        if (n >= value) clearInterval(t);
+      }, 20);
+    }, 150);
+    return () => clearTimeout(t1);
+  }, [value, animKey]);
+
+  return (
+    <div style={{ ...S.metricBlock, ...(borderColor ? { borderColor } : {}) }}>
+      <div style={S.metricTop}>
+        <div style={S.metricNumWrap}>
+          <span style={{ ...S.metricNum, color: numColor || "#C8A97E" }}>{animVal}</span>
+          <span style={S.metricUnit}>%</span>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <p style={S.metricRightName}>{rightName}</p>
+          {rightSub && <p style={S.metricRightSub}>{rightSub}</p>}
+        </div>
+      </div>
+      <div style={S.metricTrack}>
+        <div style={{ ...S.metricFill, width:`${animWidth}%`, background:`linear-gradient(90deg, ${fillFrom}, ${fillTo})` }}>
+          <span style={{ ...S.metricFillDot, background: dotColor || fillTo, boxShadow:`0 0 10px ${(dotColor||fillTo)}80` }} />
+        </div>
+      </div>
+      <div style={S.scaleLabels}>
+        {scaleLabels.map((l, i) => (
+          <span key={i} style={i === hiIndex ? { ...S.scaleLabelHi, color: numColor || "#C8A97E" } : S.scaleLabel}>
+            {l}{i === hiIndex ? " ◉" : ""}
+          </span>
+        ))}
+      </div>
+      {quote && (
+        <div style={{ ...S.metricQuote, ...(borderColor ? { borderLeftColor: (numColor||"#C8A97E")+"40" } : {}) }}>
+          <p style={S.metricQuoteText}>{quote}</p>
+        </div>
+      )}
+      {others && others.length > 0 && (
+        <div style={S.othersList}>
+          {others.map((o, i) => (
+            <div key={i} style={S.otherRow}>
+              <span style={S.otherEmoji}>{o.emoji}</span>
+              <span style={S.otherName}>{o.name}</span>
+              <span style={S.otherPct}>{o.pct}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ТЕРМОМЕТР ВЫГОРАНИЯ — 4 зоны + маркер
+// ─────────────────────────────────────────────
+function BurnoutThermo({ value, rightName, rightSub, quote, animKey }) {
+  const [animVal, setAnimVal] = useState(0);
+  const [animLeft, setAnimLeft] = useState(0);
+  useEffect(() => {
+    setAnimVal(0);
+    setAnimLeft(0);
+    const t1 = setTimeout(() => {
+      setAnimLeft(value);
+      let n = 0;
+      const step = Math.max(1, Math.ceil(value / 40));
+      const t = setInterval(() => {
+        n = Math.min(n + step, value);
+        setAnimVal(n);
+        if (n >= value) clearInterval(t);
+      }, 20);
+    }, 200);
+    return () => clearTimeout(t1);
+  }, [value, animKey]);
+
+  const hiIndex = value <= 25 ? 0 : value <= 50 ? 1 : value <= 75 ? 2 : 3;
+  const labels = ["НЕТ", "НАЧАЛО", "СРЕДНЕЕ", "ГЛУБОКОЕ"];
+
+  return (
+    <div style={S.metricBlock}>
+      <div style={S.metricTop}>
+        <div style={S.metricNumWrap}>
+          <span style={{ ...S.metricNum, color:"#C8B878" }}>{animVal}</span>
+          <span style={S.metricUnit}>%</span>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <p style={S.metricRightName}>{rightName}</p>
+          {rightSub && <p style={S.metricRightSub}>{rightSub}</p>}
+        </div>
+      </div>
+      <div style={S.thermoWrap}>
+        <div style={S.thermoZones}>
+          <div style={{ ...S.thermoZone, background:"#2A4A2A" }} />
+          <div style={{ ...S.thermoZone, background:"#4A4A1A" }} />
+          <div style={{ ...S.thermoZone, background:"#5A3010" }} />
+          <div style={{ ...S.thermoZone, background:"#5A1A1A" }} />
+        </div>
+        <div style={{ ...S.thermoMarker, left:`${animLeft}%` }} />
+      </div>
+      <div style={{ ...S.scaleLabels, marginTop:"10px" }}>
+        {labels.map((l, i) => (
+          <span key={i} style={i === hiIndex ? { ...S.scaleLabelHi, color:"#C8B878" } : S.scaleLabel}>
+            {l}{i === hiIndex ? " ◉" : ""}
+          </span>
+        ))}
+      </div>
+      {quote && <div style={S.metricQuote}><p style={S.metricQuoteText}>{quote}</p></div>}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ИСТОРИЯ РЕЗУЛЬТАТОВ — CloudStorage хелперы
+// ─────────────────────────────────────────────
+const HISTORY_LIMIT = 20;
+
+async function pushHistory(key, entry) {
+  try {
+    const raw = await CS.get(key);
+    let arr = raw ? JSON.parse(raw) : [];
+    arr.push({ ...entry, ts: Date.now() });
+    if (arr.length > HISTORY_LIMIT) arr = arr.slice(arr.length - HISTORY_LIMIT);
+    await CS.set(key, JSON.stringify(arr));
+    return arr;
+  } catch {
+    return [];
+  }
+}
+
+async function getHistory(key) {
+  try {
+    const raw = await CS.get(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+// считает % распределения по полю winner/result в массиве истории
+function calcDistribution(history, field = "winner") {
+  if (!history || history.length === 0) return [];
+  const counts = {};
+  history.forEach(h => { const k = h[field]; if (k) counts[k] = (counts[k]||0)+1; });
+  const total = history.length;
+  return Object.entries(counts)
+    .map(([key, count]) => ({ key, count, pct: Math.round((count/total)*100) }))
+    .sort((a,b) => b.count - a.count);
+}
+
+// средние последних N записей опросника
+function calcQuizAverage(history, n = 3) {
+  if (!history || history.length === 0) return null;
+  const last = history.slice(-n);
+  const avgScore = last.reduce((s,h) => s + (h.score||0), 0) / last.length;
+  const avgBurnout = last.reduce((s,h) => s + (h.burnout||0), 0) / last.length;
+  return { avgScore, avgBurnout, count: last.length };
 }
 
 // ─────────────────────────────────────────────
@@ -1078,6 +1274,13 @@ function QuizScreen({ onBack }) {
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
         statEvent("quiz");
+        const t = ns.reduce((a,b)=>a+b,0);
+        const bt = nb.reduce((a,b)=>a+b,0);
+        const maxScore = QUESTIONS_QUIZ.length * 3;
+        pushHistory("quiz_history", {
+          score: Math.round((t/maxScore)*100),
+          burnout: Math.round((bt/75)*100),
+        });
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
@@ -1085,58 +1288,60 @@ function QuizScreen({ onBack }) {
 
   if (finished && result) {
     const maxScore = QUESTIONS_QUIZ.length * 3;
+    const pct = Math.round((total/maxScore)*100);
     const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutTotal >= b.range[0] && burnoutTotal <= b.range[1]) || BURNOUT_LEVELS[0];
     const adviceKey = burnoutPct <= 26 ? "none" : burnoutPct <= 53 ? "mild" : burnoutPct <= 73 ? "medium" : "deep";
     const advice = BURNOUT_ADVICE[adviceKey];
+    const quizScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
+    const quizHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
     const shareMsg = `${result.emoji} ${result.title}\n«${result.subtitle}»\n\nВыгорание: ${burnoutLevel.label}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>← назад</button>
         <div style={S.resultContainer}>
-          <div style={S.resultEmoji}>{result.emoji}</div>
-          <p style={{ ...S.resultTitle, color:result.color }}>{result.title}</p>
-          <p style={S.resultSubtitle}>{result.subtitle}</p>
-          <div style={S.progressBar}><div style={{ ...S.progressFill, width:`${(total/maxScore)*100}%`, backgroundColor:result.color }} /></div>
-          <p style={S.progressLabel}>{total} / {maxScore} · <span style={{ color:result.color }}>{Math.round((total/maxScore)*100)}%</span></p>
-          <p style={S.resultText}>{result.text}</p>
-          <div style={{ width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:`1px solid ${burnoutLevel.color}60`, borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
-            <p style={{ margin:"0 0 6px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>ИНДЕКС ВЫГОРАНИЯ</p>
-            <div style={{ ...S.progressBar, marginBottom:"4px" }}><div style={{ ...S.progressFill, width:`${(burnoutTotal/75)*100}%`, backgroundColor:burnoutLevel.color }} /></div>
-            <p style={{ ...S.progressLabel, marginBottom:"8px" }}>{burnoutTotal} / 75 · <span style={{ color:burnoutLevel.color }}>{burnoutPct}%</span></p>
-            <p style={{ margin:"0 0 6px", fontSize:"14px", color:burnoutLevel.color }}>{burnoutLevel.label}</p>
-            <p style={{ margin:0, fontSize:"13px", color:"#B0A090", lineHeight:1.6 }}>{burnoutLevel.text}</p>
+
+          <div style={S.sectionHead}>
+            <p style={S.sectionTitle}>ТОЧКА СБОРКИ</p>
+            <InfoButton text="«Насколько ты близко к себе настоящему. К внутреннему равновесию, где тихо и ясно.»" />
           </div>
+          <MetricBlock
+            value={pct}
+            rightName={result.title}
+            rightSub={result.subtitle}
+            fillFrom="#4A3020"
+            fillTo="#C8A97E"
+            scaleLabels={quizScaleLabels}
+            hiIndex={quizHiIndex}
+            quote={`«${result.text}»`}
+          />
 
-          {/* Блок советов — раскрывающийся */}
-          <div style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${advice.color}40`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
-            <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>ЧТО ДЕЛАТЬ</p>
-            <p style={{ margin:0, fontSize:"14px", color:"#D0C8BC", lineHeight:1.7, fontStyle:"italic" }}>{advice.why}</p>
+          <div style={S.sectionHead}>
+            <p style={S.sectionTitle}>УРОВЕНЬ ВЫГОРАНИЯ</p>
+            <InfoButton text="«Сколько внутреннего ресурса осталось. Считается по твоим ответам — чем ниже, тем лучше.»" />
           </div>
+          <BurnoutThermo
+            value={burnoutPct}
+            rightName={burnoutLevel.label}
+            rightSub="по результатам опроса"
+            quote={`«${burnoutLevel.text}»`}
+          />
 
-          <button
-            onClick={() => setShowAdvice(v => !v)}
-            style={{ width:"100%", padding:"14px", background: showAdvice ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.03)", border:`1px solid ${showAdvice ? advice.color : "#2A2520"}`, borderRadius:"12px", color: showAdvice ? advice.color : "#C8A97E", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"16px", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center" }}
-          >
-            <span>{advice.label}</span>
-            <span>{showAdvice ? "↑" : "↓"}</span>
-          </button>
-
-          {showAdvice && (
-            <div style={{ width:"100%", background:"rgba(255,255,255,0.02)", border:`1px solid ${advice.color}30`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
-              {advice.steps.map((step, i) => (
-                <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "14px" : "0" }}>
-                  <span style={{ fontSize:"11px", color:advice.color, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
-                  <p style={{ margin:0, fontSize:"13px", color:"#C0B8AC", lineHeight:1.7 }}>{step}</p>
-                </div>
-              ))}
-              <div style={{ marginTop:"16px", paddingTop:"14px", borderTop:"1px solid #2A2520" }}>
-                <p style={{ margin:0, fontSize:"11px", color:"#7A6E62" }}>⏱ {advice.duration}</p>
+          {/* Блок советов — всегда открыт */}
+          <div style={S.stepsBlock}>
+            <p style={S.stepsTitle}>ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС</p>
+            {advice.steps.map((step, i) => (
+              <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "12px" : "0" }}>
+                <span style={{ fontSize:"11px", color:"#C8A97E", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7 }}>{step}</p>
               </div>
+            ))}
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
+              <p style={{ margin:0, fontSize:"11px", color:"#5A5048" }}>⏱ {advice.duration}</p>
             </div>
-          )}
+          </div>
 
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
+          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>Пройти заново</button>
         </div>
       </div>
@@ -1173,8 +1378,8 @@ function MeditationQuizScreen({ onBack }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [finished, setFinished] = useState(false);
   const [winner, setWinner] = useState(null);
+  const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
-  const [showFull, setShowFull] = useState(false);
   const q = MEDITATION_QUESTIONS[current];
 
   const handleNext = () => {
@@ -1187,10 +1392,14 @@ function MeditationQuizScreen({ onBack }) {
       setScores(ns);
       setSelectedIdx(null);
       if (current + 1 >= MEDITATION_QUESTIONS.length) {
-        const w = Object.entries(ns).sort((a,b) => b[1]-a[1])[0][0];
+        const sorted = Object.entries(ns).sort((a,b) => b[1]-a[1]);
+        const w = sorted[0][0];
         setWinner(w);
+        setSortedScores(sorted);
         setFinished(true);
         statEvent("meditation");
+        const maxPossible = MEDITATION_QUESTIONS.length * 2;
+        pushHistory("meditation_history", { winner: w, pct: Math.min(100, Math.round((sorted[0][1]/maxPossible)*100)) });
       } else {
         setCurrent(c => c+1);
       }
@@ -1200,64 +1409,57 @@ function MeditationQuizScreen({ onBack }) {
 
   if (finished && winner) {
     const r = MEDITATION_RESULTS[winner];
+    const maxPossible = MEDITATION_QUESTIONS.length * 2;
+    const pct = Math.min(100, Math.round((sortedScores[0][1]/maxPossible)*100));
+    const medScaleLabels = ["СЛАБО", "ПОДХОДИТ", "ТОЧНО", "ИДЕАЛЬНО"];
+    const medHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
+    const others = sortedScores.slice(1, 4).filter(([,s]) => s > 0).map(([key], i) => ({
+      emoji: MEDITATION_RESULTS[key].emoji,
+      name: MEDITATION_RESULTS[key].name,
+      pct: `${i+2}-е место`,
+    }));
     const shareMsg = `Моя практика — ${r.name} · ${r.tag}\n\n«${r.why.slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>← назад</button>
         <div style={S.resultContainer}>
-          {/* Шапка */}
-          <div style={{ fontSize:"18px", letterSpacing:"0.3em", color:r.color, marginBottom:"8px" }}>✦ ✦ ✦</div>
-          <div style={{ fontSize:"40px", marginBottom:"8px" }}>{r.emoji}</div>
-          <p style={{ ...S.resultTitle, color:r.color, fontSize:"22px", margin:"0 0 4px" }}>{r.fullName}</p>
-          <p style={{ fontSize:"12px", color:r.color, opacity:0.7, margin:"0 0 6px", letterSpacing:"0.1em" }}>{r.tag}</p>
-          <p style={{ fontSize:"11px", color:"#4A4036", margin:"0 0 20px", fontStyle:"italic" }}>{r.tradition}</p>
-          <div style={{ ...S.progressBar, marginBottom:"20px" }}><div style={{ ...S.progressFill, width:"100%", backgroundColor:r.color }} /></div>
-
-          {/* Почему именно эта */}
-          <div style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
-            <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>ПОЧЕМУ ИМЕННО ЭТА</p>
-            <p style={{ margin:0, fontSize:"14px", color:"#D0C8BC", lineHeight:1.7, fontStyle:"italic" }}>{r.why}</p>
-          </div>
-
-          {/* Кнопка развернуть инструкцию */}
-          <button
-            onClick={() => setShowFull(v => !v)}
-            style={{ width:"100%", padding:"14px", background: showFull ? "rgba(200,169,126,0.1)" : "rgba(255,255,255,0.03)", border:`1px solid ${showFull ? r.color+"60" : "#2A2520"}`, borderRadius:"12px", color: showFull ? r.color : "#C8A97E", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"16px", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center" }}
-          >
-            <span>Как практиковать</span>
-            <span>{showFull ? "↑" : "↓"}</span>
-          </button>
-
-          {showFull && (
-            <div style={{ width:"100%", background:"rgba(255,255,255,0.02)", border:`1px solid ${r.color}30`, borderRadius:"12px", padding:"16px", marginBottom:"16px", textAlign:"left" }}>
-              {r.steps.map((step, i) => (
-                <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < r.steps.length-1 ? "14px" : "0" }}>
-                  <span style={{ fontSize:"11px", color:r.color, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
-                  <p style={{ margin:0, fontSize:"13px", color:"#C0B8AC", lineHeight:1.7, whiteSpace:"pre-line" }}>{step}</p>
-                </div>
-              ))}
-              <div style={{ marginTop:"16px", paddingTop:"14px", borderTop:"1px solid #2A2520" }}>
-                <p style={{ margin:"0 0 6px", fontSize:"11px", color:"#7A6E62" }}>⏱ {r.duration}</p>
-                <p style={{ margin:0, fontSize:"11px", color:"#4A4036", fontStyle:"italic" }}>🔍 {r.source}</p>
+          <MetricBlock
+            value={pct}
+            rightName={`${r.emoji} ${r.fullName}`}
+            rightSub={`${r.tag} · ${r.tradition}`}
+            fillFrom="#1A2A30"
+            fillTo="#7B9EB0"
+            dotColor="#7B9EB0"
+            numColor="#7B9EB0"
+            borderColor="rgba(123,158,176,0.25)"
+            scaleLabels={medScaleLabels}
+            hiIndex={medHiIndex}
+            quote={r.why}
+            others={others}
+          />
+          <div style={{ ...S.stepsBlock, borderColor:"rgba(123,158,176,0.12)" }}>
+            <p style={{ ...S.stepsTitle, color:"#4A6A78" }}>КАК ПРАКТИКОВАТЬ</p>
+            {r.steps.map((step, i) => (
+              <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < r.steps.length-1 ? "12px" : "0" }}>
+                <span style={{ fontSize:"11px", color:"#7B9EB0", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7, whiteSpace:"pre-line" }}>{step}</p>
               </div>
+            ))}
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
+              <p style={{ margin:"0 0 4px", fontSize:"11px", color:"#5A5048" }}>⏱ {r.duration}</p>
+              <p style={{ margin:0, fontSize:"11px", color:"#3A3028", fontStyle:"italic" }}>🔍 {r.source}</p>
             </div>
-          )}
-
-          {!showFull && (
-            <div style={{ width:"100%", marginBottom:"16px", textAlign:"left" }}>
-              <p style={{ margin:"0 0 4px", fontSize:"11px", color:"#7A6E62" }}>⏱ {r.duration}</p>
-            </div>
-          )}
+          </div>
 
           <a
             href={`https://www.youtube.com/results?search_query=${encodeURIComponent(r.fullName + " медитация")}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ ...S.shareBtn, display:"block", textAlign:"center", textDecoration:"none" }}
-          >▶ Найти на YouTube</a>
+            style={{ ...S.shareBtn, display:"block", textAlign:"center", textDecoration:"none", borderColor:"rgba(123,158,176,0.3)", color:"#7B9EB0", marginTop:"18px" }}
+          >Найти на YouTube ↗</a>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
-          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setShowFull(false); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
         </div>
       </div>
     );
@@ -1301,6 +1503,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [finished, setFinished] = useState(false);
   const [winner, setWinner] = useState(null);
+  const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
   const q = TEA_QUESTIONS[current];
   const handleNext = () => {
@@ -1312,28 +1515,49 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
       setTeaScores(ns);
       setSelectedIdx(null);
       if (current+1 >= TEA_QUESTIONS.length) {
-        const w = Object.entries(ns).sort((a,b) => b[1]-a[1])[0][0];
-        setWinner(w); setFinished(true); statEvent("tea"); onTeaResult(w);
+        const sorted = Object.entries(ns).sort((a,b) => b[1]-a[1]);
+        const w = sorted[0][0];
+        setWinner(w); setSortedScores(sorted); setFinished(true); statEvent("tea"); onTeaResult(w);
+        const maxPossible = TEA_QUESTIONS.length * 2;
+        pushHistory("tea_history", { winner: w, pct: Math.round((sorted[0][1]/maxPossible)*100) });
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
   };
   if (finished && winner) {
     const result = TEA_RESULTS[winner];
+    const maxPossible = TEA_QUESTIONS.length * 2;
+    const pct = Math.min(100, Math.round((sortedScores[0][1]/maxPossible)*100));
+    const teaScaleLabels = ["СЛАБО", "УМЕРЕННО", "СИЛЬНО", "ТОЧНО"];
+    const teaHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
+    const others = sortedScores.slice(1, 4).filter(([,s]) => s > 0).map(([key], i) => ({
+      emoji: "✦",
+      name: TEA_RESULTS[key].name,
+      pct: `${i+2}-е место`,
+    }));
     const shareMsg = `Мой чай сегодня — ${result.name} ✦\n${result.tag}\n\n«${result.text.slice(0,80)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>← назад</button>
         <div style={S.resultContainer}>
-          <div style={{ fontSize:"18px", letterSpacing:"0.3em", color:result.color, marginBottom:"8px" }}>✦ ✦ ✦</div>
-          <p style={{ ...S.resultTitle, color:result.color, fontSize:"24px" }}>{result.name}</p>
-          <p style={{ ...S.resultSubtitle, color:result.color, opacity:0.8 }}>{result.tag}</p>
-          <div style={{ ...S.progressBar, marginBottom:"28px" }}><div style={{ ...S.progressFill, width:"100%", backgroundColor:result.color }} /></div>
-          <p style={S.resultText}>{result.text}</p>
-          <div style={S.teaNoteBox}><p style={S.teaNoteText}>🍵 {result.note}</p></div>
+          <MetricBlock
+            value={pct}
+            rightName={`✦ ${result.name}`}
+            rightSub={result.tag}
+            fillFrom="#3A2E20"
+            fillTo="#A89880"
+            scaleLabels={teaScaleLabels}
+            hiIndex={teaHiIndex}
+            quote={result.text}
+            others={others}
+          />
+          <div style={S.stepsBlock}>
+            <p style={S.stepsTitle}>КАК ЗАВАРИВАТЬ</p>
+            <p style={{ margin:0, fontSize:"13px", color:"#C8A97E", fontStyle:"italic", lineHeight:1.7 }}>🍵 {result.note}</p>
+          </div>
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
-          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); }} style={S.ghostBtn}>Пройти заново</button>
+          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>Перейти в канал 🌕</a>
+          <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
         </div>
       </div>
     );
@@ -1876,6 +2100,278 @@ function AnonPopup() {
 }
 
 // ─────────────────────────────────────────────
+// ЭКРАН: МОЙ ПУТЬ
+// ─────────────────────────────────────────────
+function MyPathScreen({ onBack }) {
+  const [loaded, setLoaded] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [quizHist, setQuizHist] = useState([]);
+  const [teaHist, setTeaHist] = useState([]);
+  const [medHist, setMedHist] = useState([]);
+  const [moodCounts, setMoodCounts] = useState(null);
+  const [moodTotal, setMoodTotal] = useState(0);
+
+  useEffect(() => {
+    async function load() {
+      const s = await CS.get("streak");
+      setStreak(parseInt(s || "0"));
+
+      setQuizHist(await getHistory("quiz_history"));
+      setTeaHist(await getHistory("tea_history"));
+      setMedHist(await getHistory("meditation_history"));
+
+      // настроение за последние 90 дней
+      const counts = {};
+      EMOTIONS.forEach(e => { counts[e.id] = 0; });
+      let total = 0;
+      for (let i = 0; i < 90; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const r = await CS.get("mood_" + getDateKey(d));
+        if (r) {
+          const e = JSON.parse(r);
+          if (counts[e.id] !== undefined) { counts[e.id]++; total++; }
+        }
+      }
+      setMoodCounts(counts);
+      setMoodTotal(total);
+      setLoaded(true);
+    }
+    load();
+  }, []);
+
+  if (!loaded) {
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <p style={{ color:"#7A6E62", fontStyle:"italic" }}>Собираем твой путь...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const title = getCurrentTitle(streak);
+  const nextTitle = TITLES.find(t => t.days > streak);
+
+  // ── ТОЧКА СБОРКИ / ВЫГОРАНИЕ — среднее по последним 3 ──
+  const quizAvg = calcQuizAverage(quizHist, 3);
+  const hasQuiz = quizAvg !== null;
+  const assemblyPct = hasQuiz ? Math.round(quizAvg.avgScore) : 0;
+  const burnoutPct = hasQuiz ? Math.round(quizAvg.avgBurnout) : 0;
+  const assemblyResult = QUIZ_RESULTS.find(r => assemblyPct >= r.range[0] && assemblyPct <= r.range[1]) || QUIZ_RESULTS[0];
+  const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutPct >= b.range[0] && burnoutPct <= b.range[1]) || BURNOUT_LEVELS[0];
+  const assemblyScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
+  const assemblyHiIndex = assemblyPct <= 25 ? 0 : assemblyPct <= 50 ? 1 : assemblyPct <= 75 ? 2 : 3;
+
+  // ── ЧАЙ — распределение по истории ──
+  const teaDist = calcDistribution(teaHist, "winner");
+  const hasTea = teaDist.length > 0;
+  const topTea = hasTea ? teaDist[0] : null;
+  const topTeaInfo = topTea ? TEA_RESULTS[topTea.key] : null;
+  const otherTeas = teaDist.slice(1, 4).map(d => ({
+    emoji: "✦",
+    name: TEA_RESULTS[d.key]?.name || d.key,
+    pct: `${d.pct}%`,
+  }));
+
+  // ── ПРАКТИКА — распределение по истории ──
+  const medDist = calcDistribution(medHist, "winner");
+  const hasMed = medDist.length > 0;
+  const topMed = hasMed ? medDist[0] : null;
+  const topMedInfo = topMed ? MEDITATION_RESULTS[topMed.key] : null;
+  const otherMeds = medDist.slice(1, 4).map(d => ({
+    emoji: MEDITATION_RESULTS[d.key]?.emoji || "✦",
+    name: MEDITATION_RESULTS[d.key]?.name || d.key,
+    pct: `${d.pct}%`,
+  }));
+
+  // ── КУДА ДВИЖЕШЬСЯ — доминирующая эмоция ──
+  const hasMood = moodTotal > 0;
+  let moodSorted = [];
+  let topMood = null;
+  let moodPct = 0;
+  let moodHiIndex = 1;
+  let moodVerdict = "";
+  if (hasMood) {
+    moodSorted = Object.entries(moodCounts).sort((a,b) => b[1]-a[1]).filter(([,c]) => c > 0);
+    const [topId, topCount] = moodSorted[0];
+    topMood = EMOTIONS.find(e => e.id === topId);
+    moodPct = Math.round((topCount/moodTotal)*100);
+    const lightIds = ["joy","calm","inspired"];
+    moodHiIndex = lightIds.includes(topId) ? (topId === "calm" ? 2 : 3) : 0;
+    if (lightIds.includes(topId)) {
+      moodVerdict = "Становишься мягче к себе. Светлые состояния — твой фон последнее время.";
+    } else {
+      moodVerdict = "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.";
+    }
+  }
+  const moodScaleLabels = ["ТЯЖЕЛО", "НЕЙТРАЛЬНО", "ПОКОЙ", "СВЕТЛО"];
+  const otherMoods = moodSorted.slice(1, 4).map(([id, count]) => {
+    const em = EMOTIONS.find(e => e.id === id);
+    return { emoji: em?.emoji || "•", name: em?.label || id, pct: `${Math.round((count/moodTotal)*100)}%` };
+  });
+
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>← назад</button>
+      <p style={{ fontSize:"10px", letterSpacing:"0.28em", color:"#3A3028", margin:"4px 0 28px" }}>МОЙ ПУТЬ</p>
+
+      {/* ГЕРОЙ */}
+      <div style={{ textAlign:"center", marginBottom:"24px" }}>
+        <div style={{ fontSize:"52px", marginBottom:"12px" }}>{title.emoji}</div>
+        <p style={{ margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", letterSpacing:"0.06em" }}>{title.name}</p>
+        <p style={{ margin:"0 0 6px", fontSize:"12px", color:"#4A4036", letterSpacing:"0.14em" }}>
+          {streak} {streak===1?"день":streak<5?"дня":"дней"} практики
+        </p>
+        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:"#3A3028", fontStyle:"italic" }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+      </div>
+      <div style={{ width:"36px", height:"1px", background:"#2A2520", margin:"0 auto 8px" }} />
+
+      {/* ТОЧКА СБОРКИ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>ТОЧКА СБОРКИ</p>
+        <InfoButton text="«Насколько ты близко к себе настоящему. К внутреннему равновесию, где тихо и ясно.»" />
+      </div>
+      {hasQuiz ? (
+        <MetricBlock
+          value={assemblyPct}
+          rightName={assemblyResult.title}
+          rightSub={assemblyResult.subtitle}
+          fillFrom="#4A3020"
+          fillTo="#C8A97E"
+          scaleLabels={assemblyScaleLabels}
+          hiIndex={assemblyHiIndex}
+          quote={`«${assemblyResult.text}»`}
+          animKey={`assembly-${assemblyPct}`}
+        />
+      ) : (
+        <EmptyMetric text="Пройди опросник «Честный разговор с собой» — и здесь появится твоя точка сборки." />
+      )}
+
+      {/* ВЫГОРАНИЕ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>УРОВЕНЬ ВЫГОРАНИЯ</p>
+        <InfoButton text="«Сколько внутреннего ресурса осталось. Считается по твоим ответам — чем ниже, тем лучше.»" />
+      </div>
+      {hasQuiz ? (
+        <BurnoutThermo
+          value={burnoutPct}
+          rightName={burnoutLevel.label}
+          rightSub="среднее по последним прохождениям"
+          quote={`«${burnoutLevel.text}»`}
+          animKey={`burnout-${burnoutPct}`}
+        />
+      ) : (
+        <EmptyMetric text="Опросник покажет и уровень выгорания." />
+      )}
+
+      {/* ЛЮБИМЫЙ ЧАЙ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>ЛЮБИМЫЙ ЧАЙ</p>
+        <InfoButton text="«Какой чай выбирался тебе чаще всего по результатам теста. Отражает твоё преобладающее состояние.»" />
+      </div>
+      {hasTea ? (
+        <MetricBlock
+          value={topTea.pct}
+          rightName={`✦ ${topTeaInfo.name}`}
+          rightSub={`${topTeaInfo.tag} · ${topTea.count} раз`}
+          fillFrom="#3A2E20"
+          fillTo="#A89880"
+          scaleLabels={["0%", "25%", "50%", "75%+"]}
+          hiIndex={topTea.pct <= 25 ? 0 : topTea.pct <= 50 ? 1 : topTea.pct <= 75 ? 2 : 3}
+          others={otherTeas}
+          animKey={`tea-${topTea.key}`}
+        />
+      ) : (
+        <EmptyMetric text="Пройди тест чая — и здесь появится твой любимый." />
+      )}
+
+      {/* ЛЮБИМАЯ ПРАКТИКА */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>ЛЮБИМАЯ ПРАКТИКА</p>
+        <InfoButton text="«Какая медитация или дыхательная практика подходила тебе чаще всего. Твой личный инструмент возвращения к себе.»" />
+      </div>
+      {hasMed ? (
+        <MetricBlock
+          value={topMed.pct}
+          rightName={`${topMedInfo.emoji} ${topMedInfo.name}`}
+          rightSub={`${topMedInfo.tag} · ${topMed.count} раз`}
+          fillFrom="#1A2A30"
+          fillTo="#7B9EB0"
+          dotColor="#7B9EB0"
+          numColor="#7B9EB0"
+          borderColor="rgba(123,158,176,0.25)"
+          scaleLabels={["0%", "25%", "50%+", "75%"]}
+          hiIndex={topMed.pct <= 25 ? 0 : topMed.pct <= 50 ? 1 : topMed.pct <= 75 ? 2 : 3}
+          others={otherMeds}
+          animKey={`med-${topMed.key}`}
+        />
+      ) : (
+        <EmptyMetric text="Пройди тест медитаций — и здесь появится твоя практика." />
+      )}
+
+      {/* ПРОГРЕСС */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>ПРОГРЕСС</p>
+        <InfoButton text="«Сколько всего ты сделал в Tea Bro. Каждое прохождение — шаг к себе.»" />
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px", marginBottom:"4px" }}>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{medHist.length}</p>
+          <p style={S.statLabel}>практик пройдено</p>
+        </div>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{teaHist.length}</p>
+          <p style={S.statLabel}>тестов чая</p>
+        </div>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{moodTotal}</p>
+          <p style={S.statLabel}>дней настроения</p>
+        </div>
+      </div>
+
+      {/* КУДА ДВИЖЕШЬСЯ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>КУДА ТЫ ДВИЖЕШЬСЯ</p>
+        <InfoButton text="«Анализ твоего настроения за последние 90 дней. Какое состояние преобладает — и куда смещается твой внутренний баланс.»" />
+      </div>
+      {hasMood ? (
+        <MetricBlock
+          value={moodPct}
+          rightName={`${topMood.emoji} ${topMood.label}`}
+          rightSub="доминирующее состояние"
+          fillFrom="#1A2A1A"
+          fillTo="#5A8A5A"
+          dotColor="#7A9E7E"
+          numColor="#C8A97E"
+          scaleLabels={moodScaleLabels}
+          hiIndex={moodHiIndex}
+          quote={`«${moodVerdict}»`}
+          others={otherMoods}
+          animKey={`mood-${topMood.id}`}
+        />
+      ) : (
+        <EmptyMetric text="Отмечай настроение каждый день — и здесь появится твоя траектория." />
+      )}
+
+      {/* ВОПРОС ДНЯ */}
+      <div style={{ border:"1px dashed #2A2520", borderRadius:"10px", padding:"14px 16px", marginTop:"28px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#3A3028" }}>ВОПРОС ДНЯ</p>
+        <p style={{ margin:0, fontSize:"14px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyMetric({ text }) {
+  return (
+    <div style={{ ...S.metricBlock, textAlign:"center", padding:"24px 16px" }}>
+      <p style={{ margin:0, fontSize:"13px", color:"#5A5048", fontStyle:"italic", lineHeight:1.7 }}>{text}</p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ГЛАВНЫЙ ЭКРАН
 // ─────────────────────────────────────────────
 export default function App() {
@@ -1914,6 +2410,7 @@ export default function App() {
   if (screen === "wisdom")     return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   if (screen === "teaquiz")    return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   if (screen === "mood")       return <MoodScreen onBack={() => setScreen("home")} />;
+  if (screen === "mypath")      return <MyPathScreen onBack={() => setScreen("home")} />;
   if (screen === "shop")       return <ShopScreen onBack={() => setScreen("home")} />;
   if (screen === "admin")      return <AdminScreen onBack={() => setScreen("home")} />;
 
@@ -1931,6 +2428,7 @@ export default function App() {
           { id:"meditation", title:"Какая практика тебе нужна?", desc:"20 вопросов · медитация или дыхание" },
           { id:"teaquiz",    title:"Какой чай тебе нужен?",      desc:"5 вопросов · подбор под состояние" },
           { id:"mood",       title:"Мое состояние",              desc:"Эмоция дня · серии · твой путь" },
+          { id:"mypath",     title:"Мой путь",                   desc:"Точка сборки · чай · практика · движение" },
           { id:"wisdom",     title:"Совет дня",                  desc:"3 совета · под твое состояние" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
@@ -2016,4 +2514,37 @@ const S = {
   statCard: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", textAlign:"center" },
   statNum: { margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", fontWeight:"normal" },
   statLabel: { margin:0, fontSize:"11px", color:"#7A6E62", letterSpacing:"0.05em" },
+
+  // ── МЕТРИК-БЛОК (единый стиль: число% + шкала + i) ──
+  sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
+  sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:"#C8A97E", margin:0 },
+  infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:"1px solid #3A3028", background:"none", color:"#6A6058", fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
+  infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:"#1A1713", border:"1px solid #3A3028", borderRadius:"10px", padding:"12px", fontSize:"11px", color:"#9A8E80", fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.7)", boxSizing:"border-box" },
+  metricBlock: { background:"rgba(255,255,255,0.022)", border:"1px solid #2A2520", borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
+  metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
+  metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
+  metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
+  metricUnit: { fontSize:"18px", color:"#5A5048", marginBottom:"8px" },
+  metricRightName: { margin:"0 0 3px", fontSize:"15px", color:"#E8E0D4" },
+  metricRightSub: { margin:0, fontSize:"11px", color:"#7A6E62", fontStyle:"italic" },
+  metricTrack: { width:"100%", height:"8px", background:"#1E1B18", borderRadius:"4px", position:"relative", marginBottom:"9px", overflow:"visible" },
+  metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
+  metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:"2px solid #0F0D0B", display:"block" },
+  scaleLabels: { display:"flex", justifyContent:"space-between" },
+  scaleLabel: { fontSize:"10px", color:"#6A6058", letterSpacing:"0.04em" },
+  scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
+  metricQuote: { padding:"10px 13px", background:"rgba(200,169,126,0.05)", borderLeft:"2px solid rgba(200,169,126,0.25)", borderRadius:"0 6px 6px 0", marginTop:"13px" },
+  metricQuoteText: { margin:0, fontSize:"12px", color:"#8A7E72", fontStyle:"italic", lineHeight:1.75 },
+  thermoWrap: { position:"relative", marginBottom:"3px" },
+  thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
+  thermoZone: { flex:1, borderRadius:"2px" },
+  thermoMarker: { position:"absolute", top:"50%", transform:"translate(-50%,-50%)", width:"16px", height:"16px", background:"#E8D4A8", borderRadius:"50%", border:"2px solid #0F0D0B", boxShadow:"0 0 10px rgba(232,212,168,0.45)", transition:"left 1.2s cubic-bezier(.4,0,.2,1)" },
+  othersList: { display:"flex", flexDirection:"column", gap:"8px", marginTop:"14px" },
+  otherRow: { display:"flex", alignItems:"center", gap:"10px" },
+  otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
+  otherName: { fontSize:"13px", color:"#7A6E62", flex:1 },
+  otherPct: { fontSize:"13px", color:"#6A6058", flexShrink:0 },
+  stepsBlock: { background:"rgba(255,255,255,0.02)", border:"1px solid #1E1B18", borderRadius:"12px", padding:"16px", marginTop:"12px" },
+  stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color:"#4A4036" },
 };
+
