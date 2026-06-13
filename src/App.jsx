@@ -26,10 +26,10 @@ const CS = {
 // ─────────────────────────────────────────────
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
-async function statEvent(action, uid, debug) {
-  let url = `${STATS_URL}?action=${action}`;
-  if (uid) url += `&uid=${encodeURIComponent(uid)}`;
-  if (debug) url += `&debug=${debug}`;
+async function statEvent(action, uid) {
+  const url = uid
+    ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
+    : `${STATS_URL}?action=${action}`;
   for (let i = 0; i < 3; i++) {
     try {
       const res = await fetch(url, { keepalive: true });
@@ -2243,11 +2243,17 @@ function AdminScreen({ onBack }) {
         const serverStats = res.ok ? await res.json() : {};
 
         // Личные данные эмоций — из CS (они у каждого свои)
-        const allEntries = [];
+        const days = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
-          const raw = await CS.get("mood_" + getDateKey(d));
-          if (raw) allEntries.push(JSON.parse(raw));
+          days.push(getDateKey(d));
+        }
+        const allEntries = [];
+        const BATCH = 15;
+        for (let i = 0; i < days.length; i += BATCH) {
+          const batch = days.slice(i, i + BATCH);
+          const results = await Promise.all(batch.map(key => CS.get("mood_" + key)));
+          results.forEach(raw => { if (raw) allEntries.push(JSON.parse(raw)); });
         }
         const emotionCounts = {};
         EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
@@ -2636,13 +2642,7 @@ export default function App() {
       // Серверная статистика открытий
       const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       const uid = tgUser?.id || null;
-      const debugInfo = encodeURIComponent(JSON.stringify({
-        hasTelegram: !!window.Telegram,
-        hasWebApp: !!window.Telegram?.WebApp,
-        initDataUnsafe: window.Telegram?.WebApp?.initDataUnsafe || null,
-        platform: window.Telegram?.WebApp?.platform || null,
-      }));
-      statEvent("open", uid, debugInfo);
+      statEvent("open", uid);
 
       // Личные данные — остаются в CS
       const todayKey = getTodayKey();

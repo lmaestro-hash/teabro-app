@@ -57,17 +57,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { action, uid, debug } = req.method === "POST"
+  const { action, uid } = req.method === "POST"
     ? req.body
     : req.query;
-
-  if (debug) {
-    try {
-      console.log("DEBUG client info:", decodeURIComponent(debug));
-    } catch (e) {
-      console.log("DEBUG client info (raw):", debug);
-    }
-  }
 
   const todayKey = getTodayKey();
 
@@ -82,16 +74,12 @@ export default async function handler(req, res) {
     if (action === "open") {
       stats.totalOpens = (stats.totalOpens || 0) + 1;
       today.opens = (today.opens || 0) + 1;
-      console.log("DEBUG open: uid=", uid, "typeof uid=", typeof uid, "existing uniqueIds=", today.uniqueIds);
       if (uid && !today.uniqueIds.includes(String(uid))) {
         today.uniqueIds.push(String(uid));
         stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
-        console.log("DEBUG open: added new uid, new uniqueIds=", today.uniqueIds);
-      } else {
-        console.log("DEBUG open: NOT added, uid falsy or already present");
       }
       await writeStats(stats);
-      return res.status(200).json({ ok: true, debugUid: uid, debugUniqueIds: today.uniqueIds });
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "quiz") {
