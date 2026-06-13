@@ -5,9 +5,14 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // ─────────────────────────────────────────────
 const CS = {
   get: (key) => new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(null), 3000); // 3s timeout
     if (window.Telegram?.WebApp?.CloudStorage) {
-      window.Telegram.WebApp.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val));
+      window.Telegram.WebApp.CloudStorage.getItem(key, (err, val) => {
+        clearTimeout(timer);
+        resolve(err ? null : val);
+      });
     } else {
+      clearTimeout(timer);
       resolve(localStorage.getItem(key));
     }
   }),
@@ -2243,17 +2248,11 @@ function AdminScreen({ onBack }) {
         const serverStats = res.ok ? await res.json() : {};
 
         // Личные данные эмоций — из CS (они у каждого свои)
-        const days = [];
+        const allEntries = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
-          days.push(getDateKey(d));
-        }
-        const allEntries = [];
-        const BATCH = 15;
-        for (let i = 0; i < days.length; i += BATCH) {
-          const batch = days.slice(i, i + BATCH);
-          const results = await Promise.all(batch.map(key => CS.get("mood_" + key)));
-          results.forEach(raw => { if (raw) allEntries.push(JSON.parse(raw)); });
+          const raw = await CS.get("mood_" + getDateKey(d));
+          if (raw) allEntries.push(JSON.parse(raw));
         }
         const emotionCounts = {};
         EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
