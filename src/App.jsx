@@ -26,10 +26,10 @@ const CS = {
 // ─────────────────────────────────────────────
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
-async function statEvent(action, uid) {
-  const url = uid
-    ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
-    : `${STATS_URL}?action=${action}`;
+async function statEvent(action, uid, debug) {
+  let url = `${STATS_URL}?action=${action}`;
+  if (uid) url += `&uid=${encodeURIComponent(uid)}`;
+  if (debug) url += `&debug=${debug}`;
   for (let i = 0; i < 3; i++) {
     try {
       const res = await fetch(url, { keepalive: true });
@@ -2636,7 +2636,13 @@ export default function App() {
       // Серверная статистика открытий
       const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       const uid = tgUser?.id || null;
-      statEvent("open", uid);
+      const debugInfo = encodeURIComponent(JSON.stringify({
+        hasTelegram: !!window.Telegram,
+        hasWebApp: !!window.Telegram?.WebApp,
+        initDataUnsafe: window.Telegram?.WebApp?.initDataUnsafe || null,
+        platform: window.Telegram?.WebApp?.platform || null,
+      }));
+      statEvent("open", uid, debugInfo);
 
       // Личные данные — остаются в CS
       const todayKey = getTodayKey();
