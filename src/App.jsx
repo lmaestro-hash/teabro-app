@@ -1914,7 +1914,10 @@ function QuietNotes({ onBack }) {
   );
 }
 
-
+// ─────────────────────────────────────────────
+// ЭКРАН: МОЁ СОСТОЯНИЕ
+// ─────────────────────────────────────────────
+function MoodScreen({ onBack }) {
   const [todayEmotion, setTodayEmotion] = useState(null);
   const [streak, setStreak] = useState(0);
   const [weekData, setWeekData] = useState([]);
