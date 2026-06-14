@@ -2167,6 +2167,7 @@ function AdminScreen({ onBack }) {
           )}
         </>
       )}
+      <button onClick={onBack} style={S.backBtn}>← назад</button>
     </div>
   );
 }
