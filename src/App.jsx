@@ -1242,7 +1242,7 @@ function WisdomScreen({ onBack, currentMood }) {
       {index + 1 < wisdoms.length && (
         <button onClick={() => { setFading(true); setTimeout(() => { setIndex(i => i+1); setFading(false); }, 400); }} style={S.primaryBtn}>Следующий совет</button>
       )}
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -1344,7 +1344,7 @@ function QuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>Пройти заново</button>
-          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+          <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
         </div>
       </div>
     );
@@ -1462,7 +1462,7 @@ function MeditationQuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
-          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+          <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
         </div>
       </div>
     );
@@ -1561,7 +1561,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
-          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+          <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
         </div>
       </div>
     );
@@ -1633,7 +1633,7 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
           </p>
         </div>
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     );
   }
 
@@ -1678,7 +1678,7 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
           </div>
         ))}
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -1760,7 +1760,7 @@ function QuietNotes({ onBack }) {
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
       {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => persist(entries.filter(x => x.id !== e.id))} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -2048,7 +2048,7 @@ function MoodScreen({ onBack }) {
           )}
         </div>
       )}
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -2073,7 +2073,7 @@ function ShopScreen({ onBack }) {
         <p style={{ fontSize:"12px", color:"#4A4036", marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
       </div>
       <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Следить в канале 🌕</a>
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -2168,7 +2168,7 @@ function AdminScreen({ onBack }) {
           )}
         </>
       )}
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
@@ -2464,7 +2464,7 @@ function MyPathScreen({ onBack }) {
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#3A3028" }}>ВОПРОС ДНЯ</p>
         <p style={{ margin:0, fontSize:"14px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
+      <button onClick={onBack} style={{ width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"12px", boxSizing:"border-box" }}>← на главную</button>
     </div>
   );
 }
