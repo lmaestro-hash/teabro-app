@@ -1,89 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const S = {
-  screen: { minHeight:"100vh", backgroundColor:"#0F0D0B", color:"#E8E0D4", fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box" },
-  screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
-  backBtn: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  backBtnBottom: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"20px 0 0 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  hintBtn: { background:"none", border:"1px solid #2A2520", color:"#7A6E62", fontSize:"12px", cursor:"pointer", width:"22px", height:"22px", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
-  homeHeader: { textAlign:"center", paddingTop:"32px", paddingBottom:"8px" },
-  moonIcon: { fontSize:"40px", marginBottom:"12px" },
-  homeTitle: { fontSize:"32px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.1em", color:"#E8E0D4" },
-  homeSubtitle: { fontSize:"13px", color:"#7A6E62", letterSpacing:"0.15em", margin:0 },
-  homeIntro: { textAlign:"center", fontSize:"15px", color:"#B0A090", fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
-  menuList: { display:"flex", flexDirection:"column", gap:"12px" },
-  menuCard: { background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:"#E8E0D4", transition:"border-color 0.2s" },
-  menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:"#C8A97E" },
-  menuCardContent: { flex:1 },
-  menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
-  menuCardDesc: { margin:0, fontSize:"12px", color:"#7A6E62", letterSpacing:"0.03em" },
-  menuCardArrow: { color:"#4A4036", fontSize:"18px" },
-  shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  quizProgress: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" },
-  quizCategory: { fontSize:"11px", letterSpacing:"0.2em", color:"#C8A97E" },
-  quizCounter: { fontSize:"12px", color:"#7A6E62" },
-  progressTrack: { display:"flex", gap:"6px", marginBottom:"28px" },
-  progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
-  questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:"#E8E0D4", fontWeight:"normal" },
-  optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
-  optionBtn: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
-  optionRadio: { color:"#C8A97E", fontSize:"16px", lineHeight:1.4, flexShrink:0 },
-  optionText: { fontSize:"14px", color:"#D0C8BC", lineHeight:1.5, fontFamily:"'Georgia',serif" },
-  resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
-  resultEmoji: { fontSize:"52px", marginBottom:"16px" },
-  resultTitle: { fontSize:"28px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.05em" },
-  resultSubtitle: { fontSize:"14px", color:"#7A6E62", fontStyle:"italic", margin:"0 0 20px" },
-  progressBar: { width:"100%", height:"3px", backgroundColor:"#2A2520", borderRadius:"2px", marginBottom:"8px", overflow:"hidden" },
-  progressFill: { height:"100%", borderRadius:"2px", transition:"width 0.8s ease" },
-  progressLabel: { fontSize:"12px", color:"#7A6E62", marginBottom:"24px" },
-  resultText: { fontSize:"15px", lineHeight:1.7, color:"#C0B8AC", fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
-  teaNoteBox: { width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"10px", padding:"14px", marginBottom:"24px" },
-  teaNoteText: { margin:0, fontSize:"13px", color:"#C8A97E", fontStyle:"italic", lineHeight:1.6, textAlign:"left" },
-  wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
-  teaIcon: { fontSize:"48px", marginBottom:"32px" },
-  wisdomText: { fontSize:"20px", lineHeight:1.7, color:"#E8E0D4", fontStyle:"italic", marginBottom:"28px" },
-  wisdomLine: { width:"40px", height:"1px", backgroundColor:"#4A4036", marginBottom:"12px" },
-  wisdomHint: { fontSize:"12px", color:"#4A4036", letterSpacing:"0.1em", margin:0 },
-  primaryBtn: { width:"100%", padding:"16px", backgroundColor:"#C8A97E", color:"#0F0D0B", border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
-  ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
-  shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#C8A97E", border:"1px solid rgba(200,169,126,0.3)", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"12px", boxSizing:"border-box" },
-  statCard: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", textAlign:"center" },
-  statNum: { margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", fontWeight:"normal" },
-  statLabel: { margin:0, fontSize:"11px", color:"#7A6E62", letterSpacing:"0.05em" },
-
-  // ── МЕТРИК-БЛОК (единый стиль: число% + шкала + i) ──
-  sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
-  sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:"#C8A97E", margin:0 },
-  infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:"1px solid #3A3028", background:"none", color:"#6A6058", fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
-  infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:"#1A1713", border:"1px solid #3A3028", borderRadius:"10px", padding:"12px", fontSize:"11px", color:"#9A8E80", fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.7)", boxSizing:"border-box" },
-  metricBlock: { background:"rgba(255,255,255,0.022)", border:"1px solid #2A2520", borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
-  metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
-  metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
-  metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
-  metricUnit: { fontSize:"18px", color:"#5A5048", marginBottom:"8px" },
-  metricRightName: { margin:"0 0 3px", fontSize:"15px", color:"#E8E0D4" },
-  metricRightSub: { margin:0, fontSize:"11px", color:"#7A6E62", fontStyle:"italic" },
-  metricTrack: { width:"100%", height:"8px", background:"#1E1B18", borderRadius:"4px", position:"relative", marginBottom:"9px", overflow:"visible" },
-  metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
-  metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:"2px solid #0F0D0B", display:"block" },
-  scaleLabels: { display:"flex", justifyContent:"space-between" },
-  scaleLabel: { fontSize:"10px", color:"#6A6058", letterSpacing:"0.04em" },
-  scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
-  metricQuote: { padding:"10px 13px", background:"rgba(200,169,126,0.05)", borderLeft:"2px solid rgba(200,169,126,0.25)", borderRadius:"0 6px 6px 0", marginTop:"13px" },
-  metricQuoteText: { margin:0, fontSize:"12px", color:"#8A7E72", fontStyle:"italic", lineHeight:1.75 },
-  thermoWrap: { position:"relative", marginBottom:"3px" },
-  thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
-  thermoZone: { flex:1, borderRadius:"2px" },
-  thermoMarker: { position:"absolute", top:"50%", transform:"translate(-50%,-50%)", width:"16px", height:"16px", background:"#E8D4A8", borderRadius:"50%", border:"2px solid #0F0D0B", boxShadow:"0 0 10px rgba(232,212,168,0.45)", transition:"left 1.2s cubic-bezier(.4,0,.2,1)" },
-  othersList: { display:"flex", flexDirection:"column", gap:"8px", marginTop:"14px" },
-  otherRow: { display:"flex", alignItems:"center", gap:"10px" },
-  otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
-  otherName: { fontSize:"13px", color:"#7A6E62", flex:1 },
-  otherPct: { fontSize:"13px", color:"#6A6058", flexShrink:0 },
-  stepsBlock: { background:"rgba(255,255,255,0.02)", border:"1px solid #1E1B18", borderRadius:"12px", padding:"16px", marginTop:"12px" },
-  stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color:"#4A4036" },
-};
-
 // ─────────────────────────────────────────────
 // TELEGRAM CLOUD STORAGE HELPER
 // ─────────────────────────────────────────────
@@ -1326,7 +1242,6 @@ function WisdomScreen({ onBack, currentMood }) {
       {index + 1 < wisdoms.length && (
         <button onClick={() => { setFading(true); setTimeout(() => { setIndex(i => i+1); setFading(false); }, 400); }} style={S.primaryBtn}>Следующий совет</button>
       )}
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -1428,7 +1343,6 @@ function QuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>Пройти заново</button>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
         </div>
       </div>
     );
@@ -1546,7 +1460,6 @@ function MeditationQuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
         </div>
       </div>
     );
@@ -1645,7 +1558,6 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
         </div>
       </div>
     );
@@ -1717,7 +1629,6 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
           </p>
         </div>
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     );
   }
 
@@ -1762,7 +1673,6 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
           </div>
         ))}
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -1844,7 +1754,6 @@ function QuietNotes({ onBack }) {
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
       {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => persist(entries.filter(x => x.id !== e.id))} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -2156,7 +2065,6 @@ function ShopScreen({ onBack }) {
         <p style={{ fontSize:"12px", color:"#4A4036", marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
       </div>
       <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Следить в канале 🌕</a>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -2278,7 +2186,6 @@ function AnonPopup() {
           <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
         </div>
       )}
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -2547,7 +2454,6 @@ function MyPathScreen({ onBack }) {
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#3A3028" }}>ВОПРОС ДНЯ</p>
         <p style={{ margin:0, fontSize:"14px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
       </div>
-      <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
 }
@@ -2654,5 +2560,86 @@ export default function App() {
 // ─────────────────────────────────────────────
 // СТИЛИ
 // ─────────────────────────────────────────────
+const S = {
+  screen: { minHeight:"100vh", backgroundColor:"#0F0D0B", color:"#E8E0D4", fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box" },
+  screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
+  backBtn: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+  hintBtn: { background:"none", border:"1px solid #2A2520", color:"#7A6E62", fontSize:"12px", cursor:"pointer", width:"22px", height:"22px", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
+  homeHeader: { textAlign:"center", paddingTop:"32px", paddingBottom:"8px" },
+  moonIcon: { fontSize:"40px", marginBottom:"12px" },
+  homeTitle: { fontSize:"32px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.1em", color:"#E8E0D4" },
+  homeSubtitle: { fontSize:"13px", color:"#7A6E62", letterSpacing:"0.15em", margin:0 },
+  homeIntro: { textAlign:"center", fontSize:"15px", color:"#B0A090", fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
+  menuList: { display:"flex", flexDirection:"column", gap:"12px" },
+  menuCard: { background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:"#E8E0D4", transition:"border-color 0.2s" },
+  menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:"#C8A97E" },
+  menuCardContent: { flex:1 },
+  menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
+  menuCardDesc: { margin:0, fontSize:"12px", color:"#7A6E62", letterSpacing:"0.03em" },
+  menuCardArrow: { color:"#4A4036", fontSize:"18px" },
+  shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+  quizProgress: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" },
+  quizCategory: { fontSize:"11px", letterSpacing:"0.2em", color:"#C8A97E" },
+  quizCounter: { fontSize:"12px", color:"#7A6E62" },
+  progressTrack: { display:"flex", gap:"6px", marginBottom:"28px" },
+  progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
+  questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:"#E8E0D4", fontWeight:"normal" },
+  optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
+  optionBtn: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
+  optionRadio: { color:"#C8A97E", fontSize:"16px", lineHeight:1.4, flexShrink:0 },
+  optionText: { fontSize:"14px", color:"#D0C8BC", lineHeight:1.5, fontFamily:"'Georgia',serif" },
+  resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
+  resultEmoji: { fontSize:"52px", marginBottom:"16px" },
+  resultTitle: { fontSize:"28px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.05em" },
+  resultSubtitle: { fontSize:"14px", color:"#7A6E62", fontStyle:"italic", margin:"0 0 20px" },
+  progressBar: { width:"100%", height:"3px", backgroundColor:"#2A2520", borderRadius:"2px", marginBottom:"8px", overflow:"hidden" },
+  progressFill: { height:"100%", borderRadius:"2px", transition:"width 0.8s ease" },
+  progressLabel: { fontSize:"12px", color:"#7A6E62", marginBottom:"24px" },
+  resultText: { fontSize:"15px", lineHeight:1.7, color:"#C0B8AC", fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
+  teaNoteBox: { width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"10px", padding:"14px", marginBottom:"24px" },
+  teaNoteText: { margin:0, fontSize:"13px", color:"#C8A97E", fontStyle:"italic", lineHeight:1.6, textAlign:"left" },
+  wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
+  teaIcon: { fontSize:"48px", marginBottom:"32px" },
+  wisdomText: { fontSize:"20px", lineHeight:1.7, color:"#E8E0D4", fontStyle:"italic", marginBottom:"28px" },
+  wisdomLine: { width:"40px", height:"1px", backgroundColor:"#4A4036", marginBottom:"12px" },
+  wisdomHint: { fontSize:"12px", color:"#4A4036", letterSpacing:"0.1em", margin:0 },
+  primaryBtn: { width:"100%", padding:"16px", backgroundColor:"#C8A97E", color:"#0F0D0B", border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
+  ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
+  shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#C8A97E", border:"1px solid rgba(200,169,126,0.3)", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"12px", boxSizing:"border-box" },
+  statCard: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", textAlign:"center" },
+  statNum: { margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", fontWeight:"normal" },
+  statLabel: { margin:0, fontSize:"11px", color:"#7A6E62", letterSpacing:"0.05em" },
 
+  // ── МЕТРИК-БЛОК (единый стиль: число% + шкала + i) ──
+  sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
+  sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:"#C8A97E", margin:0 },
+  infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:"1px solid #3A3028", background:"none", color:"#6A6058", fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
+  infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:"#1A1713", border:"1px solid #3A3028", borderRadius:"10px", padding:"12px", fontSize:"11px", color:"#9A8E80", fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.7)", boxSizing:"border-box" },
+  metricBlock: { background:"rgba(255,255,255,0.022)", border:"1px solid #2A2520", borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
+  metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
+  metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
+  metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
+  metricUnit: { fontSize:"18px", color:"#5A5048", marginBottom:"8px" },
+  metricRightName: { margin:"0 0 3px", fontSize:"15px", color:"#E8E0D4" },
+  metricRightSub: { margin:0, fontSize:"11px", color:"#7A6E62", fontStyle:"italic" },
+  metricTrack: { width:"100%", height:"8px", background:"#1E1B18", borderRadius:"4px", position:"relative", marginBottom:"9px", overflow:"visible" },
+  metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
+  metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:"2px solid #0F0D0B", display:"block" },
+  scaleLabels: { display:"flex", justifyContent:"space-between" },
+  scaleLabel: { fontSize:"10px", color:"#6A6058", letterSpacing:"0.04em" },
+  scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
+  metricQuote: { padding:"10px 13px", background:"rgba(200,169,126,0.05)", borderLeft:"2px solid rgba(200,169,126,0.25)", borderRadius:"0 6px 6px 0", marginTop:"13px" },
+  metricQuoteText: { margin:0, fontSize:"12px", color:"#8A7E72", fontStyle:"italic", lineHeight:1.75 },
+  thermoWrap: { position:"relative", marginBottom:"3px" },
+  thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
+  thermoZone: { flex:1, borderRadius:"2px" },
+  thermoMarker: { position:"absolute", top:"50%", transform:"translate(-50%,-50%)", width:"16px", height:"16px", background:"#E8D4A8", borderRadius:"50%", border:"2px solid #0F0D0B", boxShadow:"0 0 10px rgba(232,212,168,0.45)", transition:"left 1.2s cubic-bezier(.4,0,.2,1)" },
+  othersList: { display:"flex", flexDirection:"column", gap:"8px", marginTop:"14px" },
+  otherRow: { display:"flex", alignItems:"center", gap:"10px" },
+  otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
+  otherName: { fontSize:"13px", color:"#7A6E62", flex:1 },
+  otherPct: { fontSize:"13px", color:"#6A6058", flexShrink:0 },
+  stepsBlock: { background:"rgba(255,255,255,0.02)", border:"1px solid #1E1B18", borderRadius:"12px", padding:"16px", marginTop:"12px" },
+  stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color:"#4A4036" },
+};
 
