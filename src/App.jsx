@@ -1703,6 +1703,7 @@ function QuietNotes({ onBack }) {
   const [seal, setSeal] = useState(false);
   const [sealDays, setSealDays] = useState(7);
   const [justSaved, setJustSaved] = useState(false);
+  const [sealing, setSealing] = useState(false);
   const [tab, setTab] = useState("all");
   const [moodFilter, setMoodFilter] = useState(null);
   const [search, setSearch] = useState("");
@@ -1713,8 +1714,9 @@ function QuietNotes({ onBack }) {
     if (!text.trim()) return;
     const now = new Date();
     const entry = { id: Date.now(), date: now.toISOString(), text: seal ? `Письмо себе — открыть через ${sealDays} дн.` : text.trim(), fullText: text.trim(), mood, sealed: seal, revealAt: seal ? new Date(now.getTime() + sealDays * 86400000).toISOString() : null };
-    persist([entry, ...entries]); setText(""); setMood(null); setSeal(false);
-    setJustSaved(true); setTimeout(() => setJustSaved(false), 1800);
+    persist([entry, ...entries]); setText(""); setMood(null); setSeal(false); setSealDate("");
+    if (seal) { setSealing(true); setTimeout(() => setSealing(false), 2000); }
+    else { setJustSaved(true); setTimeout(() => setJustSaved(false), 1800); }
   }
   if (!loaded) return (<div style={S.screen}><button onClick={onBack} style={S.backBtn}>← назад</button><div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:"#7A6E62", fontStyle:"italic" }}>Открываю тихие записи...</p></div></div>);
   const streak = calcNotesStreak(entries);
@@ -1725,8 +1727,8 @@ function QuietNotes({ onBack }) {
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>← назад</button>
-      <p style={{ fontSize:"20px", fontWeight:"normal", margin:"0 0 4px" }}>Тихие записи</p>
-      <p style={{ fontSize:"13px", color:"#7A6E62", margin:"0 0 16px" }}>Место, куда можно положить мысли — и закрыть дверь.</p>
+      <p style={{ fontSize:"20px", fontWeight:"normal", margin:"0 0 4px" }}>Мой блокнот</p>
+      <p style={{ fontSize:"13px", color:"#7A6E62", margin:"0 0 16px" }}>Твоё личное пространство для мыслей.</p>
       {streak > 1 && <p style={{ fontSize:"12px", color:"#C8A97E", margin:"0 0 20px" }}>🌙 {streak} дней подряд</p>}
       <div style={card}>
         <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:"1px solid #2A2520", borderRadius:"10px", padding:"12px", color:"#E8E0D4", fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder="О чём думаешь сегодня?" value={text} onChange={e => setText(e.target.value)} />
@@ -1740,7 +1742,8 @@ function QuietNotes({ onBack }) {
         <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{seal ? "ЗАПЕЧАТАТЬ" : "СОХРАНИТЬ"}</button>
         <p style={{ fontSize:"11px", color:"#5E564C", textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>видишь только ты, хранится на твоём устройстве</p>
       </div>
-      {justSaved && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:"#C8A97E", fontSize:"13px" }}>сохранено 🌙</div>}
+      {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:"#C8A97E", fontSize:"13px", letterSpacing:"0.05em" }}>запечатано</div></div>}
+      {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:"#C8A97E", fontSize:"13px" }}>сохранено 🌙</div>}
       {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 вспомнить запись</button>}
       {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:"#C8A97E", margin:"0 0 8px" }}>ИЗ ПРОШЛОГО · {getEntryDateLabel(memory.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>закрыть</button></div>}
       <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 поиск по записям" style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"10px", padding:"10px 12px", color:"#E8E0D4", fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
@@ -1750,7 +1753,7 @@ function QuietNotes({ onBack }) {
       </div>
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); return (<div key={e.id} style={card}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color:"#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => persist(entries.filter(x => x.id !== e.id))} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => persist(entries.filter(x => x.id !== e.id))} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
     </div>
   );
 }
@@ -1920,7 +1923,7 @@ function MoodScreen({ onBack }) {
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>куда движется твоя жизнь</p>
 
       <button onClick={() => setShowNotes(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:"#C8A97E", fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-        <span>🌙</span><span>Тихие записи</span><span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
+        <span>🌙</span><span>Мой блокнот</span><span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
       </button>
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>место, куда можно положить мысли</p>
       <div style={{ margin:"16px 0" }}>
