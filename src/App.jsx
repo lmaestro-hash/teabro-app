@@ -2195,7 +2195,6 @@ function AnonPopup() {
           <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
         </div>
       )}
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
     </div>
   );
 }
