@@ -1632,8 +1632,8 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
             Отметь хотя бы 7 дней —<br />и траектория начнёт проявляться.
           </p>
         </div>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
       </div>
-      <button onClick={onBack} style={S.backBtn}>← назад</button>
     );
   }
 
