@@ -1242,6 +1242,7 @@ function WisdomScreen({ onBack, currentMood }) {
       {index + 1 < wisdoms.length && (
         <button onClick={() => { setFading(true); setTimeout(() => { setIndex(i => i+1); setFading(false); }, 400); }} style={S.primaryBtn}>Следующий совет</button>
       )}
+      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
     </div>
   );
 }
@@ -1343,6 +1344,7 @@ function QuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
         </div>
       </div>
     );
@@ -1460,6 +1462,7 @@ function MeditationQuizScreen({ onBack }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
         </div>
       </div>
     );
@@ -1558,6 +1561,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
         </div>
       </div>
     );
@@ -2041,6 +2045,7 @@ function MoodScreen({ onBack }) {
           )}
         </div>
       )}
+      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
     </div>
   );
 }
@@ -2454,6 +2459,7 @@ function MyPathScreen({ onBack }) {
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#3A3028" }}>ВОПРОС ДНЯ</p>
         <p style={{ margin:0, fontSize:"14px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
       </div>
+      <button onClick={onBack} style={S.backBtnBottom}>← на главную</button>
     </div>
   );
 }
@@ -2520,11 +2526,11 @@ export default function App() {
       <div style={S.menuList}>
         {[
           { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · два теста" },
-          { id:"meditation", title:"Какая практика тебе нужна?", desc:"20 вопросов · медитация или дыхание" },
-          { id:"teaquiz",    title:"Какой чай тебе нужен?",      desc:"5 вопросов · подбор под состояние" },
-          { id:"mood",       title:"Мое состояние",              desc:"Эмоция дня · серии · твой путь" },
-          { id:"mypath",     title:"Мой путь",                   desc:"Точка сборки · чай · практика · движение" },
-          { id:"wisdom",     title:"Совет дня",                  desc:"3 совета · под твое состояние" },
+          { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние" },
+          { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние" },
+          { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
+          { id:"mypath",     title:"Мой профиль",                desc:"Мои результаты и прогресс" },
+          { id:"wisdom",     title:"Тихая мысль",                desc:"Для тебя сейчас" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
             <div style={S.menuCardIcon}>✦</div>
@@ -2538,8 +2544,8 @@ export default function App() {
         <a href="https://t.me/TeaBroLife" style={{ ...S.menuCard, textDecoration:"none" }}>
           <div style={S.menuCardIcon}>✦</div>
           <div style={S.menuCardContent}>
-            <p style={S.menuCardTitle}>В чайную</p>
-            <p style={S.menuCardDesc}>Пуэр, медитация, медленная жизнь</p>
+            <p style={S.menuCardTitle}>Читать Tea Bro</p>
+            <p style={S.menuCardDesc}>О возвращении к себе через чай</p>
           </div>
           <span style={S.menuCardArrow}>→</span>
         </a>
@@ -2574,7 +2580,7 @@ const S = {
   menuCard: { background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:"#E8E0D4", transition:"border-color 0.2s" },
   menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:"#C8A97E" },
   menuCardContent: { flex:1 },
-  menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em" },
+  menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
   menuCardDesc: { margin:0, fontSize:"12px", color:"#7A6E62", letterSpacing:"0.03em" },
   menuCardArrow: { color:"#4A4036", fontSize:"18px" },
   shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
