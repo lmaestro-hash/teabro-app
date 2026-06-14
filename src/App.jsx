@@ -1743,7 +1743,7 @@ function QuietNotes({ onBack }) {
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"14px" }}>
           <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ Письмо себе</button>
-          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={new Date(Date.now()+86400000).toISOString().split("T")[0]} max={new Date(new Date().setFullYear(new Date().getFullYear()+3)).toISOString().split("T")[0]} style={{ background:"#1A1713", color:"#C8A97E", border:"1px solid #2A2520", borderRadius:"8px", padding:"9px 10px", fontFamily:"'Georgia',serif", fontSize:"12px" }} />}
+          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={(() => { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().split("T")[0]; })()} max={(() => { const d = new Date(); d.setFullYear(d.getFullYear()+3); return d.toISOString().split("T")[0]; })()} style={{ background:"#1A1713", color:"#C8A97E", border:"1px solid #2A2520", borderRadius:"8px", padding:"9px 10px", fontFamily:"'Georgia',serif", fontSize:"12px", colorScheme:"dark" }} />}
         </div>
         <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{seal ? "ЗАПЕЧАТАТЬ" : "СОХРАНИТЬ"}</button>
         <p style={{ fontSize:"11px", color:"#5E564C", textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>видишь только ты, хранится на твоём устройстве</p>
