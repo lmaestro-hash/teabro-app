@@ -1701,7 +1701,10 @@ function QuietNotes({ onBack }) {
   const [text, setText] = useState("");
   const [mood, setMood] = useState(null);
   const [seal, setSeal] = useState(false);
-  const [sealDays, setSealDays] = useState(7);
+  const [sealDate, setSealDate] = useState("");
+  const minDate = new Date(); minDate.setDate(minDate.getDate() + 1);
+  const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 3);
+  const toISO = d => d.toISOString().split("T")[0];
   const [justSaved, setJustSaved] = useState(false);
   const [tab, setTab] = useState("all");
   const [moodFilter, setMoodFilter] = useState(null);
@@ -1711,7 +1714,9 @@ function QuietNotes({ onBack }) {
   function handleSave() {
     if (!text.trim()) return;
     const now = new Date();
-    const entry = { id: Date.now(), date: now.toISOString(), text: seal ? `Письмо себе — открыть через ${sealDays} дн.` : text.trim(), fullText: text.trim(), mood, sealed: seal, revealAt: seal ? new Date(now.getTime() + sealDays * 86400000).toISOString() : null };
+    const sealTarget = sealDate ? new Date(sealDate) : new Date(now.getTime() + 7 * 86400000);
+    const daysLeft = Math.ceil((sealTarget - now) / 86400000);
+    const entry = { id: Date.now(), date: now.toISOString(), text: seal ? `Письмо себе — открыть ${sealTarget.toLocaleDateString("ru-RU", { day:"numeric", month:"long", year:"numeric" })}` : text.trim(), fullText: text.trim(), mood, sealed: seal, revealAt: seal ? sealTarget.toISOString() : null };
     persist([entry, ...entries]); setText(""); setMood(null); setSeal(false);
     setJustSaved(true); setTimeout(() => setJustSaved(false), 1800);
   }
@@ -1734,7 +1739,7 @@ function QuietNotes({ onBack }) {
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"14px" }}>
           <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ Письмо себе</button>
-          {seal && <select value={sealDays} onChange={e => setSealDays(Number(e.target.value))} style={{ background:"#1A1713", color:"#C8A97E", border:"1px solid #2A2520", borderRadius:"8px", padding:"9px 10px", fontFamily:"'Georgia',serif", fontSize:"12px" }}><option value={7}>через неделю</option><option value={30}>через месяц</option><option value={90}>через 3 месяца</option></select>}
+          {seal && <input type="date" value={sealDate} min={toISO(minDate)} max={toISO(maxDate)} onChange={e => setSealDate(e.target.value)} style={{ background:"#1A1713", color:"#C8A97E", border:"1px solid #2A2520", borderRadius:"8px", padding:"9px 10px", fontFamily:"'Georgia',serif", fontSize:"12px", colorScheme:"dark" }} />}
         </div>
         <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{seal ? "ЗАПЕЧАТАТЬ" : "СОХРАНИТЬ"}</button>
         <p style={{ fontSize:"11px", color:"#5E564C", textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>видишь только ты, хранится на твоём устройстве</p>
