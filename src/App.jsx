@@ -2158,7 +2158,7 @@ function AdminScreen({ onBack }) {
             {row("Опросник", stats.totalQuiz)}
             {row("Тест чая", stats.totalTea)}
             {row("Тест медитаций", stats.totalMeditation)}
-            {row("Записей эмоций", stats.allEntries)}
+            {row("Записей эмоций", stats.totalMood)}
           </div>
           {stats.topEmotions?.length > 0 && (
             <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px" }}>
@@ -2489,7 +2489,14 @@ export default function App() {
     async function loadMood() {
       // Серверная статистика открытий
       const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      const uid = tgUser?.id || null;
+      let uid = tgUser?.id ? String(tgUser.id) : null;
+      if (!uid) {
+        try {
+          let stored = localStorage.getItem("teabro_uid");
+          if (!stored) { stored = "b_" + Math.random().toString(36).slice(2, 10); localStorage.setItem("teabro_uid", stored); }
+          uid = stored;
+        } catch {}
+      }
       statEvent("open", uid);
 
       // Личные данные — остаются в CS
