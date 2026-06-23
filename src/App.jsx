@@ -1275,11 +1275,11 @@ function QuizScreen({ onBack }) {
     setAnimating(true);
     const ns = [...scores, selected.score];
     const nb = [...burnouts, selected.burnout];
+    if (current+1 >= QUESTIONS_QUIZ.length) { statEvent("quiz"); }
     setTimeout(() => {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
         setFinished(true);
-        statEvent("quiz");
         const t = ns.reduce((a,b)=>a+b,0);
         const bt = nb.reduce((a,b)=>a+b,0);
         const maxScore = QUESTIONS_QUIZ.length * 3;
@@ -1395,6 +1395,7 @@ function MeditationQuizScreen({ onBack }) {
     const ns = { ...scores };
     const pts = q.options[selectedIdx].p;
     Object.keys(pts).forEach(k => { ns[k] = (ns[k] || 0) + pts[k]; });
+    if (current + 1 >= MEDITATION_QUESTIONS.length) { statEvent("meditation"); }
     setTimeout(() => {
       setScores(ns);
       setSelectedIdx(null);
@@ -1404,7 +1405,6 @@ function MeditationQuizScreen({ onBack }) {
         setWinner(w);
         setSortedScores(sorted);
         setFinished(true);
-        statEvent("meditation");
         const maxPossible = MEDITATION_QUESTIONS.length * 2;
         pushHistory("meditation_history", { winner: w, pct: Math.min(100, Math.round((sorted[0][1]/maxPossible)*100)) });
       } else {
@@ -1525,7 +1525,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
       if (current+1 >= TEA_QUESTIONS.length) {
         const sorted = Object.entries(ns).sort((a,b) => b[1]-a[1]);
         const w = sorted[0][0];
-        setWinner(w); setSortedScores(sorted); setFinished(true); statEvent("tea"); onTeaResult(w);
+        statEvent("tea"); setWinner(w); setSortedScores(sorted); setFinished(true); onTeaResult(w);
         const maxPossible = TEA_QUESTIONS.length * 2;
         pushHistory("tea_history", { winner: w, pct: Math.round((sorted[0][1]/maxPossible)*100) });
       } else { setCurrent(c => c+1); }
