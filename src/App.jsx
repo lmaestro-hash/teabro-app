@@ -2492,9 +2492,10 @@ export default function App() {
   useEffect(() => {
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
     async function loadMood() {
-      // Серверная статистика открытий
+      // ── uid + chat_id ──
       const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       let uid = tgUser?.id ? String(tgUser.id) : null;
+      const chatId = uid; // в TG Mini App user.id === chat_id
       if (!uid) {
         try {
           let stored = localStorage.getItem("teabro_uid");
@@ -2502,9 +2503,49 @@ export default function App() {
           uid = stored;
         } catch {}
       }
-      statEvent("open", uid);
 
-      // Личные данные — остаются в CS
+      // Событие открытия с chat_id
+      const openUrl = chatId
+        ? `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}&chatId=${encodeURIComponent(chatId)}`
+        : `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}`;
+      fetch(openUrl, { keepalive: true }).catch(() => {});
+
+      // ── Snapshot для пушей (фоново, не блокирует UI) ──
+      (async () => {
+        try {
+          const EMOTION_EMOJIS = { joy:"😊", calm:"😌", inspired:"💪", unclear:"🤔", anxiety:"😟", angry:"😡", tired:"😴" };
+          // Burnout из последнего квиза
+          const quizRaw = await CS.get("quiz_history");
+          const quizHist = quizRaw ? JSON.parse(quizRaw) : [];
+          const lastQuiz = quizHist.length > 0 ? quizHist[quizHist.length - 1] : null;
+          const burnoutPct = lastQuiz?.burnout ?? null;
+          // Преобладающее настроение за неделю
+          const counts = {};
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            const r = await CS.get("mood_" + k);
+            if (r) { const e = JSON.parse(r); counts[e.id] = (counts[e.id]||0)+1; }
+          }
+          const topEmotion = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+          const moodEmoji = topEmotion ? (EMOTION_EMOJIS[topEmotion[0]] || "🤔") : null;
+          // Записи в блокноте за неделю
+          let notesCount = 0;
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const k = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            const r = await CS.get("note_" + k);
+            if (r) notesCount++;
+          }
+          // Отправляем snapshot
+          const p = new URLSearchParams({ action:"snapshot", uid, notesCount:String(notesCount) });
+          if (burnoutPct !== null) p.set("burnout", String(burnoutPct));
+          if (moodEmoji) p.set("mood", moodEmoji);
+          fetch(`${STATS_URL}?${p}`, { keepalive:true }).catch(()=>{});
+        } catch {}
+      })();
+
+      // ── Настроение дня (без изменений) ──
       const todayKey = getTodayKey();
       const raw = await CS.get("mood_" + todayKey);
       if (raw) { const e = JSON.parse(raw); setCurrentMood(e.mood || "general"); return; }

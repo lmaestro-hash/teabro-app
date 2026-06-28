@@ -4,6 +4,7 @@ export default async function handler(req, res) {
   const BOT_TOKEN = process.env.BOT_TOKEN;
   const ADMIN_ID = 5175467398;
   const APP_URL = "https://teabro-app.vercel.app";
+  const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
   const body = req.body;
   const message = body?.message;
@@ -17,15 +18,33 @@ export default async function handler(req, res) {
     });
   }
 
-  async function answerCallback(callback_query_id) {
+  async function answerCallback(callback_query_id, text = "") {
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ callback_query_id }),
+      body: JSON.stringify({ callback_query_id, text, show_alert: false }),
     });
   }
 
-  // Счётчик открытий — через KV или просто логируем
+  // ── Обработка кнопки паузы из пуша ──
+  if (callbackQuery) {
+    const cbId = callbackQuery.id;
+    const data = callbackQuery.data;
+    const chatId = callbackQuery.message?.chat?.id;
+
+    if (data === "pause_pushes" && chatId) {
+      // uid для реальных TG пользователей = их tg id
+      const uid = String(chatId);
+      await fetch(`${STATS_URL}?action=pause&uid=${encodeURIComponent(uid)}`);
+      await answerCallback(cbId, "Пауза на месяц. Отдыхай 🌕");
+    } else {
+      await answerCallback(cbId);
+    }
+
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── Обработка сообщений ──
   if (message) {
     const chat_id = message.chat.id;
     const text = message.text || "";
@@ -37,10 +56,7 @@ export default async function handler(req, res) {
         {
           reply_markup: {
             inline_keyboard: [[
-              {
-                text: "Открыть Tea Bro 🌕",
-                web_app: { url: APP_URL }
-              }
+              { text: "Открыть Tea Bro 🌕", web_app: { url: APP_URL } }
             ]]
           }
         }
@@ -53,10 +69,7 @@ export default async function handler(req, res) {
         {
           reply_markup: {
             inline_keyboard: [[
-              {
-                text: "Открыть Tea Bro 🌕",
-                web_app: { url: APP_URL }
-              }
+              { text: "Открыть Tea Bro 🌕", web_app: { url: APP_URL } }
             ]]
           }
         }
@@ -64,5 +77,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true });
 }
