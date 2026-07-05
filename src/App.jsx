@@ -1824,10 +1824,16 @@ function MoodScreen({ onBack }) {
     await CS.set("mood_" + todayKey, JSON.stringify(emotion));
     setTodayEmotion(emotion);
     statEvent("mood");
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-    const yRaw = await CS.get("mood_" + getDateKey(yesterday));
-    const newStreak = yRaw ? streak + 1 : 1;
+
+    // ── Серия (streak) только растёт и никогда не откатывается. ──
+    // Один прирост за календарный день, сколько бы дней ни было
+    // пропущено до этого — старый результат и титул всегда сохраняются.
+    const lastDateKey = await CS.get("streak_last_date");
+    const alreadyToday = lastDateKey === todayKey;
+    const newStreak = alreadyToday ? streak : streak + 1;
+
     await CS.set("streak", String(newStreak));
+    await CS.set("streak_last_date", todayKey);
     setStreak(newStreak);
     setWeekData(prev => prev.map((d,i) => i === 6 ? { ...d, data: emotion } : d));
     setMonthData(prev => { const n=[...prev]; n[29]=emotion; return n; });
