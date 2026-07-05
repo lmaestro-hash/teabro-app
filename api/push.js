@@ -126,11 +126,6 @@ async function sendPush(chatId, text) {
 }
 
 export default async function handler(req, res) {
-  // Защита от случайных вызовов
-  const auth = req.headers["authorization"];
-  if (auth !== `Bearer ${CRON_SECRET}`) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
 
   // Проверяем время — только пн 07:00 UTC и чт 15:00 UTC
   const now = new Date();
