@@ -75,16 +75,28 @@ export default async function handler(req, res) {
     }
     const today = stats.byDay[todayKey];
 
-    // ── Инициализация записи пользователя ──
-    if (uid && !stats.users[uid]) {
-      stats.users[uid] = {
-        chatId: null,
-        lastSeen: null,
-        lastPushSent: null,
-        lastPushOpened: null,
-        pauseUntil: null,
-        snapshots: [],
-      };
+    // ── Инициализация / докладка записи пользователя ──
+    // Создаём с нуля, если пользователя ещё нет, ИЛИ докладываем
+    // недостающие поля, если запись создана старой версией схемы.
+    if (uid) {
+      if (!stats.users[uid]) {
+        stats.users[uid] = {
+          chatId: null,
+          lastSeen: null,
+          lastPushSent: null,
+          lastPushOpened: null,
+          pauseUntil: null,
+          snapshots: [],
+        };
+      } else {
+        const u = stats.users[uid];
+        if (u.chatId === undefined) u.chatId = null;
+        if (u.lastSeen === undefined) u.lastSeen = null;
+        if (u.lastPushSent === undefined) u.lastPushSent = null;
+        if (u.lastPushOpened === undefined) u.lastPushOpened = null;
+        if (u.pauseUntil === undefined) u.pauseUntil = null;
+        if (!Array.isArray(u.snapshots)) u.snapshots = [];
+      }
     }
 
     // ── open ──
