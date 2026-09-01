@@ -48,7 +48,7 @@ async function statEvent(action, uid) {
 // ─────────────────────────────────────────────
 const WISDOMS = [
   { text: "Чай не торопит. Он просто есть.", mood: "general" },
-  { text: "Суета — это когда ты занят, но не присутствуешь.", mood: "general" },
+  { text: "Суета — это когда ты занят(а), но не присутствуешь.", mood: "general" },
   { text: "Первый глоток — самый честный момент дня.", mood: "general" },
   { text: "Ты не можешь вернуться к себе бегом.", mood: "general" },
   { text: "Тишина — не отсутствие звука. Это присутствие себя.", mood: "general" },
@@ -84,7 +84,7 @@ const WISDOMS = [
   { text: "Тревога — это не ты. Это погода внутри. Она пройдет.", mood: "bai" },
   { text: "Одна чашка чая. Один вдох. Один момент. Больше ничего не нужно.", mood: "bai" },
   { text: "Самое тревожное время — между делами. Займи руки чаем.", mood: "bai" },
-  { text: "Позволь мыслям идти мимо. Ты не обязан за каждой бежать.", mood: "bai" },
+  { text: "Позволь мыслям идти мимо. Ты не обязан(а) за каждой бежать.", mood: "bai" },
   { text: "Когда внутри шумно — замедли внешнее. Тело успокаивает голову.", mood: "bai" },
   { text: "Три вдоха медленнее, чем обычно. Это уже практика.", mood: "bai" },
   { text: "Все, что ты сейчас чувствуешь — временно. Даже это.", mood: "bai" },
@@ -101,7 +101,7 @@ const WISDOMS = [
   { text: "Тело зажато — значит что-то долго держишь. Можно отпустить.", mood: "shu" },
   { text: "Иногда лучшее что можно сделать со злостью — переждать ее.", mood: "shu" },
   { text: "Первый глоток темного пуэра. Тяжелый. Теплый. Заземляет.", mood: "shu" },
-  { text: "Ты не обязан быть добрым когда внутри огонь. Просто не обожги других.", mood: "shu" },
+  { text: "Ты не обязан(а) быть мягким(ой) когда внутри огонь. Просто не обожги других.", mood: "shu" },
   { text: "Раздражение часто прячет за собой боль. Что болит на самом деле?", mood: "shu" },
   { text: "Сделай паузу прежде чем говорить. Пять секунд меняют многое.", mood: "shu" },
   { text: "Жар внутри просит выхода. Движение, воздух, теплый чай.", mood: "shu" },
@@ -125,7 +125,7 @@ const WISDOMS = [
   { text: "Пустота — это не конец. Это пространство перед чем-то новым.", mood: "dahong" },
   { text: "Да Хун Пао греет изнутри. Медленно. Он не кричит — вставай.", mood: "dahong" },
   { text: "Когда нет сил — не нужно их искать. Просто не трать то, что есть.", mood: "dahong" },
-  { text: "Апатия часто приходит после долгого напряжения. Ты просто устал.", mood: "dahong" },
+  { text: "Апатия часто приходит после долгого напряжения. Ты просто устал(а).", mood: "dahong" },
   { text: "Один маленький шаг. Не план. Один шаг.", mood: "dahong" },
   { text: "Тело помнит радость даже когда голова забыла. Дай ему тепло.", mood: "dahong" },
   { text: "Не заставляй себя хотеть. Позволь желанию прийти само.", mood: "dahong" },
@@ -139,7 +139,7 @@ const WISDOMS = [
   { text: "Маленькая радость считается. Вкусный чай — это уже победа.", mood: "dahong" },
   { text: "Усталость от людей — это не нелюдимость. Это потребность в себе.", mood: "tguan" },
   { text: "Те Гуань Инь цветочный и тихий. Он уводит внутрь.", mood: "tguan" },
-  { text: "Ты не обязан быть доступным всегда. Граница — это уважение к себе.", mood: "tguan" },
+  { text: "Ты не обязан(а) быть доступным(ой) всегда. Граница — это уважение к себе.", mood: "tguan" },
   { text: "Закрой дверь. Этот чай не любит компании.", mood: "tguan" },
   { text: "Тишина с собой — не одиночество. Это восстановление.", mood: "tguan" },
   { text: "После людей нужно время на себя. Это не эгоизм.", mood: "tguan" },
@@ -303,7 +303,7 @@ const QUESTIONS_QUIZ = [
     { text: "Встаю спокойно. Несколько минут просто лежу, слушаю тишину.", score: 3, burnout: 0 },
     { text: "Встаю нормально, но первое что делаю — беру телефон.", score: 2, burnout: 1 },
     { text: "Будильник несколько раз. Встаю уже на бегу.", score: 1, burnout: 2 },
-    { text: "Утро ощущается как насилие. Я уже что-то должен.", score: 0, burnout: 3 },
+    { text: "Утро ощущается как насилие. Я уже что-то должен(на).", score: 0, burnout: 3 },
   ]},
   { id: 2, category: "ТИШИНА", text: "Как ты себя чувствуешь наедине с собой — без музыки, экрана?", options: [
     { text: "Хорошо. Это моё любимое время — я его намеренно ищу.", score: 3, burnout: 0 },
@@ -334,10 +334,10 @@ const QUESTIONS_QUIZ = [
     { text: "Не знаю где. Ощущение, что меня нет в собственной жизни.", score: 0, burnout: 3 },
   ]},
   { id: 6, category: "ЭНЕРГИЯ", text: "Как ты чувствуешь себя в начале рабочего дня?", options: [
-    { text: "Заряжен. Есть предвкушение, хочется начать.", score: 3, burnout: 0 },
-    { text: "Есть настрой. Спокойно готов к работе.", score: 3, burnout: 0 },
+    { text: "Заряжен(а). Есть предвкушение, хочется начать.", score: 3, burnout: 0 },
+    { text: "Есть настрой. Спокойно готов(а) к работе.", score: 3, burnout: 0 },
     { text: "Нейтрально. Не в восторге, но ок.", score: 2, burnout: 1 },
-    { text: "Уже устал, не начав.", score: 1, burnout: 2 },
+    { text: "Уже устал(а), не начав.", score: 1, burnout: 2 },
     { text: "Внутри сопротивление. Хочется сбежать.", score: 0, burnout: 3 },
   ]},
   { id: 7, category: "ЭНЕРГИЯ", text: "Хватает ли тебе сил на себя после основных дел?", options: [
@@ -363,9 +363,9 @@ const QUESTIONS_QUIZ = [
   ]},
   { id: 10, category: "ЭНЕРГИЯ", text: "Каким ты бываешь к вечеру?", options: [
     { text: "Наполненным. День прошёл хорошо, есть удовлетворение.", score: 3, burnout: 0 },
-    { text: "Немного устал, но в норме. Силы на себя есть.", score: 3, burnout: 0 },
+    { text: "Немного устал(а), но в норме. Силы на себя есть.", score: 3, burnout: 0 },
     { text: "По-разному. Зависит от дня.", score: 2, burnout: 1 },
-    { text: "Часто опустошён. Вечером — как выжатый лимон.", score: 1, burnout: 2 },
+    { text: "Часто опустошён(а). Вечером — как выжатый лимон.", score: 1, burnout: 2 },
     { text: "Всегда на нуле. Просыпаюсь уже уставшим.", score: 0, burnout: 3 },
   ]},
   { id: 11, category: "МОТИВАЦИЯ", text: "Как ты относишься к своей работе или основному делу?", options: [
@@ -382,7 +382,7 @@ const QUESTIONS_QUIZ = [
     { text: "Часто — КПД упал, хотя трачу всё больше.", score: 1, burnout: 2 },
     { text: "Полное ощущение бега на месте. Смысла не вижу.", score: 0, burnout: 3 },
   ]},
-  { id: 13, category: "МОТИВАЦИЯ", text: "Когда ты последний раз делал что-то с настоящим удовольствием?", options: [
+  { id: 13, category: "МОТИВАЦИЯ", text: "Когда ты последний раз делал(а) что-то с настоящим удовольствием?", options: [
     { text: "Сегодня или вчера. Таких моментов много.", score: 3, burnout: 0 },
     { text: "Недавно. Есть вещи, которые заряжают.", score: 3, burnout: 0 },
     { text: "Было, но нечасто.", score: 2, burnout: 1 },
@@ -400,7 +400,7 @@ const QUESTIONS_QUIZ = [
     { text: "Хорошо. Люди дают энергию, мне интересно с ними.", score: 3, burnout: 0 },
     { text: "С теплом. Близкие важны, общение даёт силы.", score: 3, burnout: 0 },
     { text: "Нормально, но иногда нужна пауза.", score: 2, burnout: 1 },
-    { text: "Устал. Большинство общения — трата сил.", score: 1, burnout: 2 },
+    { text: "Устал(а). Большинство общения — трата сил.", score: 1, burnout: 2 },
     { text: "Раздражение или полная отстранённость.", score: 0, burnout: 3 },
   ]},
   { id: 16, category: "ЭМОЦИИ", text: "Как ты себя чувствуешь эмоционально в последнее время?", options: [
@@ -450,7 +450,7 @@ const QUESTIONS_QUIZ = [
     { text: "Да. Это важно — я его защищаю.", score: 3, burnout: 0 },
     { text: "Иногда бывает, но не всегда.", score: 2, burnout: 1 },
     { text: "Редко. Всё время кто-то или что-то нужно.", score: 1, burnout: 2 },
-    { text: "Нет. Я постоянно доступен для других.", score: 0, burnout: 3 },
+    { text: "Нет. Я постоянно доступен(на) для других.", score: 0, burnout: 3 },
   ]},
   { id: 23, category: "ГРАНИЦА", text: "Как ты относишься к отдыху и паузам?", options: [
     { text: "Как к необходимости и удовольствию. Умею отдыхать.", score: 3, burnout: 0 },
@@ -470,14 +470,14 @@ const QUESTIONS_QUIZ = [
     { text: "Да, отчётливо. Знаю кто я, что важно, куда иду.", score: 3, burnout: 0 },
     { text: "Да. Знаю кто я и что мне важно.", score: 3, burnout: 0 },
     { text: "Иногда теряюсь, но быстро нахожу опору.", score: 2, burnout: 1 },
-    { text: "Часто. Не помню когда последний раз думал о себе.", score: 1, burnout: 2 },
+    { text: "Часто. Не помню когда последний раз думал(а) о себе.", score: 1, burnout: 2 },
     { text: "Ощущение что меня нет — есть только функция.", score: 0, burnout: 3 },
   ]},
 ];
 
 const QUIZ_RESULTS = [
-  { range: [0,18],   emoji: "🌫", title: "Очень далеко",  subtitle: "Туман поглотил дорогу",          color: "#6B7B8D", text: "Ты бежишь уже давно. Так давно, что забыл от чего. Связь с собой — тонкая, почти оборванная. Начни с одной чашки. Без телефона. Просто сиди." },
-  { range: [19,37],  emoji: "🌿", title: "На полпути",    subtitle: "Ты чувствуешь, что сбился",       color: "#7A9E7E", text: "Что-то внутри уже знает, что не так. Это важно — ты еще слышишь себя. Суета взяла свое, но не все. Войди в зазор — медленно." },
+  { range: [0,18],   emoji: "🌫", title: "Очень далеко",  subtitle: "Туман поглотил дорогу",          color: "#6B7B8D", text: "Ты бежишь уже давно. Так давно, что забыл(а) от чего. Связь с собой — тонкая, почти оборванная. Начни с одной чашки. Без телефона. Просто сиди." },
+  { range: [19,37],  emoji: "🌿", title: "На полпути",    subtitle: "Ты чувствуешь, что сбился(лась)",       color: "#7A9E7E", text: "Что-то внутри уже знает, что не так. Это важно — ты еще слышишь себя. Суета взяла свое, но не все. Войди в зазор — медленно." },
   { range: [38,56],  emoji: "🍵", title: "Почти здесь",  subtitle: "Ты возвращаешься",                 color: "#C8A97E", text: "Ты чувствуешь разницу между суетой и тишиной — и иногда выбираешь тишину. Это уже много. Осталось сделать это привычкой." },
   { range: [57,75],  emoji: "🌕", title: "Ты здесь",     subtitle: "Чашка стынет — ты не торопишься", color: "#D4B896", text: "Ты умеешь быть там, где ты есть. Это редкость. Не потому что ты особенный — а потому что ты это выбираешь. Снова и снова." },
 ];
@@ -487,6 +487,34 @@ const BURNOUT_LEVELS = [
   { range: [21,40], label: "Начальные признаки",   color: "#C8A97E", text: "Усталость накапливается. Пока не критично, но стоит замедлиться и обратить внимание на себя." },
   { range: [41,55], label: "Среднее выгорание",    color: "#B87333", text: "Ты работаешь на износ. Тело и психика сигналят. Нужна настоящая пауза — не выходные, а пересмотр ритма." },
   { range: [56,75], label: "Глубокое выгорание",   color: "#8B4A4A", text: "Ресурс почти на нуле. Это серьезно. Не героизм, а необходимость — остановиться и позаботиться о себе." },
+];
+
+// ─────────────────────────────────────────────
+// ТЕСТ: НАСКОЛЬКО ТЫ ЧЕСТЕН САМ С СОБОЙ
+// ─────────────────────────────────────────────
+// Шкала 1–5 по каждому пункту. Пункты с reverse:true считаются в обратную сторону (6 - score).
+const SELF_HONESTY_QUESTIONS = [
+  { id: 1,  category: "РЕШЕНИЯ",  text: "Я всегда точно знаю, почему принял(а) то или иное решение", reverse: false },
+  { id: 2,  category: "РЕШЕНИЯ",  text: "Иногда я принимаю решения и сам(а) не до конца понимаю почему", reverse: true },
+  { id: 3,  category: "ПРИВЫЧКИ", text: "Если бы я захотел(а) избавиться от плохой привычки — легко бы это сделал(а)", reverse: false },
+  { id: 4,  category: "ПРИВЫЧКИ", text: "У меня есть привычки, с которыми я реально борюсь и не всегда справляюсь", reverse: true },
+  { id: 5,  category: "ПРИВЫЧКИ", text: "Мне почти не в чем себя упрекнуть за последний год", reverse: false },
+  { id: 6,  category: "НЕУДАЧИ",  text: "Мои неудачи почти всегда были вызваны внешними обстоятельствами", reverse: false },
+  { id: 7,  category: "НЕУДАЧИ",  text: "Оглядываясь назад, я вижу решения, которые мог(ла) принять иначе", reverse: true },
+  { id: 8,  category: "ЭМОЦИИ",   text: "Я контролирую свои эмоции лучше, чем большинство людей", reverse: false },
+  { id: 9,  category: "ЭМОЦИИ",   text: "Бывают моменты, когда эмоции берут надо мной верх, и я это признаю", reverse: true },
+  { id: 10, category: "ЛЮДИ",     text: "Мои первые впечатления о людях почти всегда оказываются верны", reverse: false },
+  { id: 11, category: "ЛЮДИ",     text: "Я не раз ошибался(ась) в людях, доверившись первому впечатлению", reverse: true },
+  { id: 12, category: "ОБРАТНАЯ СВЯЗЬ", text: "Мне не нужна обратная связь от других — я и так знаю свои сильные и слабые стороны", reverse: false },
+  { id: 13, category: "ОБРАТНАЯ СВЯЗЬ", text: "Я никогда не откладываю важные решения из страха", reverse: false },
+  { id: 14, category: "ЦЕННОСТИ", text: "Я всегда действую в соответствии со своими ценностями, даже когда это трудно", reverse: false },
+];
+
+const SELF_HONESTY_RESULTS = [
+  { range: [0,25],   emoji: "🪞", title: "Трезвый взгляд",     subtitle: "Видишь себя без прикрас",     color: "#7A9E7E", text: "Ты редко приукрашиваешь себя перед собой. Признаёшь ошибки, замечаешь слабости, не строишь удобных версий прошлого. Это тяжелее эмоционально, но честнее — и в долгосрочной перспективе выгоднее." },
+  { range: [26,50],  emoji: "🌤", title: "В целом честно",     subtitle: "Есть небольшие слепые пятна", color: "#A9B98E", text: "В большинстве случаев ты видишь себя реалистично, но кое-где чуть смягчаешь картину в свою пользу. Это нормально — полностью без искажений не живёт никто. Стоит присмотреться к тем ответам, где балл был выше." },
+  { range: [51,75],  emoji: "🌫", title: "Умеренный самообман", subtitle: "Есть удобные версии себя",     color: "#C8A97E", text: "Ты периодически рассказываешь себе версию событий, где выглядишь лучше, чем было на самом деле. Это защитный механизм — но если он мешает видеть реальные проблемы, стоит начать замечать его в моменте." },
+  { range: [76,100], emoji: "🎭", title: "Сильное приукрашивание", subtitle: "Себе — удобную версию",   color: "#B87333", text: "Ты склонен(на) верить в собственную непогрешимость чаще, чем это оправдано. Решения кажутся более осознанными, ошибки — менее твоими, чем на самом деле. Разговор с кем-то честным со стороны может здорово прояснить картину." },
 ];
 
 // ─────────────────────────────────────────────
@@ -527,7 +555,7 @@ const BURNOUT_ADVICE = {
       "Сначала тело. Сон — минимум 8 часов. Не как роскошь, а как лечение. Без переговоров.",
       "Сократи список. Возьми лист бумаги и напиши всё, что на тебе висит. Выдели 3 важных. Остальное — отложи, делегируй, отмени.",
       "Каждый день — что-то только для удовольствия. Не «полезное». Именно бессмысленное: прогулка, кино, вкусная еда.",
-      "Прекрати объяснять себе почему ты устал. Просто устал — и этого достаточно. Вина за усталость только усиливает её.",
+      "Прекрати объяснять себе почему ты устал(а). Просто устал(а) — и этого достаточно. Вина за усталость только усиливает её.",
       "Поговори с врачом или психологом. Выгорание средней степени — медицинская история, не слабость. Это честнее и быстрее, чем справляться в одиночку.",
     ],
     duration: "4–8 недель восстановления · не пытайся сделать быстрее",
@@ -557,7 +585,7 @@ const TEA_QUESTIONS = [
     { text: "Туман. Мысли путаются, сложно сосредоточиться.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:0, gaba:1 } },
     { text: "Тревога. Мысли не останавливаются, внутри сжато.", teas: { shu:0, bai:2, tguan:0, sheng:0, dahong:0, gaba:0 } },
     { text: "Пустота. Нет энергии, нет желания.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
-    { text: "Устал от всех. Хочу тишины и быть одному.", teas: { shu:0, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
+    { text: "Устал(а) от всех. Хочу тишины и быть одному(одной).", teas: { shu:0, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
   ]},
   { id: 2, category: "ТЕЛО", text: "Где чаще всего ощущаешь напряжение?", options: [
     { text: "Тело в тонусе, но внутри лёгкий гул — не могу остановиться.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
@@ -569,8 +597,8 @@ const TEA_QUESTIONS = [
   ]},
   { id: 3, category: "ЭНЕРГИЯ", text: "Какой у тебя сейчас уровень энергии?", options: [
     { text: "Высокая. Много идей, хочется всё и сразу.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:0, gaba:2 } },
-    { text: "Взвинчен. Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
-    { text: "Рассеяна. Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0, gaba:0 } },
+    { text: "Взвинчен(а). Энергия есть, но она нервная, не туда.", teas: { shu:2, bai:1, tguan:0, sheng:0, dahong:0, gaba:0 } },
+    { text: "Рассеян(а). Есть немного, но не могу собрать.", teas: { shu:0, bai:0, tguan:1, sheng:2, dahong:0, gaba:0 } },
     { text: "На нуле. Даже встать было трудно.", teas: { shu:0, bai:0, tguan:0, sheng:0, dahong:2, gaba:0 } },
     { text: "Тихая. Не хочу тратить ее на людей.", teas: { shu:0, bai:1, tguan:2, sheng:0, dahong:0, gaba:0 } },
     { text: "Нормальная, но хочется ясности в голове.", teas: { shu:0, bai:0, tguan:0, sheng:2, dahong:1, gaba:0 } },
@@ -581,7 +609,7 @@ const TEA_QUESTIONS = [
     { text: "Хаотичные. Скачут с одного на другое.", teas: { shu:0, bai:1, tguan:0, sheng:2, dahong:0, gaba:1 } },
     { text: "Тревожные. Прокручиваю одно и то же по кругу.", teas: { shu:0, bai:2, tguan:1, sheng:0, dahong:0, gaba:0 } },
     { text: "Нет мыслей. Пустота или безразличие.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:2, gaba:0 } },
-    { text: "Много мыслей о других людях. Устал от этого.", teas: { shu:1, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
+    { text: "Много мыслей о других людях. Устал(а) от этого.", teas: { shu:1, bai:0, tguan:2, sheng:0, dahong:0, gaba:0 } },
   ]},
   { id: 5, category: "ПОТРЕБНОСТЬ", text: "Чего тебе сейчас больше всего не хватает?", options: [
     { text: "Фокуса. Энергия есть — хочу направить её в одно место.", teas: { shu:0, bai:0, tguan:0, sheng:1, dahong:0, gaba:2 } },
@@ -598,7 +626,7 @@ const TEA_RESULTS = {
   sheng:  { emoji:"✦", name:"Шэн пуэр",     tag:"Ясность",     color:"#6B8E6B", text:"Голова в тумане, мысли не собрать. Шэн пуэр — это как открыть окно. Он не бодрит резко, он проясняет. Горьковатый, живой, чуть дикий. После него думается иначе — чище, без лишнего.", note:"Первый пролив — слей. Со второго начинается настоящий чай." },
   bai:    { emoji:"✦", name:"Белый чай",    tag:"Тишина",      color:"#A89880", text:"Тревога — это когда мысли бегут быстрее тебя. Белый чай не останавливает их силой. Он просто создает другой ритм. Нежный, почти незаметный. Пьешь — и замечаешь, что немного выдохнул.", note:"Заваривай при 80°C — и он раскроется." },
   dahong: { emoji:"✦", name:"Да Хун Пао",   tag:"Пробуждение", color:"#B87333", text:"Нет сил, пустота, апатия — тело знает, что устало. Да Хун Пао не кричит «вставай». Он греет. Медленно, изнутри. Жареный, теплый, с глубиной. Он возвращает ощущение, что ты живой.", note:"Пей теплым, не спеша. Это не кофе — это другая история." },
-  tguan:  { emoji:"✦", name:"Те Гуань Инь", tag:"Уединение",   color:"#7A9E7E", text:"Ты устал от людей. От их слов, энергии, ожиданий. Те Гуань Инь — цветочный, легкий, уводит внутрь. Он не требует ничего. Просто сиди с ним. Это чай для того, чтобы снова стать собой.", note:"Закрой дверь. Этот чай не любит компании." },
+  tguan:  { emoji:"✦", name:"Те Гуань Инь", tag:"Уединение",   color:"#7A9E7E", text:"Ты устал(а) от людей. От их слов, энергии, ожиданий. Те Гуань Инь — цветочный, легкий, уводит внутрь. Он не требует ничего. Просто сиди с ним. Это чай для того, чтобы снова стать собой.", note:"Закрой дверь. Этот чай не любит компании." },
   gaba:   { emoji:"✦", name:"Габа улун",    tag:"Равновесие",  color:"#7B9E87", text:"Энергия есть — но она ищет берег. Ты на подъёме, внутри много всего, идеи рождаются быстрее чем успеваешь их поймать. Габа не тормозит этот поток. Она выравнивает его. Мягкий, чуть фруктовый, без резкости. После него хочется не больше — а точнее.", note:"Заваривай при 85°C. Пей не торопясь — дай себе выбрать главное." },
 };
 
@@ -612,7 +640,7 @@ const MEDITATION_QUESTIONS = [
     { text: "Тревога. Мысли крутятся по кругу, не останавливаются.", p: { shamatha:2, b478:2, vipassana:1 } },
     { text: "Туман. Не понимаю себя, живу как на автопилоте.", p: { vipassana:2, shamatha:1, coherent:1 } },
     { text: "Пусто и холодно. Нет сил, нет желания.", p: { tummo:2, metta:1, b478:1 } },
-    { text: "Устал от людей. Хочется тишины и одиночества.", p: { metta:2, nidra:1, shamatha:1 } },
+    { text: "Устал(а) от людей. Хочется тишины и одиночества.", p: { metta:2, nidra:1, shamatha:1 } },
     { text: "Перегруз. Много всего, голова как котёл.", p: { box:2, coherent:2, b478:1 } },
     { text: "Подъём. Энергия есть — хочу направить её глубже.", p: { tonglen:2, coherent:1, vipassana:1 } },
   ]},
@@ -640,7 +668,7 @@ const MEDITATION_QUESTIONS = [
     { text: "Пустота. Мысли почти не приходят.", p: { tummo:1, nidra:2, metta:1 } },
     { text: "Мысли живые и быстрые. Идей много.", p: { tonglen:2, coherent:1, vipassana:1 } },
   ]},
-  { id: 5, category: "ВРЕМЯ", text: "Сколько времени ты готов уделить практике прямо сейчас?", options: [
+  { id: 5, category: "ВРЕМЯ", text: "Сколько времени ты готов(а) уделить практике прямо сейчас?", options: [
     { text: "2–3 минуты. Совсем немного.", p: { b478:2, box:2, coherent:1 } },
     { text: "5–10 минут.", p: { shamatha:2, tummo:2, box:1 } },
     { text: "10–15 минут.", p: { vipassana:2, metta:2, tonglen:1 } },
@@ -651,14 +679,14 @@ const MEDITATION_QUESTIONS = [
   { id: 6, category: "МЕСТО", text: "Где ты сейчас будешь практиковать?", options: [
     { text: "На рабочем месте. Незаметно для окружающих.", p: { box:2, coherent:2, b478:1 } },
     { text: "Дома. Могу сесть как удобно.", p: { shamatha:2, vipassana:2, metta:1 } },
-    { text: "Лёжа. Устал, хочу горизонталь.", p: { nidra:2, metta:1, b478:1 } },
+    { text: "Лёжа. Устал(а), хочу горизонталь.", p: { nidra:2, metta:1, b478:1 } },
     { text: "В транспорте или на ходу.", p: { coherent:2, box:2, b478:1 } },
     { text: "В тихом уединённом месте.", p: { tonglen:2, vipassana:1, shamatha:1 } },
     { text: "Неважно где. Главное — попробовать.", p: { shamatha:1, b478:1, box:1, coherent:1 } },
   ]},
   { id: 7, category: "ОПЫТ", text: "Есть ли у тебя опыт медитации?", options: [
     { text: "Нет. Первый раз.", p: { b478:2, box:2, coherent:2 } },
-    { text: "Пробовал пару раз, но нерегулярно.", p: { shamatha:2, b478:1, coherent:1 } },
+    { text: "Пробовал(а) пару раз, но нерегулярно.", p: { shamatha:2, b478:1, coherent:1 } },
     { text: "Есть базовая практика.", p: { vipassana:2, metta:1, shamatha:1 } },
     { text: "Практикую регулярно.", p: { tonglen:2, vipassana:1, tummo:1 } },
     { text: "Знаком с буддийскими практиками.", p: { tonglen:2, tummo:2, vipassana:1 } },
@@ -683,13 +711,13 @@ const MEDITATION_QUESTIONS = [
   { id: 10, category: "СОН", text: "Как ты спишь последнее время?", options: [
     { text: "Плохо. Засыпаю долго, мысли не останавливаются.", p: { b478:2, shamatha:1, nidra:1 } },
     { text: "Прерывисто. Просыпаюсь ночью.", p: { coherent:2, b478:1, nidra:2 } },
-    { text: "Сплю, но не высыпаюсь. Встаю разбитым.", p: { nidra:2, tummo:1, metta:1 } },
+    { text: "Сплю, но не высыпаюсь. Встаю разбитым(ой).", p: { nidra:2, tummo:1, metta:1 } },
     { text: "Нормально. Сон не проблема.", p: { vipassana:1, tonglen:1, shamatha:1 } },
     { text: "Хорошо. Сплю глубоко.", p: { tonglen:2, vipassana:1, coherent:1 } },
     { text: "Слишком много сплю. Нет сил вставать.", p: { tummo:2, box:1, coherent:1 } },
   ]},
   { id: 11, category: "ЛЮДИ", text: "Как ты себя чувствуешь в контакте с людьми?", options: [
-    { text: "Устал от всех. Хочу побыть один.", p: { metta:2, nidra:1, shamatha:1 } },
+    { text: "Устал(а) от всех. Хочу побыть один(одна).", p: { metta:2, nidra:1, shamatha:1 } },
     { text: "Чувствую чужую боль и усталость сильнее своей.", p: { tonglen:2, metta:2, b478:1 } },
     { text: "Раздражение. Люди выводят из себя.", p: { box:2, coherent:1, shamatha:1 } },
     { text: "Одиноко среди людей. Нет настоящего контакта.", p: { metta:2, vipassana:1, tonglen:1 } },
@@ -712,13 +740,13 @@ const MEDITATION_QUESTIONS = [
     { text: "Активный. Что-то, что даст энергию.", p: { tummo:2, tonglen:1, box:1 } },
     { text: "Неважно. Главное — что-то делать.", p: { shamatha:1, b478:1, coherent:1 } },
   ]},
-  { id: 14, category: "ГЛУБИНА", text: "Насколько ты готов погрузиться?", options: [
+  { id: 14, category: "ГЛУБИНА", text: "Насколько ты готов(а) погрузиться?", options: [
     { text: "Хочу просто успокоиться. Без глубины.", p: { b478:2, box:2, coherent:1 } },
-    { text: "Готов немного — понаблюдать за собой.", p: { shamatha:2, vipassana:1, coherent:1 } },
+    { text: "Готов(а) немного — понаблюдать за собой.", p: { shamatha:2, vipassana:1, coherent:1 } },
     { text: "Хочу по-настоящему расслабиться и отпустить.", p: { nidra:2, metta:1, b478:1 } },
-    { text: "Готов исследовать что внутри.", p: { vipassana:2, tonglen:1, shamatha:1 } },
+    { text: "Готов(а) исследовать что внутри.", p: { vipassana:2, tonglen:1, shamatha:1 } },
     { text: "Хочу тепла — для себя или кого-то.", p: { metta:2, tonglen:2, nidra:1 } },
-    { text: "Готов к самой глубокой практике.", p: { tonglen:2, tummo:2, vipassana:1 } },
+    { text: "Готов(а) к самой глубокой практике.", p: { tonglen:2, tummo:2, vipassana:1 } },
   ]},
   { id: 15, category: "ВНУТРИ", text: "Есть ли ощущение холода или пустоты внутри?", options: [
     { text: "Да. Внутри холодно и пусто.", p: { tummo:2, metta:2, b478:1 } },
@@ -761,12 +789,12 @@ const MEDITATION_QUESTIONS = [
     { text: "Глубина. Выйти за пределы поверхности.", p: { tonglen:2, tummo:1, vipassana:1 } },
   ]},
   { id: 20, category: "ГОТОВНОСТЬ", text: "Какое слово лучше всего описывает тебя сейчас?", options: [
-    { text: "Тревожный.", p: { shamatha:2, b478:2, coherent:1 } },
-    { text: "Опустошённый.", p: { tummo:2, metta:1, nidra:1 } },
-    { text: "Напряжённый.", p: { box:2, nidra:1, coherent:2 } },
-    { text: "Потерянный.", p: { vipassana:2, shamatha:1, metta:1 } },
-    { text: "Уставший.", p: { nidra:2, b478:1, metta:1 } },
-    { text: "Живой.", p: { tonglen:2, coherent:1, vipassana:1 } },
+    { text: "Тревожный(ая).", p: { shamatha:2, b478:2, coherent:1 } },
+    { text: "Опустошённый(ая).", p: { tummo:2, metta:1, nidra:1 } },
+    { text: "Напряжённый(ая).", p: { box:2, nidra:1, coherent:2 } },
+    { text: "Потерянный(ая).", p: { vipassana:2, shamatha:1, metta:1 } },
+    { text: "Уставший(ая).", p: { nidra:2, b478:1, metta:1 } },
+    { text: "Живой(ая).", p: { tonglen:2, coherent:1, vipassana:1 } },
   ]},
 ];
 
@@ -814,7 +842,7 @@ const MEDITATION_RESULTS = {
     tag: "Тепло",
     tradition: "Буддийская традиция · Практика любящей доброты",
     color: "#C8A97E",
-    why: "Ты устал от людей — или от одиночества среди них. Внутри что-то затвердело. Метта не заставляет любить всех. Она начинается с себя — с маленького тепла которое уже есть внутри.",
+    why: "Ты устал(а) от людей — или от одиночества среди них. Внутри что-то затвердело. Метта не заставляет любить всех. Она начинается с себя — с маленького тепла которое уже есть внутри.",
     steps: [
       "Сядь удобно. Положи правую руку на грудь — туда где сердце.",
       "Вспомни любой момент когда тебе было хорошо — даже совсем маленький. Почувствуй это тепло.",
@@ -850,7 +878,7 @@ const MEDITATION_RESULTS = {
     tag: "Растворение",
     tradition: "Йогическая традиция · Свами Сатьянанда Сарасвати",
     color: "#7B9EB0",
-    why: "Ты истощён — не физически, а глубже. Тело держит напряжение даже когда ты «отдыхаешь». Нидра — это состояние между сном и бодрствованием. Ты не засыпаешь и не думаешь. Ты просто позволяешь.",
+    why: "Ты истощён(а) — не физически, а глубже. Тело держит напряжение даже когда ты «отдыхаешь». Нидра — это состояние между сном и бодрствованием. Ты не засыпаешь и не думаешь. Ты просто позволяешь.",
     steps: [
       "Ляг на спину. Руки чуть в стороны, ладони вверх. Три медленных вдоха.",
       "Медленно веди внимание по телу — не напрягай, просто касайся вниманием и отпускай:",
@@ -868,7 +896,7 @@ const MEDITATION_RESULTS = {
     tag: "Равновесие",
     tradition: "Тибетский буддизм · Атиша, XI век",
     color: "#9E7AB0",
-    why: "Ты сейчас в ресурсе — энергия есть, внутри светло. Тонглен — это практика для тех кто готов идти глубже. Парадоксальная: ты вдыхаешь тяжёлое и выдыхаешь лёгкое. Это не про жертву. Это про бесстрашие сердца.",
+    why: "Ты сейчас в ресурсе — энергия есть, внутри светло. Тонглен — это практика для тех кто готов(а) идти глубже. Парадоксальная: ты вдыхаешь тяжёлое и выдыхаешь лёгкое. Это не про жертву. Это про бесстрашие сердца.",
     steps: [
       "Сядь удобно, закрой глаза. Несколько вдохов — просто успокойся.",
       "На вдохе — представляй тёмный густой дым который входит в тебя. Это боль — чья-то или твоя прошлая. Не бойся. Ты принимаешь её в сердце.",
@@ -1377,6 +1405,103 @@ function QuizScreen({ onBack }) {
 }
 
 // ─────────────────────────────────────────────
+// ЭКРАН: НАСКОЛЬКО ТЫ ЧЕСТЕН САМ С СОБОЙ
+// ─────────────────────────────────────────────
+const SH_SCALE = [
+  { v: 1, label: "Совсем не про меня" },
+  { v: 2, label: "Скорее не про меня" },
+  { v: 3, label: "И да, и нет" },
+  { v: 4, label: "Скорее про меня" },
+  { v: 5, label: "Это точно про меня" },
+];
+
+function SelfHonestyScreen({ onBack }) {
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [finished, setFinished] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const q = SELF_HONESTY_QUESTIONS[current];
+
+  const rawTotal = answers.reduce((a,b) => a+b, 0);
+  const minTotal = SELF_HONESTY_QUESTIONS.length * 1;
+  const maxTotal = SELF_HONESTY_QUESTIONS.length * 5;
+  const pct = Math.round(((rawTotal - minTotal) / (maxTotal - minTotal)) * 100);
+  const result = finished ? (SELF_HONESTY_RESULTS.find(r => pct >= r.range[0] && pct <= r.range[1]) || SELF_HONESTY_RESULTS[0]) : null;
+
+  const handleNext = () => {
+    if (selected === null) return;
+    setAnimating(true);
+    const scored = q.reverse ? (6 - selected) : selected;
+    const na = [...answers, scored];
+    if (current+1 >= SELF_HONESTY_QUESTIONS.length) { statEvent("selfhonesty"); }
+    setTimeout(() => {
+      setAnswers(na); setSelected(null);
+      if (current+1 >= SELF_HONESTY_QUESTIONS.length) {
+        setFinished(true);
+        const t = na.reduce((a,b)=>a+b,0);
+        pushHistory("selfhonesty_history", {
+          score: Math.round(((t - minTotal) / (maxTotal - minTotal)) * 100),
+        });
+      } else { setCurrent(c => c+1); }
+      setAnimating(false);
+    }, 300);
+  };
+
+  if (finished && result) {
+    const scaleLabels = ["ЧЕСТНО", "ЕСТЬ ПЯТНА", "ПРИУКРАШЕНО", "СИЛЬНО"];
+    const hiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
+    const shareMsg = `${result.emoji} ${result.title}\n«${result.subtitle}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.resultContainer}>
+          <div style={S.sectionHead}>
+            <p style={S.sectionTitle}>СКЛОННОСТЬ К САМООБМАНУ</p>
+            <InfoButton text="«Насколько ты склонен(на) видеть себя лучше, чем есть на самом деле — неосознанно, не ради других, а для себя.»" />
+          </div>
+          <MetricBlock
+            value={pct}
+            rightName={result.title}
+            rightSub={result.subtitle}
+            fillFrom="#4A3020"
+            fillTo="#C8A97E"
+            scaleLabels={scaleLabels}
+            hiIndex={hiIndex}
+            quote={`«${result.text}»`}
+          />
+          <ShareButton text={shareMsg} />
+          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
+          <button onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setFinished(false); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={S.screen}>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <HintPopup text="14 утверждений — насколько ты видишь себя таким, какой ты есть, а не удобной версией." />
+      </div>
+      <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current+1} / {SELF_HONESTY_QUESTIONS.length}</span></div>
+      <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{q.text}</p>
+      <div style={S.optionsList}>
+        {SH_SCALE.map((opt,i) => (
+          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, borderColor: selected===opt.v ? "#C8A97E" : "#2A2520", backgroundColor: selected===opt.v ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+            <span style={S.optionRadio}>{selected===opt.v ? "◉" : "○"}</span>
+            <span style={S.optionText}>{opt.label}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={handleNext} disabled={selected===null} style={{ ...S.primaryBtn, opacity: selected===null ? 0.3 : 1 }}>{current+1===SELF_HONESTY_QUESTIONS.length ? "Узнать результат" : "Следующий вопрос"}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ЭКРАН: ТЕСТ МЕДИТАЦИЙ
 // ─────────────────────────────────────────────
 function MeditationQuizScreen({ onBack }) {
@@ -1693,7 +1818,7 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
 // ─────────────────────────────────────────────
 const NOTE_EMOTIONS = [
   { id: "calm", emoji: "🌙", label: "тихо" },
-  { id: "tired", emoji: "🌫", label: "устал" },
+  { id: "tired", emoji: "🌫", label: "устало" },
   { id: "warm", emoji: "🌕", label: "тепло" },
   { id: "anx", emoji: "🍃", label: "тревожно" },
 ];
@@ -2123,6 +2248,7 @@ function AdminScreen({ onBack }) {
         setStats({
           totalOpens:     serverStats.totalOpens     ?? 0,
           totalQuiz:      serverStats.totalQuiz      ?? 0,
+          totalSelfHonesty:serverStats.totalSelfHonesty??0,
           totalTea:       serverStats.totalTea       ?? 0,
           totalMood:      serverStats.totalMood      ?? 0,
           totalMeditation:serverStats.totalMeditation?? 0,
@@ -2167,6 +2293,7 @@ function AdminScreen({ onBack }) {
             {row("Открытий", stats.totalOpens)}
             {row("Уникальных пользователей", stats.uniqueTotal)}
             {row("Опросник", stats.totalQuiz)}
+            {row("Насколько я вру себе", stats.totalSelfHonesty)}
             {row("Тест чая", stats.totalTea)}
             {row("Тест медитаций", stats.totalMeditation)}
             {row("Записей эмоций", stats.totalMood)}
@@ -2429,7 +2556,7 @@ function MyPathScreen({ onBack }) {
       {/* ПРОГРЕСС */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>ПРОГРЕСС</p>
-        <InfoButton text="«Сколько всего ты сделал в Tea Bro. Каждое прохождение — шаг к себе.»" />
+        <InfoButton text="«Сколько всего ты сделал(а) в Tea Bro. Каждое прохождение — шаг к себе.»" />
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px", marginBottom:"4px" }}>
         <div style={S.statCard}>
@@ -2571,6 +2698,7 @@ export default function App() {
   const isAdmin = tgUser?.id === ADMIN_ID || urlParams.get("admin") === "teabro_admin_2024";
 
   if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
+  if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
   if (screen === "meditation") return <MeditationQuizScreen onBack={() => setScreen("home")} />;
   if (screen === "wisdom")     return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   if (screen === "teaquiz")    return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
@@ -2589,9 +2717,10 @@ export default function App() {
       <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
       <div style={S.menuList}>
         {[
-          { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · два теста" },
-          { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние" },
-          { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние" },
+          { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · 25 вопросов" },
+          { id:"selfhonesty", title:"Насколько я вру себе",      desc:"Тест на самообман · 14 вопросов" },
+          { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние · 5 вопросов" },
+          { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
           { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
           { id:"mypath",     title:"Мой профиль",                desc:"Мои результаты и прогресс" },
           { id:"wisdom",     title:"Тихая мысль",                desc:"Для тебя сейчас" },
