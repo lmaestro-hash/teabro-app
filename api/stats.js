@@ -1,4 +1,4 @@
-// api/stats.js — Tea Bro v3.3
+// api/stats.js — Tea Bro v3.3 (fixed: private blob store)
 import { put, list } from "@vercel/blob";
 
 const STATS_KEY = "teabro-stats.json";
@@ -9,7 +9,10 @@ async function readStats() {
     const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
     const blob = blobs.find(b => b.pathname === STATS_KEY);
     if (!blob) return defaultStats();
-    const res = await fetch(blob.url + "?t=" + Date.now());
+    const res = await fetch(blob.url, {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+      cache: "no-store",
+    });
     if (!res.ok) return defaultStats();
     return await res.json();
   } catch (err) {
@@ -20,7 +23,7 @@ async function readStats() {
 
 async function writeStats(data) {
   await put(STATS_KEY, JSON.stringify(data), {
-    access: "public",
+    access: "private",
     allowOverwrite: true,
     addRandomSuffix: false,
     token: TOKEN,
@@ -94,7 +97,6 @@ export default async function handler(req, res) {
 
     if (uid) initUser(stats, uid);
 
-    // ── open ──
     if (action === "open") {
       stats.totalOpens = (stats.totalOpens || 0) + 1;
       today.opens = (today.opens || 0) + 1;
@@ -110,7 +112,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // ── snapshot ──
     if (action === "snapshot") {
       if (uid) {
         const week = getISOWeek();
@@ -125,7 +126,6 @@ export default async function handler(req, res) {
           notesCount: notesCount !== undefined ? Number(notesCount) : (prev?.notesCount ?? null),
           opens: (prev?.opens || 0) + 1,
         };
-        // Среднее выгорание
         if (burnout !== undefined && prev?.burnout != null) {
           snap.burnout = Math.round((prev.burnout + Number(burnout)) / 2);
         }
@@ -142,7 +142,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // ── pause ──
     if (action === "pause") {
       if (uid) {
         stats.users[uid].pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
@@ -151,7 +150,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // ── push_opened ──
     if (action === "push_opened") {
       if (uid) {
         stats.users[uid].lastPushOpened = Date.now();
@@ -160,7 +158,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // ── quiz ──
     if (action === "quiz") {
       stats.totalQuiz = (stats.totalQuiz || 0) + 1;
       today.quiz = (today.quiz || 0) + 1;
@@ -168,28 +165,24 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // ── tea ──
     if (action === "tea") {
       stats.totalTea = (stats.totalTea || 0) + 1;
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
 
-    // ── meditation ──
     if (action === "meditation") {
       stats.totalMeditation = (stats.totalMeditation || 0) + 1;
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
 
-    // ── mood ──
     if (action === "mood") {
       stats.totalMood = (stats.totalMood || 0) + 1;
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
 
-    // ── get ──
     if (action === "get") {
       return res.status(200).json({
         totalOpens: stats.totalOpens || 0,
@@ -204,12 +197,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // ── get_users ──
     if (action === "get_users") {
       return res.status(200).json({ users: stats.users });
     }
 
-    // ── update_user ──
     if (action === "update_user") {
       if (uid) {
         const body = req.method === "POST" ? req.body : {};
