@@ -40,6 +40,7 @@ function defaultStats() {
   return {
     totalOpens: 0,
     totalQuiz: 0,
+    totalSelfHonesty: 0,
     totalTea: 0,
     totalMood: 0,
     totalMeditation: 0,
@@ -199,6 +200,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    if (action === "selfhonesty") {
+      stats.totalSelfHonesty = (stats.totalSelfHonesty || 0) + 1;
+      await writeStats(stats);
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === "tea") {
       stats.totalTea = (stats.totalTea || 0) + 1;
       await writeStats(stats);
@@ -221,6 +228,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         totalOpens: stats.totalOpens || 0,
         totalQuiz: stats.totalQuiz || 0,
+        totalSelfHonesty: stats.totalSelfHonesty || 0,
         totalTea: stats.totalTea || 0,
         totalMood: stats.totalMood || 0,
         totalMeditation: stats.totalMeditation || 0,
