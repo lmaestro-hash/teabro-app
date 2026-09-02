@@ -72,10 +72,12 @@ function initUser(stats, uid) {
       lastPushOpened: null,
       pauseUntil: null,
       snapshots: [],
+      letters: [],
     };
   } else {
     const u = stats.users[uid];
     if (!u.snapshots) u.snapshots = [];
+    if (!u.letters) u.letters = [];
     if (u.chatId === undefined) u.chatId = null;
     if (u.lastSeen === undefined) u.lastSeen = null;
     if (u.lastPushSent === undefined) u.lastPushSent = null;
@@ -91,7 +93,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const params = req.method === "POST" ? req.body : req.query;
-  const { action, uid, chatId, burnout, mood, notesCount } = params;
+  const { action, uid, chatId, burnout, mood, notesCount, letterId, revealAt } = params;
   const todayKey = getTodayKey();
 
   try {
@@ -155,6 +157,28 @@ export default async function handler(req, res) {
     if (action === "pause") {
       if (uid) {
         stats.users[uid].pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
+        await writeStats(stats);
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === "schedule_letter") {
+      if (uid && letterId && revealAt) {
+        const user = stats.users[uid];
+        if (chatId) user.chatId = String(chatId);
+        const idx = user.letters.findIndex(l => String(l.id) === String(letterId));
+        const entry = { id: letterId, revealAt, notified: false };
+        if (idx >= 0) user.letters[idx] = entry;
+        else user.letters.push(entry);
+        await writeStats(stats);
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === "cancel_letter") {
+      if (uid && letterId) {
+        const user = stats.users[uid];
+        user.letters = (user.letters || []).filter(l => String(l.id) !== String(letterId));
         await writeStats(stats);
       }
       return res.status(200).json({ ok: true });

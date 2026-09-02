@@ -43,6 +43,21 @@ async function statEvent(action, uid) {
   return _statQueue;
 }
 
+// Единый способ получить uid + chat_id (для событий вне основного loadMood)
+function getUidChat() {
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  let uid = tgUser?.id ? String(tgUser.id) : null;
+  const chatId = uid; // в TG Mini App user.id === chat_id
+  if (!uid) {
+    try {
+      let stored = localStorage.getItem("teabro_uid");
+      if (!stored) { stored = "b_" + Math.random().toString(36).slice(2, 10); localStorage.setItem("teabro_uid", stored); }
+      uid = stored;
+    } catch {}
+  }
+  return { uid, chatId };
+}
+
 // ─────────────────────────────────────────────
 // 100 СОВЕТОВ ДНЯ
 // ─────────────────────────────────────────────
@@ -1926,7 +1941,14 @@ function QuietNotes({ onBack }) {
     const now = new Date();
     const entry = { id: Date.now(), date: now.toISOString(), text: seal ? `Письмо себе — открыть ${sealDate}` : text.trim(), fullText: text.trim(), mood, sealed: seal, revealAt: seal ? new Date(new Date(sealDate).getTime()).toISOString() : null };
     persist([entry, ...entries]); setText(""); setMood(null); setSeal(false); setSealDate("");
-    if (seal) { setSealing(true); setTimeout(() => setSealing(false), 2000); }
+    if (seal) {
+      setSealing(true); setTimeout(() => setSealing(false), 2000);
+      const { uid, chatId } = getUidChat();
+      if (chatId) {
+        const p = new URLSearchParams({ action: "schedule_letter", uid, chatId, letterId: String(entry.id), revealAt: entry.revealAt });
+        fetch(`${STATS_URL}?${p}`, { keepalive: true }).catch(() => {});
+      }
+    }
     else { setJustSaved(true); setTimeout(() => setJustSaved(false), 1800); }
   }
   if (!loaded) return (<div style={S.screen}><button onClick={onBack} style={S.backBtn}>← назад</button><div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:"#7A6E62", fontStyle:"italic" }}>Открываю тихие записи...</p></div></div>);
@@ -1964,7 +1986,7 @@ function QuietNotes({ onBack }) {
       </div>
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => persist(entries.filter(x => x.id !== e.id))} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );

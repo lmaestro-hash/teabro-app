@@ -1,6 +1,7 @@
-// api/push.js — Tea Bro v3.3
+// api/push.js — Tea Bro v3.5
 // Запускается каждый час через Vercel Cron
-// Рассылает только в понедельник 07:00 UTC (10:00 Киев)
+// Дайджест — не по календарю, а индивидуально: раз в 15 дней, только если юзер неактивен 5+ дней
+// Письма себе — проверяются на каждый тик, независимо от дайджеста
 
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -29,7 +30,7 @@ function selectTemplate(user) {
     ? Math.floor((Date.now() - user.lastSeen) / 86400000)
     : 999;
 
-  if (daysSince >= 3) {
+  if (daysSince >= 14) {
     const d = daysSince === 1 ? "день" : daysSince < 5 ? "дня" : "дней";
     return `🌕 Давно не виделись — ${daysSince} ${d}.\n\nКак ты сейчас?`;
   }
@@ -68,14 +69,41 @@ function shouldSend(user) {
   const daysSince = user.lastSeen
     ? Math.floor((now - user.lastSeen) / 86400000)
     : 999;
-  if (daysSince >= 7) return false;
-  if (user.lastPushSent && !user.lastPushOpened) {
-    if (now - user.lastPushSent < 6 * 24 * 60 * 60 * 1000) return false;
-  }
+  if (daysSince < 5) return false; // ещё не считается неактивным — не трогаем
+  if (user.lastPushSent && now - user.lastPushSent < 15 * 24 * 60 * 60 * 1000) return false; // не чаще раза в 15 дней
   return true;
 }
 
-async function sendPush(chatId, text) {
+function letterText() {
+  return `🌕 Ты просил напомнить о письме именно сегодня.\n\nЗайди — время пришло.`;
+}
+
+async function checkLetters(users) {
+  let sent = 0;
+  for (const [uid, user] of Object.entries(users || {})) {
+    if (!user.chatId || !user.letters?.length) continue;
+    const due = user.letters.filter(l => !l.notified && new Date(l.revealAt) <= new Date());
+    if (!due.length) continue;
+    const ok = await sendPush(user.chatId, letterText(), { withPause: false });
+    if (ok) {
+      for (const l of due) {
+        await fetch(`${STATS_URL}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "cancel_letter", uid, letterId: l.id }),
+        });
+      }
+      sent++;
+    }
+    await new Promise(r => setTimeout(r, 50));
+  }
+  return sent;
+}
+
+async function sendPush(chatId, text, { withPause = true } = {}) {
+  const buttons = withPause
+    ? [{ text: "⏸ Пауза на месяц", callback_data: "pause_pushes" }, { text: "Открыть 🌕", web_app: { url: APP_URL } }]
+    : [{ text: "Открыть 🌕", web_app: { url: APP_URL } }];
   const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -83,32 +111,21 @@ async function sendPush(chatId, text) {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [[
-          { text: "⏸ Пауза на месяц", callback_data: "pause_pushes" },
-          { text: "Открыть 🌕", web_app: { url: APP_URL } },
-        ]],
-      },
+      reply_markup: { inline_keyboard: [buttons] },
     }),
   });
   return resp.ok;
 }
 
 export default async function handler(req, res) {
-  // Только понедельник 07:00 UTC (10:00 Киев)
-  const now = new Date();
-  const day = now.getUTCDay();
-  const hour = now.getUTCHours();
-  const isPushTime = day === 1 && hour === 7;
-
-  if (!isPushTime) {
-    return res.status(200).json({ ok: true, skipped: "not push time" });
-  }
-
   try {
     const statsRes = await fetch(`${STATS_URL}?action=get_users`);
     const { users } = await statsRes.json();
 
+    // Проверка писем себе — на каждый тик крона
+    const lettersSent = await checkLetters(users);
+
+    // Дайджест — индивидуально по каждому юзеру (см. shouldSend), тоже на каждый тик
     let sent = 0;
     let skipped = 0;
 
@@ -129,7 +146,7 @@ export default async function handler(req, res) {
       await new Promise(r => setTimeout(r, 50));
     }
 
-    return res.status(200).json({ ok: true, sent, skipped });
+    return res.status(200).json({ ok: true, sent, skipped, lettersSent });
   } catch (err) {
     console.error("Push error:", err);
     return res.status(500).json({ error: String(err) });
