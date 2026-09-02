@@ -518,6 +518,64 @@ const SELF_HONESTY_RESULTS = [
 ];
 
 // ─────────────────────────────────────────────
+// СОВЕТЫ ПО САМООБМАНУ
+// ─────────────────────────────────────────────
+const SELF_HONESTY_ADVICE = {
+  low: {
+    label: "Держи то, что уже работает",
+    color: "#7A9E7E",
+    why: "Ты видишь себя без искажений — это редкость и это тяжело эмоционально, но окупается доверием к себе.",
+    steps: [
+      "Не путай честность с самокритикой — трезвость не значит жёсткость к себе.",
+      "Раз в неделю фиксируй одну вещь, которую сделал(а) хорошо — трезвый взгляд легко скатывается в излишнюю строгость.",
+      "Делись честными наблюдениями о себе с близкими — это укрепляет привычку.",
+      "Замечай, когда начинаешь оправдываться — первый признак отката в самообман.",
+      "Не жди идеала от себя — трезвость включает принятие ошибок, а не только их видение.",
+    ],
+    duration: "Поддерживающая практика · 5 минут в день",
+  },
+  mild: {
+    label: "Замечай, где именно смягчаешь картину",
+    color: "#A9B98E",
+    why: "У тебя есть небольшие слепые пятна — это нормально, но стоит их найти, пока они не выросли.",
+    steps: [
+      "Перечитай ответы теста — где балл был выше 3, там ищи конкретный пример из жизни.",
+      "Спроси у близкого человека: «В чём я себе, по-твоему, вру?» — и выслушай без защиты.",
+      "Веди короткие записи вечером: «Где я сегодня приукрасил(а) для себя ситуацию?»",
+      "Разделяй факт и интерпретацию — «я опоздал» вместо «у меня всегда что-то мешает».",
+      "Раз в месяц пересматривай одно решение — было ли оно таким осознанным, каким казалось?",
+    ],
+    duration: "2–3 недели наблюдения · станет заметнее",
+  },
+  medium: {
+    label: "Пора смотреть чуть внимательнее",
+    color: "#C8A97E",
+    why: "Ты периодически строишь удобную версию себя — это защита, но она мешает видеть реальные проблемы.",
+    steps: [
+      "Выбери одну область (работа/отношения/привычки) и честно распиши: что реально происходит, без смягчений.",
+      "Найди человека, который скажет тебе правду, даже неприятную — и разреши ему это.",
+      "Отслеживай фразы-оправдания: «все так делают», «у меня не было выбора» — это маркеры самообмана.",
+      "Раз в неделю задавай вопрос: «Что бы я увидел(а), если бы смотрел(а) на себя со стороны?»",
+      "Не пытайся исправить всё сразу — начни с одной честной мысли в день.",
+    ],
+    duration: "4–6 недель практики · без спешки",
+  },
+  high: {
+    label: "Нужен взгляд со стороны",
+    color: "#B87333",
+    why: "Ты часто веришь в свою непогрешимость больше, чем это оправдано — решения кажутся осознаннее, ошибки — не твоими.",
+    steps: [
+      "Найди человека (друга, психолога), которому доверяешь настолько, чтобы услышать неприятную правду о себе.",
+      "Прежде чем защищаться в споре — сначала выслушай полностью, не перебивая внутренним «да, но».",
+      "Пересмотри 2–3 последних конфликта — в каждом ли действительно был виноват только другой человек?",
+      "Заведи привычку: раз в день записывай одну свою ошибку без оправдания.",
+      "Работа с психологом — это не слабость, а самый быстрый путь увидеть слепые зоны, которые сам не видишь.",
+    ],
+    duration: "Месяцы регулярной практики · доверяй темпу",
+  },
+};
+
+// ─────────────────────────────────────────────
 // СОВЕТЫ ПО ВЫГОРАНИЮ
 // ─────────────────────────────────────────────
 const BURNOUT_ADVICE = {
@@ -1451,6 +1509,8 @@ function SelfHonestyScreen({ onBack }) {
   if (finished && result) {
     const scaleLabels = ["ЧЕСТНО", "ЕСТЬ ПЯТНА", "ПРИУКРАШЕНО", "СИЛЬНО"];
     const hiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
+    const adviceKey = pct <= 25 ? "low" : pct <= 50 ? "mild" : pct <= 75 ? "medium" : "high";
+    const advice = SELF_HONESTY_ADVICE[adviceKey];
     const shareMsg = `${result.emoji} ${result.title}\n«${result.subtitle}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
@@ -1470,6 +1530,21 @@ function SelfHonestyScreen({ onBack }) {
             hiIndex={hiIndex}
             quote={`«${result.text}»`}
           />
+
+          {/* Блок советов — всегда открыт */}
+          <div style={S.stepsBlock}>
+            <p style={S.stepsTitle}>ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС</p>
+            {advice.steps.map((step, i) => (
+              <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "12px" : "0" }}>
+                <span style={{ fontSize:"11px", color:"#C8A97E", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7 }}>{step}</p>
+              </div>
+            ))}
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
+              <p style={{ margin:0, fontSize:"11px", color:"#5A5048" }}>⏱ {advice.duration}</p>
+            </div>
+          </div>
+
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>Перейти в канал 🌕</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setFinished(false); }} style={S.ghostBtn}>Пройти заново</button>
@@ -2293,7 +2368,7 @@ function AdminScreen({ onBack }) {
             {row("Открытий", stats.totalOpens)}
             {row("Уникальных пользователей", stats.uniqueTotal)}
             {row("Опросник", stats.totalQuiz)}
-            {row("Насколько я вру себе", stats.totalSelfHonesty)}
+            {row("Склонность к самообману", stats.totalSelfHonesty)}
             {row("Тест чая", stats.totalTea)}
             {row("Тест медитаций", stats.totalMeditation)}
             {row("Записей эмоций", stats.totalMood)}
@@ -2345,6 +2420,7 @@ function MyPathScreen({ onBack }) {
   const [loaded, setLoaded] = useState(false);
   const [streak, setStreak] = useState(0);
   const [quizHist, setQuizHist] = useState([]);
+  const [selfHonestyHist, setSelfHonestyHist] = useState([]);
   const [teaHist, setTeaHist] = useState([]);
   const [medHist, setMedHist] = useState([]);
   const [moodCounts, setMoodCounts] = useState(null);
@@ -2356,6 +2432,7 @@ function MyPathScreen({ onBack }) {
       setStreak(parseInt(s || "0"));
 
       setQuizHist(await getHistory("quiz_history"));
+      setSelfHonestyHist(await getHistory("selfhonesty_history"));
       setTeaHist(await getHistory("tea_history"));
       setMedHist(await getHistory("meditation_history"));
 
@@ -2405,6 +2482,14 @@ function MyPathScreen({ onBack }) {
   const burnoutLevel = BURNOUT_LEVELS.find(b => burnoutRaw >= b.range[0] && burnoutRaw <= b.range[1]) || BURNOUT_LEVELS[0];
   const assemblyScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
   const assemblyHiIndex = assemblyPct <= 25 ? 0 : assemblyPct <= 50 ? 1 : assemblyPct <= 75 ? 2 : 3;
+
+  // ── СКЛОННОСТЬ К САМООБМАНУ — среднее по последним 3 ──
+  const shLast = selfHonestyHist.slice(-3);
+  const hasSelfHonesty = shLast.length > 0;
+  const selfHonestyPct = hasSelfHonesty ? Math.round(shLast.reduce((s,h) => s + (h.score||0), 0) / shLast.length) : 0;
+  const selfHonestyResult = SELF_HONESTY_RESULTS.find(r => selfHonestyPct >= r.range[0] && selfHonestyPct <= r.range[1]) || SELF_HONESTY_RESULTS[0];
+  const shScaleLabels = ["ЧЕСТНО", "ЕСТЬ ПЯТНА", "ПРИУКРАШЕНО", "СИЛЬНО"];
+  const shHiIndex = selfHonestyPct <= 25 ? 0 : selfHonestyPct <= 50 ? 1 : selfHonestyPct <= 75 ? 2 : 3;
 
   // ── ЧАЙ — распределение по истории ──
   const teaDist = calcDistribution(teaHist, "winner");
@@ -2508,6 +2593,27 @@ function MyPathScreen({ onBack }) {
         <EmptyMetric text="Опросник покажет и уровень выгорания." />
       )}
 
+      {/* СКЛОННОСТЬ К САМООБМАНУ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>СКЛОННОСТЬ К САМООБМАНУ</p>
+        <InfoButton text="«Насколько ты склонен(на) видеть себя лучше, чем есть на самом деле — неосознанно, не ради других, а для себя.»" />
+      </div>
+      {hasSelfHonesty ? (
+        <MetricBlock
+          value={selfHonestyPct}
+          rightName={selfHonestyResult.title}
+          rightSub={selfHonestyResult.subtitle}
+          fillFrom="#4A3020"
+          fillTo="#C8A97E"
+          scaleLabels={shScaleLabels}
+          hiIndex={shHiIndex}
+          quote={`«${selfHonestyResult.text}»`}
+          animKey={`selfhonesty-${selfHonestyPct}`}
+        />
+      ) : (
+        <EmptyMetric text="Пройди тест «Склонность к самообману» — и здесь появится результат." />
+      )}
+
       {/* ЛЮБИМЫЙ ЧАЙ */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>ЛЮБИМЫЙ ЧАЙ</p>
@@ -2560,16 +2666,28 @@ function MyPathScreen({ onBack }) {
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px", marginBottom:"4px" }}>
         <div style={S.statCard}>
-          <p style={S.statNum}>{medHist.length}</p>
-          <p style={S.statLabel}>практик пройдено</p>
+          <p style={S.statNum}>{hasQuiz ? `${assemblyPct}%` : "—"}</p>
+          <p style={S.statLabel}>точка сборки</p>
         </div>
         <div style={S.statCard}>
-          <p style={S.statNum}>{teaHist.length}</p>
-          <p style={S.statLabel}>тестов чая</p>
+          <p style={S.statNum}>{hasQuiz ? `${burnoutPct}%` : "—"}</p>
+          <p style={S.statLabel}>уровень выгорания</p>
         </div>
         <div style={S.statCard}>
-          <p style={S.statNum}>{moodTotal}</p>
-          <p style={S.statLabel}>дней настроения</p>
+          <p style={S.statNum}>{hasSelfHonesty ? `${selfHonestyPct}%` : "—"}</p>
+          <p style={S.statLabel}>склонность к самообману</p>
+        </div>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{hasTea ? `${topTea.pct}%` : "—"}</p>
+          <p style={S.statLabel}>любимый чай</p>
+        </div>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{hasMed ? `${topMed.pct}%` : "—"}</p>
+          <p style={S.statLabel}>любимая практика</p>
+        </div>
+        <div style={S.statCard}>
+          <p style={S.statNum}>{hasMood ? `${moodPct}%` : "—"}</p>
+          <p style={S.statLabel}>доминирующее настроение</p>
         </div>
       </div>
 
@@ -2718,7 +2836,7 @@ export default function App() {
       <div style={S.menuList}>
         {[
           { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · 25 вопросов" },
-          { id:"selfhonesty", title:"Насколько я вру себе",      desc:"Тест на самообман · 14 вопросов" },
+          { id:"selfhonesty", title:"Склонность к самообману",  desc:"Тест на самообман · 14 вопросов" },
           { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние · 5 вопросов" },
           { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
           { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
