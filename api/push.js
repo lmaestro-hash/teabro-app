@@ -1,11 +1,9 @@
-// api/push.js — Tea Bro v3.2
-// Запускается каждый час через Vercel Cron (Hobby план)
-// Реально рассылает только в пн 07:00 UTC (10:00 Киев) и чт 15:00 UTC (18:00 Киев)
+// api/push.js — Tea Bro v3.2 (TEST: isPushTime = true)
+// После теста вернуть isPushTime к нормальной логике
 
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const APP_URL = "https://teabro-app.vercel.app";
-const CRON_SECRET = process.env.CRON_SECRET;
 
 // ── Утилиты дат ──
 function getISOWeek(date = new Date()) {
@@ -53,7 +51,7 @@ function selectTemplate(user) {
     return `🌕 Эта неделя была про усталость.\n\nВыгорание: ${cur.burnout}%\nНастроение чаще: ${cur.mood}\n\nЗайди — побудь с собой пять минут.`;
   }
 
-  // 4. Спокойный (хороший мод + burnout упал)
+  // 4. Спокойный
   if (cur?.mood && ["😌","😊","💪"].includes(cur.mood)) {
     if (prev?.burnout != null && cur.burnout < prev.burnout) {
       return `🌕 Тихая неделя.\n\nВыгорание: ${cur.burnout}% — ниже обычного.\nНастроение: ${cur.mood}\n\nИногда ровно — это и есть хорошо.`;
@@ -61,12 +59,12 @@ function selectTemplate(user) {
     return `🌕 Спокойная неделя.\n\nВыгорание: ${cur?.burnout != null ? cur.burnout + "%" : "—"}\nНастроение: ${cur.mood}\n\nТакие недели стоит замечать — они редкие.`;
   }
 
-  // 5. Смешанная (много заходов, нет паттерна)
+  // 5. Смешанная
   if (cur && cur.opens >= 3 && cur.burnout != null) {
     return `🌕 Смешанная неделя.\n\nВыгорание: ${cur.burnout}%\nНастроение скакало: ${cur.mood || "🤔"}\n\nТак бывает. Ты не обязан быть ровным.`;
   }
 
-  // 6. Не писал в блокнот 7+ дней
+  // 6. Не писал в блокнот
   if (cur?.notesCount === 0 && (prev?.notesCount === 0 || !prev)) {
     return `🌕 Прошла неделя без записей.\n\nТы давно не писал себе.\nМожет есть что сказать — только себе?`;
   }
@@ -77,12 +75,12 @@ function selectTemplate(user) {
     return `🌕 ${weeks} ${weeks < 5 ? "недели" : "недель"} подряд.\n\nТы наблюдаешь за собой уже месяц.\nЭто не случайность.`;
   }
 
-  // 8. Есть данные — дефолт со статистикой
+  // 8. Дефолт со статистикой
   if (cur?.burnout != null) {
     return `🌕 Срез недели.\n\nВыгорание: ${cur.burnout}%\nНастроение: ${cur.mood || "🤔"}\n\nЗайди — посмотри на себя.`;
   }
 
-  // 9. Нет данных — дефолт без цифр
+  // 9. Дефолт без данных
   return `🌕 Новая неделя.\n\nЗайди — отметь как ты сейчас.`;
 }
 
@@ -126,12 +124,8 @@ async function sendPush(chatId, text) {
 }
 
 export default async function handler(req, res) {
-
-  // Проверяем время — только пн 07:00 UTC и чт 15:00 UTC
-  const now = new Date();
-  const day = now.getUTCDay();   // 1=пн, 4=чт
-  const hour = now.getUTCHours();
-  const isPushTime = (day === 1 && hour === 7) || (day === 4 && hour === 15);
+  // ── ТЕСТ: isPushTime = true (после теста вернуть нормальную логику) ──
+  const isPushTime = true;
 
   if (!isPushTime) {
     return res.status(200).json({ ok: true, skipped: "not push time" });
@@ -151,7 +145,6 @@ export default async function handler(req, res) {
       const ok = await sendPush(user.chatId, text);
 
       if (ok) {
-        // Обновляем lastPushSent
         await fetch(`${STATS_URL}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

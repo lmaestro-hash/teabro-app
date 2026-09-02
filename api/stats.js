@@ -1,18 +1,15 @@
-// api/stats.js — Tea Bro v3.2
-// Серверная статистика + snapshot для push-уведомлений
-
-import { put, head } from "@vercel/blob";
+// api/stats.js — Tea Bro v3.3
+import { put, list } from "@vercel/blob";
 
 const STATS_KEY = "teabro-stats.json";
+const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
 async function readStats() {
   try {
-    const info = await head(STATS_KEY);
-    if (!info) return defaultStats();
-    const res = await fetch(info.downloadUrl, {
-      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
-      cache: "no-store",
-    });
+    const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
+    const blob = blobs.find(b => b.pathname === STATS_KEY);
+    if (!blob) return defaultStats();
+    const res = await fetch(blob.url + "?t=" + Date.now());
     if (!res.ok) return defaultStats();
     return await res.json();
   } catch (err) {
@@ -23,9 +20,10 @@ async function readStats() {
 
 async function writeStats(data) {
   await put(STATS_KEY, JSON.stringify(data), {
-    access: "private",
+    access: "public",
     allowOverwrite: true,
     addRandomSuffix: false,
+    token: TOKEN,
   });
 }
 
@@ -38,7 +36,7 @@ function defaultStats() {
     totalMeditation: 0,
     uniqueTotal: 0,
     byDay: {},
-    users: {}, // uid → { chatId, lastSeen, lastPushSent, lastPushOpened, pauseUntil, snapshots[] }
+    users: {},
   };
 }
 
@@ -55,49 +53,46 @@ function getISOWeek() {
   return `${d.getFullYear()}-W${Math.ceil(((d - yearStart) / 86400000 + 1) / 7)}`;
 }
 
+function initUser(stats, uid) {
+  if (!stats.users[uid]) {
+    stats.users[uid] = {
+      chatId: null,
+      lastSeen: null,
+      lastPushSent: null,
+      lastPushOpened: null,
+      pauseUntil: null,
+      snapshots: [],
+    };
+  } else {
+    const u = stats.users[uid];
+    if (!u.snapshots) u.snapshots = [];
+    if (u.chatId === undefined) u.chatId = null;
+    if (u.lastSeen === undefined) u.lastSeen = null;
+    if (u.lastPushSent === undefined) u.lastPushSent = null;
+    if (u.lastPushOpened === undefined) u.lastPushOpened = null;
+    if (u.pauseUntil === undefined) u.pauseUntil = null;
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const { action, uid, chatId, burnout, mood, notesCount } =
-    req.method === "POST" ? req.body : req.query;
-
+  const params = req.method === "POST" ? req.body : req.query;
+  const { action, uid, chatId, burnout, mood, notesCount } = params;
   const todayKey = getTodayKey();
 
   try {
     const stats = await readStats();
 
     if (!stats.byDay[todayKey]) {
-      stats.byDay[todayKey] = { opens: 0, quiz: 0, tea: 0, uniqueIds: [] };
+      stats.byDay[todayKey] = { opens: 0, quiz: 0, uniqueIds: [] };
     }
     const today = stats.byDay[todayKey];
 
-    // ── Инициализация / докладка записи пользователя ──
-    // Создаём с нуля, если пользователя ещё нет, ИЛИ докладываем
-    // недостающие поля, если запись создана старой версией схемы.
-    if (uid) {
-      if (!stats.users[uid]) {
-        stats.users[uid] = {
-          chatId: null,
-          lastSeen: null,
-          lastPushSent: null,
-          lastPushOpened: null,
-          pauseUntil: null,
-          snapshots: [],
-        };
-      } else {
-        const u = stats.users[uid];
-        if (u.chatId === undefined) u.chatId = null;
-        if (u.lastSeen === undefined) u.lastSeen = null;
-        if (u.lastPushSent === undefined) u.lastPushSent = null;
-        if (u.lastPushOpened === undefined) u.lastPushOpened = null;
-        if (u.pauseUntil === undefined) u.pauseUntil = null;
-        if (!Array.isArray(u.snapshots)) u.snapshots = [];
-      }
-    }
+    if (uid) initUser(stats, uid);
 
     // ── open ──
     if (action === "open") {
@@ -109,70 +104,57 @@ export default async function handler(req, res) {
           stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
         }
         stats.users[uid].lastSeen = Date.now();
-        // chat_id из параметра (передаётся при открытии Mini App)
         if (chatId) stats.users[uid].chatId = String(chatId);
       }
       await writeStats(stats);
       return res.status(200).json({ ok: true });
     }
 
-    // ── register — сохранить chat_id ──
-    if (action === "register") {
-      if (uid && chatId) {
-        stats.users[uid].chatId = String(chatId);
-        await writeStats(stats);
-      }
-      return res.status(200).json({ ok: true });
-    }
-
-    // ── snapshot — сохранить состояние пользователя ──
+    // ── snapshot ──
     if (action === "snapshot") {
       if (uid) {
         const week = getISOWeek();
         const user = stats.users[uid];
-        // Обновляем или добавляем снэпшот текущей недели
         const idx = user.snapshots.findIndex(s => s.week === week);
+        const prev = idx >= 0 ? user.snapshots[idx] : null;
         const snap = {
           week,
           ts: Date.now(),
-          burnout: burnout !== undefined ? Number(burnout) : null,
-          mood: mood || null,
-          notesCount: notesCount !== undefined ? Number(notesCount) : null,
-          opens: (user.snapshots.find(s => s.week === week)?.opens || 0) + 1,
+          burnout: burnout !== undefined ? Number(burnout) : (prev?.burnout ?? null),
+          mood: mood || prev?.mood || null,
+          notesCount: notesCount !== undefined ? Number(notesCount) : (prev?.notesCount ?? null),
+          opens: (prev?.opens || 0) + 1,
         };
+        // Среднее выгорание
+        if (burnout !== undefined && prev?.burnout != null) {
+          snap.burnout = Math.round((prev.burnout + Number(burnout)) / 2);
+        }
         if (idx >= 0) {
-          // Обновляем снэпшот недели, накапливаем opens
-          snap.opens = user.snapshots[idx].opens + 1;
-          // Среднее выгорание за неделю
-          if (burnout !== undefined && user.snapshots[idx].burnout !== null) {
-            snap.burnout = Math.round((user.snapshots[idx].burnout + Number(burnout)) / 2);
-          }
           user.snapshots[idx] = snap;
         } else {
           user.snapshots.push(snap);
-          // Храним только последние 8 недель
           if (user.snapshots.length > 8) user.snapshots = user.snapshots.slice(-8);
         }
         user.lastSeen = Date.now();
+        if (chatId) user.chatId = String(chatId);
         await writeStats(stats);
       }
       return res.status(200).json({ ok: true });
     }
 
-    // ── push_opened — пользователь открыл пуш ──
+    // ── pause ──
+    if (action === "pause") {
+      if (uid) {
+        stats.users[uid].pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
+        await writeStats(stats);
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    // ── push_opened ──
     if (action === "push_opened") {
       if (uid) {
         stats.users[uid].lastPushOpened = Date.now();
-        await writeStats(stats);
-      }
-      return res.status(200).json({ ok: true });
-    }
-
-    // ── pause — поставить паузу на месяц ──
-    if (action === "pause") {
-      if (uid) {
-        const pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
-        stats.users[uid].pauseUntil = pauseUntil;
         await writeStats(stats);
       }
       return res.status(200).json({ ok: true });
@@ -222,15 +204,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // ── get_users (для push endpoint) ──
+    // ── get_users ──
     if (action === "get_users") {
       return res.status(200).json({ users: stats.users });
     }
 
-    // ── update_user (после отправки пуша) ──
+    // ── update_user ──
     if (action === "update_user") {
-      if (uid && req.method === "POST") {
-        const body = req.body;
+      if (uid) {
+        const body = req.method === "POST" ? req.body : {};
         if (body.lastPushSent !== undefined) stats.users[uid].lastPushSent = body.lastPushSent;
         await writeStats(stats);
       }
@@ -241,6 +223,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("Stats error:", err);
-    return res.status(500).json({ error: "Internal error" });
+    return res.status(500).json({ error: String(err) });
   }
 }
