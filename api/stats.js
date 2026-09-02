@@ -1,20 +1,17 @@
-// api/stats.js — Tea Bro v3.3 (fixed: private blob store)
-import { put, list } from "@vercel/blob";
+// api/stats.js — Tea Bro v3.3 (fixed: using get() from @vercel/blob)
+import { put, get } from "@vercel/blob";
 
 const STATS_KEY = "teabro-stats.json";
 const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
 async function readStats() {
   try {
-    const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
-    const blob = blobs.find(b => b.pathname === STATS_KEY);
+    const blob = await get(STATS_KEY, { token: TOKEN });
     if (!blob) return defaultStats();
-    const res = await fetch(blob.url, {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-      cache: "no-store",
-    });
+    const res = await fetch(blob.url, { cache: "no-store" });
     if (!res.ok) return defaultStats();
-    return await res.json();
+    const data = await res.json();
+    return data || defaultStats();
   } catch (err) {
     console.error("readStats error:", err);
     return defaultStats();
@@ -57,6 +54,7 @@ function getISOWeek() {
 }
 
 function initUser(stats, uid) {
+  if (!stats.users) stats.users = {};
   if (!stats.users[uid]) {
     stats.users[uid] = {
       chatId: null,
@@ -89,11 +87,14 @@ export default async function handler(req, res) {
 
   try {
     const stats = await readStats();
+    if (!stats.byDay) stats.byDay = {};
+    if (!stats.users) stats.users = {};
 
     if (!stats.byDay[todayKey]) {
       stats.byDay[todayKey] = { opens: 0, quiz: 0, uniqueIds: [] };
     }
     const today = stats.byDay[todayKey];
+    if (!today.uniqueIds) today.uniqueIds = [];
 
     if (uid) initUser(stats, uid);
 
@@ -198,7 +199,7 @@ export default async function handler(req, res) {
     }
 
     if (action === "get_users") {
-      return res.status(200).json({ users: stats.users });
+      return res.status(200).json({ users: stats.users || {} });
     }
 
     if (action === "update_user") {
