@@ -1,14 +1,19 @@
-// api/stats.js — Tea Bro v3.3 (fixed: using get() from @vercel/blob)
-import { put, get } from "@vercel/blob";
+// api/stats.js — Tea Bro v3.3 (fixed: list() with token auth)
+import { put, list } from "@vercel/blob";
 
 const STATS_KEY = "teabro-stats.json";
 const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
 async function readStats() {
   try {
-    const blob = await get(STATS_KEY, { token: TOKEN });
+    const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
+    const blob = blobs.find(b => b.pathname === STATS_KEY);
     if (!blob) return defaultStats();
-    const res = await fetch(blob.url, { cache: "no-store" });
+    // Читаем через downloadUrl с токеном
+    const url = blob.downloadUrl || blob.url;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
     if (!res.ok) return defaultStats();
     const data = await res.json();
     return data || defaultStats();
@@ -19,12 +24,16 @@ async function readStats() {
 }
 
 async function writeStats(data) {
-  await put(STATS_KEY, JSON.stringify(data), {
-    access: "private",
-    allowOverwrite: true,
-    addRandomSuffix: false,
-    token: TOKEN,
-  });
+  try {
+    await put(STATS_KEY, JSON.stringify(data), {
+      access: "private",
+      allowOverwrite: true,
+      addRandomSuffix: false,
+      token: TOKEN,
+    });
+  } catch (err) {
+    console.error("writeStats error:", err);
+  }
 }
 
 function defaultStats() {
@@ -110,7 +119,7 @@ export default async function handler(req, res) {
         if (chatId) stats.users[uid].chatId = String(chatId);
       }
       await writeStats(stats);
-      return res.status(200).json({ ok: true });
+      return res.status(200).json({ ok: true, debug: { uid, chatId, usersCount: Object.keys(stats.users).length } });
     }
 
     if (action === "snapshot") {
