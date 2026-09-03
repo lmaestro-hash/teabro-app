@@ -9,10 +9,17 @@ async function readStats() {
     const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
     const blob = blobs.find(b => b.pathname === STATS_KEY);
     if (!blob) return defaultStats();
-    // Читаем через downloadUrl с токеном
-    const url = blob.downloadUrl || blob.url;
+    // Читаем через downloadUrl с токеном.
+    // ВАЖНО: у Vercel Blob CDN своё кэширование на уровне edge, независимое
+    // от writeStats(). Поскольку URL блоба не меняется (addRandomSuffix:false),
+    // без cache-busting параметра CDN может отдавать устаревшую версию файла
+    // сразу после записи. Добавляем ?t=timestamp, чтобы каждый запрос был
+    // гарантированным cache miss.
+    const base = blob.downloadUrl || blob.url;
+    const url = `${base}${base.includes("?") ? "&" : "?"}t=${Date.now()}`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${TOKEN}` },
+      cache: "no-store",
     });
     if (!res.ok) return defaultStats();
     const data = await res.json();
