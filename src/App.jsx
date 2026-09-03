@@ -1385,6 +1385,7 @@ function QuizScreen({ onBack }) {
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [showAdvice, setShowAdvice] = useState(false);
+  useEffect(() => { statEvent("quiz"); }, []);
   const q = QUESTIONS_QUIZ[current];
   const total = scores.reduce((a,b) => a+b, 0);
   const burnoutTotal = burnouts.reduce((a,b) => a+b, 0);
@@ -1397,7 +1398,6 @@ function QuizScreen({ onBack }) {
     setAnimating(true);
     const ns = [...scores, selected.score];
     const nb = [...burnouts, selected.burnout];
-    if (current+1 >= QUESTIONS_QUIZ.length) { statEvent("quiz"); }
     setTimeout(() => {
       setScores(ns); setBurnouts(nb); setSelected(null);
       if (current+1 >= QUESTIONS_QUIZ.length) {
@@ -1515,6 +1515,7 @@ function SelfHonestyScreen({ onBack }) {
   const [answers, setAnswers] = useState([]);
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
+  useEffect(() => { statEvent("selfhonesty"); }, []);
   const q = SELF_HONESTY_QUESTIONS[current];
 
   const rawTotal = answers.reduce((a,b) => a+b, 0);
@@ -1528,7 +1529,6 @@ function SelfHonestyScreen({ onBack }) {
     setAnimating(true);
     const scored = q.reverse ? (6 - selected) : selected;
     const na = [...answers, scored];
-    if (current+1 >= SELF_HONESTY_QUESTIONS.length) { statEvent("selfhonesty"); }
     setTimeout(() => {
       setAnswers(na); setSelected(null);
       if (current+1 >= SELF_HONESTY_QUESTIONS.length) {
@@ -1623,6 +1623,7 @@ function MeditationQuizScreen({ onBack }) {
   const [winner, setWinner] = useState(null);
   const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
+  useEffect(() => { statEvent("meditation"); }, []);
   const q = MEDITATION_QUESTIONS[current];
 
   const handleNext = () => {
@@ -1631,7 +1632,6 @@ function MeditationQuizScreen({ onBack }) {
     const ns = { ...scores };
     const pts = q.options[selectedIdx].p;
     Object.keys(pts).forEach(k => { ns[k] = (ns[k] || 0) + pts[k]; });
-    if (current + 1 >= MEDITATION_QUESTIONS.length) { statEvent("meditation"); }
     setTimeout(() => {
       setScores(ns);
       setSelectedIdx(null);
@@ -1749,13 +1749,13 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
   const [winner, setWinner] = useState(null);
   const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
+  useEffect(() => { statEvent("tea"); }, []);
   const q = TEA_QUESTIONS[current];
   const handleNext = () => {
     if (selectedIdx === null) return;
     setAnimating(true);
     const ns = { ...teaScores };
     Object.keys(q.options[selectedIdx].teas).forEach(k => { ns[k] += q.options[selectedIdx].teas[k]; });
-    if (current+1 >= TEA_QUESTIONS.length) { statEvent("tea"); }
     setTimeout(() => {
       setTeaScores(ns);
       setSelectedIdx(null);
