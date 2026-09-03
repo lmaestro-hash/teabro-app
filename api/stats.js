@@ -245,8 +245,8 @@ export default async function handler(req, res) {
 
     if (action === "update_user") {
       if (uid) {
-        const body = req.method === "POST" ? req.body : {};
-        if (body.lastPushSent !== undefined) stats.users[uid].lastPushSent = body.lastPushSent;
+        if (params.lastPushSent !== undefined) stats.users[uid].lastPushSent = Number(params.lastPushSent);
+        if (params.lastSeen !== undefined) stats.users[uid].lastSeen = Number(params.lastSeen);
         await writeStats(stats);
       }
       return res.status(200).json({ ok: true });
