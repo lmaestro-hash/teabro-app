@@ -1755,13 +1755,14 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
     setAnimating(true);
     const ns = { ...teaScores };
     Object.keys(q.options[selectedIdx].teas).forEach(k => { ns[k] += q.options[selectedIdx].teas[k]; });
+    if (current+1 >= TEA_QUESTIONS.length) { statEvent("tea"); }
     setTimeout(() => {
       setTeaScores(ns);
       setSelectedIdx(null);
       if (current+1 >= TEA_QUESTIONS.length) {
         const sorted = Object.entries(ns).sort((a,b) => b[1]-a[1]);
         const w = sorted[0][0];
-        statEvent("tea"); setWinner(w); setSortedScores(sorted); setFinished(true); onTeaResult(w);
+        setWinner(w); setSortedScores(sorted); setFinished(true); onTeaResult(w);
         const maxPossible = TEA_QUESTIONS.length * 2;
         pushHistory("tea_history", { winner: w, pct: Math.round((sorted[0][1]/maxPossible)*100) });
       } else { setCurrent(c => c+1); }
