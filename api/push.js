@@ -84,17 +84,19 @@ async function checkLetters(users) {
     if (!user.chatId || !user.letters?.length) continue;
     const due = user.letters.filter(l => !l.notified && new Date(l.revealAt) <= new Date());
     if (!due.length) continue;
-    const ok = await sendPush(user.chatId, letterText(), { withPause: false });
-    if (ok) {
-      for (const l of due) {
-        await fetch(`${STATS_URL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "cancel_letter", uid, letterId: l.id }),
-        });
-      }
-      sent++;
+    // Сначала помечаем письмо как обработанное (быстрая запись в свою же Blob),
+    // и только потом шлём в Telegram — так конкурентный вызов /api/push
+    // (двойной тап, пересечение с кроном) видит письмо уже снятым с очереди
+    // и не дублирует отправку. Окно гонки не нулевое, но на порядки меньше.
+    for (const l of due) {
+      await fetch(`${STATS_URL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel_letter", uid, letterId: l.id }),
+      });
     }
+    const ok = await sendPush(user.chatId, letterText(), { withPause: false });
+    if (ok) sent++;
     await new Promise(r => setTimeout(r, 50));
   }
   return sent;
@@ -132,17 +134,13 @@ export default async function handler(req, res) {
     for (const [uid, user] of Object.entries(users || {})) {
       if (!shouldSend(user)) { skipped++; continue; }
       const text = selectTemplate(user);
+      await fetch(`${STATS_URL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_user", uid, lastPushSent: Date.now() }),
+      });
       const ok = await sendPush(user.chatId, text);
-      if (ok) {
-        await fetch(`${STATS_URL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "update_user", uid, lastPushSent: Date.now() }),
-        });
-        sent++;
-      } else {
-        skipped++;
-      }
+      if (ok) sent++; else skipped++;
       await new Promise(r => setTimeout(r, 50));
     }
 
