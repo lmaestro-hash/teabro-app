@@ -26,13 +26,14 @@ const CS = {
 // ─────────────────────────────────────────────
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 
-// Очередь — гарантирует строго последовательные запросы, без race condition.
-// ВАЖНО: любой запрос, который читает-и-пишет teabro-stats.json, должен идти
-// через queuedFetch — иначе он гонится параллельно с остальными и теряет данные
-// (Blob-запись не атомарна: read → modify → write).
-let _statQueue = Promise.resolve();
-function queuedFetch(url) {
-  _statQueue = _statQueue.then(async () => {
+// Очередь только для пары "open" + "snapshot" — именно они гонятся друг с
+// другом в момент загрузки приложения (обе стреляют почти одновременно при
+// монтировании), и это единственная реальная точка гонки для Blob-записи
+// (read → modify → write не атомарны). Только эти два события идут через
+// неё — так они не перезаписывают инкременты друг друга.
+let _loadQueue = Promise.resolve();
+function loadQueuedFetch(url) {
+  _loadQueue = _loadQueue.then(async () => {
     for (let i = 0; i < 3; i++) {
       try {
         const res = await fetch(url, { keepalive: true });
@@ -40,13 +41,27 @@ function queuedFetch(url) {
       } catch {}
     }
   });
-  return _statQueue;
+  return _loadQueue;
 }
+
+// Действия пользователя (mood/tea/meditation/quiz/selfhonesty) стреляют
+// сразу и НЕЗАВИСИМО друг от друга и от _loadQueue — не встают в очередь
+// позади чего-то ещё. Раньше все события шли через один общий queue, и если
+// Telegram WebView закрывал JS-контекст мини-аппа до того, как очередь
+// доходила до позднего события — оно терялось. Каждое из этих действий
+// разнесено по времени с "open"/"snapshot" (пользователь совершает их не в
+// момент загрузки), так что реальный риск гонки с ними минимален —
+// но задержка на ожидание чужой очереди была реальным и ощутимым риском.
 async function statEvent(action, uid) {
   const url = uid
     ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
     : `${STATS_URL}?action=${action}`;
-  return queuedFetch(url);
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await fetch(url, { keepalive: true });
+      if (res.ok) return;
+    } catch {}
+  }
 }
 
 // Единый способ получить uid + chat_id (для событий вне основного loadMood)
@@ -1952,7 +1967,7 @@ function QuietNotes({ onBack }) {
       const { uid, chatId } = getUidChat();
       if (chatId) {
         const p = new URLSearchParams({ action: "schedule_letter", uid, chatId, letterId: String(entry.id), revealAt: entry.revealAt });
-        queuedFetch(`${STATS_URL}?${p}`);
+        fetch(`${STATS_URL}?${p}`, { keepalive: true }).catch(() => {});
       }
     }
     else { setJustSaved(true); setTimeout(() => setJustSaved(false), 1800); }
@@ -1992,7 +2007,7 @@ function QuietNotes({ onBack }) {
       </div>
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); queuedFetch(`${STATS_URL}?${p}`); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
@@ -2787,7 +2802,7 @@ export default function App() {
       const openUrl = chatId
         ? `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}&chatId=${encodeURIComponent(chatId)}`
         : `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}`;
-      queuedFetch(openUrl);
+      loadQueuedFetch(openUrl);
 
       // ── Snapshot для пушей (фоново, не блокирует UI) ──
       (async () => {
@@ -2820,7 +2835,7 @@ export default function App() {
           const p = new URLSearchParams({ action:"snapshot", uid, notesCount:String(notesCount) });
           if (burnoutPct !== null) p.set("burnout", String(burnoutPct));
           if (moodEmoji) p.set("mood", moodEmoji);
-          queuedFetch(`${STATS_URL}?${p}`);
+          loadQueuedFetch(`${STATS_URL}?${p}`);
         } catch {}
       })();
 
