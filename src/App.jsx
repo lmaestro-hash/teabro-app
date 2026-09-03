@@ -2345,8 +2345,10 @@ function AdminScreen({ onBack }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        // Серверная статистика
-        const res = await fetch(`${STATS_URL}?action=get`);
+        // Серверная статистика. cache:"no-store" + timestamp — иначе Telegram
+        // WebView может отдавать закэшированный ответ на тот же URL и админка
+        // будет показывать устаревшие цифры даже после реальных новых событий.
+        const res = await fetch(`${STATS_URL}?action=get&t=${Date.now()}`, { cache: "no-store" });
         const serverStats = res.ok ? await res.json() : {};
 
         // Личные данные эмоций — из CS (они у каждого свои)
