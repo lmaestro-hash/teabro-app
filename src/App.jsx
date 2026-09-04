@@ -612,6 +612,320 @@ const SELF_HONESTY_ADVICE = {
 };
 
 // ─────────────────────────────────────────────
+// ТЕСТ: ГОРМОНАЛЬНЫЙ КОД (7 систем · 7 вопросов)
+// ─────────────────────────────────────────────
+const HORMONE_META = {
+  dopamine:      { name: "Дофамин",       short: "мотивация и драйв",     color: "#C89B5C" },
+  serotonin:     { name: "Серотонин",     short: "самооценка и опора",    color: "#A9B98E" },
+  oxytocin:      { name: "Окситоцин",     short: "доверие и близость",    color: "#C88FA0" },
+  cortisol:      { name: "Кортизол",      short: "стресс и тревога",      color: "#B87333" },
+  gaba:          { name: "ГАМК",          short: "сон и торможение",      color: "#7B9EB0" },
+  testosterone:  { name: "Тестостерон",   short: "воля и напор",          color: "#8B4A4A" },
+  acetylcholine: { name: "Ацетилхолин",   short: "фокус и ясность",       color: "#7A9E7E" },
+};
+
+const HORMONE_QUESTIONS = [
+  { key: "dopamine", category: "ДОФАМИН", text: "Что вы чувствуете в свободный день, когда ничем не обязаны?", options: [
+    { text: "Пусто, ничего не хочется, лежу и листаю телефон", score: 1 },
+    { text: "Вроде что-то хочется, но не знаю, что именно", score: 2 },
+    { text: "Есть пара идей, но быстро теряю интерес", score: 3 },
+    { text: "Обычно есть желание что-то сделать, но не всегда могу начать", score: 4 },
+    { text: "Много интересов, легко нахожу, чем заняться", score: 5 },
+  ]},
+  { key: "serotonin", category: "СЕРОТОНИН", text: "Как вы относитесь к себе, когда остаётесь наедине с собой?", options: [
+    { text: "Чувствую себя ничтожеством, постоянно критикую себя", score: 1 },
+    { text: "Сомневаюсь, часто собой недоволен(льна)", score: 2 },
+    { text: "В целом нормально, но бывает неуверенность", score: 3 },
+    { text: "Принимаю себя таким(ой), какой(ая) есть", score: 4 },
+    { text: "Ценю и уважаю себя, мне с собой комфортно", score: 5 },
+  ]},
+  { key: "oxytocin", category: "ОКСИТОЦИН", text: "Что вы чувствуете по поводу отношений с людьми?", options: [
+    { text: "Мне кажется, что меня никто не любит, я никому не доверяю", score: 1 },
+    { text: "Есть пара близких, но в основном держу дистанцию", score: 2 },
+    { text: "Доверяю проверенным людям, но не всем", score: 3 },
+    { text: "Люблю людей, легко нахожу общий язык", score: 4 },
+    { text: "Чувствую тепло и поддержку от окружающих, мне легко в обществе", score: 5 },
+  ]},
+  { key: "cortisol", category: "КОРТИЗОЛ", text: "Как вы чувствуете себя в течение обычного дня?", options: [
+    { text: "Постоянно на взводе, разбит(а), не могу отдохнуть", score: 1 },
+    { text: "Часто чувствую тревогу и усталость, трудно расслабиться", score: 2 },
+    { text: "Бываю напряжён(а), но в целом справляюсь", score: 3 },
+    { text: "Иногда бывает тревога, но быстро проходит", score: 4 },
+    { text: "Я спокоен(йна) и расслаблен(а), редко тревожусь", score: 5 },
+  ]},
+  { key: "gaba", category: "ГАМК", text: "Как вы засыпаете и спите?", options: [
+    { text: "Мучаюсь бессонницей, просыпаюсь разбитым(ой)", score: 1 },
+    { text: "Часто долго ворочаюсь, сон поверхностный", score: 2 },
+    { text: "Иногда трудно заснуть, но в целом нормально", score: 3 },
+    { text: "Обычно хорошо, но иногда бывают пробуждения", score: 4 },
+    { text: "Засыпаю мгновенно и сплю крепко", score: 5 },
+  ]},
+  { key: "testosterone", category: "ТЕСТОСТЕРОН", text: "Как вы действуете, когда встречаете серьёзное препятствие?", options: [
+    { text: "Часто отступаю, страшно, не верю в свои силы", score: 1 },
+    { text: "Пытаюсь, но быстро сдаюсь", score: 2 },
+    { text: "Иногда преодолеваю, иногда нет", score: 3 },
+    { text: "Обычно иду до конца, несмотря на страх", score: 4 },
+    { text: "Люблю вызовы, препятствия меня только заводят", score: 5 },
+  ]},
+  { key: "acetylcholine", category: "АЦЕТИЛХОЛИН", text: "Насколько легко вам сосредоточиться и ясно мыслить?", options: [
+    { text: "В голове туман, не могу сконцентрироваться", score: 1 },
+    { text: "Часто отвлекаюсь, тяжело удерживать внимание", score: 2 },
+    { text: "Средне, иногда бывает ясность", score: 3 },
+    { text: "Обычно мысли ясные, могу погрузиться в работу", score: 4 },
+    { text: "Ум острый, легко фокусируюсь и запоминаю", score: 5 },
+  ]},
+];
+
+// Тексты по каждой системе, индекс = score-1 (1..5)
+const HORMONE_LEVEL_TEXTS = {
+  dopamine: [
+    "Дни идут по нулям — хочется, но не за что зацепиться. Так дофаминовая система выгорает: слишком много быстрых стимулов и слишком мало настоящего интереса.",
+    "Желание где-то рядом, но плохо ловится. Тело просит движения, а ум не подсказывает куда.",
+    "Идеи приходят, но быстро остывают — начать легче, чем довести до конца.",
+    "Драйв есть, просто иногда трудно сделать первый шаг. Обычно хватает одного небольшого действия, чтобы включиться.",
+    "Ты легко находишь, чем зажечься, и держишь интерес дольше большинства. Редкое и ценное состояние.",
+  ],
+  serotonin: [
+    "Внутренний голос слишком строг — критика идёт впереди любого действия.",
+    "Часто ищешь подтверждения снаружи, потому что внутри не хватает опоры.",
+    "В целом ты в порядке с собой, но неуверенность заходит в гости чаще, чем хотелось бы.",
+    "Ты принимаешь себя таким(ой), какой(ая) есть — без розовых очков, но и без самобичевания.",
+    "Уважение к себе — не поза, а фон, на котором держится всё остальное.",
+  ],
+  oxytocin: [
+    "Доверие сейчас — дорогая валюта, и её почти не осталось. Это защита, но она же и изоляция.",
+    "Близких немного, дистанция — привычный способ не обжечься.",
+    "Ты выбираешь, кому открыться, и это разумно — но иногда осторожность становится стеной.",
+    "Люди даются легко, контакт не требует усилий — редкий ресурс.",
+    "Тепло от окружающих не только чувствуется, но и подпитывает — система работает в плюс.",
+  ],
+  cortisol: [
+    "Постоянно на взводе — тело давно не в покое, и это не характер, а состояние, которое требует внимания.",
+    "Тревога и усталость приходят часто, расслабиться получается с трудом.",
+    "Напряжение есть, но ты держишь его под контролем — пока.",
+    "Тревога заходит редко и быстро отпускает — хороший знак саморегуляции.",
+    "Спокойствие — твоё естественное состояние, а не результат усилий.",
+  ],
+  gaba: [
+    "Бессонница выматывает — просыпаешься уже уставшим(ей), будто и не спал(а).",
+    "Сон поверхностный, тело не до конца отпускает день.",
+    "Иногда трудно заснуть, но в целом система тормозит нормально.",
+    "Засыпаешь без борьбы, изредка просыпаешься — стабильная база.",
+    "Сон крепкий и быстрый — нервная система умеет вовремя выключаться.",
+  ],
+  testosterone: [
+    "Страх идёт впереди действия — веры в свои силы сейчас не хватает.",
+    "Ты пробуешь, но сдаёшься быстрее, чем могла бы/мог.",
+    "Иногда хватает воли пройти препятствие, иногда нет — система нестабильна.",
+    "Ты обычно идёшь до конца, даже когда страшно — воля работает.",
+    "Препятствия скорее заводят, чем пугают — редкая устойчивость к сопротивлению.",
+  ],
+  acetylcholine: [
+    "В голове туман — сконцентрироваться почти невозможно, мысли расплываются.",
+    "Внимание постоянно соскальзывает, удерживать фокус тяжело.",
+    "Ясность приходит волнами — иногда собран(а), иногда нет.",
+    "Мысли обычно чёткие, получается погружаться в задачу надолго.",
+    "Ум острый и быстрый — фокус и память работают без усилий.",
+  ],
+};
+
+const HORMONE_ADVICE = {
+  dopamine: {
+    label: "Верни телу маленькие победы",
+    steps: [
+      "Разбей любое дело на шаг, который занимает меньше 5 минут — начало часто тяжелее самого дела.",
+      "Убери один источник быстрого дофамина на день (короткие видео, лента) и посмотри, что захочется взамен.",
+      "Отмечай сделанное, а не только планы — мозгу нужно подтверждение результата.",
+      "Пройди тест «Найти свой чай» — иногда физический ритуал возвращает интерес быстрее, чем воля.",
+    ],
+    duration: "1–2 недели наблюдения · без резких решений",
+  },
+  serotonin: {
+    label: "Тренируй внутреннюю опору, а не внешнее одобрение",
+    steps: [
+      "Раз в день фиксируй одну вещь, которую сделал(а) хорошо — без «но» и оговорок.",
+      "Замечай момент, когда ищешь подтверждения у других, и спрашивай: а что думаю я сам(а)?",
+      "Сократи время в местах, где сравнение с другими включается автоматически.",
+      "Попробуй практику из раздела «Моя практика» — многие техники прицельно работают с самопринятием.",
+    ],
+    duration: "2–4 недели · накопительный эффект",
+  },
+  oxytocin: {
+    label: "Открывайся понемногу, а не сразу",
+    steps: [
+      "Выбери одного человека и сделай маленький шаг навстречу — не признание, а просто внимание.",
+      "Замечай момент, когда включается защита в безопасной ситуации — это сигнал, а не факт об угрозе.",
+      "Живой контакт (звонок, встреча) работает на эту систему сильнее переписки.",
+      "Отмечай в «Мой день сегодня» моменты, когда тепло от людей всё же почувствовалось.",
+    ],
+    duration: "Постепенно · доверие не форсируется",
+  },
+  cortisol: {
+    label: "Снижай фон, а не борись со стрессом в моменте",
+    steps: [
+      "Найди 10 минут в день без задач и уведомлений — не награда, а необходимость.",
+      "Заметь, где тело держит напряжение (плечи, челюсть), и сознательно отпусти пару раз в день.",
+      "Дыхательные практики из раздела «Моя практика» напрямую снижают напряжение за минуты.",
+      "Сократи источники фонового стресса, которые можно контролировать — начни с одного.",
+    ],
+    duration: "Начни сегодня · эффект накопительный",
+  },
+  gaba: {
+    label: "Готовь нервную систему ко сну заранее",
+    steps: [
+      "За час до сна убери яркий свет и экраны — это прямой сигнал телу тормозить.",
+      "Если мысли крутятся вечером — выпиши их на бумагу, не держи в голове.",
+      "Тёплый чай без кофеина за 30–40 минут до сна — простой, но рабочий ритуал.",
+      "Попробуй дыхательную практику перед сном из раздела «Моя практика».",
+    ],
+    duration: "3–7 дней до заметного эффекта",
+  },
+  testosterone: {
+    label: "Тренируй волю на маленьких препятствиях",
+    steps: [
+      "Выбери одно небольшое неприятное дело и сделай его сегодня, не откладывая.",
+      "Замечай момент отступления — часто препятствие меньше, чем кажется в голове.",
+      "Физическая нагрузка — один из самых прямых способов поддержать эту систему.",
+      "Не жди уверенности перед действием — она чаще приходит после первого шага.",
+    ],
+    duration: "Накопительно · через регулярные small wins",
+  },
+  acetylcholine: {
+    label: "Дай мозгу паузы, а не больше усилий",
+    steps: [
+      "Работай короткими блоками (25–40 минут) с настоящим перерывом между ними.",
+      "Проверь сон и питание в первую очередь — эта система садится от них быстрее всего.",
+      "Убери фоновый шум и уведомления на время сфокусированной работы.",
+      "Одна медитативная пауза в середине дня возвращает ясность лучше, чем ещё одна чашка кофе.",
+    ],
+    duration: "Эффект заметен за несколько дней",
+  },
+};
+
+function HormoneScreen({ onBack }) {
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [finished, setFinished] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  useEffect(() => { statEvent("hormones"); }, []);
+  const q = HORMONE_QUESTIONS[current];
+
+  const handleNext = () => {
+    if (selected === null) return;
+    setAnimating(true);
+    const na = [...answers, { key: q.key, score: selected }];
+    setTimeout(() => {
+      setAnswers(na); setSelected(null);
+      if (current + 1 >= HORMONE_QUESTIONS.length) {
+        setFinished(true);
+        const scores = {};
+        na.forEach(a => { scores[a.key] = a.score; });
+        const avgPct = Math.round(na.reduce((s, a) => s + ((a.score - 1) / 4 * 100), 0) / na.length);
+        pushHistory("hormones_history", { scores, avgPct });
+      } else { setCurrent(c => c + 1); }
+      setAnimating(false);
+    }, 300);
+  };
+
+  if (finished) {
+    const results = answers.map(a => {
+      const pct = Math.round((a.score - 1) / 4 * 100);
+      return {
+        key: a.key,
+        meta: HORMONE_META[a.key],
+        score: a.score,
+        pct,
+        hiIndex: pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3,
+        text: HORMONE_LEVEL_TEXTS[a.key][a.score - 1],
+      };
+    });
+    const weak = results.filter(r => r.score <= 2);
+    const weakest = results.reduce((min, r) => (r.score < min.score ? r : min), results[0]);
+    const advice = HORMONE_ADVICE[weakest.key];
+    let summary;
+    if (weak.length === 0) {
+      summary = "Критичных просадок нет — все семь систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.";
+    } else if (weak.length <= 2) {
+      summary = `Просело ${weak.length === 1 ? "одно звено" : "пара звеньев"} — ${weak.map(r => r.meta.name).join(" и ")}. Системы связаны между собой, так что подтянуть одно часто помогает и соседним.`;
+    } else {
+      summary = "Просело сразу несколько систем, и они тянут друг друга вниз. Это не характер и не лень — это состояние, которое восстанавливается, но само не выправится.";
+    }
+    const shareMsg = `Гормональный код 🧬\nСлабое звено: ${weakest.meta.name}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <div style={S.resultContainer}>
+          <div style={S.sectionHead}>
+            <p style={S.sectionTitle}>ГОРМОНАЛЬНЫЙ КОД</p>
+            <InfoButton text="«Семь систем, которые управляют мотивацией, спокойствием, сном и фокусом — по твоим ответам, не по анализам.»" />
+          </div>
+          <p style={{ margin: "0 0 18px", fontSize: "13px", color: "#B8B0A4", lineHeight: 1.7, fontStyle: "italic" }}>«{summary}»</p>
+
+          {results.map(r => (
+            <div key={r.key} style={{ marginBottom: "14px" }}>
+              <MetricBlock
+                value={r.pct}
+                rightName={r.meta.name}
+                rightSub={r.meta.short}
+                fillFrom="#241D14"
+                fillTo={r.meta.color}
+                dotColor={r.meta.color}
+                numColor={r.meta.color}
+                scaleLabels={["низкий", "средний", "хороший", "высокий"]}
+                hiIndex={r.hiIndex}
+                quote={`«${r.text}»`}
+                animKey={`horm-${r.key}-${r.pct}`}
+              />
+            </div>
+          ))}
+
+          <div style={S.stepsBlock}>
+            <p style={S.stepsTitle}>ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС — {weakest.meta.name.toUpperCase()}</p>
+            {advice.steps.map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: i < advice.steps.length - 1 ? "12px" : "0" }}>
+                <span style={{ fontSize: "11px", color: weakest.meta.color, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
+                <p style={{ margin: 0, fontSize: "13px", color: "#B8B0A4", lineHeight: 1.7 }}>{step}</p>
+              </div>
+            ))}
+            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #1E1B18" }}>
+              <p style={{ margin: 0, fontSize: "11px", color: "#5A5048" }}>⏱ {advice.duration}</p>
+            </div>
+          </div>
+
+          <ShareButton text={shareMsg} />
+          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration: "none", display: "block", textAlign: "center", marginTop: "18px" }}>Перейти в канал 🌕</a>
+          <button onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setFinished(false); }} style={S.ghostBtn}>Пройти заново</button>
+          <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={S.screen}>
+      <div style={S.screenHeader}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <HintPopup text="7 систем, которые управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается." />
+      </div>
+      <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current + 1} / {HORMONE_QUESTIONS.length}</span></div>
+      <div style={S.progressTrack}>{HORMONE_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{q.text}</p>
+      <div style={S.optionsList}>
+        {q.options.map((opt, i) => (
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : "#2A2520", backgroundColor: selected === opt.score ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+            <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
+            <span style={S.optionText}>{opt.text}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{current + 1 === HORMONE_QUESTIONS.length ? "Узнать результат" : "Следующий вопрос"}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // СОВЕТЫ ПО ВЫГОРАНИЮ
 // ─────────────────────────────────────────────
 const BURNOUT_ADVICE = {
@@ -2370,6 +2684,7 @@ function AdminScreen({ onBack }) {
           totalOpens:     serverStats.totalOpens     ?? 0,
           totalQuiz:      serverStats.totalQuiz      ?? 0,
           totalSelfHonesty:serverStats.totalSelfHonesty??0,
+          totalHormones:  serverStats.totalHormones  ?? 0,
           totalTea:       serverStats.totalTea       ?? 0,
           totalMood:      serverStats.totalMood      ?? 0,
           totalMeditation:serverStats.totalMeditation?? 0,
@@ -2415,6 +2730,7 @@ function AdminScreen({ onBack }) {
             {row("Уникальных пользователей", stats.uniqueTotal)}
             {row("Опросник", stats.totalQuiz)}
             {row("Склонность к самообману", stats.totalSelfHonesty)}
+            {row("Гормональный код", stats.totalHormones)}
             {row("Тест чая", stats.totalTea)}
             {row("Тест медитаций", stats.totalMeditation)}
             {row("Записей эмоций", stats.totalMood)}
@@ -2469,6 +2785,7 @@ function MyPathScreen({ onBack }) {
   const [selfHonestyHist, setSelfHonestyHist] = useState([]);
   const [teaHist, setTeaHist] = useState([]);
   const [medHist, setMedHist] = useState([]);
+  const [hormoneHist, setHormoneHist] = useState([]);
   const [moodCounts, setMoodCounts] = useState(null);
   const [moodTotal, setMoodTotal] = useState(0);
 
@@ -2479,6 +2796,7 @@ function MyPathScreen({ onBack }) {
 
       setQuizHist(await getHistory("quiz_history"));
       setSelfHonestyHist(await getHistory("selfhonesty_history"));
+      setHormoneHist(await getHistory("hormones_history"));
       setTeaHist(await getHistory("tea_history"));
       setMedHist(await getHistory("meditation_history"));
 
@@ -2536,6 +2854,19 @@ function MyPathScreen({ onBack }) {
   const selfHonestyResult = SELF_HONESTY_RESULTS.find(r => selfHonestyPct >= r.range[0] && selfHonestyPct <= r.range[1]) || SELF_HONESTY_RESULTS[0];
   const shScaleLabels = ["ЧЕСТНО", "ЕСТЬ ПЯТНА", "ПРИУКРАШЕНО", "СИЛЬНО"];
   const shHiIndex = selfHonestyPct <= 25 ? 0 : selfHonestyPct <= 50 ? 1 : selfHonestyPct <= 75 ? 2 : 3;
+
+  // ── ГОРМОНАЛЬНЫЙ КОД — по последнему прохождению ──
+  const lastHormone = hormoneHist.length ? hormoneHist[hormoneHist.length - 1] : null;
+  const hasHormone = !!lastHormone;
+  const hormonePct = hasHormone ? Math.round(lastHormone.avgPct) : 0;
+  let hormoneWeakest = null;
+  if (hasHormone && lastHormone.scores) {
+    const entries = Object.entries(lastHormone.scores);
+    const min = entries.reduce((m, e) => (e[1] < m[1] ? e : m), entries[0]);
+    hormoneWeakest = HORMONE_META[min[0]];
+  }
+  const hormoneScaleLabels = ["ПРОСЕЛО", "СРЕДНЕ", "СТАБИЛЬНО", "В РЕСУРСЕ"];
+  const hormoneHiIndex = hormonePct <= 25 ? 0 : hormonePct <= 50 ? 1 : hormonePct <= 75 ? 2 : 3;
 
   // ── ЧАЙ — распределение по истории ──
   const teaDist = calcDistribution(teaHist, "winner");
@@ -2658,6 +2989,48 @@ function MyPathScreen({ onBack }) {
         />
       ) : (
         <EmptyMetric text="Пройди тест «Склонность к самообману» — и здесь появится результат." />
+      )}
+
+      {/* ГОРМОНАЛЬНЫЙ КОД */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>ГОРМОНАЛЬНЫЙ КОД</p>
+        <InfoButton text="«Средний результат по семи системам за последнее прохождение теста. Слабое звено — система, которая просела сильнее остальных.»" />
+      </div>
+      {hasHormone ? (
+        <>
+          <MetricBlock
+            value={hormonePct}
+            rightName={hormoneWeakest ? `Слабое звено: ${hormoneWeakest.name}` : "Гормональный код"}
+            rightSub="последнее прохождение"
+            fillFrom="#241D14"
+            fillTo={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
+            dotColor={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
+            numColor={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
+            scaleLabels={hormoneScaleLabels}
+            hiIndex={hormoneHiIndex}
+            animKey={`hormone-${hormonePct}`}
+          />
+          <div style={{ ...S.metricBlock, marginTop:"-6px", paddingTop:"16px" }}>
+            <p style={{ margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.15em", color:"#5A5048" }}>ВСЕ СЕМЬ СИСТЕМ</p>
+            {HORMONE_QUESTIONS.map(({ key }) => {
+              const score = lastHormone.scores?.[key];
+              if (!score) return null;
+              const meta = HORMONE_META[key];
+              const pct = Math.round((score - 1) / 4 * 100);
+              return (
+                <div key={key} style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
+                  <span style={{ fontSize:"12px", color:"#B8B0A4", width:"98px", flexShrink:0 }}>{meta.name}</span>
+                  <div style={{ flex:1, height:"4px", background:"#1E1B18", borderRadius:"2px", overflow:"hidden" }}>
+                    <div style={{ width:`${pct}%`, height:"100%", background:meta.color, borderRadius:"2px" }} />
+                  </div>
+                  <span style={{ fontSize:"12px", color:meta.color, width:"36px", textAlign:"right", flexShrink:0 }}>{pct}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <EmptyMetric text="Пройди тест «Гормональный код» — и здесь появится разбор по семи системам." />
       )}
 
       {/* ЛЮБИМЫЙ ЧАЙ */}
@@ -2863,6 +3236,7 @@ export default function App() {
 
   if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
   if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
+  if (screen === "hormones")   return <HormoneScreen onBack={() => setScreen("home")} />;
   if (screen === "meditation") return <MeditationQuizScreen onBack={() => setScreen("home")} />;
   if (screen === "wisdom")     return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   if (screen === "teaquiz")    return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
@@ -2883,6 +3257,7 @@ export default function App() {
         {[
           { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · 25 вопросов" },
           { id:"selfhonesty", title:"Склонность к самообману",  desc:"Тест на самообман · 14 вопросов" },
+          { id:"hormones",    title:"Гормональный код",         desc:"7 систем · 7 вопросов" },
           { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние · 5 вопросов" },
           { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
           { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },

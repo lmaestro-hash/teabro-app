@@ -213,6 +213,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    if (action === "hormones") {
+      stats.totalHormones = (stats.totalHormones || 0) + 1;
+      await writeStats(stats);
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === "tea") {
       stats.totalTea = (stats.totalTea || 0) + 1;
       await writeStats(stats);
