@@ -124,6 +124,20 @@ export default async function handler(req, res) {
     const statsRes = await fetch(`${STATS_URL}?action=get_users`);
     const { users } = await statsRes.json();
 
+    // Ручная разовая рассылка всем — вызывается по секретной ссылке, обходит
+    // обычные ограничения (5 дней неактивности / раз в 15 дней). Для анонсов.
+    if (req.query?.broadcast === "teabro_admin_2024") {
+      const text = `🌕 Новая неделя.\n\nПоявился новый тест — «Гормональный код». Загляни, узнай своё слабое звено из семи систем.\n\nЗайди — отметь как ты сейчас.`;
+      let sent = 0, skipped = 0;
+      for (const [uid, user] of Object.entries(users || {})) {
+        if (!user.chatId) { skipped++; continue; }
+        const ok = await sendPush(user.chatId, text);
+        if (ok) sent++; else skipped++;
+        await new Promise(r => setTimeout(r, 50));
+      }
+      return res.status(200).json({ ok: true, broadcast: true, sent, skipped });
+    }
+
     // Проверка писем себе — на каждый тик крона
     const lettersSent = await checkLetters(users);
 
