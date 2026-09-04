@@ -676,6 +676,58 @@ const HORMONE_QUESTIONS = [
   ]},
 ];
 
+// Доп. вопросы для точности — каждый частично уточняет несколько систем сразу,
+// поэтому итоговый % перестаёт быть кратным 25 и становится «живым» числом.
+const HORMONE_CROSS_QUESTIONS = [
+  { key: "energy", category: "ЭНЕРГИЯ", text: "Как вы чувствуете уровень энергии на протяжении дня?", options: [
+    { text: "Энергии почти нет, часто чувствую разбитость", score: 1 },
+    { text: "Энергии мало, к вечеру совсем никакой", score: 2 },
+    { text: "Энергия есть, но неравномерно — то густо, то пусто", score: 3 },
+    { text: "В целом бодр(а), хватает на весь день", score: 4 },
+    { text: "Энергии много, легко выдерживаю нагрузку весь день", score: 5 },
+  ]},
+  { key: "selfworth", category: "ЗАВИСИМОСТЬ ОТ ОЦЕНКИ", text: "Насколько сильно ваше настроение зависит от мнения и реакции других людей?", options: [
+    { text: "Очень сильно — чужая реакция может испортить весь день", score: 1 },
+    { text: "Часто оглядываюсь на мнение других", score: 2 },
+    { text: "Иногда важно, иногда нет", score: 3 },
+    { text: "Редко завишу от чужой оценки", score: 4 },
+    { text: "Почти не завишу — ориентируюсь на себя", score: 5 },
+  ]},
+  { key: "recovery", category: "ВОССТАНОВЛЕНИЕ", text: "Как быстро вы приходите в себя после напряжённого дня или конфликта?", options: [
+    { text: "Долго не могу отпустить, прокручиваю в голове", score: 1 },
+    { text: "Восстановление занимает день и больше", score: 2 },
+    { text: "Обычно прихожу в себя за несколько часов", score: 3 },
+    { text: "Быстро отхожу, уже через пару часов в порядке", score: 4 },
+    { text: "Почти сразу — умею быстро сбрасывать напряжение", score: 5 },
+  ]},
+];
+
+// Какая часть каждого доп. вопроса примешивается к каждой системе
+const HORMONE_CROSS_AFFECTS = {
+  energy:    { dopamine: 0.35, cortisol: 0.35, acetylcholine: 0.3 },
+  selfworth: { serotonin: 0.5, oxytocin: 0.5 },
+  recovery:  { gaba: 0.35, testosterone: 0.3, cortisol: 0.35 },
+};
+
+// Взвешенный итог по системе: своя прямая оценка + доля смежных доп. вопросов.
+// Это и даёт нецелые/некруглые проценты вместо шага 25%.
+function computeHormoneScores(mainScores, crossScores) {
+  const result = {};
+  Object.keys(mainScores).forEach(hKey => {
+    let weightedSum = mainScores[hKey];
+    let weightTotal = 1;
+    Object.entries(HORMONE_CROSS_AFFECTS).forEach(([crossKey, affects]) => {
+      const w = affects[hKey];
+      if (w && crossScores[crossKey] !== undefined) {
+        weightedSum += crossScores[crossKey] * w;
+        weightTotal += w;
+      }
+    });
+    result[hKey] = weightedSum / weightTotal;
+  });
+  return result;
+}
+
 // Тексты по каждой системе, индекс = score-1 (1..5)
 const HORMONE_LEVEL_TEXTS = {
   dopamine: [
@@ -803,13 +855,14 @@ const HORMONE_ADVICE = {
 };
 
 function HormoneScreen({ onBack }) {
+  const ALL_Q = [...HORMONE_QUESTIONS, ...HORMONE_CROSS_QUESTIONS];
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
   useEffect(() => { statEvent("hormones"); }, []);
-  const q = HORMONE_QUESTIONS[current];
+  const q = ALL_Q[current];
 
   const handleNext = () => {
     if (selected === null) return;
@@ -817,31 +870,47 @@ function HormoneScreen({ onBack }) {
     const na = [...answers, { key: q.key, score: selected }];
     setTimeout(() => {
       setAnswers(na); setSelected(null);
-      if (current + 1 >= HORMONE_QUESTIONS.length) {
+      if (current + 1 >= ALL_Q.length) {
         setFinished(true);
-        const scores = {};
-        na.forEach(a => { scores[a.key] = a.score; });
-        const avgPct = Math.round(na.reduce((s, a) => s + ((a.score - 1) / 4 * 100), 0) / na.length);
-        pushHistory("hormones_history", { scores, avgPct });
+        const main = {};
+        const cross = {};
+        na.forEach(a => {
+          if (HORMONE_META[a.key]) main[a.key] = a.score;
+          else cross[a.key] = a.score;
+        });
+        const finalScores = computeHormoneScores(main, cross);
+        const avgPct = Math.round(
+          Object.values(finalScores).reduce((s, v) => s + ((v - 1) / 4 * 100), 0) / Object.keys(finalScores).length
+        );
+        pushHistory("hormones_history", { main, cross, avgPct });
       } else { setCurrent(c => c + 1); }
       setAnimating(false);
     }, 300);
   };
 
   if (finished) {
-    const results = answers.map(a => {
-      const pct = Math.round((a.score - 1) / 4 * 100);
+    const main = {};
+    const cross = {};
+    answers.forEach(a => {
+      if (HORMONE_META[a.key]) main[a.key] = a.score;
+      else cross[a.key] = a.score;
+    });
+    const finalScores = computeHormoneScores(main, cross);
+    const results = HORMONE_QUESTIONS.map(({ key }) => {
+      const score = finalScores[key];
+      const pct = Math.round((score - 1) / 4 * 100);
+      const bucket = Math.min(5, Math.max(1, Math.round(score)));
       return {
-        key: a.key,
-        meta: HORMONE_META[a.key],
-        score: a.score,
+        key,
+        meta: HORMONE_META[key],
+        score,
         pct,
         hiIndex: pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3,
-        text: HORMONE_LEVEL_TEXTS[a.key][a.score - 1],
+        text: HORMONE_LEVEL_TEXTS[key][bucket - 1],
       };
     });
-    const weak = results.filter(r => r.score <= 2);
-    const weakest = results.reduce((min, r) => (r.score < min.score ? r : min), results[0]);
+    const weak = results.filter(r => r.pct <= 37.5);
+    const weakest = results.reduce((min, r) => (r.pct < min.pct ? r : min), results[0]);
     const advice = HORMONE_ADVICE[weakest.key];
     let summary;
     if (weak.length === 0) {
@@ -907,10 +976,10 @@ function HormoneScreen({ onBack }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>← назад</button>
-        <HintPopup text="7 систем, которые управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается." />
+        <HintPopup text="10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается." />
       </div>
-      <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current + 1} / {HORMONE_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{HORMONE_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.quizProgress}><span style={S.quizCategory}>{q.category}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
+      <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{q.text}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
@@ -920,7 +989,7 @@ function HormoneScreen({ onBack }) {
           </button>
         ))}
       </div>
-      <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{current + 1 === HORMONE_QUESTIONS.length ? "Узнать результат" : "Следующий вопрос"}</button>
+      <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{current + 1 === ALL_Q.length ? "Узнать результат" : "Следующий вопрос"}</button>
     </div>
   );
 }
@@ -2855,13 +2924,30 @@ function MyPathScreen({ onBack }) {
   const shScaleLabels = ["ЧЕСТНО", "ЕСТЬ ПЯТНА", "ПРИУКРАШЕНО", "СИЛЬНО"];
   const shHiIndex = selfHonestyPct <= 25 ? 0 : selfHonestyPct <= 50 ? 1 : selfHonestyPct <= 75 ? 2 : 3;
 
-  // ── ГОРМОНАЛЬНЫЙ КОД — по последнему прохождению ──
-  const lastHormone = hormoneHist.length ? hormoneHist[hormoneHist.length - 1] : null;
-  const hasHormone = !!lastHormone;
-  const hormonePct = hasHormone ? Math.round(lastHormone.avgPct) : 0;
+  // ── ГОРМОНАЛЬНЫЙ КОД — среднее по последним 3 прохождениям (с учётом доп. вопросов) ──
+  const hormoneLast3 = hormoneHist.slice(-3);
+  const hasHormone = hormoneLast3.length > 0;
+  const hormoneAvgByKey = {};
+  let hormonePct = 0;
+  if (hasHormone) {
+    const avgMain = {};
+    const avgCross = {};
+    HORMONE_QUESTIONS.forEach(({ key }) => {
+      const vals = hormoneLast3.map(h => (h.main ? h.main[key] : h.scores?.[key])).filter(v => v !== undefined && v !== null);
+      if (vals.length) avgMain[key] = vals.reduce((s, v) => s + v, 0) / vals.length;
+    });
+    Object.keys(HORMONE_CROSS_AFFECTS).forEach(key => {
+      const vals = hormoneLast3.map(h => h.cross?.[key]).filter(v => v !== undefined && v !== null);
+      if (vals.length) avgCross[key] = vals.reduce((s, v) => s + v, 0) / vals.length;
+    });
+    const finalAvg = Object.keys(avgMain).length ? computeHormoneScores(avgMain, avgCross) : {};
+    Object.assign(hormoneAvgByKey, finalAvg);
+    const pctList = Object.values(finalAvg).map(v => (v - 1) / 4 * 100);
+    hormonePct = pctList.length ? Math.round(pctList.reduce((s, v) => s + v, 0) / pctList.length) : 0;
+  }
   let hormoneWeakest = null;
-  if (hasHormone && lastHormone.scores) {
-    const entries = Object.entries(lastHormone.scores);
+  if (hasHormone && Object.keys(hormoneAvgByKey).length) {
+    const entries = Object.entries(hormoneAvgByKey);
     const min = entries.reduce((m, e) => (e[1] < m[1] ? e : m), entries[0]);
     hormoneWeakest = HORMONE_META[min[0]];
   }
@@ -2994,14 +3080,14 @@ function MyPathScreen({ onBack }) {
       {/* ГОРМОНАЛЬНЫЙ КОД */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>ГОРМОНАЛЬНЫЙ КОД</p>
-        <InfoButton text="«Средний результат по семи системам за последнее прохождение теста. Слабое звено — система, которая просела сильнее остальных.»" />
+        <InfoButton text="«Средний результат по семи системам за последние прохождения теста. Слабое звено — система, которая просела сильнее остальных.»" />
       </div>
       {hasHormone ? (
         <>
           <MetricBlock
             value={hormonePct}
             rightName={hormoneWeakest ? `Слабое звено: ${hormoneWeakest.name}` : "Гормональный код"}
-            rightSub="последнее прохождение"
+            rightSub={`среднее по ${hormoneLast3.length === 1 ? "последнему прохождению" : `последним ${hormoneLast3.length} прохождениям`}`}
             fillFrom="#241D14"
             fillTo={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
             dotColor={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
@@ -3013,10 +3099,10 @@ function MyPathScreen({ onBack }) {
           <div style={{ ...S.metricBlock, marginTop:"-6px", paddingTop:"16px" }}>
             <p style={{ margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.15em", color:"#5A5048" }}>ВСЕ СЕМЬ СИСТЕМ</p>
             {HORMONE_QUESTIONS.map(({ key }) => {
-              const score = lastHormone.scores?.[key];
-              if (!score) return null;
+              const avgScore = hormoneAvgByKey[key];
+              if (avgScore === undefined) return null;
               const meta = HORMONE_META[key];
-              const pct = Math.round((score - 1) / 4 * 100);
+              const pct = Math.round((avgScore - 1) / 4 * 100);
               return (
                 <div key={key} style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
                   <span style={{ fontSize:"12px", color:"#B8B0A4", width:"98px", flexShrink:0 }}>{meta.name}</span>
@@ -3257,7 +3343,7 @@ export default function App() {
         {[
           { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · 25 вопросов" },
           { id:"selfhonesty", title:"Склонность к самообману",  desc:"Тест на самообман · 14 вопросов" },
-          { id:"hormones",    title:"Гормональный код",         desc:"7 систем · 7 вопросов" },
+          { id:"hormones",    title:"Гормональный код",         desc:"7 систем · 10 вопросов" },
           { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние · 5 вопросов" },
           { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
           { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
