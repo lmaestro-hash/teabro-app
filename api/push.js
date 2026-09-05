@@ -119,6 +119,23 @@ async function sendPush(chatId, text, { withPause = true } = {}) {
   return resp.ok;
 }
 
+// То же самое, но возвращает точный ответ Telegram при ошибке — для диагностики рассылки
+async function sendPushDebug(chatId, text) {
+  const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      reply_markup: { inline_keyboard: [{ text: "Открыть 🌕", web_app: { url: APP_URL } }] },
+    }),
+  });
+  let body = null;
+  try { body = await resp.json(); } catch (e) { body = null; }
+  return { ok: resp.ok, status: resp.status, description: body?.description || null };
+}
+
 export default async function handler(req, res) {
   try {
     const statsRes = await fetch(`${STATS_URL}?action=get_users`);
@@ -129,13 +146,14 @@ export default async function handler(req, res) {
     if (req.query?.broadcast === "teabro_admin_2024") {
       const text = `🌕 Новая неделя.\n\nПоявился новый тест — «Гормональный код». Загляни, узнай своё слабое звено из семи систем.\n\nЗайди — отметь как ты сейчас.`;
       let sent = 0, skipped = 0;
+      const details = [];
       for (const [uid, user] of Object.entries(users || {})) {
-        if (!user.chatId) { skipped++; continue; }
-        const ok = await sendPush(user.chatId, text);
-        if (ok) sent++; else skipped++;
-        await new Promise(r => setTimeout(r, 50));
+        if (!user.chatId) { skipped++; details.push({ uid, reason: "нет chatId" }); continue; }
+        const r = await sendPushDebug(user.chatId, text);
+        if (r.ok) { sent++; } else { skipped++; details.push({ uid, chatId: user.chatId, status: r.status, reason: r.description }); }
+        await new Promise(res => setTimeout(res, 50));
       }
-      return res.status(200).json({ ok: true, broadcast: true, sent, skipped });
+      return res.status(200).json({ ok: true, broadcast: true, sent, skipped, details });
     }
 
     // Проверка писем себе — на каждый тик крона
