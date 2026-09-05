@@ -96,34 +96,26 @@ function initUser(stats, uid) {
 }
 
 // Временная защита от гонки записи, пока храним всё в одном JSON-блобе
-// (см. заметку в памяти про переход на Vercel KV). Читаем-мутируем-пишем,
-// затем перепроверяем, что именно НАША запись долетела последней — если нет
-// (кто-то записал почти одновременно и затёр нас), перечитываем свежие
-// данные и пробуем снова. mutateFn обязан работать на любом свежем stats,
-// который ему дадут — не хранить состояние снаружи.
-async function withRetryWrite(mutateFn, maxAttempts = 5) {
+// (см. заметку в памяти про переход на Vercel KV). Читаем максимально свежие
+// данные прямо перед мутацией и пишем сразу — окно гонки маленькое.
+// НЕ перечитываем после записи для самопроверки: у блоб-хранилища есть
+// небольшая задержка между записью и тем, что отдаёт следующее чтение, и
+// такая проверка иногда ложно решала "меня перезаписали" ровно из-за этой
+// задержки, а не из-за реальной гонки — это грузило лишние повторы и
+// путало счётчики больше, чем помогало. mutateFn должен работать на любом
+// свежем stats, который ему дадут — не хранить состояние снаружи.
+async function withRetryWrite(mutateFn) {
   const todayKey = getTodayKey();
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const stats = await readStats();
-    if (!stats.byDay) stats.byDay = {};
-    if (!stats.users) stats.users = {};
-    if (!stats.byDay[todayKey]) stats.byDay[todayKey] = { opens: 0, quiz: 0, uniqueIds: [] };
-    if (!stats.byDay[todayKey].uniqueIds) stats.byDay[todayKey].uniqueIds = [];
-    const today = stats.byDay[todayKey];
+  const stats = await readStats();
+  if (!stats.byDay) stats.byDay = {};
+  if (!stats.users) stats.users = {};
+  if (!stats.byDay[todayKey]) stats.byDay[todayKey] = { opens: 0, quiz: 0, uniqueIds: [] };
+  if (!stats.byDay[todayKey].uniqueIds) stats.byDay[todayKey].uniqueIds = [];
+  const today = stats.byDay[todayKey];
 
-    const result = mutateFn(stats, today);
-
-    const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    stats._writeStamp = stamp;
-    await writeStats(stats);
-
-    const verify = await readStats();
-    if (verify._writeStamp === stamp) {
-      return { stats, today, result };
-    }
-    await new Promise(r => setTimeout(r, 60 + Math.random() * 140));
-  }
-  return null; // не смогли записать за 5 попыток — при реальном трафике почти невозможно
+  const result = mutateFn(stats, today);
+  await writeStats(stats);
+  return { stats, today, result };
 }
 
 export default async function handler(req, res) {
