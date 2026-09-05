@@ -2758,6 +2758,7 @@ function AdminScreen({ onBack }) {
           totalMood:      serverStats.totalMood      ?? 0,
           totalMeditation:serverStats.totalMeditation?? 0,
           uniqueTotal:    serverStats.uniqueTotal    ?? 0,
+          usersWithChatId:serverStats.usersWithChatId?? 0,
           todayOpens:     serverStats.todayOpens     ?? 0,
           todayQuiz:      serverStats.todayQuiz      ?? 0,
           todayUnique:    serverStats.todayUnique    ?? 0,
@@ -2797,6 +2798,7 @@ function AdminScreen({ onBack }) {
             <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ВСЕГО</p>
             {row("Открытий", stats.totalOpens)}
             {row("Уникальных пользователей", stats.uniqueTotal)}
+            {row("— из них через Telegram", stats.usersWithChatId)}
             {row("Опросник", stats.totalQuiz)}
             {row("Склонность к самообману", stats.totalSelfHonesty)}
             {row("Гормональный код", stats.totalHormones)}
@@ -3246,8 +3248,25 @@ export default function App() {
   const [currentMood, setCurrentMood] = useState("general");
 
   useEffect(() => {
-    if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
+    // Скрипт telegram-web-app.js грузится асинхронно — ждём его появления
+    // (до 1.5с), иначе на медленном интернете код успевает решить, что это
+    // не Telegram, и уходит в браузерный fallback (b_...), хотя человек
+    // реально открыл бота.
+    function waitForTelegram(maxWaitMs = 1500, stepMs = 50) {
+      return new Promise(resolve => {
+        const start = Date.now();
+        (function check() {
+          if (window.Telegram?.WebApp?.initDataUnsafe?.user) return resolve(true);
+          if (Date.now() - start >= maxWaitMs) return resolve(false);
+          setTimeout(check, stepMs);
+        })();
+      });
+    }
+
     async function loadMood() {
+      await waitForTelegram();
+      if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
+
       // ── uid + chat_id ──
       const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       let uid = tgUser?.id ? String(tgUser.id) : null;
