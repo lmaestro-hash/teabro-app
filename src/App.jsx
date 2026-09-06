@@ -68,7 +68,22 @@ function loadQueuedFetch(url) {
 // разнесено по времени с "open"/"snapshot" (пользователь совершает их не в
 // момент загрузки), так что реальный риск гонки с ними минимален —
 // но задержка на ожидание чужой очереди была реальным и ощутимым риском.
+//
+// Доставка через navigator.sendBeacon(), а не fetch(keepalive:true):
+// пользователь часто закрывает приложение сразу после действия (выбрал
+// эмоцию — и вышел), а fetch с keepalive в Android WebView (на чём обычно
+// построен встроенный браузер Telegram) исторически ненадёжен — запрос
+// может оборваться вместе с закрытием контекста. sendBeacon создан именно
+// для доставки данных, переживающей закрытие страницы.
 async function statEvent(action, uid) {
+  const payload = uid ? { action, uid } : { action };
+  if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+    try {
+      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      if (navigator.sendBeacon(STATS_URL, blob)) return;
+    } catch {}
+  }
+  // fallback, если sendBeacon недоступен или отказал
   const url = uid
     ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
     : `${STATS_URL}?action=${action}`;
