@@ -19,6 +19,22 @@ const CS = {
       resolve();
     }
   }),
+  // Забирает много ключей ОДНИМ запросом к CloudStorage вместо N последовательных
+  // getItem-вызовов. Раньше циклы по 90-365 дней делали await CS.get() по одному
+  // ключу за раз — каждый со своим round-trip к Telegram-бриджу. На таком
+  // количестве подряд идущих вызовов клиент либо тормозит (экран выглядит
+  // зависшим на "Загружаю..."), либо часть вызовов вообще не резолвится —
+  // тогда loading никогда не становится false и экран виснет по-настоящему.
+  getMultiple: (keys) => new Promise((resolve) => {
+    if (!keys.length) return resolve({});
+    if (window.Telegram?.WebApp?.CloudStorage) {
+      window.Telegram.WebApp.CloudStorage.getItems(keys, (err, values) => resolve(err ? {} : (values || {})));
+    } else {
+      const result = {};
+      keys.forEach(k => { result[k] = localStorage.getItem(k); });
+      resolve(result);
+    }
+  }),
 };
 
 // ─────────────────────────────────────────────
@@ -2734,13 +2750,19 @@ function AdminScreen({ onBack }) {
         const res = await fetch(`${STATS_URL}?action=get&t=${Date.now()}`, { cache: "no-store" });
         const serverStats = res.ok ? await res.json() : {};
 
-        // Личные данные эмоций — из CS (они у каждого свои)
-        const allEntries = [];
+        // Личные данные эмоций — из CS (они у каждого свои).
+        // Один батч-запрос вместо 365 последовательных CS.get() — см. комментарий
+        // у CS.getMultiple выше про причину зависаний админки.
+        const moodKeys = [];
         for (let i = 0; i < 365; i++) {
           const d = new Date(); d.setDate(d.getDate() - i);
-          const raw = await CS.get("mood_" + getDateKey(d));
-          if (raw) allEntries.push(JSON.parse(raw));
+          moodKeys.push("mood_" + getDateKey(d));
         }
+        const moodValues = await CS.getMultiple(moodKeys);
+        const allEntries = moodKeys
+          .map(k => moodValues[k])
+          .filter(Boolean)
+          .map(raw => JSON.parse(raw));
         const emotionCounts = {};
         EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
         allEntries.forEach(e => { if (emotionCounts[e.id] !== undefined) emotionCounts[e.id]++; });
@@ -2871,18 +2893,24 @@ function MyPathScreen({ onBack }) {
       setTeaHist(await getHistory("tea_history"));
       setMedHist(await getHistory("meditation_history"));
 
-      // настроение за последние 90 дней
+      // настроение за последние 90 дней — один батч-запрос вместо 90
+      // последовательных CS.get() (см. CS.getMultiple выше)
       const counts = {};
       EMOTIONS.forEach(e => { counts[e.id] = 0; });
       let total = 0;
+      const moodKeys90 = [];
       for (let i = 0; i < 90; i++) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const r = await CS.get("mood_" + getDateKey(d));
+        moodKeys90.push("mood_" + getDateKey(d));
+      }
+      const moodValues90 = await CS.getMultiple(moodKeys90);
+      moodKeys90.forEach(k => {
+        const r = moodValues90[k];
         if (r) {
           const e = JSON.parse(r);
           if (counts[e.id] !== undefined) { counts[e.id]++; total++; }
         }
-      }
+      });
       setMoodCounts(counts);
       setMoodTotal(total);
       setLoaded(true);

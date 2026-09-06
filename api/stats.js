@@ -38,8 +38,10 @@ async function writeStats(data) {
       addRandomSuffix: false,
       token: TOKEN,
     });
+    return { ok: true };
   } catch (err) {
     console.error("writeStats error:", err);
+    return { ok: false, error: String(err?.message || err) };
   }
 }
 
@@ -114,8 +116,8 @@ async function withRetryWrite(mutateFn) {
   const today = stats.byDay[todayKey];
 
   const result = mutateFn(stats, today);
-  await writeStats(stats);
-  return { stats, today, result };
+  const writeResult = await writeStats(stats);
+  return { stats, today, result, writeOk: writeResult.ok, writeError: writeResult.error || null };
 }
 
 export default async function handler(req, res) {
@@ -177,11 +179,11 @@ export default async function handler(req, res) {
           if (chatId) stats.users[uid].chatId = String(chatId);
         }
       });
-      return res.status(200).json({ ok: true, debug: { uid, chatId, usersCount: out ? Object.keys(out.stats.users).length : null } });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError, debug: { uid, chatId, usersCount: Object.keys(out.stats.users).length } });
     }
 
     if (action === "snapshot") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!uid) return;
         initUser(stats, uid);
         const week = getISOWeek();
@@ -207,20 +209,20 @@ export default async function handler(req, res) {
         user.lastSeen = Date.now();
         if (chatId) user.chatId = String(chatId);
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "pause") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!uid) return;
         initUser(stats, uid);
         stats.users[uid].pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "schedule_letter") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!(uid && letterId && revealAt)) return;
         initUser(stats, uid);
         const user = stats.users[uid];
@@ -230,79 +232,79 @@ export default async function handler(req, res) {
         if (idx >= 0) user.letters[idx] = entry;
         else user.letters.push(entry);
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "cancel_letter") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!(uid && letterId)) return;
         initUser(stats, uid);
         const user = stats.users[uid];
         user.letters = (user.letters || []).filter(l => String(l.id) !== String(letterId));
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "push_opened") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!uid) return;
         initUser(stats, uid);
         stats.users[uid].lastPushOpened = Date.now();
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "quiz") {
-      await withRetryWrite((stats, today) => {
+      const out = await withRetryWrite((stats, today) => {
         stats.totalQuiz = (stats.totalQuiz || 0) + 1;
         today.quiz = (today.quiz || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "selfhonesty") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         stats.totalSelfHonesty = (stats.totalSelfHonesty || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "hormones") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         stats.totalHormones = (stats.totalHormones || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "tea") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         stats.totalTea = (stats.totalTea || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "meditation") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         stats.totalMeditation = (stats.totalMeditation || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "mood") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         stats.totalMood = (stats.totalMood || 0) + 1;
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     if (action === "update_user") {
-      await withRetryWrite((stats) => {
+      const out = await withRetryWrite((stats) => {
         if (!uid) return;
         initUser(stats, uid);
         if (params.lastPushSent !== undefined) stats.users[uid].lastPushSent = Number(params.lastPushSent);
         if (params.lastSeen !== undefined) stats.users[uid].lastSeen = Number(params.lastSeen);
       });
-      return res.status(200).json({ ok: true });
+      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
     }
 
     return res.status(400).json({ error: "Unknown action" });
