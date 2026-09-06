@@ -1,63 +1,67 @@
-// api/stats.js — Tea Bro v3.3 (fixed: list() with token auth)
-import { put, list } from "@vercel/blob";
+// api/stats.js — Tea Bro v3.6 (миграция с Vercel Blob на Vercel KV / Upstash Redis)
+//
+// ПОЧЕМУ ПЕРЕЕХАЛИ: раньше вся статистика лежала в одном JSON-файле в Blob,
+// и каждая запись делала read-modify-write без блокировки. Если два запроса
+// (например "open" от одного юзера и "tea" от другого, или просто быстрая
+// навигация внутри одной сессии) попадали на сервер почти одновременно —
+// они оба читали один и тот же "старый" файл, и кто дописывал вторым, тот
+// перезаписывал чужой инкремент. Тесты страдали от этого сильнее входов,
+// потому что "open" обычно улетает первым и успевает провалидироваться,
+// а событие теста стреляет через несколько секунд — ровно в окно, когда
+// ответ на "open"/"snapshot" ещё может быть в полёте.
+//
+// Теперь: счётчики — атомарный HINCRBY (Redis гарантирует, что оба
+// конкурентных инкремента применятся), данные каждого юзера — свой ключ
+// (гонка возможна только если один и тот же uid пишет из двух мест
+// одновременно — на порядки реже, чем раньше).
+import { kv } from "@vercel/kv";
 
-const STATS_KEY = "teabro-stats.json";
-const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
+const COUNTERS_KEY = "counters";
+const USERS_SET_KEY = "users";
 
-async function readStats() {
-  try {
-    const { blobs } = await list({ prefix: "teabro-stats", token: TOKEN });
-    const blob = blobs.find(b => b.pathname === STATS_KEY);
-    if (!blob) return defaultStats();
-    // Читаем через downloadUrl с токеном.
-    // ВАЖНО: у Vercel Blob CDN своё кэширование на уровне edge, независимое
-    // от writeStats(). Поскольку URL блоба не меняется (addRandomSuffix:false),
-    // без cache-busting параметра CDN может отдавать устаревшую версию файла
-    // сразу после записи. Добавляем ?t=timestamp, чтобы каждый запрос был
-    // гарантированным cache miss.
-    const base = blob.downloadUrl || blob.url;
-    const url = `${base}${base.includes("?") ? "&" : "?"}t=${Date.now()}`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-      cache: "no-store",
-    });
-    if (!res.ok) return defaultStats();
-    const data = await res.json();
-    return data || defaultStats();
-  } catch (err) {
-    console.error("readStats error:", err);
-    return defaultStats();
-  }
-}
-
-async function writeStats(data) {
-  try {
-    await put(STATS_KEY, JSON.stringify(data), {
-      access: "private",
-      allowOverwrite: true,
-      addRandomSuffix: false,
-      token: TOKEN,
-    });
-    return { ok: true };
-  } catch (err) {
-    console.error("writeStats error:", err);
-    return { ok: false, error: String(err?.message || err) };
-  }
-}
-
-function defaultStats() {
+function defaultUser() {
   return {
-    totalOpens: 0,
-    totalQuiz: 0,
-    totalSelfHonesty: 0,
-    totalHormones: 0,
-    totalTea: 0,
-    totalMood: 0,
-    totalMeditation: 0,
-    uniqueTotal: 0,
-    byDay: {},
-    users: {},
+    chatId: null,
+    lastSeen: null,
+    lastPushSent: null,
+    lastPushOpened: null,
+    pauseUntil: null,
+    snapshots: [],
+    letters: [],
   };
+}
+
+async function getUser(uid) {
+  const raw = await kv.get(`user:${uid}`);
+  if (!raw) return defaultUser();
+  return {
+    chatId: raw.chatId ?? null,
+    lastSeen: raw.lastSeen ?? null,
+    lastPushSent: raw.lastPushSent ?? null,
+    lastPushOpened: raw.lastPushOpened ?? null,
+    pauseUntil: raw.pauseUntil ?? null,
+    snapshots: Array.isArray(raw.snapshots) ? raw.snapshots : [],
+    letters: Array.isArray(raw.letters) ? raw.letters : [],
+  };
+}
+
+async function saveUser(uid, user) {
+  await kv.set(`user:${uid}`, user);
+  await kv.sadd(USERS_SET_KEY, String(uid));
+}
+
+async function getAllUids() {
+  const uids = await kv.smembers(USERS_SET_KEY);
+  return uids || [];
+}
+
+async function getUsersMap() {
+  const uids = await getAllUids();
+  const users = {};
+  if (!uids.length) return users;
+  const records = await kv.mget(...uids.map(u => `user:${u}`));
+  uids.forEach((uid, i) => { users[uid] = records[i] || defaultUser(); });
+  return users;
 }
 
 function getTodayKey() {
@@ -73,61 +77,22 @@ function getISOWeek() {
   return `${d.getFullYear()}-W${Math.ceil(((d - yearStart) / 86400000 + 1) / 7)}`;
 }
 
-function initUser(stats, uid) {
-  if (!stats.users) stats.users = {};
-  if (!stats.users[uid]) {
-    stats.users[uid] = {
-      chatId: null,
-      lastSeen: null,
-      lastPushSent: null,
-      lastPushOpened: null,
-      pauseUntil: null,
-      snapshots: [],
-      letters: [],
-    };
-  } else {
-    const u = stats.users[uid];
-    if (!u.snapshots) u.snapshots = [];
-    if (!u.letters) u.letters = [];
-    if (u.chatId === undefined) u.chatId = null;
-    if (u.lastSeen === undefined) u.lastSeen = null;
-    if (u.lastPushSent === undefined) u.lastPushSent = null;
-    if (u.lastPushOpened === undefined) u.lastPushOpened = null;
-    if (u.pauseUntil === undefined) u.pauseUntil = null;
-  }
+async function incrCounter(field, by = 1) {
+  return kv.hincrby(COUNTERS_KEY, field, by);
 }
 
-// Временная защита от гонки записи, пока храним всё в одном JSON-блобе
-// (см. заметку в памяти про переход на Vercel KV). Читаем максимально свежие
-// данные прямо перед мутацией и пишем сразу — окно гонки маленькое.
-// НЕ перечитываем после записи для самопроверки: у блоб-хранилища есть
-// небольшая задержка между записью и тем, что отдаёт следующее чтение, и
-// такая проверка иногда ложно решала "меня перезаписали" ровно из-за этой
-// задержки, а не из-за реальной гонки — это грузило лишние повторы и
-// путало счётчики больше, чем помогало. mutateFn должен работать на любом
-// свежем stats, который ему дадут — не хранить состояние снаружи.
-async function withRetryWrite(mutateFn) {
-  const todayKey = getTodayKey();
-  const stats = await readStats();
-  if (!stats.byDay) stats.byDay = {};
-  if (!stats.users) stats.users = {};
-  if (!stats.byDay[todayKey]) stats.byDay[todayKey] = { opens: 0, quiz: 0, uniqueIds: [] };
-  if (!stats.byDay[todayKey].uniqueIds) stats.byDay[todayKey].uniqueIds = [];
-  const today = stats.byDay[todayKey];
+async function incrToday(field, by = 1) {
+  return kv.hincrby(`day:${getTodayKey()}`, field, by);
+}
 
-  const result = mutateFn(stats, today);
-  const writeResult = await writeStats(stats);
-  return { stats, today, result, writeOk: writeResult.ok, writeError: writeResult.error || null };
+async function addTodayUnique(uid) {
+  return kv.sadd(`day:${getTodayKey()}:uids`, String(uid));
 }
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  // КРИТИЧНО: без этого Vercel/браузер может закэшировать ответ на
-  // одинаковый GET-запрос (тот же URL) и отдавать его повторно без
-  // реального выполнения функции — из-за этого и запись, и чтение
-  // могли "зависать" на старом значении.
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   res.setHeader("Pragma", "no-cache");
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -136,181 +101,165 @@ export default async function handler(req, res) {
   const { action, uid, chatId, burnout, mood, notesCount, letterId, revealAt } = params;
 
   try {
-    // ── Действия только на чтение — без retry-записи, читаем один раз ──
+    // ── Действия только на чтение ──
     if (action === "get") {
-      const stats = await readStats();
       const todayKey = getTodayKey();
-      const today = (stats.byDay && stats.byDay[todayKey]) || { opens: 0, quiz: 0, uniqueIds: [] };
-      const usersObj = stats.users || {};
-      const withChatId = Object.values(usersObj).filter(u => u.chatId).length;
+      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids] = await Promise.all([
+        kv.hgetall(COUNTERS_KEY),
+        kv.hgetall(`day:${todayKey}`),
+        kv.scard(USERS_SET_KEY),
+        kv.scard(`day:${todayKey}:uids`),
+        getAllUids(),
+      ]);
+      let usersWithChatId = 0;
+      if (uids.length) {
+        const records = await kv.mget(...uids.map(u => `user:${u}`));
+        usersWithChatId = records.filter(u => u && u.chatId).length;
+      }
       return res.status(200).json({
-        totalOpens: stats.totalOpens || 0,
-        totalQuiz: stats.totalQuiz || 0,
-        totalSelfHonesty: stats.totalSelfHonesty || 0,
-        totalHormones: stats.totalHormones || 0,
-        totalTea: stats.totalTea || 0,
-        totalMood: stats.totalMood || 0,
-        totalMeditation: stats.totalMeditation || 0,
-        uniqueTotal: stats.uniqueTotal || 0,
-        usersWithChatId: withChatId,
-        todayOpens: today.opens || 0,
-        todayQuiz: today.quiz || 0,
-        todayUnique: today.uniqueIds?.length || 0,
+        totalOpens: Number(counters?.totalOpens) || 0,
+        totalQuiz: Number(counters?.totalQuiz) || 0,
+        totalSelfHonesty: Number(counters?.totalSelfHonesty) || 0,
+        totalHormones: Number(counters?.totalHormones) || 0,
+        totalTea: Number(counters?.totalTea) || 0,
+        totalMood: Number(counters?.totalMood) || 0,
+        totalMeditation: Number(counters?.totalMeditation) || 0,
+        uniqueTotal: uniqueTotal || 0,
+        usersWithChatId,
+        todayOpens: Number(todayStats?.opens) || 0,
+        todayQuiz: Number(todayStats?.quiz) || 0,
+        todayUnique: todayUniqueCount || 0,
       });
     }
 
     if (action === "get_users") {
-      const stats = await readStats();
-      return res.status(200).json({ users: stats.users || {} });
+      const users = await getUsersMap();
+      return res.status(200).json({ users });
     }
 
-    // ── Действия с записью — все через withRetryWrite ──
+    // ── Действия с записью ──
     if (action === "open") {
-      const out = await withRetryWrite((stats, today) => {
-        if (uid) initUser(stats, uid);
-        stats.totalOpens = (stats.totalOpens || 0) + 1;
-        today.opens = (today.opens || 0) + 1;
-        if (uid) {
-          if (!today.uniqueIds.includes(String(uid))) {
-            today.uniqueIds.push(String(uid));
-            stats.uniqueTotal = (stats.uniqueTotal || 0) + 1;
-          }
-          stats.users[uid].lastSeen = Date.now();
-          if (chatId) stats.users[uid].chatId = String(chatId);
-        }
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError, debug: { uid, chatId, usersCount: Object.keys(out.stats.users).length } });
+      if (uid) {
+        const user = await getUser(uid);
+        user.lastSeen = Date.now();
+        if (chatId) user.chatId = String(chatId);
+        await saveUser(uid, user);
+        await addTodayUnique(uid);
+      }
+      await incrCounter("totalOpens");
+      await incrToday("opens");
+      const usersCount = (await getAllUids()).length;
+      return res.status(200).json({ ok: true, debug: { uid, chatId, usersCount } });
     }
 
     if (action === "snapshot") {
-      const out = await withRetryWrite((stats) => {
-        if (!uid) return;
-        initUser(stats, uid);
-        const week = getISOWeek();
-        const user = stats.users[uid];
-        const idx = user.snapshots.findIndex(s => s.week === week);
-        const prev = idx >= 0 ? user.snapshots[idx] : null;
-        const snap = {
-          week,
-          ts: Date.now(),
-          burnout: burnout !== undefined ? Number(burnout) : (prev?.burnout ?? null),
-          mood: mood || prev?.mood || null,
-          notesCount: notesCount !== undefined ? Number(notesCount) : (prev?.notesCount ?? null),
-          opens: (prev?.opens || 0) + 1,
-        };
-        if (burnout !== undefined && prev?.burnout != null) {
-          snap.burnout = Math.round((prev.burnout + Number(burnout)) / 2);
-        }
-        if (idx >= 0) user.snapshots[idx] = snap;
-        else {
-          user.snapshots.push(snap);
-          if (user.snapshots.length > 8) user.snapshots = user.snapshots.slice(-8);
-        }
-        user.lastSeen = Date.now();
-        if (chatId) user.chatId = String(chatId);
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!uid) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      const week = getISOWeek();
+      const idx = user.snapshots.findIndex(s => s.week === week);
+      const prev = idx >= 0 ? user.snapshots[idx] : null;
+      const snap = {
+        week,
+        ts: Date.now(),
+        burnout: burnout !== undefined ? Number(burnout) : (prev?.burnout ?? null),
+        mood: mood || prev?.mood || null,
+        notesCount: notesCount !== undefined ? Number(notesCount) : (prev?.notesCount ?? null),
+        opens: (prev?.opens || 0) + 1,
+      };
+      if (burnout !== undefined && prev?.burnout != null) {
+        snap.burnout = Math.round((prev.burnout + Number(burnout)) / 2);
+      }
+      if (idx >= 0) user.snapshots[idx] = snap;
+      else {
+        user.snapshots.push(snap);
+        if (user.snapshots.length > 8) user.snapshots = user.snapshots.slice(-8);
+      }
+      user.lastSeen = Date.now();
+      if (chatId) user.chatId = String(chatId);
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "pause") {
-      const out = await withRetryWrite((stats) => {
-        if (!uid) return;
-        initUser(stats, uid);
-        stats.users[uid].pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!uid) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      user.pauseUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "schedule_letter") {
-      const out = await withRetryWrite((stats) => {
-        if (!(uid && letterId && revealAt)) return;
-        initUser(stats, uid);
-        const user = stats.users[uid];
-        if (chatId) user.chatId = String(chatId);
-        const idx = user.letters.findIndex(l => String(l.id) === String(letterId));
-        const entry = { id: letterId, revealAt, notified: false };
-        if (idx >= 0) user.letters[idx] = entry;
-        else user.letters.push(entry);
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!(uid && letterId && revealAt)) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      if (chatId) user.chatId = String(chatId);
+      const idx = user.letters.findIndex(l => String(l.id) === String(letterId));
+      const entry = { id: letterId, revealAt, notified: false };
+      if (idx >= 0) user.letters[idx] = entry;
+      else user.letters.push(entry);
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "cancel_letter") {
-      const out = await withRetryWrite((stats) => {
-        if (!(uid && letterId)) return;
-        initUser(stats, uid);
-        const user = stats.users[uid];
-        user.letters = (user.letters || []).filter(l => String(l.id) !== String(letterId));
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!(uid && letterId)) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      user.letters = user.letters.filter(l => String(l.id) !== String(letterId));
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "push_opened") {
-      const out = await withRetryWrite((stats) => {
-        if (!uid) return;
-        initUser(stats, uid);
-        stats.users[uid].lastPushOpened = Date.now();
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!uid) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      user.lastPushOpened = Date.now();
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "quiz") {
-      const out = await withRetryWrite((stats, today) => {
-        stats.totalQuiz = (stats.totalQuiz || 0) + 1;
-        today.quiz = (today.quiz || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalQuiz");
+      await incrToday("quiz");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "selfhonesty") {
-      const out = await withRetryWrite((stats) => {
-        stats.totalSelfHonesty = (stats.totalSelfHonesty || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalSelfHonesty");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "hormones") {
-      const out = await withRetryWrite((stats) => {
-        stats.totalHormones = (stats.totalHormones || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalHormones");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "tea") {
-      const out = await withRetryWrite((stats) => {
-        stats.totalTea = (stats.totalTea || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalTea");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "meditation") {
-      const out = await withRetryWrite((stats) => {
-        stats.totalMeditation = (stats.totalMeditation || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalMeditation");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "mood") {
-      const out = await withRetryWrite((stats) => {
-        stats.totalMood = (stats.totalMood || 0) + 1;
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      await incrCounter("totalMood");
+      return res.status(200).json({ ok: true });
     }
 
     if (action === "update_user") {
-      const out = await withRetryWrite((stats) => {
-        if (!uid) return;
-        initUser(stats, uid);
-        if (params.lastPushSent !== undefined) stats.users[uid].lastPushSent = Number(params.lastPushSent);
-        if (params.lastSeen !== undefined) stats.users[uid].lastSeen = Number(params.lastSeen);
-      });
-      return res.status(out.writeOk ? 200 : 500).json({ ok: out.writeOk, error: out.writeError });
+      if (!uid) return res.status(200).json({ ok: true });
+      const user = await getUser(uid);
+      if (params.lastPushSent !== undefined) user.lastPushSent = Number(params.lastPushSent);
+      if (params.lastSeen !== undefined) user.lastSeen = Number(params.lastSeen);
+      await saveUser(uid, user);
+      return res.status(200).json({ ok: true });
     }
 
     return res.status(400).json({ error: "Unknown action" });
 
   } catch (err) {
     console.error("Stats error:", err);
-    return res.status(500).json({ error: String(err) });
+    return res.status(500).json({ ok: false, error: String(err?.message || err) });
   }
 }
