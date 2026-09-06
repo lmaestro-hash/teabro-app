@@ -80,10 +80,39 @@ async function statEvent(action, uid) {
   }
 }
 
+// Достаёт id пользователя Telegram прямо из URL-хеша (tgWebAppData), который
+// сам Telegram подставляет при запуске Mini App — СИНХРОННО, без ожидания
+// того, успеет ли загрузиться внешний telegram-web-app.js. Это устраняет
+// саму причину пропавших chatId: раньше единственным источником uid был
+// window.Telegram.WebApp.initDataUnsafe.user, который появляется только
+// после выполнения стороннего скрипта с telegram.org — на медленной связи
+// или подтормаживающем CDN это могло не уложиться в тайм-аут ожидания,
+// и юзер (реально зашедший через бота) получал браузерный fallback-id
+// без chatId, а значит без единого шанса получить пуш.
+function parseTelegramUserFromHash() {
+  try {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return null;
+    const hashParams = new URLSearchParams(hash);
+    const tgWebAppData = hashParams.get("tgWebAppData");
+    if (!tgWebAppData) return null;
+    const dataParams = new URLSearchParams(tgWebAppData);
+    const userRaw = dataParams.get("user");
+    if (!userRaw) return null;
+    const user = JSON.parse(userRaw);
+    return user?.id ? String(user.id) : null;
+  } catch {
+    return null;
+  }
+}
+
 // Единый способ получить uid + chat_id (для событий вне основного loadMood)
 function getUidChat() {
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  let uid = tgUser?.id ? String(tgUser.id) : null;
+  let uid = parseTelegramUserFromHash();
+  if (!uid) {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    uid = tgUser?.id ? String(tgUser.id) : null;
+  }
   const chatId = uid; // в TG Mini App user.id === chat_id
   if (!uid) {
     try {
@@ -3292,12 +3321,17 @@ export default function App() {
     }
 
     async function loadMood() {
+      // Сначала пробуем взять uid синхронно из URL — не зависит от скорости
+      // загрузки telegram-web-app.js (см. parseTelegramUserFromHash выше)
+      let uid = parseTelegramUserFromHash();
       await waitForTelegram();
       if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
 
       // ── uid + chat_id ──
-      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      let uid = tgUser?.id ? String(tgUser.id) : null;
+      if (!uid) {
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        uid = tgUser?.id ? String(tgUser.id) : null;
+      }
       const chatId = uid; // в TG Mini App user.id === chat_id
       if (!uid) {
         try {
