@@ -75,8 +75,8 @@ function loadQueuedFetch(url) {
 // построен встроенный браузер Telegram) исторически ненадёжен — запрос
 // может оборваться вместе с закрытием контекста. sendBeacon создан именно
 // для доставки данных, переживающей закрытие страницы.
-async function statEvent(action, uid) {
-  const payload = uid ? { action, uid } : { action };
+async function statEvent(action, uid, extra) {
+  const payload = { action, ...(uid ? { uid } : {}), ...(extra || {}) };
   if (typeof navigator !== "undefined" && navigator.sendBeacon) {
     try {
       const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
@@ -84,9 +84,8 @@ async function statEvent(action, uid) {
     } catch {}
   }
   // fallback, если sendBeacon недоступен или отказал
-  const url = uid
-    ? `${STATS_URL}?action=${action}&uid=${encodeURIComponent(uid)}`
-    : `${STATS_URL}?action=${action}`;
+  const qs = new URLSearchParams(payload).toString();
+  const url = `${STATS_URL}?${qs}`;
   for (let i = 0; i < 3; i++) {
     try {
       const res = await fetch(url, { keepalive: true, cache: "no-store" });
@@ -2510,7 +2509,7 @@ function MoodScreen({ onBack }) {
     const todayKey = getTodayKey();
     await CS.set("mood_" + todayKey, JSON.stringify(emotion));
     setTodayEmotion(emotion);
-    statEvent("mood");
+    statEvent("mood", undefined, { emotion: emotion.id });
 
     // ── Серия (streak) только растёт и никогда не откатывается. ──
     // Один прирост за календарный день, сколько бы дней ни было
@@ -2794,25 +2793,13 @@ function AdminScreen({ onBack }) {
         const res = await fetch(`${STATS_URL}?action=get&t=${Date.now()}`, { cache: "no-store" });
         const serverStats = res.ok ? await res.json() : {};
 
-        // Личные данные эмоций — из CS (они у каждого свои).
-        // Один батч-запрос вместо 365 последовательных CS.get() — см. комментарий
-        // у CS.getMultiple выше про причину зависаний админки.
-        const moodKeys = [];
-        for (let i = 0; i < 365; i++) {
-          const d = new Date(); d.setDate(d.getDate() - i);
-          moodKeys.push("mood_" + getDateKey(d));
-        }
-        const moodValues = await CS.getMultiple(moodKeys);
-        const allEntries = moodKeys
-          .map(k => moodValues[k])
-          .filter(Boolean)
-          .map(raw => JSON.parse(raw));
-        const emotionCounts = {};
-        EMOTIONS.forEach(e => { emotionCounts[e.id] = 0; });
-        allEntries.forEach(e => { if (emotionCounts[e.id] !== undefined) emotionCounts[e.id]++; });
+        // Топ эмоций — из серверного агрегированного счётчика (emotionCounts),
+        // а НЕ из CloudStorage: CS привязан к текущему юзеру, и раньше здесь
+        // считались только личные записи того, кто открыл админку, а не всех.
+        const emotionCounts = serverStats.emotionCounts || {};
         const topEmotions = Object.entries(emotionCounts).sort((a,b) => b[1]-a[1]).slice(0,3).map(([id, count]) => {
           const em = EMOTIONS.find(e => e.id === id);
-          return em ? { ...em, count } : null;
+          return em && count > 0 ? { ...em, count } : null;
         }).filter(Boolean);
 
         setStats({
@@ -2829,7 +2816,6 @@ function AdminScreen({ onBack }) {
           todayQuiz:      serverStats.todayQuiz      ?? 0,
           todayUnique:    serverStats.todayUnique    ?? 0,
           topEmotions,
-          allEntries: allEntries.length,
         });
       } catch(e) { setStats({ error: true }); }
       setLoading(false);

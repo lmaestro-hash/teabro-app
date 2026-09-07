@@ -18,6 +18,10 @@ import { kv } from "@vercel/kv";
 
 const COUNTERS_KEY = "counters";
 const USERS_SET_KEY = "users";
+const EMOTION_COUNTERS_KEY = "emotionCounts";
+// Держим в списке белым списком — не пишем в Redis произвольные поля,
+// присланные с клиента (emotion=что-угодно), только известные id из EMOTIONS в App.jsx.
+const VALID_EMOTION_IDS = ["joy", "calm", "inspired", "unclear", "anxiety", "angry", "tired"];
 
 function defaultUser() {
   return {
@@ -98,19 +102,22 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const params = req.method === "POST" ? req.body : req.query;
-  const { action, uid, chatId, burnout, mood, notesCount, letterId, revealAt } = params;
+  const { action, uid, chatId, burnout, mood, notesCount, letterId, revealAt, emotion } = params;
 
   try {
     // ── Действия только на чтение ──
     if (action === "get") {
       const todayKey = getTodayKey();
-      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids] = await Promise.all([
+      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters] = await Promise.all([
         kv.hgetall(COUNTERS_KEY),
         kv.hgetall(`day:${todayKey}`),
         kv.scard(USERS_SET_KEY),
         kv.scard(`day:${todayKey}:uids`),
         getAllUids(),
+        kv.hgetall(EMOTION_COUNTERS_KEY),
       ]);
+      const emotionCounts = {};
+      VALID_EMOTION_IDS.forEach(id => { emotionCounts[id] = Number(emotionCounters?.[id]) || 0; });
       let usersWithChatId = 0;
       if (uids.length) {
         const records = await kv.mget(...uids.map(u => `user:${u}`));
@@ -129,6 +136,7 @@ export default async function handler(req, res) {
         todayOpens: Number(todayStats?.opens) || 0,
         todayQuiz: Number(todayStats?.quiz) || 0,
         todayUnique: todayUniqueCount || 0,
+        emotionCounts,
       });
     }
 
@@ -244,6 +252,11 @@ export default async function handler(req, res) {
 
     if (action === "mood") {
       await incrCounter("totalMood");
+      // Только агрегированный счётчик по эмоции — не привязан к uid,
+      // так что это не персональные данные, просто общая цифра "сколько раз выбрали X".
+      if (emotion && VALID_EMOTION_IDS.includes(String(emotion))) {
+        await kv.hincrby(EMOTION_COUNTERS_KEY, String(emotion), 1);
+      }
       return res.status(200).json({ ok: true });
     }
 
