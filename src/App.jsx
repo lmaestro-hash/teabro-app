@@ -302,32 +302,60 @@ function getCurrentTitle(streak) {
 // ─────────────────────────────────────────────
 const ARCHETYPES = [
   {
-    id: "observer",
-    emoji: "🌱",
-    name: "Спокойный наблюдатель",
-    desc: "Ты чаще в покое, чем в буре. Спокойствие, благодарность и любовь — твой частый фон. Умеешь замечать, не реагируя сразу.",
-    condition: (stats) => ((stats.calm||0) + (stats.grateful||0) + (stats.pride||0) + (stats.love||0)) / stats.total > 0.5,
+    id: "peaceful",
+    emoji: "🌿",
+    name: "Умиротворённый",
+    desc: "Спокойствие и благодарность — твой частый фон. Тебе уже достаточно того, что есть, и это редкое качество.",
+    condition: (stats) => ((stats.calm||0) + (stats.grateful||0)) / stats.total > 0.4,
+  },
+  {
+    id: "warm",
+    emoji: "🦁",
+    name: "Тёплый",
+    desc: "Любовь и гордость случаются у тебя чаще других состояний. Ты цени́шь близких и себя — редкое сочетание.",
+    condition: (stats) => ((stats.love||0) + (stats.pride||0)) / stats.total > 0.4,
+  },
+  {
+    id: "inspired_arch",
+    emoji: "✨",
+    name: "Вдохновлённый",
+    desc: "Радость, воодушевление и вдохновение — твой частый фон. В тебе много света, который тянет делиться собой.",
+    condition: (stats) => ((stats.joy||0) + (stats.inspired||0) + (stats.inspiration||0)) / stats.total > 0.4,
   },
   {
     id: "drive_seeker",
     emoji: "🔥",
     name: "Искатель драйва",
-    desc: "Ты живёшь на вкусе к жизни — радость, азарт и вдохновение случаются чаще других состояний. Энергии много — вопрос, куда её направить.",
-    condition: (stats) => ((stats.joy||0) + (stats.drive||0) + (stats.excitement||0) + (stats.inspired||0) + (stats.inspiration||0)) / stats.total > 0.5,
+    desc: "Драйв и азарт — твои частые спутники. Энергии много, и тебя тянет пробовать, рисковать, соревноваться.",
+    condition: (stats) => ((stats.drive||0) + (stats.excitement||0)) / stats.total > 0.4,
   },
   {
-    id: "intense",
-    emoji: "🌪️",
-    name: "Обострённый",
-    desc: "Тревога и злость — твои частые спутники последнее время. Организм явно сигналит: что-то требует внимания.",
-    condition: (stats) => ((stats.anxiety||0) + (stats.angry||0)) / stats.total > 0.4,
+    id: "anxious",
+    emoji: "⚡",
+    name: "Тревожный",
+    desc: "Тревога — твой частый фон последнее время. Ты чутко считываешь риски и детали — иногда можно позволить себе довериться моменту.",
+    condition: (stats) => (stats.anxiety||0) / stats.total > 0.3,
+  },
+  {
+    id: "boiling",
+    emoji: "🌋",
+    name: "Кипящий",
+    desc: "Злость — твой частый фон последнее время. Внутри копится жар — важно найти для него безопасный выход.",
+    condition: (stats) => (stats.angry||0) / stats.total > 0.3,
   },
   {
     id: "restorer",
     emoji: "🍵",
     name: "Восстанавливающийся",
-    desc: "Усталость, грусть или пустота — твой фон последнее время. Тело и душа просят паузы. Ты уже делаешь правильный шаг, замечая это.",
-    condition: (stats) => ((stats.tired||0) + (stats.sad||0) + (stats.lonely||0) + (stats.boredom||0) + (stats.disappointed||0)) / stats.total > 0.4,
+    desc: "Усталость и скука — твой фон последнее время. Тело и голова просят паузы. Ты уже делаешь правильный шаг, замечая это.",
+    condition: (stats) => ((stats.tired||0) + (stats.boredom||0)) / stats.total > 0.4,
+  },
+  {
+    id: "quiet",
+    emoji: "🍂",
+    name: "Затихший",
+    desc: "Грусть, одиночество или разочарование — твой частый фон. Это не слабость, а сигнал: тебе сейчас нужно немного тепла.",
+    condition: (stats) => ((stats.sad||0) + (stats.lonely||0) + (stats.disappointed||0)) / stats.total > 0.4,
   },
   {
     id: "seeker",
@@ -2673,7 +2701,7 @@ function MoodScreen({ onBack }) {
             {EMOTIONS.map(e => (
               <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"10px 4px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"6px" }}>
                 <span style={{ fontSize:"22px" }}>{e.emoji}</span>
-                <span style={{ fontSize:"10px", color:"#7A6E62" }}>{e.label}</span>
+                <span style={{ fontSize:"10px", color:"#7A6E62", textAlign:"center" }}>{e.label}</span>
               </button>
             ))}
           </div>
