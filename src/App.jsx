@@ -261,13 +261,22 @@ const WISDOMS = [
 // ЭМОЦИИ
 // ─────────────────────────────────────────────
 const EMOTIONS = [
-  { id: "joy",      emoji: "😊", label: "Радость",          mood: "general", score: 9 },
-  { id: "calm",     emoji: "😌", label: "Спокойствие",      mood: "general", score: 8 },
-  { id: "inspired", emoji: "💪", label: "Воодушевление",    mood: "general", score: 9 },
-  { id: "unclear",  emoji: "🤔", label: "Неопределенность", mood: "sheng",   score: 5 },
-  { id: "anxiety",  emoji: "😟", label: "Тревога",          mood: "bai",     score: 3 },
-  { id: "angry",    emoji: "😡", label: "Раздражение",      mood: "shu",     score: 2 },
-  { id: "tired",    emoji: "😴", label: "Усталость",        mood: "tguan",   score: 3 },
+  { id: "joy",          emoji: "😊", label: "Радость",        mood: "general", score: 9, desc: "Лёгкое, беспричинное \u201Cхорошо прямо сейчас\u201D" },
+  { id: "inspired",     emoji: "💪", label: "Воодушевление",  mood: "general", score: 9, desc: "Есть силы и хочется действовать" },
+  { id: "drive",        emoji: "🔥", label: "Драйв / Подъём", mood: "general", score: 8, desc: "День в кайф: энергия, всё горит, всё получается" },
+  { id: "calm",         emoji: "😌", label: "Спокойствие",    mood: "general", score: 8, desc: "Ровный внутренний штиль, ничего не тревожит" },
+  { id: "grateful",     emoji: "🙏", label: "Благодарность",  mood: "general", score: 9, desc: "Ценю то, что уже есть, а не хочу большего" },
+  { id: "pride",        emoji: "🦁", label: "Гордость",       mood: "general", score: 8, desc: "Доволен(льна) собой за конкретный поступок" },
+  { id: "love",         emoji: "🥰", label: "Любовь",         mood: "general", score: 9, desc: "Тёплое, нежное — нежность и любовь вместе" },
+  { id: "inspiration",  emoji: "✨", label: "Вдохновение",    mood: "general", score: 8, desc: "Идея, творческий импульс — тоньше, чем Воодушевление" },
+  { id: "excitement",   emoji: "🃏", label: "Азарт",          mood: "gaba",    score: 7, desc: "Тянет рискнуть, попробовать, посоревноваться" },
+  { id: "anxiety",      emoji: "😟", label: "Тревога",        mood: "bai",     score: 3, desc: "Беспокойство о том, что ещё не случилось" },
+  { id: "lonely",       emoji: "🍂", label: "Одиночество",    mood: "bai",     score: 3, desc: "Чувствую себя отдельно от всех, даже среди людей" },
+  { id: "angry",        emoji: "🤬", label: "Злость",         mood: "shu",     score: 2, desc: "Сильнее раздражения — хочется резко отреагировать" },
+  { id: "tired",        emoji: "😴", label: "Усталость",      mood: "tguan",   score: 3, desc: "Физически нет сил, тело просит отдыха" },
+  { id: "sad",          emoji: "😔", label: "Грусть",         mood: "dahong",  score: 2, desc: "Тихая печаль, часто про потерю или прошлое" },
+  { id: "disappointed", emoji: "😕", label: "Разочарование",  mood: "dahong",  score: 3, desc: "Ждал(а) одно — получил(ось) другое" },
+  { id: "boredom",      emoji: "🥱", label: "Скука",          mood: "dahong",  score: 4, desc: "Ничего не увлекает, время тянется" },
 ];
 
 // ─────────────────────────────────────────────
@@ -296,36 +305,43 @@ const ARCHETYPES = [
     id: "observer",
     emoji: "🌱",
     name: "Спокойный наблюдатель",
-    desc: "Ты чаще в покое, чем в буре. Умеешь замечать — и не реагировать сразу. Редкое качество.",
-    condition: (stats) => (stats.calm + stats.joy) / stats.total > 0.5,
+    desc: "Ты чаще в покое, чем в буре. Спокойствие, благодарность и любовь — твой частый фон. Умеешь замечать, не реагируя сразу.",
+    condition: (stats) => ((stats.calm||0) + (stats.grateful||0) + (stats.pride||0) + (stats.love||0)) / stats.total > 0.5,
   },
   {
-    id: "seeker",
+    id: "drive_seeker",
     emoji: "🔥",
-    name: "Искатель перемен",
-    desc: "Ты живешь интенсивно. Тревога и воодушевление — твои частые спутники. Энергия есть — важно куда ее.",
-    condition: (stats) => (stats.anxiety + stats.inspired + stats.angry) / stats.total > 0.5,
+    name: "Искатель драйва",
+    desc: "Ты живёшь на вкусе к жизни — радость, азарт и вдохновение случаются чаще других состояний. Энергии много — вопрос, куда её направить.",
+    condition: (stats) => ((stats.joy||0) + (stats.drive||0) + (stats.excitement||0) + (stats.inspired||0) + (stats.inspiration||0)) / stats.total > 0.5,
   },
   {
-    id: "analyst",
-    emoji: "🧭",
-    name: "Аналитик",
-    desc: "Много неопределенности и тумана. Ты думаешь глубже большинства — иногда слишком глубоко.",
-    condition: (stats) => stats.unclear / stats.total > 0.3,
+    id: "intense",
+    emoji: "🌪️",
+    name: "Обострённый",
+    desc: "Тревога и злость — твои частые спутники последнее время. Организм явно сигналит: что-то требует внимания.",
+    condition: (stats) => ((stats.anxiety||0) + (stats.angry||0)) / stats.total > 0.4,
   },
   {
     id: "restorer",
     emoji: "🍵",
     name: "Восстанавливающийся",
-    desc: "Усталость — твой фон последнее время. Тело и душа просят паузы. Ты уже делаешь правильные шаги.",
-    condition: (stats) => (stats.tired + stats.anxiety) / stats.total > 0.5,
+    desc: "Усталость, грусть или пустота — твой фон последнее время. Тело и душа просят паузы. Ты уже делаешь правильный шаг, замечая это.",
+    condition: (stats) => ((stats.tired||0) + (stats.sad||0) + (stats.lonely||0) + (stats.boredom||0) + (stats.disappointed||0)) / stats.total > 0.4,
+  },
+  {
+    id: "seeker",
+    emoji: "🧭",
+    name: "В поиске",
+    desc: "Состояния меняются без явного паттерна. Ты в поиске себя — и это честная фаза.",
+    condition: () => true,
   },
 ];
 
 function getArchetype(emotionCounts, total) {
   if (total < 30) return null;
   const stats = { ...emotionCounts, total };
-  return ARCHETYPES.find(a => a.condition(stats)) || ARCHETYPES[0];
+  return ARCHETYPES.find(a => a.condition(stats));
 }
 
 // ─────────────────────────────────────────────
@@ -336,29 +352,37 @@ const TRAJECTORIES = [
     id: "opening",
     emoji: "🌅",
     name: "Жизнь открывается",
-    dominantIds: ["joy", "inspired"],
-    verdict: (top) => `Последнее время ты чаще в ${top[0].label.toLowerCase()} и ${top[1]?.label.toLowerCase() || "воодушевлении"}. Жизнь движется в сторону раскрытия.`,
-    question: "Что именно сейчас дает тебе эту энергию? Стоит это беречь.",
+    dominantIds: ["joy", "drive", "excitement", "inspired", "inspiration"],
+    verdict: (top) => `Последнее время ты чаще в ${top[0].label.toLowerCase()}${top[1] ? ` и ${top[1].label.toLowerCase()}` : ""}. Жизнь движется в сторону раскрытия.`,
+    question: "Что именно сейчас даёт тебе эту энергию? Стоит это беречь.",
   },
   {
     id: "deepening",
     emoji: "🌊",
     name: "Жизнь углубляется",
-    dominantIds: ["calm", "unclear"],
-    verdict: () => "Преобладает спокойствие и тишина. Ты движешься внутрь — это ценный период.",
-    question: "Что ты сейчас понимаешь о себе, чего не понимал раньше?",
+    dominantIds: ["calm", "grateful", "pride", "love"],
+    verdict: () => "Преобладает спокойствие и тепло к себе. Ты движешься внутрь — это ценный период.",
+    question: "Что ты сейчас понимаешь о себе, чего не понимал(а) раньше?",
   },
   {
     id: "signal",
-    emoji: "🕯️",
+    emoji: "⚡",
     name: "Жизнь сигналит",
-    dominantIds: ["anxiety", "tired", "angry"],
-    verdict: (top) => `${top[0].label} — твой преобладающий фон. Жизнь даёт сигнал: что-то требует внимания.`,
-    question: "Что в твоей жизни сейчас просит остановки или изменения?",
+    dominantIds: ["anxiety", "angry"],
+    verdict: (top) => `${top[0].label} — твой преобладающий фон. Жизнь даёт сигнал: нужно решение или разговор.`,
+    question: "Что в твоей жизни сейчас требует прямого действия?",
+  },
+  {
+    id: "pausing",
+    emoji: "🍂",
+    name: "Жизнь просит паузу",
+    dominantIds: ["tired", "sad", "lonely", "boredom", "disappointed"],
+    verdict: (top) => `${top[0].label} — твой частый фон последнее время. Это не слабость, а сигнал: пора притормозить.`,
+    question: "Что бы тебе сейчас помогло — не решить, а просто отдохнуть?",
   },
   {
     id: "searching",
-    emoji: "🌿",
+    emoji: "🧭",
     name: "Жизнь ищет себя",
     dominantIds: [],
     verdict: () => "Состояния меняются без явного паттерна. Ты в поиске — и это честная фаза.",
@@ -379,11 +403,16 @@ function getTrajectory(stats) {
   const sorted = Object.entries(stats.counts).sort((a, b) => b[1] - a[1]);
   const topIds = sorted.filter(([, v]) => v > 0).slice(0, 2).map(([id]) => id);
   const topEmotions = topIds.map(id => EMOTIONS.find(e => e.id === id)).filter(Boolean);
-  const signalCount = (stats.counts.anxiety || 0) + (stats.counts.tired || 0) + (stats.counts.angry || 0);
-  if (signalCount / stats.total > 0.45) { const t = TRAJECTORIES.find(t => t.id === "signal"); return { ...t, topEmotions }; }
-  const openCount = (stats.counts.joy || 0) + (stats.counts.inspired || 0);
+  const c = stats.counts;
+  const signalCount = (c.anxiety||0) + (c.angry||0);
+  const pauseCount = (c.tired||0) + (c.sad||0) + (c.lonely||0) + (c.boredom||0) + (c.disappointed||0);
+  const openCount = (c.joy||0) + (c.drive||0) + (c.excitement||0) + (c.inspired||0) + (c.inspiration||0);
+  const deepCount = (c.calm||0) + (c.grateful||0) + (c.pride||0) + (c.love||0);
+  // Негативные квадранты проверяем первыми — если человеку тяжело, важнее
+  // это заметить, чем отчитаться про открывающуюся жизнь по случайному перевесу.
+  if (signalCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "signal"); return { ...t, topEmotions }; }
+  if (pauseCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "pausing"); return { ...t, topEmotions }; }
   if (openCount / stats.total > 0.45) { const t = TRAJECTORIES.find(t => t.id === "opening"); return { ...t, topEmotions }; }
-  const deepCount = (stats.counts.calm || 0) + (stats.counts.unclear || 0);
   if (deepCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "deepening"); return { ...t, topEmotions }; }
   const t = TRAJECTORIES.find(t => t.id === "searching");
   return { ...t, topEmotions };
@@ -3048,9 +3077,11 @@ function MyPathScreen({ onBack }) {
     const [topId, topCount] = moodSorted[0];
     topMood = EMOTIONS.find(e => e.id === topId);
     moodPct = Math.round((topCount/moodTotal)*100);
-    const lightIds = ["joy","calm","inspired"];
-    moodHiIndex = lightIds.includes(topId) ? (topId === "calm" ? 2 : 3) : 0;
-    if (lightIds.includes(topId)) {
+    const lightHiIds = ["joy","drive","excitement","inspired","inspiration"];
+    const lightLoIds = ["calm","grateful","pride","love"];
+    const isLight = lightHiIds.includes(topId) || lightLoIds.includes(topId);
+    moodHiIndex = lightHiIds.includes(topId) ? 3 : (lightLoIds.includes(topId) ? 2 : 0);
+    if (isLight) {
       moodVerdict = "Становишься мягче к себе. Светлые состояния — твой фон последнее время.";
     } else {
       moodVerdict = "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.";

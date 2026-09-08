@@ -21,7 +21,7 @@ const USERS_SET_KEY = "users";
 const EMOTION_COUNTERS_KEY = "emotionCounts";
 // Держим в списке белым списком — не пишем в Redis произвольные поля,
 // присланные с клиента (emotion=что-угодно), только известные id из EMOTIONS в App.jsx.
-const VALID_EMOTION_IDS = ["joy", "calm", "inspired", "unclear", "anxiety", "angry", "tired"];
+const VALID_EMOTION_IDS = ["joy", "inspired", "drive", "calm", "grateful", "pride", "love", "inspiration", "excitement", "anxiety", "lonely", "angry", "tired", "sad", "disappointed", "boredom"];
 
 function defaultUser() {
   return {
