@@ -2697,11 +2697,11 @@ function MoodScreen({ onBack }) {
             <span style={{ fontSize:"16px", color:"#E8E0D4" }}>{todayEmotion.label}</span>
           </div>
         ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"8px" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
             {EMOTIONS.map(e => (
-              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"10px 4px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"6px" }}>
-                <span style={{ fontSize:"22px" }}>{e.emoji}</span>
-                <span style={{ fontSize:"10px", color:"#7A6E62", textAlign:"center" }}>{e.label}</span>
+              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
+                <span style={{ fontSize:"19px" }}>{e.emoji}</span>
+                <span style={{ fontSize:"9px", color:"#7A6E62", textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{e.label}</span>
               </button>
             ))}
           </div>
