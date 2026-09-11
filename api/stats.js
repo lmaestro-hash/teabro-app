@@ -19,6 +19,11 @@ import { kv } from "@vercel/kv";
 const COUNTERS_KEY = "counters";
 const USERS_SET_KEY = "users";
 const EMOTION_COUNTERS_KEY = "emotionCounts";
+// Обезличенная гистограмма итоговых баллов теста "Склонность к самообману".
+// Не привязана к uid — только распределение по бакетам 0-9/10-19/.../90-100,
+// плюс sum/count для среднего. Нужно, чтобы позже пересчитать границы
+// результатов (сейчас 0-25/26-50/51-75/76-100) по реальным ответам, а не вслепую.
+const SELF_HONESTY_HIST_KEY = "selfHonestyHist";
 // Держим в списке белым списком — не пишем в Redis произвольные поля,
 // присланные с клиента (emotion=что-угодно), только известные id из EMOTIONS в App.jsx.
 const VALID_EMOTION_IDS = ["joy", "inspired", "drive", "calm", "grateful", "pride", "love", "inspiration", "excitement", "anxiety", "lonely", "angry", "tired", "sad", "disappointed", "boredom"];
@@ -108,14 +113,25 @@ export default async function handler(req, res) {
     // ── Действия только на чтение ──
     if (action === "get") {
       const todayKey = getTodayKey();
-      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters] = await Promise.all([
+      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters, selfHonestyHistRaw] = await Promise.all([
         kv.hgetall(COUNTERS_KEY),
         kv.hgetall(`day:${todayKey}`),
         kv.scard(USERS_SET_KEY),
         kv.scard(`day:${todayKey}:uids`),
         getAllUids(),
         kv.hgetall(EMOTION_COUNTERS_KEY),
+        kv.hgetall(SELF_HONESTY_HIST_KEY),
       ]);
+      const shCount = Number(selfHonestyHistRaw?.count) || 0;
+      const shSum = Number(selfHonestyHistRaw?.sum) || 0;
+      const selfHonestyHist = {
+        count: shCount,
+        average: shCount ? Math.round((shSum / shCount) * 10) / 10 : null,
+        buckets: Array.from({ length: 10 }, (_, i) => {
+          const floor = i * 10;
+          return { range: `${floor}-${floor + 9}`, count: Number(selfHonestyHistRaw?.[String(floor)]) || 0 };
+        }),
+      };
       const emotionCounts = {};
       VALID_EMOTION_IDS.forEach(id => { emotionCounts[id] = Number(emotionCounters?.[id]) || 0; });
       let usersWithChatId = 0;
@@ -137,6 +153,7 @@ export default async function handler(req, res) {
         todayQuiz: Number(todayStats?.quiz) || 0,
         todayUnique: todayUniqueCount || 0,
         emotionCounts,
+        selfHonestyHist,
       });
     }
 
@@ -232,6 +249,20 @@ export default async function handler(req, res) {
 
     if (action === "selfhonesty") {
       await incrCounter("totalSelfHonesty");
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === "selfhonesty_result") {
+      // Обезличенно: только итоговый балл 0-100, никакого uid.
+      const score = Number(params.score);
+      if (Number.isFinite(score) && score >= 0 && score <= 100) {
+        const bucket = Math.min(90, Math.floor(score / 10) * 10);
+        await Promise.all([
+          kv.hincrby(SELF_HONESTY_HIST_KEY, String(bucket), 1),
+          kv.hincrby(SELF_HONESTY_HIST_KEY, "count", 1),
+          kv.hincrby(SELF_HONESTY_HIST_KEY, "sum", score),
+        ]);
+      }
       return res.status(200).json({ ok: true });
     }
 

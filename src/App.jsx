@@ -650,16 +650,16 @@ const SELF_HONESTY_QUESTIONS = [
   { id: 2,  category: "РЕШЕНИЯ",  text: "Иногда я принимаю решения и сам(а) не до конца понимаю почему", reverse: true },
   { id: 3,  category: "ПРИВЫЧКИ", text: "Если бы я захотел(а) избавиться от плохой привычки — легко бы это сделал(а)", reverse: false },
   { id: 4,  category: "ПРИВЫЧКИ", text: "У меня есть привычки, с которыми я реально борюсь и не всегда справляюсь", reverse: true },
-  { id: 5,  category: "ПРИВЫЧКИ", text: "Мне почти не в чем себя упрекнуть за последний год", reverse: false },
-  { id: 6,  category: "НЕУДАЧИ",  text: "Мои неудачи почти всегда были вызваны внешними обстоятельствами", reverse: false },
-  { id: 7,  category: "НЕУДАЧИ",  text: "Оглядываясь назад, я вижу решения, которые мог(ла) принять иначе", reverse: true },
-  { id: 8,  category: "ЭМОЦИИ",   text: "Я контролирую свои эмоции лучше, чем большинство людей", reverse: false },
-  { id: 9,  category: "ЭМОЦИИ",   text: "Бывают моменты, когда эмоции берут надо мной верх, и я это признаю", reverse: true },
-  { id: 10, category: "ЛЮДИ",     text: "Мои первые впечатления о людях почти всегда оказываются верны", reverse: false },
-  { id: 11, category: "ЛЮДИ",     text: "Я не раз ошибался(ась) в людях, доверившись первому впечатлению", reverse: true },
-  { id: 12, category: "ОБРАТНАЯ СВЯЗЬ", text: "Мне не нужна обратная связь от других — я и так знаю свои сильные и слабые стороны", reverse: false },
-  { id: 13, category: "ОБРАТНАЯ СВЯЗЬ", text: "Я никогда не откладываю важные решения из страха", reverse: false },
-  { id: 14, category: "ЦЕННОСТИ", text: "Я всегда действую в соответствии со своими ценностями, даже когда это трудно", reverse: false },
+  { id: 5,  category: "ОШИБКИ",   text: "Мне почти не в чем себя упрекнуть за последний год", reverse: false },
+  { id: 6,  category: "ОШИБКИ",   text: "Если бы я вёл(а) честный список своих факапов за год, он был бы длинным", reverse: true },
+  { id: 7,  category: "НЕУДАЧИ",  text: "Мои неудачи почти всегда были вызваны внешними обстоятельствами", reverse: false },
+  { id: 8,  category: "НЕУДАЧИ",  text: "Оглядываясь назад, я вижу решения, которые мог(ла) принять иначе", reverse: true },
+  { id: 9,  category: "ЭМОЦИИ",   text: "Я почти никогда не теряю контроль над эмоциями", reverse: false },
+  { id: 10, category: "ЭМОЦИИ",   text: "Бывают моменты, когда эмоции берут надо мной верх, и я это признаю", reverse: true },
+  { id: 11, category: "ЛЮДИ",     text: "Мои первые впечатления о людях почти всегда оказываются верны", reverse: false },
+  { id: 12, category: "ЛЮДИ",     text: "Я не раз ошибался(ась) в людях, доверившись первому впечатлению", reverse: true },
+  { id: 13, category: "ЦЕННОСТИ", text: "Я всегда действую в соответствии со своими ценностями, даже когда это трудно", reverse: false },
+  { id: 14, category: "ЦЕННОСТИ", text: "Бывали случаи, когда я поступал(а) вопреки своим ценностям, потому что так было проще", reverse: true },
 ];
 
 const SELF_HONESTY_RESULTS = [
@@ -2033,9 +2033,11 @@ function SelfHonestyScreen({ onBack }) {
       if (current+1 >= SELF_HONESTY_QUESTIONS.length) {
         setFinished(true);
         const t = na.reduce((a,b)=>a+b,0);
-        pushHistory("selfhonesty_history", {
-          score: Math.round(((t - minTotal) / (maxTotal - minTotal)) * 100),
-        });
+        const finalScore = Math.round(((t - minTotal) / (maxTotal - minTotal)) * 100);
+        pushHistory("selfhonesty_history", { score: finalScore });
+        // Обезличенная отправка итогового балла — только число 0-100, без uid.
+        // Нужно для будущей калибровки границ результатов по реальному распределению ответов.
+        statEvent("selfhonesty_result", undefined, { score: finalScore });
       } else { setCurrent(c => c+1); }
       setAnimating(false);
     }, 300);
