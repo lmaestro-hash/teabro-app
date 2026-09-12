@@ -3526,6 +3526,11 @@ export default function App() {
         </div>
       )}
       <AnonPopup />
+      {/* ВРЕМЕННАЯ ДИАГНОСТИКА — убрать после проверки */}
+      <p style={{ marginTop: 16, fontSize: 10, color: "#4A4036", textAlign: "center" }}>
+        debug: id={String(tgUser?.id)} ({typeof tgUser?.id}) / admin_id={String(ADMIN_ID)} / isAdmin={String(isAdmin)}
+      </p>
+
     </div>
   );
 }
