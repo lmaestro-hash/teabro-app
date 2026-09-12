@@ -6,6 +6,9 @@
 const STATS_URL = "https://teabro-app.vercel.app/api/stats";
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const APP_URL = "https://teabro-app.vercel.app";
+const CRON_SECRET = process.env.CRON_SECRET;
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
 
 function getISOWeek(date = new Date()) {
   const d = new Date(date);
@@ -137,14 +140,26 @@ async function sendPushDebug(chatId, text) {
 }
 
 export default async function handler(req, res) {
+  // Vercel Cron сам подставляет заголовок Authorization: Bearer <CRON_SECRET>,
+  // когда переменная CRON_SECRET задана в проекте — так эндпоинт недоступен
+  // никому кроме реального крона и ручного broadcast с секретом ниже.
+  const isCron = CRON_SECRET && req.headers.authorization === `Bearer ${CRON_SECRET}`;
+  const isBroadcast = ADMIN_SECRET && req.query?.broadcast === ADMIN_SECRET;
+  if (!isCron && !isBroadcast) {
+    return res.status(403).json({ error: "forbidden" });
+  }
+
   try {
-    const statsRes = await fetch(`${STATS_URL}?action=get_users`);
+    const statsRes = await fetch(`${STATS_URL}?action=get_users`, {
+      headers: { "x-internal-secret": INTERNAL_API_SECRET || "" },
+    });
     const { users } = await statsRes.json();
 
-    // Ручная разовая рассылка всем — вызывается по секретной ссылке, обходит
-    // обычные ограничения (5 дней неактивности / раз в 15 дней). Для анонсов.
-    if (req.query?.broadcast === "teabro_admin_2024") {
-      const text = `🌕 В Tea Bro появились новые тесты.\n\n«Склонность к самообману» и «Гормональный код» — загляни, узнай о себе больше.\n\nЗайди — отметь как ты сейчас.`;
+    // Ручная разовая рассылка всем — обходит обычные ограничения (5 дней
+    // неактивности / раз в 15 дней). Для анонсов. Секрет теперь в ADMIN_SECRET
+    // (env var), а не захардкожен в коде.
+    if (isBroadcast) {
+      const text = `🌕 Новая неделя.\n\nПоявился новый тест — «Гормональный код». Загляни, узнай своё слабое звено из семи систем.\n\nЗайди — отметь как ты сейчас.`;
       let sent = 0, skipped = 0;
       const details = [];
       for (const [uid, user] of Object.entries(users || {})) {

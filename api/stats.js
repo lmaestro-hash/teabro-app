@@ -15,6 +15,21 @@
 // (гонка возможна только если один и тот же uid пишет из двух мест
 // одновременно — на порядки реже, чем раньше).
 import { kv } from "@vercel/kv";
+import { verifyTelegramAuth } from "./verifyTelegramAuth.js";
+
+// Проверка, что запрос на чтение чужих данных (get_users — Telegram ID +
+// chatId + личные записи ВСЕХ юзеров) пришёл либо от собственного сервера
+// (push.js), либо от владельца в настоящей Telegram-сессии. Раньше этот
+// action не проверялся вообще — /api/stats?action=get_users отдавал полный
+// дамп юзеров кому угодно без всякого пароля.
+function isAuthorizedAdmin(req, params) {
+  const internalSecret = req.headers["x-internal-secret"];
+  if (internalSecret && process.env.INTERNAL_API_SECRET && internalSecret === process.env.INTERNAL_API_SECRET) {
+    return true;
+  }
+  const auth = verifyTelegramAuth(params.initData, process.env.BOT_TOKEN);
+  return auth.ok && String(auth.userId) === process.env.ADMIN_TELEGRAM_ID;
+}
 
 const COUNTERS_KEY = "counters";
 const USERS_SET_KEY = "users";
@@ -158,6 +173,9 @@ export default async function handler(req, res) {
     }
 
     if (action === "get_users") {
+      if (!isAuthorizedAdmin(req, params)) {
+        return res.status(403).json({ error: "forbidden" });
+      }
       const users = await getUsersMap();
       return res.status(200).json({ users });
     }

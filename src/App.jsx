@@ -3461,7 +3461,11 @@ export default function App() {
 
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const urlParams = new URLSearchParams(window.location.search);
-  const isAdmin = tgUser?.id === ADMIN_ID || urlParams.get("admin") === "teabro_admin_2024";
+  // Раньше был запасной вход по ?admin=teabro_admin_2024 в URL — убран: такой
+  // "пароль" в ссылке рано или поздно светится в истории, логах Vercel и
+  // может попасть в индекс поисковиков. Теперь единственный способ попасть в
+  // админку — реальный Telegram ID владельца из подписанной Telegram-сессии.
+  const isAdmin = tgUser?.id === ADMIN_ID;
 
   if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
   if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
