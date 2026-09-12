@@ -3465,9 +3465,13 @@ export default function App() {
   // "пароль" в ссылке рано или поздно светится в истории, логах Vercel и
   // может попасть в индекс поисковиков. Теперь единственный способ попасть в
   // админку — реальный Telegram ID владельца из подписанной Telegram-сессии.
-  // Сравнение через String(...) — Telegram в части клиентов отдаёт user.id
-  // строкой, а не числом; строгое === с числовым ADMIN_ID тогда всегда false.
-  const isAdmin = tgUser?.id != null && String(tgUser.id) === String(ADMIN_ID);
+  // Раньше использовалось window.Telegram.WebApp.initDataUnsafe.user, но
+  // оно оказалось ненадёжным (пусто в реальной сессии — см. debug ниже).
+  // getUidChat() — тот же способ, что уже надёжно работает для uid/chatId
+  // в остальном приложении: сперва парсит tgWebAppData из URL-хеша
+  // (синхронно, без внешнего скрипта), и только потом initDataUnsafe как fallback.
+  const { uid: adminCheckUid } = getUidChat();
+  const isAdmin = adminCheckUid != null && String(adminCheckUid) === String(ADMIN_ID);
 
   if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
   if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
@@ -3528,7 +3532,7 @@ export default function App() {
       <AnonPopup />
       {/* ВРЕМЕННАЯ ДИАГНОСТИКА — убрать после проверки */}
       <p style={{ marginTop: 16, fontSize: 10, color: "#4A4036", textAlign: "center" }}>
-        debug: id={String(tgUser?.id)} ({typeof tgUser?.id}) / admin_id={String(ADMIN_ID)} / isAdmin={String(isAdmin)}
+        debug: hash_uid={String(adminCheckUid)} / init_id={String(tgUser?.id)} / admin_id={String(ADMIN_ID)} / isAdmin={String(isAdmin)}
       </p>
 
     </div>
