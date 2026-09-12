@@ -3465,7 +3465,9 @@ export default function App() {
   // "пароль" в ссылке рано или поздно светится в истории, логах Vercel и
   // может попасть в индекс поисковиков. Теперь единственный способ попасть в
   // админку — реальный Telegram ID владельца из подписанной Telegram-сессии.
-  const isAdmin = tgUser?.id === ADMIN_ID;
+  // Сравнение через String(...) — Telegram в части клиентов отдаёт user.id
+  // строкой, а не числом; строгое === с числовым ADMIN_ID тогда всегда false.
+  const isAdmin = tgUser?.id != null && String(tgUser.id) === String(ADMIN_ID);
 
   if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
   if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
