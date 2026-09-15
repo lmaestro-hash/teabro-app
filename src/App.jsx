@@ -3501,7 +3501,6 @@ export default function App() {
           { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
           { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
           { id:"mypath",     title:"Мой профиль",                desc:"Мои результаты и прогресс" },
-          { id:"wisdom",     title:"Тихая мысль",                desc:"Для тебя сейчас" },
         ].map(item => (
           <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
             <div style={S.menuCardIcon}>✦</div>
@@ -3512,17 +3511,10 @@ export default function App() {
             <span style={S.menuCardArrow}>→</span>
           </button>
         ))}
-        <a href="https://t.me/TeaBroLife" style={{ ...S.menuCard, textDecoration:"none" }}>
-          <div style={S.menuCardIcon}>✦</div>
-          <div style={S.menuCardContent}>
-            <p style={S.menuCardTitle}>Читать Tea Bro</p>
-            <p style={S.menuCardDesc}>О возвращении к себе через чай</p>
-          </div>
-          <span style={S.menuCardArrow}>→</span>
-        </a>
       </div>
-      <div style={{ marginTop:"16px" }}>
-        <button onClick={() => setScreen("shop")} style={S.shopBtn}>🫖 Чайная лавка</button>
+      <div style={{ marginTop:"16px", display:"flex", gap:"12px" }}>
+        <a href="https://t.me/TeaBroLife" style={{ ...S.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>🌕 Чайный дневник</a>
+        <a href="https://teabro-site.vercel.app/index.html" style={{ ...S.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>📜 Чайная библиотека</a>
       </div>
       {isAdmin && (
         <div style={{ marginTop:"12px" }}>
