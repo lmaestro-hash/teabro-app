@@ -3314,12 +3314,13 @@ function MyPathScreen({ onBack }) {
         <div style={S.statCard}>
           <p style={S.statNum}>{hasMood ? `${moodPct}%` : "—"}</p>
           <p style={S.statLabel}>доминирующее настроение</p>
+          <p style={{ margin:"2px 0 0", fontSize:"9px", color:"#4A4036" }}>90 дней</p>
         </div>
       </div>
 
       {/* КУДА ДВИЖЕШЬСЯ */}
       <div style={S.sectionHead}>
-        <p style={S.sectionTitle}>КУДА ТЫ ДВИЖЕШЬСЯ</p>
+        <p style={S.sectionTitle}>КУДА ТЫ ДВИЖЕШЬСЯ · 90 ДНЕЙ</p>
         <InfoButton text="«Анализ твоего настроения за последние 90 дней. Какое состояние преобладает — и куда смещается твой внутренний баланс.»" />
       </div>
       {hasMood ? (
