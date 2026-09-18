@@ -3681,8 +3681,36 @@ export default function App() {
   // getUidChat() — тот же способ, что уже надёжно работает для uid/chatId
   // в остальном приложении: сперва парсит tgWebAppData из URL-хеша
   // (синхронно, без внешнего скрипта), и только потом initDataUnsafe как fallback.
-  const { uid: adminCheckUid } = getUidChat();
-  const isAdmin = adminCheckUid != null && String(adminCheckUid) === String(ADMIN_ID);
+  // isAdmin в state: на первом рендере Telegram.WebApp ещё может быть не готов,
+  // а getUidChat() тогда даёт browser-fallback b_xxx ≠ ADMIN_ID. После ready
+  // пересчитываем — кнопка админки появляется без перезагрузки.
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const { uid } = getUidChat();
+    return uid != null && String(uid) === String(ADMIN_ID) && !String(uid).startsWith("b_");
+  });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const start = Date.now();
+      while (!cancelled && Date.now() - start < 2000) {
+        const { uid } = getUidChat();
+        if (uid && !String(uid).startsWith("b_") && String(uid) === String(ADMIN_ID)) {
+          setIsAdmin(true);
+          return;
+        }
+        if (uid && !String(uid).startsWith("b_")) {
+          setIsAdmin(false);
+          return;
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      if (!cancelled) {
+        const { uid } = getUidChat();
+        setIsAdmin(uid != null && String(uid) === String(ADMIN_ID) && !String(uid).startsWith("b_"));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
