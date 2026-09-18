@@ -3021,6 +3021,8 @@ function MoodScreen({ onBack }) {
 // ЭКРАН: ЧАЙНАЯ ЛАВКА
 // ─────────────────────────────────────────────
 function ShopScreen({ onBack }) {
+  const { theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   return (
     <div style={S.screen}>
       <div style={S.screenHeader}>
@@ -3341,6 +3343,8 @@ function AdminScreen({ onBack }) {
 // ПОПАП АНОНИМНОСТИ
 // ─────────────────────────────────────────────
 function AnonPopup() {
+  const { theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [open, setOpen] = useState(false);
   return (
     <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
@@ -3763,6 +3767,8 @@ function MyPathScreen({ onBack }) {
 }
 
 function EmptyMetric({ text }) {
+  const { theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   return (
     <div style={{ ...S.metricBlock, textAlign:"center", padding:"24px 16px" }}>
       <p style={{ margin:0, fontSize:"13px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.7 }}>{text}</p>
