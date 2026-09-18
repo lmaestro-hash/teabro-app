@@ -1,4 +1,177 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
+
+// ─────────────────────────────────────────────
+// THEME + i18n · 3 языка в 1 · логика score/burnout не меняется
+// ─────────────────────────────────────────────
+const LangCtx = createContext({ lang: "ru", theme: "dark", t: (k) => k, tx: (o) => o });
+const useLang = () => useContext(LangCtx);
+
+const THEMES = {
+  dark: {
+    bg: "#0F0D0B", card: "rgba(255,255,255,0.03)", cardBorder: "#2A2520",
+    ink: "#E8E0D4", inkSoft: "#7A6E62", inkMuted: "#B0A090",
+    accent: "#C8A97E", line: "#2A2520", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
+    progressInactive: "#2A2520", optionBg: "rgba(255,255,255,0.02)",
+    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(255,255,255,0.022)",
+    trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#4A4036",
+  },
+  light: {
+    bg: "#F1E9D3", card: "#FAF5E7", cardBorder: "rgba(58,53,43,0.12)",
+    ink: "#3A352B", inkSoft: "#857A66", inkMuted: "#857A66",
+    accent: "#B08454", line: "rgba(58,53,43,0.12)", primaryBtnBg: "#B08454", primaryBtnText: "#FAF5E7",
+    progressInactive: "rgba(58,53,43,0.15)", optionBg: "rgba(58,53,43,0.03)",
+    optionSelectedBg: "rgba(176,132,84,0.12)", metricBg: "#FAF5E7",
+    trackBg: "rgba(58,53,43,0.08)", softBg: "#F5EDD9", arrow: "#B0A090",
+  },
+};
+
+const UI = {
+  ru: {
+    subtitle: "茶道 · твое личное пространство", intro: "Не о чае. О возвращении к себе.",
+    diary: "🌕 Чайный дневник", library: "📜 Чайная библиотека", admin: "⚙️ Админка",
+    back: "← назад", next: "Следующий вопрос", resultBtn: "Узнать результат",
+    again: "Пройти заново", share: "Поделиться с другом ↗", loading: "Загружаю…",
+    menu: {
+      quiz: { title: "Честный разговор с собой", desc: "Самооценка · выгорание · 25 вопросов" },
+      selfhonesty: { title: "Склонность к самообману", desc: "Тест на самообман · 14 вопросов" },
+      hormones: { title: "Гормональный код", desc: "7 систем · 10 вопросов" },
+      teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
+      meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
+      mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
+      mypath: { title: "Мой профиль", desc: "Мои результаты и прогресс" },
+    },
+  },
+  uk: {
+    subtitle: "茶道 · твій особистий простір", intro: "Не про чай. Про повернення до себе.",
+    diary: "🌕 Чайний щоденник", library: "📜 Чайна бібліотека", admin: "⚙️ Адмінка",
+    back: "← назад", next: "Наступне питання", resultBtn: "Дізнатися результат",
+    again: "Пройти знову", share: "Поділитися з другом ↗", loading: "Завантажую…",
+    menu: {
+      quiz: { title: "Чесна розмова з собою", desc: "Самооцінка · вигорання · 25 питань" },
+      selfhonesty: { title: "Схильність до самообману", desc: "Тест на самообман · 14 питань" },
+      hormones: { title: "Гормональний код", desc: "7 систем · 10 питань" },
+      teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
+      meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
+      mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
+      mypath: { title: "Мій профіль", desc: "Мої результати та прогрес" },
+    },
+  },
+  en: {
+    subtitle: "茶道 · your personal space", intro: "Not about tea. About coming back to yourself.",
+    diary: "🌕 Tea diary", library: "📜 Tea library", admin: "⚙️ Admin",
+    back: "← back", next: "Next question", resultBtn: "See the result",
+    again: "Take again", share: "Share with a friend ↗", loading: "Loading…",
+    menu: {
+      quiz: { title: "Honest talk with yourself", desc: "Self-assessment · burnout · 25 questions" },
+      selfhonesty: { title: "Tendency to self-deception", desc: "Self-deception test · 14 questions" },
+      hormones: { title: "Hormonal code", desc: "7 systems · 10 questions" },
+      teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
+      meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
+      mood: { title: "My day today", desc: "Mark how you feel" },
+      mypath: { title: "My profile", desc: "My results and progress" },
+    },
+  },
+};
+
+function tx(lang, val) {
+  if (val == null) return val;
+  if (typeof val === "string" || typeof val === "number") return val;
+  if (typeof val === "object" && (val.ru != null || val.uk != null || val.en != null))
+    return val[lang] ?? val.ru ?? val.en ?? val.uk ?? "";
+  return val;
+}
+
+function buildStyles(themeName) {
+  const c = THEMES[themeName] || THEMES.dark;
+  const isDark = themeName === "dark";
+  return {
+    screen: { minHeight:"100vh", backgroundColor:c.bg, color:c.ink, fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box", transition:"background-color 0.2s,color 0.2s" },
+    screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
+    backBtn: { background:"none", border:"none", color:c.inkSoft, fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+    backBtnBottom: { background:"none", border:"none", color:c.inkSoft, fontSize:"14px", cursor:"pointer", padding:"20px 0 0 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+    hintBtn: { background:"none", border:`1px solid ${c.line}`, color:c.inkSoft, fontSize:"12px", cursor:"pointer", width:"22px", height:"22px", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
+    homeHeader: { textAlign:"center", paddingTop:"12px", paddingBottom:"8px" },
+    moonIcon: { fontSize:"40px", marginBottom:"12px" },
+    homeTitle: { fontSize:"32px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.1em", color:c.ink },
+    homeSubtitle: { fontSize:"13px", color:c.inkSoft, letterSpacing:"0.15em", margin:0 },
+    homeIntro: { textAlign:"center", fontSize:"15px", color:c.inkMuted, fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
+    menuList: { display:"flex", flexDirection:"column", gap:"12px" },
+    menuCard: { background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:c.ink, transition:"border-color 0.2s" },
+    menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:c.accent },
+    menuCardContent: { flex:1 },
+    menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
+    menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
+    menuCardArrow: { color:c.arrow, fontSize:"18px" },
+    shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 0 4px", marginBottom:"4px", background:`linear-gradient(${c.bg} 70%, transparent)` },
+    langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
+    langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
+    themeBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"14px", background:c.card, color:c.ink, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"4px 10px", cursor:"pointer", lineHeight:1.2 },
+    quizProgress: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" },
+    quizCategory: { fontSize:"11px", letterSpacing:"0.2em", color:c.accent },
+    quizCounter: { fontSize:"12px", color:c.inkSoft },
+    progressTrack: { display:"flex", gap:"6px", marginBottom:"28px" },
+    progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
+    questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:c.ink, fontWeight:"normal" },
+    optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
+    optionBtn: { background:c.optionBg, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
+    optionRadio: { color:c.accent, fontSize:"16px", lineHeight:1.4, flexShrink:0 },
+    optionText: { fontSize:"14px", color: isDark?"#D0C8BC":c.ink, lineHeight:1.5, fontFamily:"'Georgia',serif" },
+    resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
+    resultEmoji: { fontSize:"52px", marginBottom:"16px" },
+    resultTitle: { fontSize:"28px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.05em" },
+    resultSubtitle: { fontSize:"14px", color:c.inkSoft, fontStyle:"italic", margin:"0 0 20px" },
+    progressBar: { width:"100%", height:"3px", backgroundColor:c.progressInactive, borderRadius:"2px", marginBottom:"8px", overflow:"hidden" },
+    progressFill: { height:"100%", borderRadius:"2px", transition:"width 0.8s ease" },
+    progressLabel: { fontSize:"12px", color:c.inkSoft, marginBottom:"24px" },
+    resultText: { fontSize:"15px", lineHeight:1.7, color: isDark?"#C0B8AC":c.inkSoft, fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
+    teaNoteBox: { width:"100%", backgroundColor: isDark?"rgba(200,169,126,0.06)":"rgba(176,132,84,0.1)", border:`1px solid ${isDark?"rgba(200,169,126,0.15)":"rgba(176,132,84,0.25)"}`, borderRadius:"10px", padding:"14px", marginBottom:"24px" },
+    teaNoteText: { margin:0, fontSize:"13px", color:c.accent, fontStyle:"italic", lineHeight:1.6, textAlign:"left" },
+    wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
+    teaIcon: { fontSize:"48px", marginBottom:"32px" },
+    wisdomText: { fontSize:"20px", lineHeight:1.7, color:c.ink, fontStyle:"italic", marginBottom:"28px" },
+    wisdomLine: { width:"40px", height:"1px", backgroundColor: isDark?"#4A4036":c.line, marginBottom:"12px" },
+    wisdomHint: { fontSize:"12px", color: isDark?"#4A4036":c.inkSoft, letterSpacing:"0.1em", margin:0 },
+    primaryBtn: { width:"100%", padding:"16px", backgroundColor:c.primaryBtnBg, color:c.primaryBtnText, border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
+    ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
+    shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"12px", boxSizing:"border-box" },
+    statCard: { background:c.card, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", textAlign:"center" },
+    statNum: { margin:"0 0 4px", fontSize:"24px", color:c.accent, fontWeight:"normal" },
+    statLabel: { margin:0, fontSize:"11px", color:c.inkSoft, letterSpacing:"0.05em" },
+    sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
+    sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:c.accent, margin:0 },
+    infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:`1px solid ${isDark?"#3A3028":c.line}`, background:"none", color: isDark?"#6A6058":c.inkSoft, fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
+    infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"#3A3028":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"11px", color: isDark?"#9A8E80":c.inkSoft, fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.25)", boxSizing:"border-box" },
+    metricBlock: { background:c.metricBg, border:`1px solid ${c.line}`, borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
+    metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
+    metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
+    metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
+    metricUnit: { fontSize:"18px", color: isDark?"#5A5048":c.inkSoft, marginBottom:"8px" },
+    metricRightName: { margin:"0 0 3px", fontSize:"15px", color:c.ink },
+    metricRightSub: { margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" },
+    metricTrack: { width:"100%", height:"8px", background:c.trackBg, borderRadius:"4px", position:"relative", marginBottom:"9px", overflow:"visible" },
+    metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
+    metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:`2px solid ${c.bg}`, display:"block" },
+    scaleLabels: { display:"flex", justifyContent:"space-between" },
+    scaleLabel: { fontSize:"10px", color: isDark?"#6A6058":c.inkSoft, letterSpacing:"0.04em" },
+    scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
+    metricQuote: { padding:"10px 13px", background: isDark?"rgba(200,169,126,0.05)":"rgba(176,132,84,0.08)", borderLeft:`2px solid ${isDark?"rgba(200,169,126,0.25)":"rgba(176,132,84,0.3)"}`, borderRadius:"0 6px 6px 0", marginTop:"13px" },
+    metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#8A7E72":c.inkSoft, fontStyle:"italic", lineHeight:1.75 },
+    thermoWrap: { position:"relative", marginBottom:"3px" },
+    thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
+    thermoZone: { flex:1, borderRadius:"2px" },
+    thermoMarker: { position:"absolute", top:"50%", transform:"translate(-50%,-50%)", width:"16px", height:"16px", background:"#E8D4A8", borderRadius:"50%", border:`2px solid ${c.bg}`, boxShadow:"0 0 10px rgba(232,212,168,0.45)", transition:"left 1.2s cubic-bezier(.4,0,.2,1)" },
+    othersList: { display:"flex", flexDirection:"column", gap:"8px", marginTop:"14px" },
+    otherRow: { display:"flex", alignItems:"center", gap:"10px" },
+    otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
+    otherName: { fontSize:"13px", color:c.inkSoft, flex:1 },
+    otherPct: { fontSize:"13px", color: isDark?"#6A6058":c.inkSoft, flexShrink:0 },
+    stepsBlock: { background:c.card, border:`1px solid ${isDark?"#1E1B18":c.line}`, borderRadius:"12px", padding:"16px", marginTop:"12px" },
+    stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color: isDark?"#4A4036":c.inkSoft },
+  };
+}
+
+let S = buildStyles((() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } })());
 
 // ─────────────────────────────────────────────
 // TELEGRAM CLOUD STORAGE HELPER
@@ -260,6 +433,28 @@ const WISDOMS = [
 // ─────────────────────────────────────────────
 // ЭМОЦИИ
 // ─────────────────────────────────────────────
+
+const EMOTION_I18N = {
+  joy: { label: { ru:"Радость", uk:"Радість", en:"Joy" }, desc: { ru:"Лёгкое, беспричинное «хорошо прямо сейчас»", uk:"Легке, безпричинне «добре просто зараз»", en:"A light, unprompted good right now" } },
+  inspired: { label: { ru:"Воодушевление", uk:"Натхнення", en:"Inspired" }, desc: { ru:"Есть силы и хочется действовать", uk:"Є сили і хочеться діяти", en:"Energy and desire to act" } },
+  drive: { label: { ru:"Драйв / Подъём", uk:"Драйв / Підйом", en:"Drive / High" }, desc: { ru:"День в кайф: энергия, всё горит", uk:"День у кайф: енергія, усе горить", en:"A great day: energy, everything clicks" } },
+  calm: { label: { ru:"Спокойствие", uk:"Спокій", en:"Calm" }, desc: { ru:"Ровный внутренний штиль", uk:"Рівний внутрішній штиль", en:"Steady inner stillness" } },
+  grateful: { label: { ru:"Благодарность", uk:"Вдячність", en:"Gratitude" }, desc: { ru:"Ценю то, что уже есть", uk:"Ціную те, що вже є", en:"I value what I already have" } },
+  pride: { label: { ru:"Гордость", uk:"Гордість", en:"Pride" }, desc: { ru:"Доволен(льна) собой за поступок", uk:"Задоволений(а) собою за вчинок", en:"Pleased with myself for something specific" } },
+  love: { label: { ru:"Любовь", uk:"Любов", en:"Love" }, desc: { ru:"Тёплое, нежное", uk:"Тепле, ніжне", en:"Warm and tender" } },
+  inspiration: { label: { ru:"Вдохновение", uk:"Натхнення (творче)", en:"Creative spark" }, desc: { ru:"Идея, творческий импульс", uk:"Ідея, творчий імпульс", en:"An idea, a creative impulse" } },
+  excitement: { label: { ru:"Азарт", uk:"Азарт", en:"Excitement" }, desc: { ru:"Тянет рискнуть", uk:"Тягне ризикнути", en:"Want to risk and try" } },
+  anxiety: { label: { ru:"Тревога", uk:"Тривога", en:"Anxiety" }, desc: { ru:"Беспокойство о будущем", uk:"Занепокоєння про майбутнє", en:"Worry about what hasn't happened" } },
+  lonely: { label: { ru:"Одиночество", uk:"Самотність", en:"Loneliness" }, desc: { ru:"Отдельно от всех", uk:"Окремо від усіх", en:"Separate from everyone" } },
+  angry: { label: { ru:"Злость", uk:"Злість", en:"Anger" }, desc: { ru:"Хочется резко отреагировать", uk:"Хочеться різко відреагувати", en:"Want to react sharply" } },
+  tired: { label: { ru:"Усталость", uk:"Втома", en:"Tiredness" }, desc: { ru:"Тело просит отдыха", uk:"Тіло просить відпочинку", en:"Body asks for rest" } },
+  sad: { label: { ru:"Грусть", uk:"Сум", en:"Sadness" }, desc: { ru:"Тихая печаль", uk:"Тихий смуток", en:"Quiet sorrow" } },
+  disappointed: { label: { ru:"Разочарование", uk:"Розчарування", en:"Disappointment" }, desc: { ru:"Ждал одно — получил другое", uk:"Чекав одне — отримав інше", en:"Expected one thing, got another" } },
+  boredom: { label: { ru:"Скука", uk:"Нудьга", en:"Boredom" }, desc: { ru:"Ничего не увлекает", uk:"Нічого не захоплює", en:"Nothing engages" } },
+};
+function emotionLabel(id, lang) { return tx(lang, EMOTION_I18N[id]?.label) || id; }
+function emotionDesc(id, lang) { return tx(lang, EMOTION_I18N[id]?.desc) || ""; }
+
 const EMOTIONS = [
   { id: "joy",          emoji: "😊", label: "Радость",        mood: "general", score: 9, desc: "Лёгкое, беспричинное \u201Cхорошо прямо сейчас\u201D" },
   { id: "inspired",     emoji: "💪", label: "Воодушевление",  mood: "general", score: 9, desc: "Есть силы и хочется действовать" },
@@ -971,6 +1166,7 @@ const HORMONE_ADVICE = {
 };
 
 function HormoneScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const ALL_Q = [...HORMONE_QUESTIONS, ...HORMONE_CROSS_QUESTIONS];
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -1799,6 +1995,7 @@ function calcQuizAverage(history, n = 3) {
 // ЭКРАН: СОВЕТ ДНЯ
 // ─────────────────────────────────────────────
 function WisdomScreen({ onBack, currentMood }) {
+  const { lang, t, tx } = useLang();
   const [wisdoms, setWisdoms] = useState([]);
   const [index, setIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -1877,6 +2074,7 @@ function WisdomScreen({ onBack, currentMood }) {
 // ЭКРАН: ОПРОСНИК
 // ─────────────────────────────────────────────
 function QuizScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [scores, setScores] = useState([]);
@@ -2009,6 +2207,7 @@ const SH_SCALE = [
 ];
 
 function SelfHonestyScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
@@ -2117,6 +2316,7 @@ function SelfHonestyScreen({ onBack }) {
 // ЭКРАН: ТЕСТ МЕДИТАЦИЙ
 // ─────────────────────────────────────────────
 function MeditationQuizScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [current, setCurrent] = useState(0);
   const [scores, setScores] = useState({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 });
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -2243,6 +2443,7 @@ function MeditationQuizScreen({ onBack }) {
 // ЭКРАН: ТЕСТ ЧАЯ
 // ─────────────────────────────────────────────
 function TeaQuizScreen({ onBack, onTeaResult }) {
+  const { lang, t, tx } = useLang();
   const [current, setCurrent] = useState(0);
   const [teaScores, setTeaScores] = useState({ shu:0, sheng:0, bai:0, dahong:0, tguan:0, gaba:0 });
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -2445,6 +2646,7 @@ function calcNotesStreak(entries) {
   return s;
 }
 function QuietNotes({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [loaded, setLoaded] = useState(false);
   const [entries, setEntries] = useState([]);
   const [text, setText] = useState("");
@@ -2489,7 +2691,7 @@ function QuietNotes({ onBack }) {
       <div style={card}>
         <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:"1px solid #2A2520", borderRadius:"10px", padding:"12px", color:"#E8E0D4", fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder="О чём думаешь сегодня?" value={text} onChange={e => setText(e.target.value)} />
         <div style={{ display:"flex", gap:"8px", marginTop:"12px", flexWrap:"wrap" }}>
-          {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}
+          {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"14px" }}>
           <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ Письмо себе</button>
@@ -2507,7 +2709,7 @@ function QuietNotes({ onBack }) {
         <button onClick={() => { setTab("all"); setMoodFilter(null); }} style={tab === "all" ? gba : gb}>записи</button>
         <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ письма себе</button>
       </div>
-      {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {e.label}</button>)}</div>}
+      {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
       {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
@@ -2519,6 +2721,7 @@ function QuietNotes({ onBack }) {
 // ЭКРАН: МОЁ СОСТОЯНИЕ
 // ─────────────────────────────────────────────
 function MoodScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [todayEmotion, setTodayEmotion] = useState(null);
   const [streak, setStreak] = useState(0);
   const [weekData, setWeekData] = useState([]);
@@ -2703,7 +2906,7 @@ function MoodScreen({ onBack }) {
             {EMOTIONS.map(e => (
               <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
                 <span style={{ fontSize:"19px" }}>{e.emoji}</span>
-                <span style={{ fontSize:"9px", color:"#7A6E62", textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{e.label}</span>
+                <span style={{ fontSize:"9px", color:"#7A6E62", textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{emotionLabel(e.id, lang) || e.label}</span>
               </button>
             ))}
           </div>
@@ -2920,7 +3123,7 @@ function AdminScreen({ onBack }) {
           {stats.topEmotions?.length > 0 && (
             <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px" }}>
               <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ТОП ЭМОЦИЙ</p>
-              {stats.topEmotions.map((e,i) => e && row(`${e.emoji} ${e.label}`, `${e.count} раз`))}
+              {stats.topEmotions.map((e,i) => e && row(`${e.emoji} ${emotionLabel(e.id, lang) || e.label}`, `${e.count} раз`))}
             </div>
           )}
         </>
@@ -2961,6 +3164,7 @@ function AnonPopup() {
 // ЭКРАН: МОЙ ПУТЬ
 // ─────────────────────────────────────────────
 function MyPathScreen({ onBack }) {
+  const { lang, t, tx } = useLang();
   const [loaded, setLoaded] = useState(false);
   const [streak, setStreak] = useState(0);
   const [quizHist, setQuizHist] = useState([]);
@@ -3366,6 +3570,12 @@ function EmptyMetric({ text }) {
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [currentMood, setCurrentMood] = useState("general");
+  const [theme, setTheme] = useState(() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } });
+  const [lang, setLang] = useState(() => { try { return localStorage.getItem("teabro-lang") || "ru"; } catch { return "ru"; } });
+  useEffect(() => { S = buildStyles(theme); try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
+  useEffect(() => { try { localStorage.setItem("teabro-lang", lang); } catch {} }, [lang]);
+  const t = UI[lang] || UI.ru;
+  const styles = buildStyles(theme);
 
   useEffect(() => {
     // Скрипт telegram-web-app.js грузится асинхронно — ждём его появления
@@ -3474,144 +3684,70 @@ export default function App() {
   const { uid: adminCheckUid } = getUidChat();
   const isAdmin = adminCheckUid != null && String(adminCheckUid) === String(ADMIN_ID);
 
-  if (screen === "quiz")       return <QuizScreen onBack={() => setScreen("home")} />;
-  if (screen === "selfhonesty") return <SelfHonestyScreen onBack={() => setScreen("home")} />;
-  if (screen === "hormones")   return <HormoneScreen onBack={() => setScreen("home")} />;
-  if (screen === "meditation") return <MeditationQuizScreen onBack={() => setScreen("home")} />;
-  if (screen === "wisdom")     return <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
-  if (screen === "teaquiz")    return <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
-  if (screen === "mood")       return <MoodScreen onBack={() => setScreen("home")} />;
-  if (screen === "mypath")      return <MyPathScreen onBack={() => setScreen("home")} />;
-  if (screen === "shop")       return <ShopScreen onBack={() => setScreen("home")} />;
-  if (screen === "admin")      return <AdminScreen onBack={() => setScreen("home")} />;
+  const menuItems = [
+    { id: "quiz", ...t.menu.quiz },
+    { id: "selfhonesty", ...t.menu.selfhonesty },
+    { id: "hormones", ...t.menu.hormones },
+    { id: "teaquiz", ...t.menu.teaquiz },
+    { id: "meditation", ...t.menu.meditation },
+    { id: "mood", ...t.menu.mood },
+    { id: "mypath", ...t.menu.mypath },
+  ];
 
-  return (
-    <div style={S.screen}>
-      <div style={S.homeHeader}>
-        <div style={S.moonIcon}>🌕</div>
-        <h1 style={S.homeTitle}>Tea Bro</h1>
-        <p style={S.homeSubtitle}>茶道 · твое личное пространство</p>
+  let body = null;
+  if (screen === "quiz") body = <QuizScreen onBack={() => setScreen("home")} />;
+  else if (screen === "selfhonesty") body = <SelfHonestyScreen onBack={() => setScreen("home")} />;
+  else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} />;
+  else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} />;
+  else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
+  else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
+  else if (screen === "mood") body = <MoodScreen onBack={() => setScreen("home")} />;
+  else if (screen === "mypath") body = <MyPathScreen onBack={() => setScreen("home")} />;
+  else if (screen === "shop") body = <ShopScreen onBack={() => setScreen("home")} />;
+  else if (screen === "admin") body = <AdminScreen onBack={() => setScreen("home")} />;
+  else body = (
+    <div style={styles.screen}>
+      <div style={styles.controls}>
+        <button type="button" style={lang === "ru" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("ru")}>RU</button>
+        <button type="button" style={lang === "uk" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("uk")}>UK</button>
+        <button type="button" style={lang === "en" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("en")}>EN</button>
+        <button type="button" style={styles.themeBtn} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}</button>
       </div>
-      <p style={S.homeIntro}>Не о чае. О возвращении к себе.</p>
-      <div style={S.menuList}>
-        {[
-          { id:"quiz",       title:"Честный разговор с собой",  desc:"Самооценка · выгорание · 25 вопросов" },
-          { id:"selfhonesty", title:"Склонность к самообману",  desc:"Тест на самообман · 14 вопросов" },
-          { id:"hormones",    title:"Гормональный код",         desc:"7 систем · 10 вопросов" },
-          { id:"teaquiz",    title:"Найти свой чай",             desc:"Под внутреннее состояние · 5 вопросов" },
-          { id:"meditation", title:"Моя практика",               desc:"Подбор под внутреннее состояние · 20 вопросов" },
-          { id:"mood",       title:"Мой день сегодня",           desc:"Отметить своё состояние" },
-          { id:"mypath",     title:"Мой профиль",                desc:"Мои результаты и прогресс" },
-        ].map(item => (
-          <button key={item.id} onClick={() => setScreen(item.id)} style={S.menuCard}>
-            <div style={S.menuCardIcon}>✦</div>
-            <div style={S.menuCardContent}>
-              <p style={S.menuCardTitle}>{item.title}</p>
-              <p style={S.menuCardDesc}>{item.desc}</p>
+      <div style={styles.homeHeader}>
+        <div style={styles.moonIcon}>{theme === "dark" ? "🌕" : "☀️"}</div>
+        <h1 style={styles.homeTitle}>Tea Bro</h1>
+        <p style={styles.homeSubtitle}>{t.subtitle}</p>
+      </div>
+      <p style={styles.homeIntro}>{t.intro}</p>
+      <div style={styles.menuList}>
+        {menuItems.map(item => (
+          <button key={item.id} onClick={() => setScreen(item.id)} style={styles.menuCard}>
+            <div style={styles.menuCardIcon}>✦</div>
+            <div style={styles.menuCardContent}>
+              <p style={styles.menuCardTitle}>{item.title}</p>
+              <p style={styles.menuCardDesc}>{item.desc}</p>
             </div>
-            <span style={S.menuCardArrow}>→</span>
+            <span style={styles.menuCardArrow}>→</span>
           </button>
         ))}
       </div>
       <div style={{ marginTop:"16px", display:"flex", gap:"12px" }}>
-        <a href="https://t.me/TeaBroLife" style={{ ...S.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>🌕 Чайный дневник</a>
-        <a href="https://teabro-site.vercel.app/index.html" style={{ ...S.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>📜 Чайная библиотека</a>
+        <a href="https://t.me/TeaBroLife" style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.diary}</a>
+        <a href="https://teabro-site.vercel.app/index.html" style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.library}</a>
       </div>
       {isAdmin && (
         <div style={{ marginTop:"12px" }}>
-          <button onClick={() => setScreen("admin")} style={{ ...S.shopBtn, color:"#4A4036", fontSize:"12px" }}>⚙️ Админка</button>
+          <button onClick={() => setScreen("admin")} style={{ ...styles.shopBtn, fontSize:"12px" }}>{t.admin}</button>
         </div>
       )}
       <AnonPopup />
-
     </div>
   );
+
+  return (
+    <LangCtx.Provider value={{ lang, theme, t, tx: (v) => tx(lang, v) }}>
+      {body}
+    </LangCtx.Provider>
+  );
 }
-
-// ─────────────────────────────────────────────
-// СТИЛИ
-// ─────────────────────────────────────────────
-const S = {
-  screen: { minHeight:"100vh", backgroundColor:"#0F0D0B", color:"#E8E0D4", fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box" },
-  screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
-  backBtn: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  backBtnBottom: { background:"none", border:"none", color:"#7A6E62", fontSize:"14px", cursor:"pointer", padding:"20px 0 0 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  hintBtn: { background:"none", border:"1px solid #2A2520", color:"#7A6E62", fontSize:"12px", cursor:"pointer", width:"22px", height:"22px", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
-  homeHeader: { textAlign:"center", paddingTop:"32px", paddingBottom:"8px" },
-  moonIcon: { fontSize:"40px", marginBottom:"12px" },
-  homeTitle: { fontSize:"32px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.1em", color:"#E8E0D4" },
-  homeSubtitle: { fontSize:"13px", color:"#7A6E62", letterSpacing:"0.15em", margin:0 },
-  homeIntro: { textAlign:"center", fontSize:"15px", color:"#B0A090", fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
-  menuList: { display:"flex", flexDirection:"column", gap:"12px" },
-  menuCard: { background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:"#E8E0D4", transition:"border-color 0.2s" },
-  menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:"#C8A97E" },
-  menuCardContent: { flex:1 },
-  menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
-  menuCardDesc: { margin:0, fontSize:"12px", color:"#7A6E62", letterSpacing:"0.03em" },
-  menuCardArrow: { color:"#4A4036", fontSize:"18px" },
-  shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-  quizProgress: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" },
-  quizCategory: { fontSize:"11px", letterSpacing:"0.2em", color:"#C8A97E" },
-  quizCounter: { fontSize:"12px", color:"#7A6E62" },
-  progressTrack: { display:"flex", gap:"6px", marginBottom:"28px" },
-  progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
-  questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:"#E8E0D4", fontWeight:"normal" },
-  optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
-  optionBtn: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
-  optionRadio: { color:"#C8A97E", fontSize:"16px", lineHeight:1.4, flexShrink:0 },
-  optionText: { fontSize:"14px", color:"#D0C8BC", lineHeight:1.5, fontFamily:"'Georgia',serif" },
-  resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
-  resultEmoji: { fontSize:"52px", marginBottom:"16px" },
-  resultTitle: { fontSize:"28px", fontWeight:"normal", margin:"0 0 6px", letterSpacing:"0.05em" },
-  resultSubtitle: { fontSize:"14px", color:"#7A6E62", fontStyle:"italic", margin:"0 0 20px" },
-  progressBar: { width:"100%", height:"3px", backgroundColor:"#2A2520", borderRadius:"2px", marginBottom:"8px", overflow:"hidden" },
-  progressFill: { height:"100%", borderRadius:"2px", transition:"width 0.8s ease" },
-  progressLabel: { fontSize:"12px", color:"#7A6E62", marginBottom:"24px" },
-  resultText: { fontSize:"15px", lineHeight:1.7, color:"#C0B8AC", fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
-  teaNoteBox: { width:"100%", backgroundColor:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"10px", padding:"14px", marginBottom:"24px" },
-  teaNoteText: { margin:0, fontSize:"13px", color:"#C8A97E", fontStyle:"italic", lineHeight:1.6, textAlign:"left" },
-  wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
-  teaIcon: { fontSize:"48px", marginBottom:"32px" },
-  wisdomText: { fontSize:"20px", lineHeight:1.7, color:"#E8E0D4", fontStyle:"italic", marginBottom:"28px" },
-  wisdomLine: { width:"40px", height:"1px", backgroundColor:"#4A4036", marginBottom:"12px" },
-  wisdomHint: { fontSize:"12px", color:"#4A4036", letterSpacing:"0.1em", margin:0 },
-  primaryBtn: { width:"100%", padding:"16px", backgroundColor:"#C8A97E", color:"#0F0D0B", border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
-  ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
-  shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:"#C8A97E", border:"1px solid rgba(200,169,126,0.3)", borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"12px", boxSizing:"border-box" },
-  statCard: { background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", textAlign:"center" },
-  statNum: { margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", fontWeight:"normal" },
-  statLabel: { margin:0, fontSize:"11px", color:"#7A6E62", letterSpacing:"0.05em" },
-
-  // ── МЕТРИК-БЛОК (единый стиль: число% + шкала + i) ──
-  sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
-  sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:"#C8A97E", margin:0 },
-  infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:"1px solid #3A3028", background:"none", color:"#6A6058", fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
-  infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:"#1A1713", border:"1px solid #3A3028", borderRadius:"10px", padding:"12px", fontSize:"11px", color:"#9A8E80", fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.7)", boxSizing:"border-box" },
-  metricBlock: { background:"rgba(255,255,255,0.022)", border:"1px solid #2A2520", borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
-  metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
-  metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
-  metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
-  metricUnit: { fontSize:"18px", color:"#5A5048", marginBottom:"8px" },
-  metricRightName: { margin:"0 0 3px", fontSize:"15px", color:"#E8E0D4" },
-  metricRightSub: { margin:0, fontSize:"11px", color:"#7A6E62", fontStyle:"italic" },
-  metricTrack: { width:"100%", height:"8px", background:"#1E1B18", borderRadius:"4px", position:"relative", marginBottom:"9px", overflow:"visible" },
-  metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
-  metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:"2px solid #0F0D0B", display:"block" },
-  scaleLabels: { display:"flex", justifyContent:"space-between" },
-  scaleLabel: { fontSize:"10px", color:"#6A6058", letterSpacing:"0.04em" },
-  scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
-  metricQuote: { padding:"10px 13px", background:"rgba(200,169,126,0.05)", borderLeft:"2px solid rgba(200,169,126,0.25)", borderRadius:"0 6px 6px 0", marginTop:"13px" },
-  metricQuoteText: { margin:0, fontSize:"12px", color:"#8A7E72", fontStyle:"italic", lineHeight:1.75 },
-  thermoWrap: { position:"relative", marginBottom:"3px" },
-  thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
-  thermoZone: { flex:1, borderRadius:"2px" },
-  thermoMarker: { position:"absolute", top:"50%", transform:"translate(-50%,-50%)", width:"16px", height:"16px", background:"#E8D4A8", borderRadius:"50%", border:"2px solid #0F0D0B", boxShadow:"0 0 10px rgba(232,212,168,0.45)", transition:"left 1.2s cubic-bezier(.4,0,.2,1)" },
-  othersList: { display:"flex", flexDirection:"column", gap:"8px", marginTop:"14px" },
-  otherRow: { display:"flex", alignItems:"center", gap:"10px" },
-  otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
-  otherName: { fontSize:"13px", color:"#7A6E62", flex:1 },
-  otherPct: { fontSize:"13px", color:"#6A6058", flexShrink:0 },
-  stepsBlock: { background:"rgba(255,255,255,0.02)", border:"1px solid #1E1B18", borderRadius:"12px", padding:"16px", marginTop:"12px" },
-  stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color:"#4A4036" },
-};
 
