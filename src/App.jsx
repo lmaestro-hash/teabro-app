@@ -16,12 +16,13 @@ const THEMES = {
     trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#4A4036",
   },
   light: {
-    bg: "#F1E9D3", card: "#FAF5E7", cardBorder: "rgba(58,53,43,0.12)",
-    ink: "#3A352B", inkSoft: "#857A66", inkMuted: "#857A66",
-    accent: "#B08454", line: "rgba(58,53,43,0.12)", primaryBtnBg: "#B08454", primaryBtnText: "#FAF5E7",
-    progressInactive: "rgba(58,53,43,0.15)", optionBg: "rgba(58,53,43,0.03)",
-    optionSelectedBg: "rgba(176,132,84,0.12)", metricBg: "#FAF5E7",
-    trackBg: "rgba(58,53,43,0.08)", softBg: "#F5EDD9", arrow: "#B0A090",
+    // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
+    bg: "#F1E9D3", card: "#FAF6E8", cardBorder: "rgba(44,40,31,0.18)",
+    ink: "#2A261F", inkSoft: "#5A5144", inkMuted: "#4A4338",
+    accent: "#8B5E2F", line: "rgba(44,40,31,0.16)", primaryBtnBg: "#8B5E2F", primaryBtnText: "#FAF6E8",
+    progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(44,40,31,0.04)",
+    optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "#F7F0DC",
+    trackBg: "rgba(44,40,31,0.10)", softBg: "#EDE4CC", arrow: "#6A6054",
   },
 };
 
@@ -124,7 +125,7 @@ function buildStyles(themeName) {
     progressBar: { width:"100%", height:"3px", backgroundColor:c.progressInactive, borderRadius:"2px", marginBottom:"8px", overflow:"hidden" },
     progressFill: { height:"100%", borderRadius:"2px", transition:"width 0.8s ease" },
     progressLabel: { fontSize:"12px", color:c.inkSoft, marginBottom:"24px" },
-    resultText: { fontSize:"15px", lineHeight:1.7, color: isDark?"#C0B8AC":c.inkSoft, fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
+    resultText: { fontSize:"15px", lineHeight:1.7, color: isDark?"#C0B8AC":c.inkMuted, fontStyle:"italic", marginBottom:"20px", textAlign:"left" },
     teaNoteBox: { width:"100%", backgroundColor: isDark?"rgba(200,169,126,0.06)":"rgba(176,132,84,0.1)", border:`1px solid ${isDark?"rgba(200,169,126,0.15)":"rgba(176,132,84,0.25)"}`, borderRadius:"10px", padding:"14px", marginBottom:"24px" },
     teaNoteText: { margin:0, fontSize:"13px", color:c.accent, fontStyle:"italic", lineHeight:1.6, textAlign:"left" },
     wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
@@ -153,10 +154,10 @@ function buildStyles(themeName) {
     metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
     metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:`2px solid ${c.bg}`, display:"block" },
     scaleLabels: { display:"flex", justifyContent:"space-between" },
-    scaleLabel: { fontSize:"10px", color: isDark?"#6A6058":c.inkSoft, letterSpacing:"0.04em" },
+    scaleLabel: { fontSize:"10px", color: isDark?"#6A6058":c.inkSoft, letterSpacing:"0.04em", fontWeight: isDark?400:500 },
     scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
     metricQuote: { padding:"10px 13px", background: isDark?"rgba(200,169,126,0.05)":"rgba(176,132,84,0.08)", borderLeft:`2px solid ${isDark?"rgba(200,169,126,0.25)":"rgba(176,132,84,0.3)"}`, borderRadius:"0 6px 6px 0", marginTop:"13px" },
-    metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#8A7E72":c.inkSoft, fontStyle:"italic", lineHeight:1.75 },
+    metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#8A7E72":c.inkMuted, fontStyle:"italic", lineHeight:1.75 },
     thermoWrap: { position:"relative", marginBottom:"3px" },
     thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
     thermoZone: { flex:1, borderRadius:"2px" },
@@ -2646,7 +2647,9 @@ function calcNotesStreak(entries) {
   return s;
 }
 function QuietNotes({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const isDark = theme === "dark";
   const [loaded, setLoaded] = useState(false);
   const [entries, setEntries] = useState([]);
   const [text, setText] = useState("");
@@ -2676,42 +2679,42 @@ function QuietNotes({ onBack }) {
     }
     else { setJustSaved(true); setTimeout(() => setJustSaved(false), 1800); }
   }
-  if (!loaded) return (<div style={S.screen}><button onClick={onBack} style={S.backBtn}>← назад</button><div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:"#7A6E62", fontStyle:"italic" }}>Открываю тихие записи...</p></div></div>);
+  if (!loaded) return (<div style={S.screen}><button onClick={onBack} style={S.backBtn}>← назад</button><div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:c.inkSoft, fontStyle:"italic" }}>Открываю тихие записи...</p></div></div>);
   const streak = calcNotesStreak(entries);
   const visible = entries.filter(e => { if (tab === "letters") return e.sealed; if (e.sealed) return false; if (moodFilter && e.mood !== moodFilter) return false; if (search && !(e.fullText || e.text).toLowerCase().includes(search.toLowerCase())) return false; return true; });
-  const card = { background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"12px", padding:"16px", marginBottom:"12px" };
-  const gb = { padding:"10px 14px", background:"transparent", color:"#7A6E62", border:"1px solid #2A2520", borderRadius:"10px", fontSize:"12px", cursor:"pointer", fontFamily:"'Georgia',serif" };
-  const gba = { ...gb, background:"rgba(200,169,126,0.12)", color:"#C8A97E", border:"1px solid rgba(200,169,126,0.3)" };
+  const card = { background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", marginBottom:"12px" };
+  const gb = { padding:"10px 14px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", fontSize:"12px", cursor:"pointer", fontFamily:"'Georgia',serif" };
+  const gba = { ...gb, background:"rgba(200,169,126,0.12)", color:c.accent, border:"1px solid rgba(200,169,126,0.3)" };
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>← назад</button>
       <p style={{ fontSize:"20px", fontWeight:"normal", margin:"0 0 4px" }}>Мой блокнот</p>
-      <p style={{ fontSize:"13px", color:"#7A6E62", margin:"0 0 16px" }}>Твоё личное пространство для мыслей.</p>
-      {streak > 1 && <p style={{ fontSize:"12px", color:"#C8A97E", margin:"0 0 20px" }}>🌙 {streak} дней подряд</p>}
+      <p style={{ fontSize:"13px", color:c.inkSoft, margin:"0 0 16px" }}>Твоё личное пространство для мыслей.</p>
+      {streak > 1 && <p style={{ fontSize:"12px", color:c.accent, margin:"0 0 20px" }}>🌙 {streak} дней подряд</p>}
       <div style={card}>
-        <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:"1px solid #2A2520", borderRadius:"10px", padding:"12px", color:"#E8E0D4", fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder="О чём думаешь сегодня?" value={text} onChange={e => setText(e.target.value)} />
+        <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder="О чём думаешь сегодня?" value={text} onChange={e => setText(e.target.value)} />
         <div style={{ display:"flex", gap:"8px", marginTop:"12px", flexWrap:"wrap" }}>
           {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"14px" }}>
           <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ Письмо себе</button>
-          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={new Date(Date.now()+86400000).toISOString().split("T")[0]} max={new Date(Date.now()+3*365*86400000).toISOString().split("T")[0]} style={{ background:"#1A1713", color:"#C8A97E", border:"1px solid #2A2520", borderRadius:"8px", padding:"9px 10px", fontFamily:"Georgia,serif", fontSize:"12px" }} />}
+          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={new Date(Date.now()+86400000).toISOString().split("T")[0]} max={new Date(Date.now()+3*365*86400000).toISOString().split("T")[0]} style={{ background:"#1A1713", color:c.accent, border:`1px solid ${c.cardBorder}`, borderRadius:"8px", padding:"9px 10px", fontFamily:"Georgia,serif", fontSize:"12px" }} />}
         </div>
         <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{seal ? "ЗАПЕЧАТАТЬ" : "СОХРАНИТЬ"}</button>
-        <p style={{ fontSize:"11px", color:"#5E564C", textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>видишь только ты, хранится на твоём устройстве</p>
+        <p style={{ fontSize:"11px", color:c.inkSoft, textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>видишь только ты, хранится на твоём устройстве</p>
       </div>
-      {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:"#C8A97E", fontSize:"13px", letterSpacing:"0.05em" }}>запечатано</div></div>}
-      {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:"#C8A97E", fontSize:"13px" }}>сохранено 🌙</div>}
+      {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:c.accent, fontSize:"13px", letterSpacing:"0.05em" }}>запечатано</div></div>}
+      {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>сохранено 🌙</div>}
       {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 вспомнить запись</button>}
-      {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:"#C8A97E", margin:"0 0 8px" }}>ИЗ ПРОШЛОГО · {getEntryDateLabel(memory.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>закрыть</button></div>}
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 поиск по записям" style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:"1px solid #2A2520", borderRadius:"10px", padding:"10px 12px", color:"#E8E0D4", fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
+      {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>ИЗ ПРОШЛОГО · {getEntryDateLabel(memory.date)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>закрыть</button></div>}
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 поиск по записям" style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
       <div style={{ display:"flex", gap:"8px", marginBottom:"12px" }}>
         <button onClick={() => { setTab("all"); setMoodFilter(null); }} style={tab === "all" ? gba : gb}>записи</button>
         <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ письма себе</button>
       </div>
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}</div>}
-      {visible.length === 0 && <p style={{ fontSize:"13px", color:"#5E564C", textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:"#7A6E62", margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:"#D0C8BC", lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:"1px solid #2A2520", borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:"#5E564C", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
+      {visible.length === 0 && <p style={{ fontSize:"13px", color:c.inkSoft, textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:c.inkSoft, margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:`1px solid ${c.cardBorder}`, borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>удалить</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
@@ -2721,7 +2724,9 @@ function QuietNotes({ onBack }) {
 // ЭКРАН: МОЁ СОСТОЯНИЕ
 // ─────────────────────────────────────────────
 function MoodScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const isDark = theme === "dark";
   const [todayEmotion, setTodayEmotion] = useState(null);
   const [streak, setStreak] = useState(0);
   const [weekData, setWeekData] = useState([]);
@@ -2813,7 +2818,7 @@ function MoodScreen({ onBack }) {
 
   function StatBlock({ data, label }) {
     const stats = calcStats(data);
-    if (!stats) return <p style={{ color:"#4A4036", fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>Пока нет данных за {label}.</p>;
+    if (!stats) return <p style={{ color:c.inkSoft, fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>Пока нет данных за {label}.</p>;
     const sorted = Object.entries(stats.counts).sort((a,b) => b[1]-a[1]).filter(([,v]) => v > 0);
     const daysInPeriod = data.length;
     return (
@@ -2822,15 +2827,15 @@ function MoodScreen({ onBack }) {
           <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>из {daysInPeriod} дней</p></div>
           <div style={S.statCard}><p style={S.statNum}>{stats.avgScore}</p><p style={S.statLabel}>средний балл</p></div>
         </div>
-        <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"10px" }}>СОСТОЯНИЯ</p>
+        <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"10px" }}>СОСТОЯНИЯ</p>
         {sorted.map(([id, count]) => {
           const em = EMOTIONS.find(e => e.id === id);
           const pct = Math.round((count / stats.total) * 100);
           return (
             <div key={id} style={{ marginBottom:"8px" }}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"3px" }}>
-                <span style={{ fontSize:"13px", color:"#D0C8BC" }}>{em?.emoji} {em?.label}</span>
-                <span style={{ fontSize:"12px", color:"#7A6E62" }}>{pct}%</span>
+                <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em?.label}</span>
+                <span style={{ fontSize:"12px", color:c.inkSoft }}>{pct}%</span>
               </div>
               <div style={{ height:"3px", backgroundColor:"#2A2520", borderRadius:"2px", overflow:"hidden" }}>
                 <div style={{ height:"100%", width:`${pct}%`, backgroundColor:"#C8A97E", borderRadius:"2px", transition:"width 0.6s ease" }} />
@@ -2846,7 +2851,7 @@ function MoodScreen({ onBack }) {
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>← назад</button>
       <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <p style={{ color:"#7A6E62", fontStyle:"italic" }}>Загружаю твой путь...</p>
+        <p style={{ color:c.inkSoft, fontStyle:"italic" }}>Загружаю твой путь...</p>
       </div>
     </div>
   );
@@ -2867,46 +2872,46 @@ function MoodScreen({ onBack }) {
       </div>
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
-        <p style={{ margin:0, fontSize:"18px", color:"#C8A97E", letterSpacing:"0.05em" }}>{title.name}</p>
-        <p style={{ margin:"4px 0 0", fontSize:"12px", color:"#7A6E62" }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
-        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:"#4A4036" }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+        <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{title.name}</p>
+        <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
+        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
         <div style={{ marginTop:"10px" }}><ShareButton text={shareTitle} label="Поделиться титулом ↗" /></div>
       </div>
       <div style={S.wisdomLine} />
       {archetype && (
         <div style={{ ...S.teaNoteBox, margin:"16px 0", textAlign:"center" }}>
           <p style={{ margin:"0 0 4px", fontSize:"22px" }}>{archetype.emoji}</p>
-          <p style={{ margin:"0 0 4px", fontSize:"15px", color:"#C8A97E" }}>{archetype.name}</p>
-          <p style={{ margin:0, fontSize:"12px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.6 }}>{archetype.desc}</p>
+          <p style={{ margin:"0 0 4px", fontSize:"15px", color:c.accent }}>{archetype.name}</p>
+          <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.6 }}>{archetype.desc}</p>
           <div style={{ marginTop:"10px" }}>
             <ShareButton text={`${archetype.emoji} Мой архетип — «${archetype.name}»\n${archetype.desc}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться архетипом ↗" />
           </div>
         </div>
       )}
-      <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:"#C8A97E", fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-        <span>🧭</span><span>Моя траектория</span><span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
+      <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+        <span>🧭</span><span>Моя траектория</span><span style={{ color:c.inkSoft, fontSize:"16px" }}>→</span>
       </button>
-      <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>куда движется твоя жизнь</p>
+      <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>куда движется твоя жизнь</p>
 
-      <button onClick={() => setShowNotes(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:"#C8A97E", fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
-        <span>🌙</span><span>Мой блокнот</span><span style={{ color:"#4A4036", fontSize:"16px" }}>→</span>
+      <button onClick={() => setShowNotes(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+        <span>🌙</span><span>Мой блокнот</span><span style={{ color:c.inkSoft, fontSize:"16px" }}>→</span>
       </button>
-      <p style={{ margin:"0 0 16px", fontSize:"11px", color:"#4A4036", textAlign:"center", letterSpacing:"0.05em" }}>место, куда можно положить мысли</p>
+      <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>место, куда можно положить мысли</p>
       <div style={{ margin:"16px 0" }}>
-        <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>
+        <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>
           {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
         </p>
         {todayEmotion ? (
           <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
             <span style={{ fontSize:"28px" }}>{todayEmotion.emoji}</span>
-            <span style={{ fontSize:"16px", color:"#E8E0D4" }}>{todayEmotion.label}</span>
+            <span style={{ fontSize:"16px", color:c.ink }}>{todayEmotion.label}</span>
           </div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
             {EMOTIONS.map(e => (
-              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
+              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
                 <span style={{ fontSize:"19px" }}>{e.emoji}</span>
-                <span style={{ fontSize:"9px", color:"#7A6E62", textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{emotionLabel(e.id, lang) || e.label}</span>
+                <span style={{ fontSize:"9px", color:c.inkSoft, textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{emotionLabel(e.id, lang) || e.label}</span>
               </button>
             ))}
           </div>
@@ -2919,22 +2924,22 @@ function MoodScreen({ onBack }) {
       </div>
       {tab === "today" && (
         <div>
-          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА НЕДЕЛИ</p>
+          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>КАРТА НЕДЕЛИ</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"6px", marginBottom:"16px" }}>
             {weekData.map((d,i) => (
               <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:"1px solid #2A2520", background: d.data ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>{d.data ? d.data.emoji : ""}</div>
-                <span style={{ fontSize:"10px", color:"#4A4036" }}>{d.day}</span>
+                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: d.data ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>{d.data ? d.data.emoji : ""}</div>
+                <span style={{ fontSize:"10px", color:c.inkSoft }}>{d.day}</span>
               </div>
             ))}
           </div>
           <StatBlock data={weekData.map(d => d.data)} label="неделю" />
           {(() => { const ws = calcStats(weekData.map(d => d.data)); return ws ? (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
-              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Итог недели</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ws.total} из 7 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ws.avgScore}/10</p>
-              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>Итог недели</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
+              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
             </div>
           ) : null; })()}
@@ -2942,26 +2947,26 @@ function MoodScreen({ onBack }) {
       )}
       {tab === "month" && (
         <div>
-          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА МЕСЯЦА</p>
+          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>КАРТА МЕСЯЦА</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"5px", marginBottom:"16px" }}>
             {monthData.map((d,i) => {
               const daysAgo = 29 - i;
               const date = new Date(); date.setDate(date.getDate() - daysAgo);
               return (
                 <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"3px" }}>
-                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:"1px solid #2A2520", background: d ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>{d ? d.emoji : ""}</div>
-                  <span style={{ fontSize:"9px", color:"#3A3028" }}>{date.getDate()}</span>
+                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:`1px solid ${c.cardBorder}`, background: d ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>{d ? d.emoji : ""}</div>
+                  <span style={{ fontSize:"9px", color:c.inkSoft }}>{date.getDate()}</span>
                 </div>
               );
             })}
           </div>
           <StatBlock data={monthData} label="месяц" />
           {(() => { const ms = calcStats(monthData); return ms ? (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
-              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Итог месяца</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {ms.total} из 30 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {ms.avgScore}/10</p>
-              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>Итог месяца</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
+              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
             </div>
           ) : null; })()}
@@ -2969,7 +2974,7 @@ function MoodScreen({ onBack }) {
       )}
       {tab === "year" && (
         <div>
-          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"12px" }}>КАРТА ГОДА</p>
+          <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>КАРТА ГОДА</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"6px", marginBottom:"16px" }}>
             {(() => {
               const months = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"];
@@ -2987,9 +2992,9 @@ function MoodScreen({ onBack }) {
                 const mIdx = (new Date().getMonth() - 11 + mi + 12) % 12;
                 return (
                   <div key={mi} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:"1px solid #2A2520", background: filled.length > 0 ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
-                    <span style={{ fontSize:"9px", color:"#4A4036" }}>{months[mIdx]}</span>
-                    <span style={{ fontSize:"8px", color:"#3A3028" }}>{filled.length}д</span>
+                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: filled.length > 0 ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
+                    <span style={{ fontSize:"9px", color:c.inkSoft }}>{months[mIdx]}</span>
+                    <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}д</span>
                   </div>
                 );
               });
@@ -2997,11 +3002,11 @@ function MoodScreen({ onBack }) {
           </div>
           <StatBlock data={allData} label="год" />
           {allStats && (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px" }}>
-              <p style={{ margin:"0 0 8px", fontSize:"13px", color:"#C8A97E" }}>Годовой отчет</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Отмечался {allStats.total} из 365 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:"#D0C8BC" }}>Средний балл: {allStats.avgScore}/10</p>
-              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:"#D0C8BC" }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+              <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>Годовой отчет</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
+              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчетом ↗" /></div>
             </div>
           )}
@@ -3026,10 +3031,10 @@ function ShopScreen({ onBack }) {
         <div style={{ fontSize:"48px", marginBottom:"20px" }}>🫖</div>
         <p style={{ ...S.wisdomText, fontSize:"22px", marginBottom:"12px" }}>Чайная лавка</p>
         <div style={S.wisdomLine} />
-        <p style={{ fontSize:"14px", color:"#7A6E62", fontStyle:"italic", marginTop:"16px", lineHeight:1.8, textAlign:"center" }}>
+        <p style={{ fontSize:"14px", color:c.inkSoft, fontStyle:"italic", marginTop:"16px", lineHeight:1.8, textAlign:"center" }}>
           Скоро здесь появятся чаи,<br />которые мы выбираем сами.<br />Без лишнего. Только то, что работает.
         </p>
-        <p style={{ fontSize:"12px", color:"#4A4036", marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
+        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
       </div>
       <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>Следить в канале 🌕</a>
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
@@ -3043,92 +3048,290 @@ function ShopScreen({ onBack }) {
 const ADMIN_ID = 5175467398;
 
 function AdminScreen({ onBack }) {
-  const { lang } = useLang();
+  const { lang, theme } = useLang();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function loadStats() {
-      try {
-        // Серверная статистика. cache:"no-store" + timestamp — иначе Telegram
-        // WebView может отдавать закэшированный ответ на тот же URL и админка
-        // будет показывать устаревшие цифры даже после реальных новых событий.
-        const res = await fetch(`${STATS_URL}?action=get&t=${Date.now()}`, { cache: "no-store" });
-        const serverStats = res.ok ? await res.json() : {};
+  const c = THEMES[theme] || THEMES.dark;
+  const isDark = theme === "dark";
 
-        // Топ эмоций — из серверного агрегированного счётчика (emotionCounts),
-        // а НЕ из CloudStorage: CS привязан к текущему юзеру, и раньше здесь
-        // считались только личные записи того, кто открыл админку, а не всех.
-        const emotionCounts = serverStats.emotionCounts || {};
-        const topEmotions = Object.entries(emotionCounts).sort((a,b) => b[1]-a[1]).slice(0,3).map(([id, count]) => {
+  async function loadStats(isRefresh) {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const res = await fetch(`${STATS_URL}?action=get&t=${Date.now()}`, { cache: "no-store" });
+      const serverStats = res.ok ? await res.json() : {};
+      const emotionCounts = serverStats.emotionCounts || {};
+      const topEmotions = Object.entries(emotionCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id, count]) => {
           const em = EMOTIONS.find(e => e.id === id);
           return em && count > 0 ? { ...em, count } : null;
-        }).filter(Boolean);
-
-        setStats({
-          totalOpens:     serverStats.totalOpens     ?? 0,
-          totalQuiz:      serverStats.totalQuiz      ?? 0,
-          totalSelfHonesty:serverStats.totalSelfHonesty??0,
-          totalHormones:  serverStats.totalHormones  ?? 0,
-          totalTea:       serverStats.totalTea       ?? 0,
-          totalMood:      serverStats.totalMood      ?? 0,
-          totalMeditation:serverStats.totalMeditation?? 0,
-          uniqueTotal:    serverStats.uniqueTotal    ?? 0,
-          usersWithChatId:serverStats.usersWithChatId?? 0,
-          todayOpens:     serverStats.todayOpens     ?? 0,
-          todayQuiz:      serverStats.todayQuiz      ?? 0,
-          todayUnique:    serverStats.todayUnique    ?? 0,
-          topEmotions,
-        });
-      } catch(e) { setStats({ error: true }); }
-      setLoading(false);
+        })
+        .filter(Boolean);
+      const maxEmotion = topEmotions[0]?.count || 1;
+      setStats({
+        totalOpens: serverStats.totalOpens ?? 0,
+        totalQuiz: serverStats.totalQuiz ?? 0,
+        totalSelfHonesty: serverStats.totalSelfHonesty ?? 0,
+        totalHormones: serverStats.totalHormones ?? 0,
+        totalTea: serverStats.totalTea ?? 0,
+        totalMood: serverStats.totalMood ?? 0,
+        totalMeditation: serverStats.totalMeditation ?? 0,
+        uniqueTotal: serverStats.uniqueTotal ?? 0,
+        usersWithChatId: serverStats.usersWithChatId ?? 0,
+        todayOpens: serverStats.todayOpens ?? 0,
+        todayQuiz: serverStats.todayQuiz ?? 0,
+        todayUnique: serverStats.todayUnique ?? 0,
+        topEmotions,
+        maxEmotion,
+        selfHonestyHist: serverStats.selfHonestyHist || null,
+      });
+    } catch (e) {
+      setStats({ error: true });
     }
-    loadStats();
-  }, []);
+    setLoading(false);
+    setRefreshing(false);
+  }
 
-  const row = (label, value) => (
-    <div style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #1A1713" }}>
-      <span style={{ fontSize:"13px", color:"#7A6E62" }}>{label}</span>
-      <span style={{ fontSize:"13px", color:"#C8A97E" }}>{value}</span>
-    </div>
-  );
+  useEffect(() => { loadStats(false); }, []);
+
+  const card = {
+    background: isDark ? "rgba(200,169,126,0.05)" : "rgba(176,132,84,0.06)",
+    border: `1px solid ${c.cardBorder}`,
+    borderRadius: "14px",
+    padding: "16px",
+    marginBottom: "14px",
+  };
+  const sectionTitle = {
+    margin: "0 0 14px",
+    fontSize: "10px",
+    letterSpacing: "0.22em",
+    color: c.accent,
+    fontFamily: "'Georgia',serif",
+  };
+  const metricBig = {
+    flex: 1,
+    minWidth: 0,
+    textAlign: "center",
+    padding: "14px 8px",
+    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(58,53,43,0.03)",
+    borderRadius: "12px",
+    border: `1px solid ${c.cardBorder}`,
+  };
+  const metricVal = {
+    margin: "0 0 4px",
+    fontSize: "26px",
+    color: c.accent,
+    fontFamily: "'Georgia',serif",
+    letterSpacing: "0.02em",
+  };
+  const metricLabel = {
+    margin: 0,
+    fontSize: "10px",
+    color: c.inkSoft,
+    letterSpacing: "0.08em",
+    lineHeight: 1.3,
+  };
+  const rowStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "11px 0",
+    borderBottom: `1px solid ${isDark ? "#1A1713" : "rgba(58,53,43,0.08)"}`,
+  };
+  const rowLabel = { fontSize: "13px", color: c.inkSoft, display: "flex", alignItems: "center", gap: "8px" };
+  const rowValue = { fontSize: "14px", color: c.accent, fontVariantNumeric: "tabular-nums" };
+
+  const tests = stats && !stats.error ? [
+    { icon: "🪞", label: "Опросник", value: stats.totalQuiz },
+    { icon: "🎭", label: "Самообман", value: stats.totalSelfHonesty },
+    { icon: "🧬", label: "Гормоны", value: stats.totalHormones },
+    { icon: "🍵", label: "Чай", value: stats.totalTea },
+    { icon: "🧘", label: "Медитации", value: stats.totalMeditation },
+    { icon: "💭", label: "Эмоции", value: stats.totalMood },
+  ] : [];
 
   return (
     <div style={S.screen}>
-      <div style={S.screenHeader}><button onClick={onBack} style={S.backBtn}>← назад</button></div>
-      <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E", marginBottom:"20px" }}>ПАНЕЛЬ АДМИНИСТРАТОРА</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+        <button onClick={onBack} style={S.backBtn}>← назад</button>
+        <button
+          onClick={() => loadStats(true)}
+          disabled={loading || refreshing}
+          style={{
+            background: "none",
+            border: `1px solid ${c.cardBorder}`,
+            color: c.inkSoft,
+            fontSize: "12px",
+            cursor: loading || refreshing ? "default" : "pointer",
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontFamily: "'Georgia',serif",
+            opacity: refreshing ? 0.6 : 1,
+          }}
+        >
+          {refreshing ? "обновляю…" : "↻ обновить"}
+        </button>
+      </div>
+
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
+        <div style={{ fontSize: "28px", marginBottom: "8px" }}>⚙️</div>
+        <p style={{ margin: "0 0 4px", fontSize: "11px", letterSpacing: "0.25em", color: c.accent }}>TEA BRO</p>
+        <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "normal", color: c.ink, letterSpacing: "0.06em" }}>Панель</h2>
+        <p style={{ margin: "6px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>статистика пространства</p>
+      </div>
+
       {loading ? (
-        <p style={{ color:"#4A4036", fontStyle:"italic" }}>Загружаю статистику...</p>
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <p style={{ color: c.inkSoft, fontStyle: "italic", fontSize: "14px" }}>Завариваю цифры…</p>
+        </div>
       ) : stats?.error ? (
-        <p style={{ color:"#8B4A4A" }}>Ошибка загрузки</p>
+        <div style={{ ...card, textAlign: "center" }}>
+          <p style={{ margin: "0 0 8px", color: "#A85A5A", fontSize: "14px" }}>Не удалось загрузить</p>
+          <p style={{ margin: 0, color: c.inkSoft, fontSize: "12px" }}>Проверь API / KV на Vercel</p>
+          <button onClick={() => loadStats(true)} style={{ ...S.backBtn, marginTop: "12px", padding: 0 }}>попробовать снова</button>
+        </div>
       ) : (
         <>
-          <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
-            <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>СЕГОДНЯ</p>
-            {row("Открытий бота", stats.todayOpens)}
-            {row("Уникальных пользователей", stats.todayUnique)}
-            {row("Прошли опросник", stats.todayQuiz)}
+          {/* СЕГОДНЯ — крупные метрики */}
+          <div style={card}>
+            <p style={sectionTitle}>СЕГОДНЯ</p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <div style={metricBig}>
+                <p style={metricVal}>{stats.todayOpens}</p>
+                <p style={metricLabel}>открытий</p>
+              </div>
+              <div style={metricBig}>
+                <p style={metricVal}>{stats.todayUnique}</p>
+                <p style={metricLabel}>уникальных</p>
+              </div>
+              <div style={metricBig}>
+                <p style={metricVal}>{stats.todayQuiz}</p>
+                <p style={metricLabel}>опросник</p>
+              </div>
+            </div>
           </div>
-          <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", marginBottom:"16px" }}>
-            <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ВСЕГО</p>
-            {row("Открытий", stats.totalOpens)}
-            {row("Уникальных пользователей", stats.uniqueTotal)}
-            {row("— из них через Telegram", stats.usersWithChatId)}
-            {row("Опросник", stats.totalQuiz)}
-            {row("Склонность к самообману", stats.totalSelfHonesty)}
-            {row("Гормональный код", stats.totalHormones)}
-            {row("Тест чая", stats.totalTea)}
-            {row("Тест медитаций", stats.totalMeditation)}
-            {row("Записей эмоций", stats.totalMood)}
+
+          {/* АУДИТОРИЯ */}
+          <div style={card}>
+            <p style={sectionTitle}>АУДИТОРИЯ</p>
+            <div style={rowStyle}>
+              <span style={rowLabel}>Всего открытий</span>
+              <span style={rowValue}>{stats.totalOpens}</span>
+            </div>
+            <div style={rowStyle}>
+              <span style={rowLabel}>Уникальных людей</span>
+              <span style={rowValue}>{stats.uniqueTotal}</span>
+            </div>
+            <div style={{ ...rowStyle, borderBottom: "none" }}>
+              <span style={rowLabel}>через Telegram</span>
+              <span style={rowValue}>
+                {stats.usersWithChatId}
+                {stats.uniqueTotal > 0 && (
+                  <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
+                    ({Math.round((stats.usersWithChatId / stats.uniqueTotal) * 100)}%)
+                  </span>
+                )}
+              </span>
+            </div>
           </div>
+
+          {/* ТЕСТЫ — сетка */}
+          <div style={card}>
+            <p style={sectionTitle}>ТЕСТЫ И ПРАКТИКИ</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {tests.map(t => (
+                <div
+                  key={t.label}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "10px",
+                    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(58,53,43,0.03)",
+                    border: `1px solid ${c.cardBorder}`,
+                  }}
+                >
+                  <div style={{ fontSize: "18px", marginBottom: "6px" }}>{t.icon}</div>
+                  <p style={{ margin: "0 0 2px", fontSize: "20px", color: c.accent }}>{t.value}</p>
+                  <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft }}>{t.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ТОП ЭМОЦИЙ с полосками */}
           {stats.topEmotions?.length > 0 && (
-            <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px" }}>
-              <p style={{ margin:"0 0 10px", fontSize:"12px", color:"#C8A97E", letterSpacing:"0.1em" }}>ТОП ЭМОЦИЙ</p>
-              {stats.topEmotions.map((e,i) => e && row(`${e.emoji} ${emotionLabel(e.id, lang) || e.label}`, `${e.count} раз`))}
+            <div style={card}>
+              <p style={sectionTitle}>ТОП ЭМОЦИЙ</p>
+              {stats.topEmotions.map((e, i) => {
+                const pct = Math.round((e.count / stats.maxEmotion) * 100);
+                return (
+                  <div key={e.id} style={{ marginBottom: i === stats.topEmotions.length - 1 ? 0 : "14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "13px", color: c.ink }}>
+                        {e.emoji} {emotionLabel(e.id, lang) || e.label}
+                      </span>
+                      <span style={{ fontSize: "12px", color: c.accent }}>{e.count}</span>
+                    </div>
+                    <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "#1E1B18" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
+                      <div style={{
+                        width: `${pct}%`,
+                        height: "100%",
+                        borderRadius: "3px",
+                        background: c.accent,
+                        opacity: 0.85 - i * 0.12,
+                        transition: "width 0.6s ease",
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Самообман — среднее, если есть */}
+          {stats.selfHonestyHist?.count > 0 && (
+            <div style={card}>
+              <p style={sectionTitle}>САМООБМАН · РАСПРЕДЕЛЕНИЕ</p>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "12px" }}>
+                <div style={metricBig}>
+                  <p style={metricVal}>{stats.selfHonestyHist.count}</p>
+                  <p style={metricLabel}>результатов</p>
+                </div>
+                <div style={metricBig}>
+                  <p style={metricVal}>{stats.selfHonestyHist.average ?? "—"}</p>
+                  <p style={metricLabel}>средний балл</p>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "48px" }}>
+                {(stats.selfHonestyHist.buckets || []).map((b, i) => {
+                  const maxB = Math.max(1, ...stats.selfHonestyHist.buckets.map(x => x.count));
+                  const h = Math.max(4, Math.round((b.count / maxB) * 48));
+                  return (
+                    <div key={b.range} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                      <div style={{
+                        width: "100%",
+                        height: h,
+                        borderRadius: "3px 3px 0 0",
+                        background: c.accent,
+                        opacity: 0.35 + (b.count / maxB) * 0.55,
+                      }} title={`${b.range}: ${b.count}`} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>0</span>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>50</span>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>99</span>
+              </div>
             </div>
           )}
         </>
       )}
+
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
   );
@@ -3141,20 +3344,20 @@ function AnonPopup() {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:"#3A3028", cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:c.inkSoft, cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
         <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
-        <span style={{ fontSize:"12px", color:"#3A3028", letterSpacing:"0.05em" }}>Анонимность</span>
+        <span style={{ fontSize:"12px", color:c.inkSoft, letterSpacing:"0.05em" }}>Анонимность</span>
       </button>
       {open && (
-        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:"1px solid #2A2520", borderRadius:"10px", padding:"14px", zIndex:100 }}>
-          <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:"#C8A97E" }}>О ТВОИХ ДАННЫХ</p>
-          <p style={{ margin:0, fontSize:"12px", color:"#7A6E62", lineHeight:1.8, fontStyle:"italic" }}>
+        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
+          <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:c.accent }}>О ТВОИХ ДАННЫХ</p>
+          <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, lineHeight:1.8, fontStyle:"italic" }}>
             Твой путь — только твой.<br />
             Твои данные хранятся только у тебя.<br />
             Никто кроме тебя их не видит.<br />
             Бот полностью анонимный.
           </p>
-          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:"#4A4036", cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
+          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:c.inkSoft, cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>закрыть</button>
         </div>
       )}
     </div>
@@ -3165,7 +3368,9 @@ function AnonPopup() {
 // ЭКРАН: МОЙ ПУТЬ
 // ─────────────────────────────────────────────
 function MyPathScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const isDark = theme === "dark";
   const [loaded, setLoaded] = useState(false);
   const [streak, setStreak] = useState(0);
   const [quizHist, setQuizHist] = useState([]);
@@ -3217,7 +3422,7 @@ function MyPathScreen({ onBack }) {
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>← назад</button>
         <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <p style={{ color:"#7A6E62", fontStyle:"italic" }}>Собираем твой путь...</p>
+          <p style={{ color:c.inkSoft, fontStyle:"italic" }}>Собираем твой путь...</p>
         </div>
       </div>
     );
@@ -3331,18 +3536,18 @@ function MyPathScreen({ onBack }) {
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>← назад</button>
-      <p style={{ fontSize:"10px", letterSpacing:"0.28em", color:"#3A3028", margin:"4px 0 28px" }}>МОЙ ПУТЬ</p>
+      <p style={{ fontSize:"10px", letterSpacing:"0.28em", color:c.inkSoft, margin:"4px 0 28px" }}>МОЙ ПУТЬ</p>
 
       {/* ГЕРОЙ */}
       <div style={{ textAlign:"center", marginBottom:"24px" }}>
         <div style={{ fontSize:"52px", marginBottom:"12px" }}>{title.emoji}</div>
-        <p style={{ margin:"0 0 4px", fontSize:"24px", color:"#C8A97E", letterSpacing:"0.06em" }}>{title.name}</p>
-        <p style={{ margin:"0 0 6px", fontSize:"12px", color:"#4A4036", letterSpacing:"0.14em" }}>
+        <p style={{ margin:"0 0 4px", fontSize:"24px", color:c.accent, letterSpacing:"0.06em" }}>{title.name}</p>
+        <p style={{ margin:"0 0 6px", fontSize:"12px", color:c.inkSoft, letterSpacing:"0.14em" }}>
           {streak} {streak===1?"день":streak<5?"дня":"дней"} практики
         </p>
-        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:"#3A3028", fontStyle:"italic" }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
       </div>
-      <div style={{ width:"36px", height:"1px", background:"#2A2520", margin:"0 auto 8px" }} />
+      <div style={{ width:"36px", height:"1px", background:c.line, margin:"0 auto 8px" }} />
 
       {/* ТОЧКА СБОРКИ */}
       <div style={S.sectionHead}>
@@ -3423,7 +3628,7 @@ function MyPathScreen({ onBack }) {
             animKey={`hormone-${hormonePct}`}
           />
           <div style={{ ...S.metricBlock, marginTop:"-6px", paddingTop:"16px" }}>
-            <p style={{ margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.15em", color:"#5A5048" }}>ВСЕ СЕМЬ СИСТЕМ</p>
+            <p style={{ margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.15em", color:c.inkSoft }}>ВСЕ СЕМЬ СИСТЕМ</p>
             {HORMONE_QUESTIONS.map(({ key }) => {
               const avgScore = hormoneAvgByKey[key];
               if (avgScore === undefined) return null;
@@ -3431,8 +3636,8 @@ function MyPathScreen({ onBack }) {
               const pct = Math.round((avgScore - 1) / 4 * 100);
               return (
                 <div key={key} style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
-                  <span style={{ fontSize:"12px", color:"#B8B0A4", width:"98px", flexShrink:0 }}>{meta.name}</span>
-                  <div style={{ flex:1, height:"4px", background:"#1E1B18", borderRadius:"2px", overflow:"hidden" }}>
+                  <span style={{ fontSize:"12px", color:c.inkMuted, width:"98px", flexShrink:0 }}>{meta.name}</span>
+                  <div style={{ flex:1, height:"4px", background:c.trackBg, borderRadius:"2px", overflow:"hidden" }}>
                     <div style={{ width:`${pct}%`, height:"100%", background:meta.color, borderRadius:"2px" }} />
                   </div>
                   <span style={{ fontSize:"12px", color:meta.color, width:"36px", textAlign:"right", flexShrink:0 }}>{pct}%</span>
@@ -3519,7 +3724,7 @@ function MyPathScreen({ onBack }) {
         <div style={S.statCard}>
           <p style={S.statNum}>{hasMood ? `${moodPct}%` : "—"}</p>
           <p style={S.statLabel}>доминирующее настроение</p>
-          <p style={{ margin:"2px 0 0", fontSize:"9px", color:"#4A4036" }}>90 дней</p>
+          <p style={{ margin:"2px 0 0", fontSize:"9px", color:c.inkSoft }}>90 дней</p>
         </div>
       </div>
 
@@ -3548,9 +3753,9 @@ function MyPathScreen({ onBack }) {
       )}
 
       {/* ВОПРОС ДНЯ */}
-      <div style={{ border:"1px dashed #2A2520", borderRadius:"10px", padding:"14px 16px", marginTop:"28px" }}>
-        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#3A3028" }}>ВОПРОС ДНЯ</p>
-        <p style={{ margin:0, fontSize:"14px", color:"#7A6E62", fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
+      <div style={{ border:`1px dashed ${c.cardBorder}`, borderRadius:"10px", padding:"14px 16px", marginTop:"28px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:c.inkSoft }}>ВОПРОС ДНЯ</p>
+        <p style={{ margin:0, fontSize:"14px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.8 }}>«Что сейчас больше всего забирает твою тишину?»</p>
       </div>
       <button onClick={onBack} style={S.backBtnBottom}>← назад</button>
     </div>
@@ -3560,7 +3765,7 @@ function MyPathScreen({ onBack }) {
 function EmptyMetric({ text }) {
   return (
     <div style={{ ...S.metricBlock, textAlign:"center", padding:"24px 16px" }}>
-      <p style={{ margin:0, fontSize:"13px", color:"#5A5048", fontStyle:"italic", lineHeight:1.7 }}>{text}</p>
+      <p style={{ margin:0, fontSize:"13px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.7 }}>{text}</p>
     </div>
   );
 }
@@ -3573,10 +3778,11 @@ export default function App() {
   const [currentMood, setCurrentMood] = useState("general");
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } });
   const [lang, setLang] = useState(() => { try { return localStorage.getItem("teabro-lang") || "ru"; } catch { return "ru"; } });
-  useEffect(() => { S = buildStyles(theme); try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
+  S = buildStyles(theme);
+  useEffect(() => { try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem("teabro-lang", lang); } catch {} }, [lang]);
   const t = UI[lang] || UI.ru;
-  const styles = buildStyles(theme);
+  const styles = S;
 
   useEffect(() => {
     // Скрипт telegram-web-app.js грузится асинхронно — ждём его появления
