@@ -3043,6 +3043,7 @@ function ShopScreen({ onBack }) {
 const ADMIN_ID = 5175467398;
 
 function AdminScreen({ onBack }) {
+  const { lang } = useLang();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
