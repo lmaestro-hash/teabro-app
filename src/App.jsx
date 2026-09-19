@@ -3389,6 +3389,9 @@ function AdminScreen({ onBack }) {
     color: c.inkSoft,
     letterSpacing: "0.08em",
     lineHeight: 1.3,
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
+    hyphens: "auto",
   };
   const rowStyle = {
     display: "flex",
