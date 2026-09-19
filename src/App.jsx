@@ -863,11 +863,11 @@ function getTrajectory(stats) {
   const deepCount = (c.calm||0) + (c.grateful||0) + (c.pride||0) + (c.love||0);
   // Негативные квадранты проверяем первыми — если человеку тяжело, важнее
   // это заметить, чем отчитаться про открывающуюся жизнь по случайному перевесу.
-  if (signalCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "signal"); return { ...t, topEmotions }; }
+  if (signalCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "tension"); return { ...t, topEmotions }; }
   if (pauseCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "pausing"); return { ...t, topEmotions }; }
   if (openCount / stats.total > 0.45) { const t = TRAJECTORIES.find(t => t.id === "opening"); return { ...t, topEmotions }; }
   if (deepCount / stats.total > 0.4) { const t = TRAJECTORIES.find(t => t.id === "deepening"); return { ...t, topEmotions }; }
-  const t = TRAJECTORIES.find(t => t.id === "searching");
+  const t = TRAJECTORIES.find(t => t.id === "mixed");
   return { ...t, topEmotions };
 }
 
@@ -3486,26 +3486,31 @@ function AdminScreen({ onBack }) {
             </div>
           </div>
 
-          {/* ТЕСТЫ — сетка */}
+          {/* ТЕСТЫ — строки, как «Топ эмоций» */}
           <div style={card}>
             <p style={sectionTitle}>{t.testsAndPractices}</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              {tests.map(t => (
-                <div
-                  key={t.label}
-                  style={{
-                    padding: "12px",
-                    borderRadius: "10px",
-                    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(58,53,43,0.03)",
-                    border: `1px solid ${c.cardBorder}`,
-                  }}
-                >
-                  <div style={{ fontSize: "18px", marginBottom: "6px" }}>{t.icon}</div>
-                  <p style={{ margin: "0 0 2px", fontSize: "20px", color: c.accent }}>{t.value}</p>
-                  <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft }}>{t.label}</p>
+            {tests.map((test, i) => {
+              const maxTest = Math.max(...tests.map(x => x.value || 0), 1);
+              const pct = Math.round(((test.value || 0) / maxTest) * 100);
+              return (
+                <div key={test.label} style={{ marginBottom: i === tests.length - 1 ? 0 : "14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                    <span style={{ fontSize: "13px", color: c.ink }}>{test.icon} {test.label}</span>
+                    <span style={{ fontSize: "12px", color: c.accent }}>{test.value}</span>
+                  </div>
+                  <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "#1E1B18" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
+                    <div style={{
+                      width: `${pct}%`,
+                      height: "100%",
+                      borderRadius: "3px",
+                      background: c.accent,
+                      opacity: 0.85 - i * 0.08,
+                      transition: "width 0.6s ease",
+                    }} />
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
           {/* ТОП ЭМОЦИЙ с полосками */}
