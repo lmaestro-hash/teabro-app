@@ -2781,7 +2781,8 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
 // ЭКРАН: МОЯ ТРАЕКТОРИЯ
 // ─────────────────────────────────────────────
 function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
-  const { t, tx, lang } = useLang();
+  const { t, tx, lang, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   function calcStats(data) {
     const filled = data.filter(Boolean);
     const total = filled.length;
@@ -2817,8 +2818,8 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
         <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"20px 0" }}>
           <div style={{ fontSize:"48px", marginBottom:"20px" }}>🌱</div>
-          <p style={{ fontSize:"18px", color:"#C8A97E", margin:"0 0 12px" }}>{t.littleData}</p>
-          <p style={{ fontSize:"14px", color:"#7A6E62", lineHeight:1.7, fontStyle:"italic" }}>
+          <p style={{ fontSize:"18px", color:c.accent, margin:"0 0 12px" }}>{t.littleData}</p>
+          <p style={{ fontSize:"14px", color:c.inkSoft, lineHeight:1.7, fontStyle:"italic" }}>
             {tx({ ru: "Отметь хотя бы 7 дней —", uk: "Відміть хоча б 7 днів —", en: "Mark at least 7 days —" })}<br />{t.trajWillShow}
           </p>
         </div>
@@ -2834,36 +2835,36 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={{ textAlign:"center", marginBottom:"24px" }}>
         <div style={{ fontSize:"40px", marginBottom:"10px" }}>{trajectory.emoji}</div>
-        <p style={{ margin:"0 0 4px", fontSize:"20px", color:"#C8A97E", letterSpacing:"0.05em" }}>{tx(trajectory.name)}</p>
-        <p style={{ margin:0, fontSize:"11px", color:"#4A4036", letterSpacing:"0.1em" }}>{tx({ ru: `на основе данных за ${periodLabel}`, uk: `на основі даних за ${periodLabel}`, en: `based on data for the ${periodLabel}` })}</p>
+        <p style={{ margin:"0 0 4px", fontSize:"20px", color:c.accent, letterSpacing:"0.05em" }}>{tx(trajectory.name)}</p>
+        <p style={{ margin:0, fontSize:"11px", color:c.arrow, letterSpacing:"0.1em" }}>{tx({ ru: `на основе данных за ${periodLabel}`, uk: `на основі даних за ${periodLabel}`, en: `based on data for the ${periodLabel}` })}</p>
       </div>
       <div style={S.wisdomLine} />
-      <div style={{ margin:"20px 0", padding:"18px", background:"rgba(200,169,126,0.05)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
-        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#C8A97E" }}>{t.whereLifeGoes}</p>
-        <p style={{ margin:0, fontSize:"15px", color:"#E8E0D4", lineHeight:1.8, fontStyle:"italic" }}>{verdictText}</p>
+      <div style={{ margin:"20px 0", padding:"18px", background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:c.accent }}>{t.whereLifeGoes}</p>
+        <p style={{ margin:0, fontSize:"15px", color:c.ink, lineHeight:1.8, fontStyle:"italic" }}>{verdictText}</p>
       </div>
       {trend && (
-        <div style={{ margin:"0 0 20px", padding:"14px 18px", background:"rgba(255,255,255,0.02)", border:"1px solid #2A2520", borderRadius:"12px", display:"flex", alignItems:"center", gap:"14px" }}>
+        <div style={{ margin:"0 0 20px", padding:"14px 18px", background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", display:"flex", alignItems:"center", gap:"14px" }}>
           <span style={{ fontSize:"32px", color:trend.color, lineHeight:1 }}>{trend.arrow}</span>
           <div>
-            <p style={{ margin:"0 0 2px", fontSize:"11px", letterSpacing:"0.15em", color:"#7A6E62" }}>{tx({ru:'ДИНАМИКА',uk:'ДИНАМІКА',en:'DYNAMICS'})}</p>
-            <p style={{ margin:0, fontSize:"14px", color:trend.color }}>Средний балл {trend.label}</p>
-            <p style={{ margin:"2px 0 0", fontSize:"11px", color:"#4A4036" }}>Неделя: {weekStats?.avgScore}/10 · Месяц: {monthStats?.avgScore || "—"}/10</p>
+            <p style={{ margin:"0 0 2px", fontSize:"11px", letterSpacing:"0.15em", color:c.inkSoft }}>{tx({ru:'ДИНАМИКА',uk:'ДИНАМІКА',en:'DYNAMICS'})}</p>
+            <p style={{ margin:0, fontSize:"14px", color:trend.color }}>{tx({ru:"Средний балл",uk:"Середній бал",en:"Average score"})} {trend.label}</p>
+            <p style={{ margin:"2px 0 0", fontSize:"11px", color:c.arrow }}>{tx({ru:"Неделя",uk:"Тиждень",en:"Week"})}: {weekStats?.avgScore}/10 · {tx({ru:"Месяц",uk:"Місяць",en:"Month"})}: {monthStats?.avgScore || "—"}/10</p>
           </div>
         </div>
       )}
-      <div style={{ margin:"0 0 24px", padding:"18px", background:"rgba(255,255,255,0.015)", border:"1px dashed #2A2520", borderRadius:"12px" }}>
-        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#7A6E62" }}>{t.questionReflect}</p>
-        <p style={{ margin:0, fontSize:"15px", color:"#C0B8AC", lineHeight:1.8, fontStyle:"italic" }}>«{tx(trajectory.question)}»</p>
+      <div style={{ margin:"0 0 24px", padding:"18px", background:c.card, border:`1px dashed ${c.cardBorder}`, borderRadius:"12px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:c.inkSoft }}>{t.questionReflect}</p>
+        <p style={{ margin:0, fontSize:"15px", color:c.inkMuted, lineHeight:1.8, fontStyle:"italic" }}>«{tx(trajectory.question)}»</p>
       </div>
-      <div style={{ padding:"14px", background:"rgba(200,169,126,0.03)", border:"1px solid #1A1713", borderRadius:"10px", marginBottom:"20px" }}>
-        <p style={{ margin:"0 0 10px", fontSize:"10px", letterSpacing:"0.15em", color:"#4A4036" }}>{t.truthScale}</p>
+      <div style={{ padding:"14px", background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", marginBottom:"20px" }}>
+        <p style={{ margin:"0 0 10px", fontSize:"10px", letterSpacing:"0.15em", color:c.arrow }}>{t.truthScale}</p>
         {scaleLabels.map((s, i) => (
           <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:"8px", marginBottom:"6px" }}>
-            <span style={{ fontSize:"10px", color: i === scaleIdx ? "#C8A97E" : "#3A3028", flexShrink:0, marginTop:"2px" }}>{i === scaleIdx ? "◉" : "○"}</span>
+            <span style={{ fontSize:"10px", color: i === scaleIdx ? c.accent : c.line, flexShrink:0, marginTop:"2px" }}>{i === scaleIdx ? "◉" : "○"}</span>
             <div>
-              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#C8A97E" : "#4A4036" }}>{tx(s.label)}: </span>
-              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#7A6E62" : "#3A3028" }}>{tx(s.desc)}</span>
+              <span style={{ fontSize:"11px", color: i === scaleIdx ? c.accent : c.arrow }}>{tx(s.label)}: </span>
+              <span style={{ fontSize:"11px", color: i === scaleIdx ? c.inkSoft : c.line }}>{tx(s.desc)}</span>
             </div>
           </div>
         ))}
