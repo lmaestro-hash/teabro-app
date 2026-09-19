@@ -106,6 +106,7 @@ const UI = {
       hormones: { title: "Гормональный код", desc: "7 систем · 10 вопросов" },
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
+      dailycheck: { title: "Компас состояния", desc: "Точно узнай, что сейчас не так, и что с этим делать · 10 вопросов" },
       mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
       mypath: { title: "Мой профиль", desc: "Мои результаты и прогресс" },
     },
@@ -189,6 +190,7 @@ const UI = {
       hormones: { title: "Гормональний код", desc: "7 систем · 10 питань" },
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
+      dailycheck: { title: "Компас стану", desc: "Точно дізнайся, що зараз не так, і що з цим робити · 10 питань" },
       mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
       mypath: { title: "Мій профіль", desc: "Мої результати та прогрес" },
     },
@@ -272,6 +274,7 @@ const UI = {
       hormones: { title: "Hormonal code", desc: "7 systems · 10 questions" },
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
+      dailycheck: { title: "State compass", desc: "Find out exactly what's off, and what to do about it · 10 questions" },
       mood: { title: "My day today", desc: "Mark how you feel" },
       mypath: { title: "My profile", desc: "My results and progress" },
     },
@@ -2240,6 +2243,340 @@ function calcQuizAverage(history, n = 3) {
 }
 
 // ─────────────────────────────────────────────
+// КОМПАС СОСТОЯНИЯ — лёгкий ежедневный чек-ин
+// ─────────────────────────────────────────────
+// 10 показателей. Во всех вопросах score 5 = хорошо/спокойно, score 1 = плохо/тревожно —
+// направление специально выровнено по всем 10, чтобы группировка ниже была простой.
+const DAILYCHECK_QUESTIONS = [
+  { key: "energy", label: { ru: "Энергия", uk: "Енергія", en: "Energy" }, text: { ru: "Сколько у тебя сейчас сил?", uk: "Скільки в тебе зараз сил?", en: "How much strength do you have right now?" }, options: [
+    { text: { ru: "Почти на нуле", uk: "Майже на нулі", en: "Almost at zero" }, score: 1 },
+    { text: { ru: "Мало, через силу", uk: "Мало, через силу", en: "Very little, forcing myself" }, score: 2 },
+    { text: { ru: "Средне", uk: "Середньо", en: "Average" }, score: 3 },
+    { text: { ru: "Хватает на дела", uk: "Вистачає на справи", en: "Enough for what I need" }, score: 4 },
+    { text: { ru: "Полно сил", uk: "Повно сил", en: "Plenty of energy" }, score: 5 },
+  ]},
+  { key: "mood", label: { ru: "Настроение", uk: "Настрій", en: "Mood" }, text: { ru: "Какое сейчас настроение?", uk: "Який зараз настрій?", en: "How's your mood right now?" }, options: [
+    { text: { ru: "Совсем тяжело", uk: "Зовсім важко", en: "Really heavy" }, score: 1 },
+    { text: { ru: "Скорее плохое", uk: "Скоріше погане", en: "Rather bad" }, score: 2 },
+    { text: { ru: "Никакое", uk: "Ніяке", en: "Neutral, flat" }, score: 3 },
+    { text: { ru: "Скорее хорошее", uk: "Скоріше добре", en: "Rather good" }, score: 4 },
+    { text: { ru: "Легко и светло", uk: "Легко і світло", en: "Light and easy" }, score: 5 },
+  ]},
+  { key: "tension", label: { ru: "Напряжение", uk: "Напруга", en: "Tension" }, text: { ru: "Насколько тело/голова напряжены?", uk: "Наскільки тіло/голова напружені?", en: "How tense is your body/mind?" }, options: [
+    { text: { ru: "Как натянутая струна", uk: "Як натягнута струна", en: "Wound up like a spring" }, score: 1 },
+    { text: { ru: "Сильно напряжён(а)", uk: "Сильно напружений(а)", en: "Quite tense" }, score: 2 },
+    { text: { ru: "Есть немного", uk: "Є трохи", en: "A bit" }, score: 3 },
+    { text: { ru: "Скорее расслаблен(а)", uk: "Скоріше розслаблений(а)", en: "Rather relaxed" }, score: 4 },
+    { text: { ru: "Полностью расслаблен(а)", uk: "Повністю розслаблений(а)", en: "Fully relaxed" }, score: 5 },
+  ]},
+  { key: "anxiety", label: { ru: "Тревожность", uk: "Тривожність", en: "Anxiety" }, text: { ru: "Насколько сейчас тревожно?", uk: "Наскільки зараз тривожно?", en: "How anxious do you feel right now?" }, options: [
+    { text: { ru: "Очень тревожно", uk: "Дуже тривожно", en: "Very anxious" }, score: 1 },
+    { text: { ru: "Заметно тревожно", uk: "Помітно тривожно", en: "Noticeably anxious" }, score: 2 },
+    { text: { ru: "Немного есть", uk: "Трохи є", en: "A little" }, score: 3 },
+    { text: { ru: "Почти спокоен(на)", uk: "Майже спокійний(а)", en: "Almost calm" }, score: 4 },
+    { text: { ru: "Полностью спокоен(на)", uk: "Повністю спокійний(а)", en: "Completely calm" }, score: 5 },
+  ]},
+  { key: "fatigue", label: { ru: "Усталость", uk: "Втома", en: "Fatigue" }, text: { ru: "Насколько ты устал(а)?", uk: "Наскільки ти втомлений(а)?", en: "How tired are you?" }, options: [
+    { text: { ru: "Вымотан(а) до предела", uk: "Виснажений(а) до краю", en: "Exhausted to the limit" }, score: 1 },
+    { text: { ru: "Сильно устал(а)", uk: "Сильно втомлений(а)", en: "Very tired" }, score: 2 },
+    { text: { ru: "Есть усталость", uk: "Є втома", en: "Somewhat tired" }, score: 3 },
+    { text: { ru: "Скорее бодр(а)", uk: "Скоріше бадьорий(а)", en: "Rather alert" }, score: 4 },
+    { text: { ru: "Совсем не устал(а)", uk: "Зовсім не втомлений(а)", en: "Not tired at all" }, score: 5 },
+  ]},
+  { key: "sleep", label: { ru: "Сон", uk: "Сон", en: "Sleep" }, text: { ru: "Как спал(а) в последнее время?", uk: "Як спав(ла) останнім часом?", en: "How have you been sleeping lately?" }, options: [
+    { text: { ru: "Почти не сплю", uk: "Майже не сплю", en: "Barely sleeping" }, score: 1 },
+    { text: { ru: "Сон плохой, урывками", uk: "Сон поганий, уривками", en: "Poor, broken sleep" }, score: 2 },
+    { text: { ru: "Средне", uk: "Середньо", en: "Average" }, score: 3 },
+    { text: { ru: "В целом хорошо", uk: "Загалом добре", en: "Mostly good" }, score: 4 },
+    { text: { ru: "Сплю отлично", uk: "Сплю відмінно", en: "Sleeping great" }, score: 5 },
+  ]},
+  { key: "focus", label: { ru: "Концентрация", uk: "Концентрація", en: "Focus" }, text: { ru: "Легко ли сейчас сосредоточиться?", uk: "Чи легко зараз зосередитися?", en: "Is it easy to focus right now?" }, options: [
+    { text: { ru: "В голове туман", uk: "У голові туман", en: "Foggy-headed" }, score: 1 },
+    { text: { ru: "Постоянно отвлекаюсь", uk: "Постійно відволікаюся", en: "Constantly distracted" }, score: 2 },
+    { text: { ru: "Средне", uk: "Середньо", en: "Average" }, score: 3 },
+    { text: { ru: "В целом собран(а)", uk: "Загалом зібраний(а)", en: "Reasonably focused" }, score: 4 },
+    { text: { ru: "Ясная голова", uk: "Ясна голова", en: "Clear-headed" }, score: 5 },
+  ]},
+  { key: "social", label: { ru: "Общение", uk: "Спілкування", en: "Social" }, text: { ru: "Есть желание общаться с людьми?", uk: "Є бажання спілкуватися з людьми?", en: "Do you feel like connecting with people?" }, options: [
+    { text: { ru: "Хочу побыть в одиночестве", uk: "Хочу побути на самоті", en: "I want to be alone" }, score: 1 },
+    { text: { ru: "Скорее нет настроения", uk: "Скоріше немає настрою", en: "Not really in the mood" }, score: 2 },
+    { text: { ru: "Как получится", uk: "Як вийде", en: "Whatever happens" }, score: 3 },
+    { text: { ru: "Скорее хочется", uk: "Скоріше хочеться", en: "Rather want to" }, score: 4 },
+    { text: { ru: "Очень хочется к людям", uk: "Дуже хочеться до людей", en: "Really want to be with people" }, score: 5 },
+  ]},
+  { key: "motivation", label: { ru: "Мотивация", uk: "Мотивація", en: "Motivation" }, text: { ru: "Есть желание что-то делать?", uk: "Є бажання щось робити?", en: "Do you feel like doing anything?" }, options: [
+    { text: { ru: "Ничего не хочется", uk: "Нічого не хочеться", en: "I don't want anything" }, score: 1 },
+    { text: { ru: "Через силу", uk: "Через силу", en: "Forcing myself" }, score: 2 },
+    { text: { ru: "Средне", uk: "Середньо", en: "Average" }, score: 3 },
+    { text: { ru: "Скорее есть настрой", uk: "Скоріше є настрій", en: "Rather motivated" }, score: 4 },
+    { text: { ru: "Хочется действовать", uk: "Хочеться діяти", en: "Ready to act" }, score: 5 },
+  ]},
+  { key: "calm", label: { ru: "Внутреннее спокойствие", uk: "Внутрішній спокій", en: "Inner calm" }, text: { ru: "Насколько спокойно внутри?", uk: "Наскільки спокійно всередині?", en: "How calm do you feel inside?" }, options: [
+    { text: { ru: "Совсем не спокойно", uk: "Зовсім не спокійно", en: "Not calm at all" }, score: 1 },
+    { text: { ru: "Скорее неспокойно", uk: "Скоріше неспокійно", en: "Rather uneasy" }, score: 2 },
+    { text: { ru: "Средне", uk: "Середньо", en: "Average" }, score: 3 },
+    { text: { ru: "Скорее спокойно", uk: "Скоріше спокійно", en: "Rather calm" }, score: 4 },
+    { text: { ru: "Полный внутренний покой", uk: "Повний внутрішній спокій", en: "Complete inner peace" }, score: 5 },
+  ]},
+];
+
+// Банк действий по группам — тон "друга", а не инструкции.
+const DAILYCHECK_ACTIONS = {
+  recovery: [
+    { id: "r1", text: { ru: "Ляг сегодня минут на 30 раньше обычного.", uk: "Ляж сьогодні хвилин на 30 раніше звичайного.", en: "Go to bed about 30 minutes earlier tonight." } },
+    { id: "r2", text: { ru: "Дай себе 20 минут — вообще ничего не делай.", uk: "Дай собі 20 хвилин — взагалі нічого не роби.", en: "Give yourself 20 minutes of doing absolutely nothing." } },
+    { id: "r3", text: { ru: "Выйди на улицу минут на 10, просто на свет.", uk: "Вийди на вулицю хвилин на 10, просто на світло.", en: "Step outside for 10 minutes, just into the light." } },
+    { id: "r4", text: { ru: "Выпей воды и съешь что-то нормальное — тело часто путает голод с усталостью.", uk: "Випий води і з'їж щось нормальне — тіло часто плутає голод із втомою.", en: "Drink water and eat something real — the body often mistakes hunger for tiredness." } },
+    { id: "r5", text: { ru: "Приляг на 15-20 минут, если получится.", uk: "Приляж на 15-20 хвилин, якщо вийде.", en: "Lie down for 15–20 minutes if you can." } },
+  ],
+  overload: [
+    { id: "o1", text: { ru: "Отложи телефон минут на 15. Дай голове выдохнуть.", uk: "Відклади телефон хвилин на 15. Дай голові видихнути.", en: "Put your phone away for 15 minutes. Let your head breathe." } },
+    { id: "o2", text: { ru: "Возьми лист и выпиши всё, что крутится в голове, без разбора.", uk: "Візьми аркуш і випиши все, що крутиться в голові, без розбору.", en: "Grab paper and dump everything spinning in your head, no filtering." } },
+    { id: "o3", text: { ru: "Убери одну задачу из сегодняшнего списка — просто перенеси.", uk: "Прибери одну задачу з сьогоднішнього списку — просто перенеси.", en: "Drop one task from today's list — just move it to another day." } },
+    { id: "o4", text: { ru: "Пройдись 10 минут без цели, просто чтобы переключиться.", uk: "Пройдись 10 хвилин без мети, просто щоб перемкнутися.", en: "Take a 10-minute walk with no purpose, just to switch gears." } },
+    { id: "o5", text: { ru: "Наведи порядок на столе — 5 минут, не больше.", uk: "Наведи лад на столі — 5 хвилин, не більше.", en: "Tidy your desk — 5 minutes, no more." } },
+  ],
+  anxiety: [
+    { id: "a1", text: { ru: "Подыши спокойно: 4 секунды вдох, 7 задержка, 8 выдох. Пару минут.", uk: "Подихай спокійно: 4 секунди вдих, 7 затримка, 8 видих. Пару хвилин.", en: "Breathe slowly: 4s in, 7s hold, 8s out. A couple of minutes." } },
+    { id: "a2", text: { ru: "Пройдись 15 минут — движение реально сбрасывает тревогу.", uk: "Пройдись 15 хвилин — рух справді скидає тривогу.", en: "Walk for 15 minutes — movement really does drop anxiety." } },
+    { id: "a3", text: { ru: "Закрой ленту новостей и соцсети на час.", uk: "Закрий стрічку новин і соцмережі на годину.", en: "Close the news feed and social media for an hour." } },
+    { id: "a4", text: { ru: "Проговори вслух, что именно тревожит — коротко, пару минут.", uk: "Промов вголос, що саме тривожить — коротко, пару хвилин.", en: "Say out loud what's actually bothering you — just a couple of minutes." } },
+    { id: "a5", text: { ru: "Заметь что-то хорошее в близком человеке и скажи ему об этом прямо сейчас.", uk: "Поміть щось хороше в близькій людині і скажи їй про це просто зараз.", en: "Notice something good in someone close and tell them right now." } },
+  ],
+  lowEnergy: [
+    { id: "e1", text: { ru: "Выпей стакан воды прямо сейчас.", uk: "Випий склянку води просто зараз.", en: "Drink a glass of water right now." } },
+    { id: "e2", text: { ru: "Съешь что-то нормальное — не кофе и не сладкое.", uk: "З'їж щось нормальне — не каву і не солодке.", en: "Eat something real — not coffee, not sugar." } },
+    { id: "e3", text: { ru: "5 минут любого движения — потянись, пройдись.", uk: "5 хвилин будь-якого руху — потягнись, пройдись.", en: "5 minutes of any movement — stretch, walk around." } },
+    { id: "e4", text: { ru: "Выйди на дневной свет хоть на пару минут.", uk: "Вийди на денне світло хоч на пару хвилин.", en: "Get some daylight, even for a couple of minutes." } },
+    { id: "e5", text: { ru: "Дай себе короткий отдых лёжа, 10 минут.", uk: "Дай собі короткий відпочинок лежачи, 10 хвилин.", en: "Give yourself a short rest lying down, 10 minutes." } },
+  ],
+  focus: [
+    { id: "f1", text: { ru: "Убери уведомления на телефоне на полчаса.", uk: "Прибери сповіщення на телефоні на пів години.", en: "Turn off phone notifications for half an hour." } },
+    { id: "f2", text: { ru: "Возьми одну задачу и посвяти ей 20 минут, без переключений.", uk: "Візьми одну задачу і присвяти їй 20 хвилин, без перемикань.", en: "Pick one task and give it 20 minutes, no switching." } },
+    { id: "f3", text: { ru: "Расчисти рабочее место — то, что перед глазами, влияет на голову.", uk: "Розчисти робоче місце — те, що перед очима, впливає на голову.", en: "Clear your workspace — what's in front of your eyes affects your head." } },
+    { id: "f4", text: { ru: "Сделай паузу 5 минут перед тем, как начать — не бросайся сразу в дело.", uk: "Зроби паузу 5 хвилин перед тим, як почати — не кидайся одразу в справу.", en: "Take a 5-minute pause before you start — don't dive straight in." } },
+  ],
+  pause: [
+    { id: "p1", text: { ru: "Завари чай, убери телефон и 10 минут просто ничего не решай.", uk: "Завари чай, прибери телефон і 10 хвилин просто нічого не вирішуй.", en: "Brew tea, put the phone away, and don't solve anything for 10 minutes." } },
+    { id: "p2", text: { ru: "Посиди в тишине 5 минут, без музыки и звуков.", uk: "Посидь у тиші 5 хвилин, без музики і звуків.", en: "Sit in silence for 5 minutes, no music, no sound." } },
+    { id: "p3", text: { ru: "Включи спокойную музыку минут на 10 и просто побудь с ней.", uk: "Увімкни спокійну музику хвилин на 10 і просто побудь із нею.", en: "Put on calm music for 10 minutes and just sit with it." } },
+    { id: "p4", text: { ru: "Разреши себе несколько минут вообще ничего не делать.", uk: "Дозволь собі кілька хвилин узагалі нічого не робити.", en: "Give yourself a few minutes to do absolutely nothing." } },
+  ],
+};
+
+// Модификатор по слабому звену гормонов → приоритетная группа
+const HORMONE_TO_DAILYCHECK_GROUP = {
+  cortisol: "anxiety", dopamine: "lowEnergy", serotonin: "recovery",
+  gaba: "anxiety", oxytocin: "anxiety", testosterone: "focus", acetylcholine: "focus",
+};
+
+function pickDailyCheckGroup(scores, ctx = {}) {
+  const { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds = [] } = ctx;
+  let group;
+  if (scores.anxiety <= 2 || scores.calm <= 2) group = "anxiety";
+  else if (scores.fatigue <= 2 || scores.sleep <= 2) group = "recovery";
+  else if (scores.tension <= 2 && scores.focus <= 3) group = "overload";
+  else if (scores.energy <= 2) group = "lowEnergy";
+  else if (scores.focus <= 2) group = "focus";
+  else if (scores.social <= 2 && scores.mood <= 3) group = "anxiety"; // общение — берём action a5 через ротацию
+  else group = "pause";
+
+  // фон: сильное выгорание или тяжёлый 90-дневный тренд смещают к мягким группам
+  const softBias = (burnoutPct != null && burnoutPct >= 41) || moodHeavy;
+  if (softBias && group === "focus") group = "recovery";
+  if (softBias && group === "lowEnergy") group = "recovery";
+
+  // слабое звено гормонов — если чек-ин пограничный (нет явной проблемы), задаёт группу
+  const allFine = Object.values(scores).every(v => v >= 3);
+  if (allFine && hormoneWeakestKey && HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey]) {
+    group = HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey];
+  }
+
+  const pool = DAILYCHECK_ACTIONS[group] || DAILYCHECK_ACTIONS.pause;
+  const fresh = pool.filter(a => !recentActionIds.includes(a.id));
+  const chosen = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length ? fresh.length : pool.length))];
+  return { group, action: chosen };
+}
+
+const DAILYCHECK_GROUP_LABEL = {
+  recovery: { ru: "Похоже, тебе сейчас нужно восстановиться", uk: "Схоже, тобі зараз треба відновитися", en: "Looks like you need to recover" },
+  overload: { ru: "Похоже, тебя сейчас перегружает", uk: "Схоже, тебе зараз перевантажує", en: "Looks like you're overloaded" },
+  anxiety: { ru: "Похоже, сейчас важнее всего успокоиться", uk: "Схоже, зараз найважливіше заспокоїтися", en: "Looks like calming down matters most right now" },
+  lowEnergy: { ru: "Похоже, энергии сейчас маловато", uk: "Схоже, енергії зараз малувато", en: "Looks like your energy is running low" },
+  focus: { ru: "Похоже, не хватает концентрации", uk: "Схоже, бракує концентрації", en: "Looks like focus is what's missing" },
+  pause: { ru: "В целом всё ровно — но небольшая пауза не помешает", uk: "Загалом усе рівно — але невелика пауза не завадить", en: "Things look steady — but a small pause won't hurt" },
+};
+
+function DailyCheckScreen({ onBack }) {
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [finished, setFinished] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [result, setResult] = useState(null);
+  const [step, setStep] = useState("questions"); // questions | advice | followup | done
+  const [followUpChoice, setFollowUpChoice] = useState(null);
+
+  useEffect(() => { statEvent("dailycheck"); }, []);
+
+  const q = DAILYCHECK_QUESTIONS[current];
+
+  const handleNext = () => {
+    if (selected === null) return;
+    setAnimating(true);
+    const na = [...answers, { key: q.key, score: selected }];
+    setTimeout(() => {
+      setAnswers(na); setSelected(null);
+      if (current + 1 >= DAILYCHECK_QUESTIONS.length) {
+        finish(na);
+      } else {
+        setCurrent(c => c + 1);
+      }
+      setAnimating(false);
+    }, 300);
+  };
+
+  const finish = async (na) => {
+    const scores = {};
+    na.forEach(a => { scores[a.key] = a.score; });
+
+    const [hormoneHistRaw, burnoutHistRaw, dcHistRaw] = await Promise.all([
+      getHistory("hormones_history"),
+      getHistory("quiz_history"),
+      getHistory("dailycheck_history"),
+    ]);
+
+    let hormoneWeakestKey = null;
+    if (hormoneHistRaw.length) {
+      const last = hormoneHistRaw[hormoneHistRaw.length - 1];
+      const finalScores = computeHormoneScores(last.main || {}, last.cross || {});
+      const entries = Object.entries(finalScores);
+      if (entries.length) hormoneWeakestKey = entries.reduce((min, e) => (e[1] < min[1] ? e : min), entries[0])[0];
+    }
+    // burnout_history хранит уже готовый % (см. QuizScreen: burnout = Math.round((bt/75)*100))
+    const burnoutAvg = calcQuizAverage(burnoutHistRaw, 3);
+    const burnoutPct = burnoutAvg ? Math.round(burnoutAvg.avgBurnout) : null;
+
+    // 90-дневный тренд настроения: тот же источник, что и "Куда ты движешься" в профиле —
+    // ежедневные записи "mood_" + dateKey, а не отдельная история.
+    let moodHeavy = false;
+    try {
+      const moodKeys90 = [];
+      for (let i = 0; i < 90; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        moodKeys90.push("mood_" + getDateKey(d));
+      }
+      const moodValues90 = await CS.getMultiple(moodKeys90);
+      const scoresLast90 = moodKeys90
+        .map(k => moodValues90[k])
+        .filter(Boolean)
+        .map(r => JSON.parse(r))
+        .map(e => e.score)
+        .filter(v => typeof v === "number");
+      if (scoresLast90.length >= 5) {
+        const avg = scoresLast90.reduce((s, v) => s + v, 0) / scoresLast90.length;
+        moodHeavy = avg < 5;
+      }
+    } catch {}
+
+    const recentActionIds = dcHistRaw.slice(-2).map(h => h.action_id).filter(Boolean);
+    const { group, action } = pickDailyCheckGroup(scores, { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds });
+
+    const problemKeys = Object.entries(scores).filter(([, v]) => v <= 2).map(([k]) => k);
+    const followUpKeys = (problemKeys.length ? problemKeys : Object.entries(scores).sort((a, b) => a[1] - b[1]).slice(0, 2).map(([k]) => k)).slice(0, 3);
+
+    setResult({ scores, group, action, followUpKeys });
+    setFinished(true);
+    setStep("advice");
+  };
+
+  const handleDone = () => setStep("followup");
+
+  const saveFollowUp = async (choice) => {
+    setFollowUpChoice(choice);
+    const delta = choice === "better" ? 1 : choice === "worse" ? -1 : 0;
+    await pushHistory("dailycheck_history", {
+      indicators: result.scores,
+      group: result.group,
+      action_id: result.action.id,
+      followUp: { improved: choice, checkedIndicators: result.followUpKeys, delta },
+    });
+    setStep("done");
+  };
+
+  if (step === "advice" && result) {
+    const shareMsg = `Компас состояния 🧭\n${tx(DAILYCHECK_GROUP_LABEL[result.group])}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+        <div style={S.resultContainer}>
+          <h2 style={S.resultTitle}>{tx(DAILYCHECK_GROUP_LABEL[result.group])}</h2>
+          <p style={S.resultSubtitle}>{tx({ ru: "Сегодня попробуй только одно", uk: "Сьогодні спробуй лише одне", en: "Just try one thing today" })}</p>
+          <div style={S.stepsBlock}>
+            <p style={{ margin: 0, fontSize: "16px", color: c.ink, lineHeight: 1.6 }}>{tx(result.action.text)}</p>
+          </div>
+          <button onClick={handleDone} style={{ ...S.primaryBtn, marginTop: "18px" }}>
+            {tx({ ru: "Я сделал(а)", uk: "Я зробив(ла)", en: "I did it" })}
+          </button>
+          <ShareButton text={shareMsg} />
+          <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "followup" && result) {
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+        <div style={S.resultContainer}>
+          <h2 style={S.resultTitle}>{tx({ ru: "Как ты сейчас?", uk: "Як ти зараз?", en: "How are you now?" })}</h2>
+          <p style={S.resultSubtitle}>{tx({ ru: "Что изменилось после этого действия?", uk: "Що змінилося після цієї дії?", en: "What changed after doing it?" })}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "8px" }}>
+            <button onClick={() => saveFollowUp("better")} style={S.optionBtn}><span style={S.optionText}>{tx({ ru: "Стало лучше", uk: "Стало краще", en: "Better" })}</span></button>
+            <button onClick={() => saveFollowUp("same")} style={S.optionBtn}><span style={S.optionText}>{tx({ ru: "Без изменений", uk: "Без змін", en: "No change" })}</span></button>
+            <button onClick={() => saveFollowUp("worse")} style={S.optionBtn}><span style={S.optionText}>{tx({ ru: "Стало хуже", uk: "Стало гірше", en: "Worse" })}</span></button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "done" && result) {
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+        <div style={S.resultContainer}>
+          <h2 style={S.resultTitle}>{tx({ ru: "Записал(а). Спасибо, что отметил(а).", uk: "Записав(ла). Дякую, що відмітив(ла).", en: "Saved. Thanks for checking in." })}</h2>
+          <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "12px" }}>{t.back}</button>
+        </div>
+      </div>
+    );
+  }
+
+  // экран вопроса
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.label).toUpperCase()}</span><span style={S.quizCounter}>{current + 1} / {DAILYCHECK_QUESTIONS.length}</span></div>
+      <div style={S.progressTrack}>{DAILYCHECK_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
+      <div style={S.optionsList}>
+        {q.options.map((opt, i) => (
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : "#2A2520", backgroundColor: selected === opt.score ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+            <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
+            <span style={S.optionText}>{tx(opt.text)}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{t.next}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ЭКРАН: СОВЕТ ДНЯ
 // ─────────────────────────────────────────────
 function WisdomScreen({ onBack, currentMood }) {
@@ -3643,6 +3980,7 @@ function MyPathScreen({ onBack }) {
   const [teaHist, setTeaHist] = useState([]);
   const [medHist, setMedHist] = useState([]);
   const [hormoneHist, setHormoneHist] = useState([]);
+  const [dailyCheckHist, setDailyCheckHist] = useState([]);
   const [moodCounts, setMoodCounts] = useState(null);
   const [moodTotal, setMoodTotal] = useState(0);
 
@@ -3656,6 +3994,7 @@ function MyPathScreen({ onBack }) {
       setHormoneHist(await getHistory("hormones_history"));
       setTeaHist(await getHistory("tea_history"));
       setMedHist(await getHistory("meditation_history"));
+      setDailyCheckHist(await getHistory("dailycheck_history"));
 
       // настроение за последние 90 дней — один батч-запрос вместо 90
       // последовательных CS.get() (см. CS.getMultiple выше)
@@ -3747,6 +4086,23 @@ function MyPathScreen({ onBack }) {
   }
   const hormoneScaleLabels = [tx({ru:"ПРОСЕЛО",uk:"ПРОСІЛО",en:"LOW"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"СТАБИЛЬНО",uk:"СТАБІЛЬНО",en:"STABLE"}), tx({ru:"В РЕСУРСЕ",uk:"В РЕСУРСІ",en:"RESOURCE"})];
   const hormoneHiIndex = hormonePct <= 25 ? 0 : hormonePct <= 50 ? 1 : hormonePct <= 75 ? 2 : 3;
+
+  // ── КОМПАС СОСТОЯНИЯ — последняя запись + паттерны по накопленной истории ──
+  const hasDailyCheck = dailyCheckHist.length > 0;
+  const dcLast = hasDailyCheck ? dailyCheckHist[dailyCheckHist.length - 1] : null;
+  const dcEnoughForPatterns = dailyCheckHist.length >= 10;
+  let dcTopActions = [];
+  if (dcEnoughForPatterns) {
+    const byAction = {};
+    dailyCheckHist.forEach(h => {
+      if (!h.action_id || !h.followUp || h.followUp.delta !== 1) return;
+      byAction[h.action_id] = (byAction[h.action_id] || 0) + 1;
+    });
+    dcTopActions = Object.entries(byAction).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, count]) => {
+      const found = Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === id);
+      return { id, count, text: found ? found.text : null };
+    }).filter(a => a.text);
+  }
 
   // ── ЧАЙ — распределение по истории ──
   const teaDist = calcDistribution(teaHist, "winner");
@@ -3913,6 +4269,38 @@ function MyPathScreen({ onBack }) {
         </>
       ) : (
         <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по семи системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по семи системах.", en: "Take the Hormonal code test — and a seven-system breakdown will appear here." })} />
+      )}
+
+      {/* КОМПАС СОСТОЯНИЯ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>{tx({ru:"КОМПАС СОСТОЯНИЯ",uk:"КОМПАС СТАНУ",en:"STATE COMPASS"})}</p>
+        <InfoButton text={tx({ ru: "«Что показал последний чек-ин и какие действия чаще всего реально помогают именно тебе.»", uk: "«Що показав останній чек-ін і які дії найчастіше реально допомагають саме тобі.»", en: "«What your last check-in showed and which actions actually tend to help you.»" })} />
+      </div>
+      {hasDailyCheck ? (
+        <div style={S.stepsBlock}>
+          <p style={{ margin: "0 0 8px", fontSize: "13px", color: c.inkMuted, fontStyle: "italic" }}>
+            {tx(DAILYCHECK_GROUP_LABEL[dcLast.group] || {})}
+          </p>
+          {dcEnoughForPatterns && dcTopActions.length > 0 ? (
+            <>
+              <p style={{ margin: "14px 0 10px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+                {tx({ ru: "ЧТО ЧАЩЕ ВСЕГО ПОМОГАЕТ", uk: "ЩО НАЙЧАСТІШЕ ДОПОМАГАЄ", en: "WHAT HELPS MOST OFTEN" })}
+              </p>
+              {dcTopActions.map((a, i) => (
+                <div key={a.id} style={{ display: "flex", gap: "10px", marginBottom: i < dcTopActions.length - 1 ? "10px" : "0" }}>
+                  <span style={{ fontSize: "11px", color: c.accent, flexShrink: 0, marginTop: "2px" }}>{i + 1}.</span>
+                  <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(a.text)}</p>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p style={{ margin: "10px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
+              {tx({ ru: "Собираем твою историю — после нескольких отметок здесь появятся личные закономерности.", uk: "Збираємо твою історію — після кількох відміток тут з'являться особисті закономірності.", en: "Building your history — after a few check-ins, your own patterns will show up here." })}
+            </p>
+          )}
+        </div>
+      ) : (
+        <EmptyMetric text={tx({ ru: "Пройди «Компас состояния» — и здесь появится твой последний результат.", uk: "Пройди «Компас стану» — і тут з'явиться твій останній результат.", en: "Take the State compass — and your latest result will appear here." })} />
       )}
 
       {/* ЛЮБИМЫЙ ЧАЙ */}
@@ -4192,6 +4580,7 @@ export default function App() {
     { id: "hormones", ...t.menu.hormones },
     { id: "teaquiz", ...t.menu.teaquiz },
     { id: "meditation", ...t.menu.meditation },
+    { id: "dailycheck", ...t.menu.dailycheck },
     { id: "mood", ...t.menu.mood },
     { id: "mypath", ...t.menu.mypath },
   ];
@@ -4201,6 +4590,7 @@ export default function App() {
   else if (screen === "selfhonesty") body = <SelfHonestyScreen onBack={() => setScreen("home")} />;
   else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} />;
   else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} />;
+  else if (screen === "dailycheck") body = <DailyCheckScreen onBack={() => setScreen("home")} />;
   else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   else if (screen === "mood") body = <MoodScreen onBack={() => setScreen("home")} />;
