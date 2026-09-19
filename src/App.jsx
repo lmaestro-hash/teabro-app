@@ -62,8 +62,8 @@ const UI = {
     whereYouGo90: "КУДА ТЫ ДВИЖЕШЬСЯ · 90 ДНЕЙ",
     aboutData: "О ТВОИХ ДАННЫХ",
     anonymity: "Анонимность",
-    onlyYou: t.onlyYou,
-    viaTelegram: t.viaTelegram,
+    onlyYou: "видишь только ты, хранится на твоём устройстве",
+    viaTelegram: "через Telegram",
     saved: "сохранено 🌙",
     sealed: "запечатано",
     opensToday: "откроется сегодня",
@@ -146,7 +146,7 @@ const UI = {
     aboutData: "ПРО ТВОЇ ДАНІ",
     anonymity: "Анонімність",
     onlyYou: "бачиш лише ти, зберігається на твоєму пристрої",
-    viaTelegram: t.viaTelegram,
+    viaTelegram: "через Telegram",
     saved: "збережено 🌙",
     sealed: "запечатано",
     opensToday: "відкриється сьогодні",
@@ -3588,7 +3588,7 @@ function AdminScreen({ onBack }) {
 // ПОПАП АНОНИМНОСТИ
 // ─────────────────────────────────────────────
 function AnonPopup() {
-  const { theme } = useLang();
+  const { theme, t, tx } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [open, setOpen] = useState(false);
   return (
@@ -3601,10 +3601,10 @@ function AnonPopup() {
         <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
           <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:c.accent }}>{t.aboutData}</p>
           <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, lineHeight:1.8, fontStyle:"italic" }}>
-            Твой путь — только твой.<br />
-            Твои данные хранятся только у тебя.<br />
-            Никто кроме тебя их не видит.<br />
-            Бот полностью анонимный.
+            {tx({ru:"Твой путь — только твой.",uk:"Твій шлях — тільки твій.",en:"Your path is yours alone."})}<br />
+            {tx({ru:"Твои данные хранятся только у тебя.",uk:"Твої дані зберігаються тільки в тебе.",en:"Your data is stored only on your device."})}<br />
+            {tx({ru:"Никто кроме тебя их не видит.",uk:"Ніхто, крім тебе, їх не бачить.",en:"No one but you can see it."})}<br />
+            {tx({ru:"Бот полностью анонимный.",uk:"Бот повністю анонімний.",en:"The bot is fully anonymous."})}
           </p>
           <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"10px", background:"none", border:"none", color:c.inkSoft, cursor:"pointer", fontSize:"11px", fontFamily:"'Georgia',serif" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button>
         </div>
