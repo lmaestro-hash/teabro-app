@@ -3295,7 +3295,7 @@ function ShopScreen({ onBack }) {
 const ADMIN_ID = 5175467398;
 
 function AdminScreen({ onBack }) {
-  const { lang, theme } = useLang();
+  const { lang, t, tx, theme } = useLang();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -4028,7 +4028,7 @@ export default function App() {
   const [screen, setScreen] = useState("home");
   const [currentMood, setCurrentMood] = useState("general");
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } });
-  const [lang, setLang] = useState(() => { try { return localStorage.getItem("teabro-lang") || "ru"; } catch { return "ru"; } });
+  const [lang, setLang] = useState(() => { try { const saved = localStorage.getItem("teabro-lang"); return (saved === "ru" || saved === "uk") ? saved : "ru"; } catch { return "ru"; } });
   S = buildStyles(theme);
   useEffect(() => { try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem("teabro-lang", lang); } catch {} }, [lang]);
@@ -4196,7 +4196,6 @@ export default function App() {
       <div style={styles.controls}>
         <button type="button" style={lang === "ru" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("ru")}>RU</button>
         <button type="button" style={lang === "uk" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("uk")}>UK</button>
-        <button type="button" style={lang === "en" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("en")}>EN</button>
         <button type="button" style={styles.themeBtn} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}</button>
       </div>
       <div style={styles.homeHeader}>
