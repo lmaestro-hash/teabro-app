@@ -1465,13 +1465,15 @@ function HormoneScreen({ onBack }) {
     const advice = HORMONE_ADVICE[weakest.key];
     let summary;
     if (weak.length === 0) {
-      summary = "Критичных просадок нет — все семь систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.";
+      summary = tx({ ru: "Критичных просадок нет — все семь систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі сім систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all seven systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
     } else if (weak.length <= 2) {
-      summary = `Просело ${weak.length === 1 ? "одно звено" : "пара звеньев"} — ${weak.map(r => r.meta.name).join(" и ")}. Системы связаны между собой, так что подтянуть одно часто помогает и соседним.`;
+      const linkWord = tx({ ru: weak.length === 1 ? "одно звено" : "пара звеньев", uk: weak.length === 1 ? "одна ланка" : "пара ланок", en: weak.length === 1 ? "one link" : "a couple of links" });
+      const names = weak.map(r => tx(r.meta.name)).join(tx({ ru: " и ", uk: " і ", en: " and " }));
+      summary = tx({ ru: `Просело ${linkWord} — ${names}. Системы связаны между собой, так что подтянуть одно часто помогает и соседним.`, uk: `Просіла ${linkWord} — ${names}. Системи пов'язані між собою, тож підтягнути одне часто допомагає й сусіднім.`, en: `${linkWord === "one link" ? "One link is" : "A couple of links are"} weak — ${names}. Systems are interconnected, so lifting one often helps the neighbors too.` });
     } else {
-      summary = "Просело сразу несколько систем, и они тянут друг друга вниз. Это не характер и не лень — это состояние, которое восстанавливается, но само не выправится.";
+      summary = tx({ ru: "Просело сразу несколько систем, и они тянут друг друга вниз. Это не характер и не лень — это состояние, которое восстанавливается, но само не выправится.", uk: "Просіло одразу кілька систем, і вони тягнуть одна одну вниз. Це не характер і не лінь — це стан, який відновлюється, але сам не вирівняється.", en: "Several systems have dropped at once and are pulling each other down. This isn't a character trait or laziness — it's a state that can recover, but won't fix itself." });
     }
-    const shareMsg = `Гормональный код 🧬\nСлабое звено: ${weakest.meta.name}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Гормональный код 🧬\n${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(weakest.meta.name)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
 
     return (
       <div style={S.screen}>
@@ -1487,13 +1489,13 @@ function HormoneScreen({ onBack }) {
             <div key={r.key} style={{ marginBottom: "14px" }}>
               <MetricBlock
                 value={r.pct}
-                rightName={r.meta.name}
-                rightSub={r.meta.short}
+                rightName={tx(r.meta.name)}
+                rightSub={tx(r.meta.short)}
                 fillFrom="#241D14"
                 fillTo={r.meta.color}
                 dotColor={r.meta.color}
                 numColor={r.meta.color}
-                scaleLabels={["низкий", "средний", "хороший", "высокий"]}
+                scaleLabels={[tx({ru:"низкий",uk:"низький",en:"low"}), tx({ru:"средний",uk:"середній",en:"medium"}), tx({ru:"хороший",uk:"хороший",en:"good"}), tx({ru:"высокий",uk:"високий",en:"high"})]}
                 hiIndex={r.hiIndex}
                 quote={`«${r.text}»`}
                 animKey={`horm-${r.key}-${r.pct}`}
@@ -1502,7 +1504,7 @@ function HormoneScreen({ onBack }) {
           ))}
 
           <div style={S.stepsBlock}>
-            <p style={S.stepsTitle}>ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС — {weakest.meta.name.toUpperCase()}</p>
+            <p style={S.stepsTitle}>{tx({ru:"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС",uk:"ЩО РОБИТИ ПРЯМО ЗАРАЗ",en:"WHAT TO DO RIGHT NOW"})} — {tx(weakest.meta.name).toUpperCase()}</p>
             {advice.steps.map((step, i) => (
               <div key={i} style={{ display: "flex", gap: "10px", marginBottom: i < advice.steps.length - 1 ? "12px" : "0" }}>
                 <span style={{ fontSize: "11px", color: weakest.meta.color, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
@@ -1527,7 +1529,7 @@ function HormoneScreen({ onBack }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается." />
+        <HintPopup text={tx({ ru: "10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается.", uk: "10 питань, які уточнюють картину по семи системах — вони керують мотивацією, спокоєм, сном і фокусом. Відповідай першим, що відгукується.", en: "10 questions that clarify the picture across seven systems — they govern motivation, calm, sleep and focus. Answer with whatever resonates first." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
       <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
@@ -1875,16 +1877,7 @@ const MEDITATION_RESULTS = {
     steps: [
       { ru: "Сядь удобно. Положи правую руку на грудь — туда где сердце.", uk: "Сядь зручно. Поклади праву руку на груди — туди де серце.", en: "Sit comfortably. Place the right hand on the chest — where the heart is." },
       { ru: "Вспомни любой момент когда тебе было хорошо — даже совсем маленький. Почувствуй это тепло.", uk: "Згадай будь-який момент коли тобі було добре — навіть зовсім маленький. Відчуй це тепло.", en: "Recall any moment when you felt good — even a tiny one. Feel that warmth." },
-      { ru: "Мысленно скажи себе — медленно, с паузами:
-«Пусть я буду счастлив.»
-«Пусть я буду в покое.»
-«Пусть мне будет хорошо.»", uk: "Мисленно скажи собі — повільно, з паузами:
-«Нехай я буду щасливий.»
-«Нехай я буду в спокої.»
-«Нехай мені буде добре.»", en: "Mentally say to yourself — slowly, with pauses:
-'May I be happy.'
-'May I be at peace.'
-'May I be well.'" },
+      { ru: "Мысленно скажи себе — медленно, с паузами:\n«Пусть я буду счастлив.»\n«Пусть я буду в покое.»\n«Пусть мне будет хорошо.»", uk: "Мисленно скажи собі — повільно, з паузами:\n«Нехай я буду щасливий.»\n«Нехай я буду в спокої.»\n«Нехай мені буде добре.»", en: "Mentally say to yourself — slowly, with pauses:\n'May I be happy.'\n'May I be at peace.'\n'May I be well.'" },
       { ru: "Не нужно верить. Просто говори и замечай что происходит в груди.", uk: "Не потрібно вірити. Просто говори і помічай що відбувається в грудях.", en: "You don't need to believe. Just speak and notice what happens in the chest." },
       { ru: "Потом то же самое — близкому человеку. Потом нейтральному. Потом всем.", uk: "Потім те саме — близькій людині. Потім нейтральній. Потім усім.", en: "Then the same — to someone close. Then a neutral person. Then everyone." },
     ],
@@ -2025,8 +2018,10 @@ function shareText(text) {
   }
 }
 
-function ShareButton({ text, label = "Поделиться с другом ↗" }) {
-  return <button onClick={() => shareText(text)} style={S.shareBtn}>{label}</button>;
+function ShareButton({ text, label }) {
+  const { tx } = useLang();
+  const resolvedLabel = label ?? tx({ ru: "Поделиться с другом ↗", uk: "Поділитися з другом ↗", en: "Share with a friend ↗" });
+  return <button onClick={() => shareText(text)} style={S.shareBtn}>{resolvedLabel}</button>;
 }
 
 function HintPopup({ text }) {
@@ -2296,7 +2291,7 @@ function WisdomScreen({ onBack, currentMood }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="3 совета в день, подобранных под твое состояние. Обновляются в полночь." />
+        <HintPopup text={tx({ ru: "3 совета в день, подобранных под твое состояние. Обновляются в полночь.", uk: "3 поради на день, підібрані під твій стан. Оновлюються опівночі.", en: "3 tips a day, picked for your state. Refresh at midnight." })} />
       </div>
       <div style={S.wisdomContainer}>
         <div style={S.teaIcon}>🍵</div>
@@ -2368,7 +2363,7 @@ function QuizScreen({ onBack }) {
     const advice = BURNOUT_ADVICE[adviceKey];
     const quizScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
     const quizHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
-    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nВыгорание: ${burnoutLevel.label}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nВыгорание: ${tx(burnoutLevel.label)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -2544,7 +2539,7 @@ function SelfHonestyScreen({ onBack }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="14 утверждений — насколько ты видишь себя таким, какой ты есть, а не удобной версией." />
+        <HintPopup text={tx({ ru: "14 утверждений — насколько ты видишь себя таким, какой ты есть, а не удобной версией.", uk: "14 тверджень — наскільки ти бачиш себе таким, який ти є, а не зручною версією.", en: "14 statements — how much you see yourself as you really are, not a convenient version." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {SELF_HONESTY_QUESTIONS.length}</span></div>
       <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
@@ -2553,7 +2548,7 @@ function SelfHonestyScreen({ onBack }) {
         {SH_SCALE.map((opt,i) => (
           <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, borderColor: selected===opt.v ? "#C8A97E" : "#2A2520", backgroundColor: selected===opt.v ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
             <span style={S.optionRadio}>{selected===opt.v ? "◉" : "○"}</span>
-            <span style={S.optionText}>{opt.label}</span>
+            <span style={S.optionText}>{tx(opt.label)}</span>
           </button>
         ))}
       </div>
@@ -2664,7 +2659,7 @@ function MeditationQuizScreen({ onBack }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="20 вопросов — подберём медитацию или дыхательную практику под твоё состояние." />
+        <HintPopup text={tx({ ru: "20 вопросов — подберём медитацию или дыхательную практику под твоё состояние.", uk: "20 питань — підберемо медитацію або дихальну практику під твій стан.", en: "20 questions — we'll pick a meditation or breathing practice for your state." })} />
       </div>
       <div style={S.quizProgress}>
         <span style={S.quizCategory}>{tx(q.category)}</span>
@@ -2764,7 +2759,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="5 вопросов о твоем состоянии — подберем чай, который нужен именно сейчас." />
+        <HintPopup text={tx({ ru: "5 вопросов о твоем состоянии — подберем чай, который нужен именно сейчас.", uk: "5 питань про твій стан — підберемо чай, який потрібен саме зараз.", en: "5 questions about your state — we'll pick the tea you need right now." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {TEA_QUESTIONS.length}</span></div>
       <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
@@ -2804,13 +2799,13 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
   const analysisStats = yearStats || monthStats || weekStats;
   const trajectory = getTrajectory(analysisStats);
   const trend = getTrend(weekStats, monthStats);
-  const periodLabel = yearStats ? "год" : monthStats ? "месяц" : "неделю";
+  const periodLabel = yearStats ? tx({ ru: "год", uk: "рік", en: "year" }) : monthStats ? tx({ ru: "месяц", uk: "місяць", en: "month" }) : tx({ ru: "неделю", uk: "тиждень", en: "week" });
 
   const scaleLabels = [
-    { label: "Неделя", desc: "Слишком мало для выводов. Это ещё не ты — это погода." },
-    { label: "Месяц", desc: "Уже виден паттерн. Тенденция начинает проясняться." },
-    { label: "Квартал", desc: "Это близко к правде. Здесь виден характер периода." },
-    { label: "Год", desc: "Это уже зеркало. Здесь видно кем ты становишься." },
+    { label: { ru: "Неделя", uk: "Тиждень", en: "Week" }, desc: { ru: "Слишком мало для выводов. Это ещё не ты — это погода.", uk: "Занадто мало для висновків. Це ще не ти — це погода.", en: "Too little to draw conclusions. This isn't you yet — it's weather." } },
+    { label: { ru: "Месяц", uk: "Місяць", en: "Month" }, desc: { ru: "Уже виден паттерн. Тенденция начинает проясняться.", uk: "Вже видно патерн. Тенденція починає прояснюватися.", en: "A pattern is already visible. The trend starts to clarify." } },
+    { label: { ru: "Квартал", uk: "Квартал", en: "Quarter" }, desc: { ru: "Это близко к правде. Здесь виден характер периода.", uk: "Це близько до правди. Тут видно характер періоду.", en: "This is close to the truth. The period's character shows here." } },
+    { label: { ru: "Год", uk: "Рік", en: "Year" }, desc: { ru: "Это уже зеркало. Здесь видно кем ты становишься.", uk: "Це вже дзеркало. Тут видно ким ти стаєш.", en: "This is a mirror now. You can see who you're becoming." } },
   ];
 
   const totalEntries = yearStats?.total || monthStats?.total || weekStats?.total || 0;
@@ -2832,15 +2827,15 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
     );
   }
 
-  const verdictText = trajectory.verdict(trajectory.topEmotions);
+  const verdictText = tx(trajectory.verdict(trajectory.topEmotions));
 
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={{ textAlign:"center", marginBottom:"24px" }}>
         <div style={{ fontSize:"40px", marginBottom:"10px" }}>{trajectory.emoji}</div>
-        <p style={{ margin:"0 0 4px", fontSize:"20px", color:"#C8A97E", letterSpacing:"0.05em" }}>{trajectory.name}</p>
-        <p style={{ margin:0, fontSize:"11px", color:"#4A4036", letterSpacing:"0.1em" }}>на основе данных за {periodLabel}</p>
+        <p style={{ margin:"0 0 4px", fontSize:"20px", color:"#C8A97E", letterSpacing:"0.05em" }}>{tx(trajectory.name)}</p>
+        <p style={{ margin:0, fontSize:"11px", color:"#4A4036", letterSpacing:"0.1em" }}>{tx({ ru: `на основе данных за ${periodLabel}`, uk: `на основі даних за ${periodLabel}`, en: `based on data for the ${periodLabel}` })}</p>
       </div>
       <div style={S.wisdomLine} />
       <div style={{ margin:"20px 0", padding:"18px", background:"rgba(200,169,126,0.05)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
@@ -2859,7 +2854,7 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
       )}
       <div style={{ margin:"0 0 24px", padding:"18px", background:"rgba(255,255,255,0.015)", border:"1px dashed #2A2520", borderRadius:"12px" }}>
         <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:"#7A6E62" }}>{t.questionReflect}</p>
-        <p style={{ margin:0, fontSize:"15px", color:"#C0B8AC", lineHeight:1.8, fontStyle:"italic" }}>«{trajectory.question}»</p>
+        <p style={{ margin:0, fontSize:"15px", color:"#C0B8AC", lineHeight:1.8, fontStyle:"italic" }}>«{tx(trajectory.question)}»</p>
       </div>
       <div style={{ padding:"14px", background:"rgba(200,169,126,0.03)", border:"1px solid #1A1713", borderRadius:"10px", marginBottom:"20px" }}>
         <p style={{ margin:"0 0 10px", fontSize:"10px", letterSpacing:"0.15em", color:"#4A4036" }}>{t.truthScale}</p>
@@ -2868,7 +2863,7 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
             <span style={{ fontSize:"10px", color: i === scaleIdx ? "#C8A97E" : "#3A3028", flexShrink:0, marginTop:"2px" }}>{i === scaleIdx ? "◉" : "○"}</span>
             <div>
               <span style={{ fontSize:"11px", color: i === scaleIdx ? "#C8A97E" : "#4A4036" }}>{tx(s.label)}: </span>
-              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#7A6E62" : "#3A3028" }}>{s.desc}</span>
+              <span style={{ fontSize:"11px", color: i === scaleIdx ? "#7A6E62" : "#3A3028" }}>{tx(s.desc)}</span>
             </div>
           </div>
         ))}
@@ -2940,9 +2935,9 @@ function QuietNotes({ onBack }) {
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <p style={{ fontSize:"20px", fontWeight:"normal", margin:"0 0 4px" }}>{t.notebook}</p>
       <p style={{ fontSize:"13px", color:c.inkSoft, margin:"0 0 16px" }}>{t.personalThoughts}</p>
-      {streak > 1 && <p style={{ fontSize:"12px", color:c.accent, margin:"0 0 20px" }}>🌙 {streak} дней подряд</p>}
+      {streak > 1 && <p style={{ fontSize:"12px", color:c.accent, margin:"0 0 20px" }}>🌙 {tx({ ru: `${streak} дней подряд`, uk: `${streak} днів поспіль`, en: `${streak} days in a row` })}</p>}
       <div style={card}>
-        <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder="О чём думаешь сегодня?" value={text} onChange={e => setText(e.target.value)} />
+        <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder={tx({ ru: "О чём думаешь сегодня?", uk: "Про що думаєш сьогодні?", en: "What are you thinking about today?" })} value={text} onChange={e => setText(e.target.value)} />
         <div style={{ display:"flex", gap:"8px", marginTop:"12px", flexWrap:"wrap" }}>
           {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}
         </div>
@@ -2957,7 +2952,7 @@ function QuietNotes({ onBack }) {
       {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>{t.saved}</div>}
       {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 вспомнить запись</button>}
       {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>ИЗ ПРОШЛОГО · {getEntryDateLabel(memory.date)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 поиск по записям" style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tx({ ru: "🔍 поиск по записям", uk: "🔍 пошук по записах", en: "🔍 search entries" })} style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
       <div style={{ display:"flex", gap:"8px", marginBottom:"12px" }}>
         <button onClick={() => { setTab("all"); setMoodFilter(null); }} style={tab === "all" ? gba : gb}>{tx({ru:'записи',uk:'записи',en:'entries'})}</button>
         <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ письма себе</button>
@@ -3056,7 +3051,7 @@ function MoodScreen({ onBack }) {
 
   const title = getCurrentTitle(streak);
   const nextTitle = TITLES.find(t => t.days > streak);
-  const shareTitle = `${title.emoji} Мой титул — «${title.name}»\n${title.desc}\n${streak} дней практики\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+  const shareTitle = `${title.emoji} ${tx({ru:"Мой титул",uk:"Мій титул",en:"My title"})} — «${tx(title.name)}»\n${tx(title.desc)}\n${streak} ${tx({ru:"дней практики",uk:"днів практики",en:"days of practice"})}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
   const allStats = calcStats(allData);
   const archetype = allStats ? getArchetype(allStats.counts, allStats.total) : null;
 
@@ -3118,23 +3113,23 @@ function MoodScreen({ onBack }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text="Отмечай эмоцию каждый день. Серии, титулы, архетип — твой путь к себе." />
+        <HintPopup text={tx({ ru: "Отмечай эмоцию каждый день. Серии, титулы, архетип — твой путь к себе.", uk: "Відзначай емоцію щодня. Серії, титули, архетип — твій шлях до себе.", en: "Log your emotion every day. Streaks, titles, archetype — your path to yourself." })} />
       </div>
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
-        <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{title.name}</p>
+        <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{tx(title.name)}</p>
         <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
-        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{nextTitle.name}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
-        <div style={{ marginTop:"10px" }}><ShareButton text={shareTitle} label="Поделиться титулом ↗" /></div>
+        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+        <div style={{ marginTop:"10px" }}><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
       <div style={S.wisdomLine} />
       {archetype && (
         <div style={{ ...S.teaNoteBox, margin:"16px 0", textAlign:"center" }}>
           <p style={{ margin:"0 0 4px", fontSize:"22px" }}>{archetype.emoji}</p>
-          <p style={{ margin:"0 0 4px", fontSize:"15px", color:c.accent }}>{archetype.name}</p>
-          <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.6 }}>{archetype.desc}</p>
+          <p style={{ margin:"0 0 4px", fontSize:"15px", color:c.accent }}>{tx(archetype.name)}</p>
+          <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.6 }}>{tx(archetype.desc)}</p>
           <div style={{ marginTop:"10px" }}>
-            <ShareButton text={`${archetype.emoji} Мой архетип — «${archetype.name}»\n${archetype.desc}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться архетипом ↗" />
+            <ShareButton text={`${archetype.emoji} ${tx({ru:"Мой архетип",uk:"Мій архетип",en:"My archetype"})} — «${tx(archetype.name)}»\n${tx(archetype.desc)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться архетипом ↗", uk: "Поділитися архетипом ↗", en: "Share archetype ↗" })} />
           </div>
         </div>
       )}
@@ -3168,9 +3163,9 @@ function MoodScreen({ onBack }) {
         )}
       </div>
       <div style={{ display:"flex", gap:"6px", margin:"16px 0 14px" }}>
-        <TabBtn id="today" label="Неделя" />
-        <TabBtn id="month" label="Месяц" />
-        <TabBtn id="year"  label="Год" />
+        <TabBtn id="today" label={tx({ ru: "Неделя", uk: "Тиждень", en: "Week" })} />
+        <TabBtn id="month" label={tx({ ru: "Месяц", uk: "Місяць", en: "Month" })} />
+        <TabBtn id="year"  label={tx({ ru: "Год", uk: "Рік", en: "Year" })} />
       </div>
       {tab === "today" && (
         <div>
@@ -3190,7 +3185,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
               {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -3217,7 +3212,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
               {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться итогом ↗" /></div>
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -3257,7 +3252,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
               {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `Архетип: ${archetype.emoji} ${archetype.name}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label="Поделиться отчетом ↗" /></div>
+              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
           )}
         </div>
@@ -3744,7 +3739,7 @@ function MyPathScreen({ onBack }) {
   const topTeaInfo = topTea ? TEA_RESULTS[topTea.key] : null;
   const otherTeas = teaDist.slice(1, 4).map(d => ({
     emoji: "✦",
-    name: TEA_RESULTS[d.key]?.name || d.key,
+    name: tx(TEA_RESULTS[d.key]?.name) || d.key,
     pct: `${d.pct}%`,
   }));
 
@@ -3755,7 +3750,7 @@ function MyPathScreen({ onBack }) {
   const topMedInfo = topMed ? MEDITATION_RESULTS[topMed.key] : null;
   const otherMeds = medDist.slice(1, 4).map(d => ({
     emoji: MEDITATION_RESULTS[d.key]?.emoji || "✦",
-    name: MEDITATION_RESULTS[d.key]?.name || d.key,
+    name: tx(MEDITATION_RESULTS[d.key]?.name) || d.key,
     pct: `${d.pct}%`,
   }));
 
@@ -3811,13 +3806,13 @@ function MyPathScreen({ onBack }) {
       {hasQuiz ? (
         <MetricBlock
           value={assemblyPct}
-          rightName={assemblyResult.title}
-          rightSub={assemblyResult.subtitle}
+          rightName={tx(assemblyResult.title)}
+          rightSub={tx(assemblyResult.subtitle)}
           fillFrom="#4A3020"
           fillTo="#C8A97E"
           scaleLabels={assemblyScaleLabels}
           hiIndex={assemblyHiIndex}
-          quote={`«${assemblyResult.text}»`}
+          quote={`«${tx(assemblyResult.text)}»`}
           animKey={`assembly-${assemblyPct}`}
         />
       ) : (
@@ -3849,13 +3844,13 @@ function MyPathScreen({ onBack }) {
       {hasSelfHonesty ? (
         <MetricBlock
           value={selfHonestyPct}
-          rightName={selfHonestyResult.title}
-          rightSub={selfHonestyResult.subtitle}
+          rightName={tx(selfHonestyResult.title)}
+          rightSub={tx(selfHonestyResult.subtitle)}
           fillFrom="#4A3020"
           fillTo="#C8A97E"
           scaleLabels={shScaleLabels}
           hiIndex={shHiIndex}
-          quote={`«${selfHonestyResult.text}»`}
+          quote={`«${tx(selfHonestyResult.text)}»`}
           animKey={`selfhonesty-${selfHonestyPct}`}
         />
       ) : (
@@ -3871,7 +3866,7 @@ function MyPathScreen({ onBack }) {
         <>
           <MetricBlock
             value={hormonePct}
-            rightName={hormoneWeakest ? `Слабое звено: ${hormoneWeakest.name}` : "Гормональный код"}
+            rightName={hormoneWeakest ? `${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(hormoneWeakest.name)}` : t.hormoneCode}
             rightSub={`среднее по ${hormoneLast3.length === 1 ? "последнему прохождению" : `последним ${hormoneLast3.length} прохождениям`}`}
             fillFrom="#241D14"
             fillTo={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
@@ -3890,7 +3885,7 @@ function MyPathScreen({ onBack }) {
               const pct = Math.round((avgScore - 1) / 4 * 100);
               return (
                 <div key={key} style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
-                  <span style={{ fontSize:"12px", color:c.inkMuted, width:"98px", flexShrink:0 }}>{meta.name}</span>
+                  <span style={{ fontSize:"12px", color:c.inkMuted, width:"98px", flexShrink:0 }}>{tx(meta.name)}</span>
                   <div style={{ flex:1, height:"4px", background:c.trackBg, borderRadius:"2px", overflow:"hidden" }}>
                     <div style={{ width:`${pct}%`, height:"100%", background:meta.color, borderRadius:"2px" }} />
                   </div>
@@ -3912,8 +3907,8 @@ function MyPathScreen({ onBack }) {
       {hasTea ? (
         <MetricBlock
           value={topTea.pct}
-          rightName={`✦ ${topTeaInfo.name}`}
-          rightSub={`${topTeaInfo.tag} · ${topTea.count} раз`}
+          rightName={`✦ ${tx(topTeaInfo.name)}`}
+          rightSub={`${tx(topTeaInfo.tag)} · ${topTea.count} ${tx({ru:"раз",uk:"разів",en:"times"})}`}
           fillFrom="#3A2E20"
           fillTo="#A89880"
           scaleLabels={["0%", "25%", "50%", "75%+"]}
@@ -3933,8 +3928,8 @@ function MyPathScreen({ onBack }) {
       {hasMed ? (
         <MetricBlock
           value={topMed.pct}
-          rightName={`${topMedInfo.emoji} ${topMedInfo.name}`}
-          rightSub={`${topMedInfo.tag} · ${topMed.count} раз`}
+          rightName={`${topMedInfo.emoji} ${tx(topMedInfo.name)}`}
+          rightSub={`${tx(topMedInfo.tag)} · ${topMed.count} ${tx({ru:"раз",uk:"разів",en:"times"})}`}
           fillFrom="#1A2A30"
           fillTo="#7B9EB0"
           dotColor="#7B9EB0"
