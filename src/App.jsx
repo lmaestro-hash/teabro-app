@@ -340,7 +340,7 @@ function buildStyles(themeName) {
     wisdomHint: { fontSize:"12px", color: isDark?"#4A4036":c.inkSoft, letterSpacing:"0.1em", margin:0 },
     primaryBtn: { width:"100%", padding:"16px", backgroundColor:c.primaryBtnBg, color:c.primaryBtnText, border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
     ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
-    shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"12px", boxSizing:"border-box" },
+    shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"18px", marginBottom:"12px", boxSizing:"border-box" },
     statCard: { background:c.card, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", textAlign:"center" },
     statNum: { margin:"0 0 4px", fontSize:"24px", color:c.accent, fontWeight:"normal" },
     statLabel: { margin:0, fontSize:"11px", color:c.inkSoft, letterSpacing:"0.05em" },
@@ -1405,7 +1405,8 @@ const HORMONE_ADVICE = {
 
 
 function HormoneScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const ALL_Q = [...HORMONE_QUESTIONS, ...HORMONE_CROSS_QUESTIONS];
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -1483,7 +1484,7 @@ function HormoneScreen({ onBack }) {
             <p style={S.sectionTitle}>{t.hormoneCode}</p>
             <InfoButton text={tx({ ru: "«Семь систем, которые управляют мотивацией, спокойствием, сном и фокусом — по твоим ответам, не по анализам.»", uk: "«Сім систем, які керують мотивацією, спокоєм, сном і фокусом — за твоїми відповідями, не за аналізами.»", en: "«Seven systems that drive motivation, calm, sleep and focus — from your answers, not lab tests.»" })} />
           </div>
-          <p style={{ margin: "0 0 18px", fontSize: "13px", color: "#B8B0A4", lineHeight: 1.7, fontStyle: "italic" }}>«{summary}»</p>
+          <p style={{ margin: "0 0 18px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>«{summary}»</p>
 
           {results.map(r => (
             <div key={r.key} style={{ marginBottom: "14px" }}>
@@ -1508,11 +1509,11 @@ function HormoneScreen({ onBack }) {
             {advice.steps.map((step, i) => (
               <div key={i} style={{ display: "flex", gap: "10px", marginBottom: i < advice.steps.length - 1 ? "12px" : "0" }}>
                 <span style={{ fontSize: "11px", color: weakest.meta.color, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
-                <p style={{ margin: 0, fontSize: "13px", color: "#B8B0A4", lineHeight: 1.7 }}>{step}</p>
+                <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.7 }}>{tx(step)}</p>
               </div>
             ))}
-            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #1E1B18" }}>
-              <p style={{ margin: 0, fontSize: "11px", color: "#5A5048" }}>⏱ {tx(advice.duration)}</p>
+            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${c.line}` }}>
+              <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft }}>⏱ {tx(advice.duration)}</p>
             </div>
           </div>
 
@@ -2025,14 +2026,17 @@ function ShareButton({ text, label }) {
 }
 
 function HintPopup({ text }) {
+  const { theme, tx } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const isDark = theme === "dark";
   const [open, setOpen] = useState(false);
   return (
     <div style={{ position:"relative", marginBottom:"20px" }}>
       <button onClick={() => setOpen(o => !o)} style={S.hintBtn}>ℹ</button>
       {open && (
-        <div style={{ position:"absolute", right:0, top:"30px", width:"220px", background:"#1A1713", border:"1px solid #2A2520", borderRadius:"10px", padding:"12px", fontSize:"12px", color:"#B0A090", lineHeight:1.6, zIndex:100 }}>
+        <div style={{ position:"absolute", right:0, top:"30px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"#2A2520":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"12px", color:c.inkMuted, lineHeight:1.6, zIndex:100 }}>
           {text}
-          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"8px", background:"none", border:"none", color:"#7A6E62", cursor:"pointer", fontSize:"11px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button>
+          <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"8px", background:"none", border:"none", color:c.inkSoft, cursor:"pointer", fontSize:"11px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button>
         </div>
       )}
     </div>
@@ -2318,7 +2322,8 @@ function WisdomScreen({ onBack, currentMood }) {
 // ЭКРАН: ОПРОСНИК
 // ─────────────────────────────────────────────
 function QuizScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [scores, setScores] = useState([]);
@@ -2400,12 +2405,12 @@ function QuizScreen({ onBack }) {
             <p style={S.stepsTitle}>{t.doNow}</p>
             {advice.steps.map((step, i) => (
               <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "12px" : "0" }}>
-                <span style={{ fontSize:"11px", color:"#C8A97E", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
-                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7 }}>{tx(step)}</p>
+                <span style={{ fontSize:"11px", color:c.accent, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                <p style={{ margin:0, fontSize:"13px", color:c.inkMuted, lineHeight:1.7 }}>{tx(step)}</p>
               </div>
             ))}
-            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
-              <p style={{ margin:0, fontSize:"11px", color:"#5A5048" }}>⏱ {tx(advice.duration)}</p>
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:`1px solid ${c.line}` }}>
+              <p style={{ margin:0, fontSize:"11px", color:c.inkSoft }}>⏱ {tx(advice.duration)}</p>
             </div>
           </div>
 
@@ -2452,7 +2457,8 @@ const SH_SCALE = [
 
 
 function SelfHonestyScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
@@ -2517,12 +2523,12 @@ function SelfHonestyScreen({ onBack }) {
             <p style={S.stepsTitle}>{t.doNow}</p>
             {advice.steps.map((step, i) => (
               <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < advice.steps.length-1 ? "12px" : "0" }}>
-                <span style={{ fontSize:"11px", color:"#C8A97E", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
-                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7 }}>{tx(step)}</p>
+                <span style={{ fontSize:"11px", color:c.accent, flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
+                <p style={{ margin:0, fontSize:"13px", color:c.inkMuted, lineHeight:1.7 }}>{tx(step)}</p>
               </div>
             ))}
-            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
-              <p style={{ margin:0, fontSize:"11px", color:"#5A5048" }}>⏱ {tx(advice.duration)}</p>
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:`1px solid ${c.line}` }}>
+              <p style={{ margin:0, fontSize:"11px", color:c.inkSoft }}>⏱ {tx(advice.duration)}</p>
             </div>
           </div>
 
@@ -2561,7 +2567,8 @@ function SelfHonestyScreen({ onBack }) {
 // ЭКРАН: ТЕСТ МЕДИТАЦИЙ
 // ─────────────────────────────────────────────
 function MeditationQuizScreen({ onBack }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
   const [scores, setScores] = useState({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 });
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -2604,10 +2611,10 @@ function MeditationQuizScreen({ onBack }) {
     const medHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
     const others = sortedScores.slice(1, 4).filter(([,s]) => s > 0).map(([key], i) => ({
       emoji: MEDITATION_RESULTS[key].emoji,
-      name: MEDITATION_RESULTS[key].name,
+      name: tx(MEDITATION_RESULTS[key].name),
       pct: `${i+2}-е место`,
     }));
-    const shareMsg = `Моя практика — ${tx(r.name)} · ${tx(r.tag)}\n\n«${r.why.slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Моя практика — ${tx(r.name)} · ${tx(r.tag)}\n\n«${tx(r.why).slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -2631,17 +2638,17 @@ function MeditationQuizScreen({ onBack }) {
             {r.steps.map((step, i) => (
               <div key={i} style={{ display:"flex", gap:"10px", marginBottom: i < r.steps.length-1 ? "12px" : "0" }}>
                 <span style={{ fontSize:"11px", color:"#7B9EB0", flexShrink:0, marginTop:"2px", minWidth:"16px" }}>{i+1}.</span>
-                <p style={{ margin:0, fontSize:"13px", color:"#B8B0A4", lineHeight:1.7, whiteSpace:"pre-line" }}>{tx(step)}</p>
+                <p style={{ margin:0, fontSize:"13px", color:c.inkMuted, lineHeight:1.7, whiteSpace:"pre-line" }}>{tx(step)}</p>
               </div>
             ))}
-            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:"1px solid #1E1B18" }}>
-              <p style={{ margin:"0 0 4px", fontSize:"11px", color:"#5A5048" }}>⏱ {tx(r.duration)}</p>
-              <p style={{ margin:0, fontSize:"11px", color:"#3A3028", fontStyle:"italic" }}>🔍 {r.source}</p>
+            <div style={{ marginTop:"12px", paddingTop:"12px", borderTop:`1px solid ${c.line}` }}>
+              <p style={{ margin:"0 0 4px", fontSize:"11px", color:c.inkSoft }}>⏱ {tx(r.duration)}</p>
+              <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>🔍 {r.source}</p>
             </div>
           </div>
 
           <a
-            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(r.fullName + " медитация")}`}
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(tx(r.fullName) + " медитация")}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ ...S.shareBtn, display:"block", textAlign:"center", textDecoration:"none", borderColor:"rgba(123,158,176,0.3)", color:"#7B9EB0", marginTop:"18px" }}
@@ -2724,10 +2731,10 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
     const teaHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
     const others = sortedScores.slice(1, 4).filter(([,s]) => s > 0).map(([key], i) => ({
       emoji: "✦",
-      name: TEA_RESULTS[key].name,
+      name: tx(TEA_RESULTS[key].name),
       pct: `${i+2}-е место`,
     }));
-    const shareMsg = `Мой чай сегодня — ${tx(result.name)} ✦\n${tx(result.tag)}\n\n«${result.text.slice(0,80)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Мой чай сегодня — ${tx(result.name)} ✦\n${tx(result.tag)}\n\n«${tx(result.text).slice(0,80)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -2878,12 +2885,12 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
 // ЭКРАН: ТИХИЕ ЗАПИСИ
 // ─────────────────────────────────────────────
 const NOTE_EMOTIONS = [
-  { id: "calm", emoji: "🌙", label: "тихо" },
-  { id: "tired", emoji: "🌫", label: "устало" },
-  { id: "warm", emoji: "🌕", label: "тепло" },
-  { id: "anx", emoji: "🍃", label: "тревожно" },
+  { id: "calm", emoji: "🌙", label: { ru: "тихо", uk: "тихо", en: "quiet" } },
+  { id: "tired", emoji: "🌫", label: { ru: "устало", uk: "втомлено", en: "tired" } },
+  { id: "warm", emoji: "🌕", label: { ru: "тепло", uk: "тепло", en: "warm" } },
+  { id: "anx", emoji: "🍃", label: { ru: "тревожно", uk: "тривожно", en: "anxious" } },
 ];
-function getEntryDateLabel(iso) { return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "long" }); }
+function getEntryDateLabel(iso, lang) { const locale = lang === "uk" ? "uk-UA" : lang === "en" ? "en-US" : "ru-RU"; return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "long" }); }
 function getEntryDaysLeft(iso) { return Math.max(0, Math.ceil((new Date(iso) - new Date()) / 86400000)); }
 function calcNotesStreak(entries) {
   const days = new Set(entries.filter(e => !e.sealed).map(e => new Date(e.date).toDateString()));
@@ -2940,27 +2947,27 @@ function QuietNotes({ onBack }) {
       <div style={card}>
         <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder={tx({ ru: "О чём думаешь сегодня?", uk: "Про що думаєш сьогодні?", en: "What are you thinking about today?" })} value={text} onChange={e => setText(e.target.value)} />
         <div style={{ display:"flex", gap:"8px", marginTop:"12px", flexWrap:"wrap" }}>
-          {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}
+          {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {tx(e.label)}</button>)}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"14px" }}>
-          <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ Письмо себе</button>
-          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={new Date(Date.now()+86400000).toISOString().split("T")[0]} max={new Date(Date.now()+3*365*86400000).toISOString().split("T")[0]} style={{ background:"#1A1713", color:c.accent, border:`1px solid ${c.cardBorder}`, borderRadius:"8px", padding:"9px 10px", fontFamily:"Georgia,serif", fontSize:"12px" }} />}
+          <button onClick={() => setSeal(!seal)} style={seal ? gba : gb}>{seal ? "✓ " : ""}✉️ {tx({ru:'Письмо себе',uk:'Лист собі',en:'Letter to yourself'})}</button>
+          {seal && <input type="date" value={sealDate} onChange={e => setSealDate(e.target.value)} min={new Date(Date.now()+86400000).toISOString().split("T")[0]} max={new Date(Date.now()+3*365*86400000).toISOString().split("T")[0]} style={{ background:c.softBg, color:c.accent, border:`1px solid ${c.cardBorder}`, borderRadius:"8px", padding:"9px 10px", fontFamily:"Georgia,serif", fontSize:"12px" }} />}
         </div>
-        <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{seal ? "ЗАПЕЧАТАТЬ" : "СОХРАНИТЬ"}</button>
+        <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{tx(seal ? {ru:"ЗАПЕЧАТАТЬ",uk:"ЗАПЕЧАТАТИ",en:"SEAL"} : {ru:"СОХРАНИТЬ",uk:"ЗБЕРЕГТИ",en:"SAVE"})}</button>
         <p style={{ fontSize:"11px", color:c.inkSoft, textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>{t.onlyYou}</p>
       </div>
       {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:c.accent, fontSize:"13px", letterSpacing:"0.05em" }}>{t.sealed}</div></div>}
       {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>{t.saved}</div>}
-      {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 вспомнить запись</button>}
-      {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>ИЗ ПРОШЛОГО · {getEntryDateLabel(memory.date)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
+      {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 {tx({ru:'вспомнить запись',uk:'згадати запис',en:'recall an entry'})}</button>}
+      {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>{tx({ru:'ИЗ ПРОШЛОГО',uk:'З МИНУЛОГО',en:'FROM THE PAST'})} · {getEntryDateLabel(memory.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
       <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tx({ ru: "🔍 поиск по записям", uk: "🔍 пошук по записах", en: "🔍 search entries" })} style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
       <div style={{ display:"flex", gap:"8px", marginBottom:"12px" }}>
         <button onClick={() => { setTab("all"); setMoodFilter(null); }} style={tab === "all" ? gba : gb}>{tx({ru:'записи',uk:'записи',en:'entries'})}</button>
-        <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ письма себе</button>
+        <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ {tx({ru:'письма себе',uk:'листи собі',en:'letters to self'})}</button>
       </div>
-      {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {emotionLabel(e.id, lang) || e.label}</button>)}</div>}
-      {visible.length === 0 && <p style={{ fontSize:"13px", color:c.inkSoft, textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? "пока нет писем себе" : "пока ничего нет"}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:c.inkSoft, margin:"0 0 6px" }}>{getEntryDateLabel(e.date)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {mi.label}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:`1px solid ${c.cardBorder}`, borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? "откроется сегодня" : getEntryDaysLeft(e.revealAt) === 1 ? "осталось 1 день" : `осталось ${getEntryDaysLeft(e.revealAt)} дн.`}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>{tx({ru:'удалить',uk:'видалити',en:'delete'})}</button></div></div>); })}
+      {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {tx(e.label)}</button>)}</div>}
+      {visible.length === 0 && <p style={{ fontSize:"13px", color:c.inkSoft, textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? tx({ru:'пока нет писем себе',uk:'поки немає листів собі',en:'no letters to yourself yet'}) : tx({ru:'пока ничего нет',uk:'поки нічого немає',en:'nothing here yet'})}</p>}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:c.inkSoft, margin:"0 0 6px" }}>{getEntryDateLabel(e.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {tx(mi.label)}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:`1px solid ${c.cardBorder}`, borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? tx({ru:"откроется сегодня",uk:"відкриється сьогодні",en:"unlocks today"}) : getEntryDaysLeft(e.revealAt) === 1 ? tx({ru:"осталось 1 день",uk:"залишився 1 день",en:"1 day left"}) : tx({ru:`осталось ${getEntryDaysLeft(e.revealAt)} дн.`,uk:`залишилося ${getEntryDaysLeft(e.revealAt)} дн.`,en:`${getEntryDaysLeft(e.revealAt)} days left`})}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>{tx({ru:'удалить',uk:'видалити',en:'delete'})}</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
@@ -3121,7 +3128,7 @@ function MoodScreen({ onBack }) {
         <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{tx(title.name)}</p>
         <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
         {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
-        <div style={{ marginTop:"10px" }}><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
+        <div><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
       <div style={S.wisdomLine} />
       {archetype && (
@@ -3129,7 +3136,7 @@ function MoodScreen({ onBack }) {
           <p style={{ margin:"0 0 4px", fontSize:"22px" }}>{archetype.emoji}</p>
           <p style={{ margin:"0 0 4px", fontSize:"15px", color:c.accent }}>{tx(archetype.name)}</p>
           <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.6 }}>{tx(archetype.desc)}</p>
-          <div style={{ marginTop:"10px" }}>
+          <div>
             <ShareButton text={`${archetype.emoji} ${tx({ru:"Мой архетип",uk:"Мій архетип",en:"My archetype"})} — «${tx(archetype.name)}»\n${tx(archetype.desc)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться архетипом ↗", uk: "Поділитися архетипом ↗", en: "Share archetype ↗" })} />
           </div>
         </div>
@@ -3186,7 +3193,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
               {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
+              <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -3213,7 +3220,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
               {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
+              <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -3253,7 +3260,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
               {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div style={{ marginTop:"12px" }}><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
+              <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
           )}
         </div>
@@ -3604,7 +3611,7 @@ function AnonPopup() {
         <span style={{ fontSize:"12px", color:c.inkSoft, letterSpacing:"0.05em" }}>{t.anonymity}</span>
       </button>
       {open && (
-        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:"#1A1713", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
+        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:c.softBg, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
           <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:c.accent }}>{t.aboutData}</p>
           <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, lineHeight:1.8, fontStyle:"italic" }}>
             {tx({ru:"Твой путь — только твой.",uk:"Твій шлях — тільки твій.",en:"Your path is yours alone."})}<br />
