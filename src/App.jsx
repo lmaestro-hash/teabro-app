@@ -2369,9 +2369,16 @@ const HORMONE_TO_DAILYCHECK_GROUP = {
   cortisol: "anxiety", dopamine: "lowEnergy", serotonin: "recovery",
   gaba: "anxiety", oxytocin: "anxiety", testosterone: "focus", acetylcholine: "focus",
 };
+// Прямое соответствие показателя своей группе — для случая, когда пограничный чек-ин
+// решаем по накопленной за всё время личной истории, а не по гормонам.
+const INDICATOR_TO_DAILYCHECK_GROUP = {
+  energy: "lowEnergy", mood: "recovery", tension: "overload", anxiety: "anxiety",
+  fatigue: "recovery", sleep: "recovery", focus: "focus", social: "anxiety",
+  motivation: "lowEnergy", calm: "anxiety",
+};
 
 function pickDailyCheckGroup(scores, ctx = {}) {
-  const { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds = [] } = ctx;
+  const { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds = [], allTimeWeakestKey, allTimeCount = 0 } = ctx;
   let group;
   if (scores.anxiety <= 2 || scores.calm <= 2) group = "anxiety";
   else if (scores.fatigue <= 2 || scores.sleep <= 2) group = "recovery";
@@ -2381,21 +2388,67 @@ function pickDailyCheckGroup(scores, ctx = {}) {
   else if (scores.social <= 2 && scores.mood <= 3) group = "anxiety"; // общение — берём action a5 через ротацию
   else group = "pause";
 
+  let reason = { type: "checkin" };
+
   // фон: сильное выгорание или тяжёлый 90-дневный тренд смещают к мягким группам
   const softBias = (burnoutPct != null && burnoutPct >= 41) || moodHeavy;
-  if (softBias && group === "focus") group = "recovery";
-  if (softBias && group === "lowEnergy") group = "recovery";
+  if (softBias && (group === "focus" || group === "lowEnergy")) {
+    group = "recovery";
+    reason = { type: "background", burnoutPct, moodHeavy };
+  }
 
-  // слабое звено гормонов — если чек-ин пограничный (нет явной проблемы), задаёт группу
   const allFine = Object.values(scores).every(v => v >= 3);
-  if (allFine && hormoneWeakestKey && HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey]) {
+
+  // накопленная личная история (10+ тестов) — приоритетнее гормонов, если чек-ин пограничный
+  if (allFine && allTimeCount >= 10 && allTimeWeakestKey && INDICATOR_TO_DAILYCHECK_GROUP[allTimeWeakestKey]) {
+    group = INDICATOR_TO_DAILYCHECK_GROUP[allTimeWeakestKey];
+    reason = { type: "pattern", key: allTimeWeakestKey };
+  } else if (allFine && hormoneWeakestKey && HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey]) {
+    // слабое звено гормонов — если чек-ин пограничный (нет явной проблемы), задаёт группу
     group = HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey];
+    reason = { type: "hormone", key: hormoneWeakestKey };
+  } else if (!allFine && hormoneWeakestKey && HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey] === group) {
+    // чек-ин сам указал на проблему, и она совпадает со слабым звеном — не меняем группу, но отмечаем совпадение
+    reason = { type: "aligned", key: hormoneWeakestKey };
   }
 
   const pool = DAILYCHECK_ACTIONS[group] || DAILYCHECK_ACTIONS.pause;
   const fresh = pool.filter(a => !recentActionIds.includes(a.id));
   const chosen = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length ? fresh.length : pool.length))];
-  return { group, action: chosen };
+  return { group, action: chosen, reason };
+}
+
+function dailyCheckReasonText(reason) {
+  if (!reason) return null;
+  if (reason.type === "background") {
+    return reason.burnoutPct != null && reason.burnoutPct >= 41
+      ? { ru: "Учли и общий фон последнего времени — по твоему уровню выгорания сейчас лучше мягче.", uk: "Врахували і загальний фон останнього часу — за рівнем вигорання зараз краще м'якше.", en: "Also factored in your recent burnout level — better to go gentle right now." }
+      : { ru: "Учли и то, каким было твоё настроение в последние недели — сейчас лучше мягче.", uk: "Врахували і те, яким був твій настрій останні тижні — зараз краще м'якше.", en: "Also factored in your mood over the last few weeks — better to go gentle right now." };
+  }
+  if (reason.type === "hormone" || reason.type === "aligned") {
+    const hName = HORMONE_META[reason.key]?.name || { ru: "", uk: "", en: "" };
+    if (reason.type === "aligned") {
+      return {
+        ru: `Заметно совпадает с твоим слабым звеном по гормональному тесту — ${hName.ru || ""}.`,
+        uk: `Помітно збігається з твоєю слабкою ланкою за гормональним тестом — ${hName.uk || ""}.`,
+        en: `This also lines up with the weak link from your hormone test — ${hName.en || ""}.`,
+      };
+    }
+    return {
+      ru: `Твои ответы сегодня пограничные, поэтому учли слабое звено твоего гормонального теста — ${hName.ru || ""}.`,
+      uk: `Твої відповіді сьогодні пограничні, тому врахували слабку ланку твого гормонального тесту — ${hName.uk || ""}.`,
+      en: `Today's answers were borderline, so we factored in the weak link from your hormone test — ${hName.en || ""}.`,
+    };
+  }
+  if (reason.type === "pattern") {
+    const qLabel = DAILYCHECK_QUESTIONS.find(q => q.key === reason.key)?.label || { ru: "", uk: "", en: "" };
+    return {
+      ru: `Твои ответы сегодня пограничные, а по твоей накопленной истории чаще всего слабое место — «${qLabel.ru || ""}», это и учли.`,
+      uk: `Твої відповіді сьогодні пограничні, а за твоєю накопиченою історією найчастіше слабке місце — «${qLabel.uk || ""}», це і врахували.`,
+      en: `Today's answers were borderline, and your own history most often points to "${qLabel.en || ""}" — so that's what we factored in.`,
+    };
+  }
+  return null;
 }
 
 const DAILYCHECK_GROUP_LABEL = {
@@ -2416,10 +2469,18 @@ function DailyCheckScreen({ onBack }) {
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [result, setResult] = useState(null);
-  const [step, setStep] = useState("questions"); // questions | advice | followup | done
+  const [step, setStep] = useState("intro"); // intro | questions | advice | followup | done
   const [followUpChoice, setFollowUpChoice] = useState(null);
+  const [introHist, setIntroHist] = useState(null); // null = ещё грузится
+  const [showNotes, setShowNotes] = useState(false);
 
-  useEffect(() => { statEvent("dailycheck"); }, []);
+  useEffect(() => {
+    getHistory("dailycheck_history").then(setIntroHist).catch(() => setIntroHist([]));
+  }, []);
+
+  const startTest = () => { statEvent("dailycheck"); setStep("questions"); };
+
+  if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
 
   const q = DAILYCHECK_QUESTIONS[current];
 
@@ -2482,12 +2543,44 @@ function DailyCheckScreen({ onBack }) {
     } catch {}
 
     const recentActionIds = dcHistRaw.slice(-2).map(h => h.action_id).filter(Boolean);
-    const { group, action } = pickDailyCheckGroup(scores, { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds });
+
+    // накопленная за всё время статистика — какой показатель слабее всего в среднем (от 10 тестов)
+    let allTimeWeakestKey = null;
+    if (dcHistRaw.length >= 10) {
+      const sums = {}; const counts = {};
+      dcHistRaw.forEach(h => {
+        if (!h.indicators) return;
+        Object.entries(h.indicators).forEach(([k, v]) => { sums[k] = (sums[k] || 0) + v; counts[k] = (counts[k] || 0) + 1; });
+      });
+      const avgs = Object.keys(sums).map(k => [k, sums[k] / counts[k]]);
+      if (avgs.length) allTimeWeakestKey = avgs.reduce((min, e) => (e[1] < min[1] ? e : min), avgs[0])[0];
+    }
+
+    const { group, action, reason } = pickDailyCheckGroup(scores, { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds, allTimeWeakestKey, allTimeCount: dcHistRaw.length });
 
     const problemKeys = Object.entries(scores).filter(([, v]) => v <= 2).map(([k]) => k);
     const followUpKeys = (problemKeys.length ? problemKeys : Object.entries(scores).sort((a, b) => a[1] - b[1]).slice(0, 2).map(([k]) => k)).slice(0, 3);
 
-    setResult({ scores, group, action, followUpKeys });
+    // % по чек-ину (1-5 → 0-100%) для отображения в профиле, как у гормонов/выгорания
+    const avgScore = Object.values(scores).reduce((s, v) => s + v, 0) / Object.values(scores).length;
+    const pct = Math.round(((avgScore - 1) / 4) * 100);
+    const weakestKey = Object.entries(scores).sort((a, b) => a[1] - b[1])[0][0];
+
+    // Более точный подсчёт для отображения (как в «Гормональном коде»): среднее по каждому
+    // показателю за последние до 3 прохождений (включая сегодняшнее), а не одно сырое значение.
+    // Совет и группа выше уже выбраны по сегодняшним сырым ответам — здесь только для витрины.
+    const last2 = dcHistRaw.slice(-2);
+    const avgScores = {};
+    DAILYCHECK_QUESTIONS.forEach(qq => {
+      const vals = [scores[qq.key], ...last2.map(h => h.indicators?.[qq.key]).filter(v => typeof v === "number")];
+      avgScores[qq.key] = vals.reduce((s, v) => s + v, 0) / vals.length;
+    });
+    const avgCount = 1 + last2.filter(h => h.indicators).length;
+    const overallAvg = Object.values(avgScores).reduce((s, v) => s + v, 0) / Object.values(avgScores).length;
+    const avgPct = Math.round(((overallAvg - 1) / 4) * 100);
+    const avgWeakestKey = Object.entries(avgScores).sort((a, b) => a[1] - b[1])[0][0];
+
+    setResult({ scores, group, action, followUpKeys, reason, pct, weakestKey, avgScores, avgCount, avgPct, avgWeakestKey });
     setFinished(true);
     setStep("advice");
   };
@@ -2501,19 +2594,148 @@ function DailyCheckScreen({ onBack }) {
       indicators: result.scores,
       group: result.group,
       action_id: result.action.id,
+      pct: result.pct,
+      weakestKey: result.weakestKey,
       followUp: { improved: choice, checkedIndicators: result.followUpKeys, delta },
     });
     setStep("done");
   };
 
-  if (step === "advice" && result) {
-    const shareMsg = `Компас состояния 🧭\n${tx(DAILYCHECK_GROUP_LABEL[result.group])}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+  if (step === "intro") {
+    const hasHist = introHist && introHist.length > 0;
+    let introPct = null, introWeakestQ = null, introBreakdown = [];
+    if (hasHist) {
+      const last3 = introHist.slice(-3);
+      const pctOf = (h) => {
+        if (typeof h.pct === "number") return h.pct;
+        if (!h.indicators) return null;
+        const vals = Object.values(h.indicators);
+        if (!vals.length) return null;
+        const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+        return Math.round(((avg - 1) / 4) * 100);
+      };
+      const pcts = last3.map(pctOf).filter(v => v != null);
+      introPct = pcts.length ? Math.round(pcts.reduce((s, v) => s + v, 0) / pcts.length) : null;
+      const dcLastRec = introHist[introHist.length - 1];
+      const weakestKey = dcLastRec.weakestKey || (dcLastRec.indicators ? Object.entries(dcLastRec.indicators).sort((a, b) => a[1] - b[1])[0][0] : null);
+      introWeakestQ = weakestKey ? DAILYCHECK_QUESTIONS.find(qq => qq.key === weakestKey) : null;
+      introBreakdown = DAILYCHECK_QUESTIONS.map(qq => {
+        const vals = last3.map(h => h.indicators?.[qq.key]).filter(v => typeof v === "number");
+        if (!vals.length) return null;
+        const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+        return { key: qq.key, label: qq.label, pct: Math.round(((avg - 1) / 4) * 100) };
+      }).filter(Boolean);
+    }
+    const introScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
+    const introHi = introPct == null ? 0 : introPct <= 25 ? 0 : introPct <= 50 ? 1 : introPct <= 75 ? 2 : 3;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <div style={S.resultContainer}>
-          <h2 style={S.resultTitle}>{tx(DAILYCHECK_GROUP_LABEL[result.group])}</h2>
+        <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
+          {introHist === null ? (
+            <p style={{ color: c.inkSoft, fontStyle: "italic", textAlign: "center" }}>{t.openingNotes}</p>
+          ) : hasHist ? (
+            <>
+              <div style={{ width: "100%" }}>
+                <MetricBlock
+                  value={introPct}
+                  rightName={introWeakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(introWeakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
+                  rightSub={`${tx({ru:"последние отметки",uk:"останні відмітки",en:"recent check-ins"})} · ${introHist.length}`}
+                  fillFrom="#241D14"
+                  fillTo="#C8A97E"
+                  scaleLabels={introScaleLabels}
+                  hiIndex={introHi}
+                  quote={tx({ ru: "Вот как ты был(а) в последний раз", uk: "Ось яким(ою) ти був(ла) минулого разу", en: "Here's how you were last time" })}
+                  animKey={`dc-intro-${introPct}`}
+                />
+              </div>
+              {introBreakdown.length > 0 && (
+                <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "20px", boxSizing: "border-box" }}>
+                  <p style={{ margin: "0 0 18px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+                    {tx({ ru: "ВСЕ 10 ПОКАЗАТЕЛЕЙ", uk: "УСІ 10 ПОКАЗНИКІВ", en: "ALL 10 INDICATORS" })}
+                  </p>
+                  {introBreakdown.map((item, i) => (
+                    <div key={item.key} style={{ marginBottom: i < introBreakdown.length - 1 ? "16px" : "0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "13px", color: c.inkMuted }}>{tx(item.label)}</span>
+                        <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>{item.pct}%</span>
+                      </div>
+                      <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
+                        <div style={{ ...S.metricFill, width: `${item.pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
+                          <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyMetric text={tx({ ru: "Здесь появится твоя статистика после первого прохождения.", uk: "Тут з'явиться твоя статистика після першого проходження.", en: "Your stats will show up here after your first check-in." })} />
+          )}
+          <button onClick={startTest} style={{ ...S.primaryBtn, marginTop: "20px" }}>
+            {tx(hasHist
+              ? { ru: "Пройти тест сегодня", uk: "Пройти тест сьогодні", en: "Take today's check-in" }
+              : { ru: "Пройти тест", uk: "Пройти тест", en: "Take the check-in" })}
+          </button>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "advice" && result) {
+    const shareMsg = `Компас состояния 🧭\n${tx(DAILYCHECK_GROUP_LABEL[result.group])}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const dcScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
+    const dcHiIndex = result.avgPct <= 25 ? 0 : result.avgPct <= 50 ? 1 : result.avgPct <= 75 ? 2 : 3;
+    const weakestQ = DAILYCHECK_QUESTIONS.find(q => q.key === result.avgWeakestKey);
+    return (
+      <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+        <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
+          <div style={{ width: "100%" }}>
+            <MetricBlock
+              value={result.avgPct}
+              rightName={weakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(weakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
+              rightSub={`${tx({ru:"среднее по",uk:"середнє за",en:"average of"})} ${result.avgCount} ${tx({ ru: result.avgCount === 1 ? "отметке" : "отметкам", uk: result.avgCount === 1 ? "відмітці" : "відміткам", en: result.avgCount === 1 ? "check-in" : "check-ins" })}`}
+              fillFrom="#241D14"
+              fillTo="#C8A97E"
+              scaleLabels={dcScaleLabels}
+              hiIndex={dcHiIndex}
+              quote={`«${tx(DAILYCHECK_GROUP_LABEL[result.group] || {})}»`}
+              animKey={`dc-advice-${result.avgPct}`}
+            />
+          </div>
+          <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "20px", marginBottom: "16px", boxSizing: "border-box" }}>
+            <p style={{ margin: "0 0 18px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+              {tx({ ru: "ВСЕ 10 ПОКАЗАТЕЛЕЙ", uk: "УСІ 10 ПОКАЗНИКІВ", en: "ALL 10 INDICATORS" })}
+            </p>
+            {DAILYCHECK_QUESTIONS.map((q, i) => {
+              const avgScore = result.avgScores[q.key];
+              const pct = Math.round(((avgScore - 1) / 4) * 100);
+              return (
+                <div key={q.key} style={{ marginBottom: i < DAILYCHECK_QUESTIONS.length - 1 ? "16px" : "0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "13px", color: c.inkMuted }}>{tx(q.label)}</span>
+                    <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>{pct}%</span>
+                  </div>
+                  <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
+                    <div style={{ ...S.metricFill, width: `${pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
+                      <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           <p style={S.resultSubtitle}>{tx({ ru: "Сегодня попробуй только одно", uk: "Сьогодні спробуй лише одне", en: "Just try one thing today" })}</p>
+          {dailyCheckReasonText(result.reason) && (
+            <p style={{ margin: "4px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>
+              {tx(dailyCheckReasonText(result.reason))}
+            </p>
+          )}
           <div style={S.stepsBlock}>
             <p style={{ margin: 0, fontSize: "16px", color: c.ink, lineHeight: 1.6 }}>{tx(result.action.text)}</p>
           </div>
@@ -2548,9 +2770,15 @@ function DailyCheckScreen({ onBack }) {
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <div style={S.resultContainer}>
+        <div style={{ ...S.resultContainer, width: "100%" }}>
           <h2 style={S.resultTitle}>{tx({ ru: "Записал(а). Спасибо, что отметил(а).", uk: "Записав(ла). Дякую, що відмітив(ла).", en: "Saved. Thanks for checking in." })}</h2>
-          <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "12px" }}>{t.back}</button>
+          <p style={{ ...S.resultSubtitle, marginBottom: "18px" }}>
+            {tx({ ru: "Хочешь коротко записать, что сейчас на душе?", uk: "Хочеш коротко записати, що зараз на душі?", en: "Want to jot down what's on your mind?" })}
+          </p>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
+          </button>
+          <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "2px" }}>{t.back}</button>
         </div>
       </div>
     );
@@ -4090,14 +4318,49 @@ function MyPathScreen({ onBack }) {
   // ── КОМПАС СОСТОЯНИЯ — последняя запись + паттерны по накопленной истории ──
   const hasDailyCheck = dailyCheckHist.length > 0;
   const dcLast = hasDailyCheck ? dailyCheckHist[dailyCheckHist.length - 1] : null;
+  const dcPctOf = (h) => {
+    if (typeof h.pct === "number") return h.pct;
+    if (!h.indicators) return null;
+    const vals = Object.values(h.indicators);
+    if (!vals.length) return null;
+    const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+    return Math.round(((avg - 1) / 4) * 100);
+  };
+  const dcLast3 = dailyCheckHist.slice(-3);
+  const dcPcts = dcLast3.map(dcPctOf).filter(v => v != null);
+  const dcAvgPct = dcPcts.length ? Math.round(dcPcts.reduce((s, v) => s + v, 0) / dcPcts.length) : null;
+  const dcWeakestKey = dcLast ? (dcLast.weakestKey || (dcLast.indicators ? Object.entries(dcLast.indicators).sort((a, b) => a[1] - b[1])[0][0] : null)) : null;
+  const dcWeakestQ = dcWeakestKey ? DAILYCHECK_QUESTIONS.find(q => q.key === dcWeakestKey) : null;
+  const dcScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
+  const dcHiIndex = dcAvgPct == null ? 0 : dcAvgPct <= 25 ? 0 : dcAvgPct <= 50 ? 1 : dcAvgPct <= 75 ? 2 : 3;
   const dcEnoughForPatterns = dailyCheckHist.length >= 10;
   let dcTopActions = [];
+  let dcAllTimePct = null;
+  let dcAllTimeWeakestQ = null;
+  let dcAllTimeBreakdown = [];
   if (dcEnoughForPatterns) {
     const byAction = {};
+    const sums = {}; const counts = {};
     dailyCheckHist.forEach(h => {
       if (!h.action_id || !h.followUp || h.followUp.delta !== 1) return;
       byAction[h.action_id] = (byAction[h.action_id] || 0) + 1;
     });
+    dailyCheckHist.forEach(h => {
+      if (!h.indicators) return;
+      Object.entries(h.indicators).forEach(([k, v]) => { sums[k] = (sums[k] || 0) + v; counts[k] = (counts[k] || 0) + 1; });
+    });
+    const avgs = Object.keys(sums).map(k => [k, sums[k] / counts[k]]);
+    if (avgs.length) {
+      const overallAvg = avgs.reduce((s, e) => s + e[1], 0) / avgs.length;
+      dcAllTimePct = Math.round(((overallAvg - 1) / 4) * 100);
+      const weakest = avgs.reduce((min, e) => (e[1] < min[1] ? e : min), avgs[0])[0];
+      dcAllTimeWeakestQ = DAILYCHECK_QUESTIONS.find(q => q.key === weakest);
+      dcAllTimeBreakdown = DAILYCHECK_QUESTIONS.map(q => ({
+        key: q.key,
+        label: q.label,
+        pct: sums[q.key] != null ? Math.round(((sums[q.key] / counts[q.key] - 1) / 4) * 100) : null,
+      })).filter(x => x.pct != null);
+    }
     dcTopActions = Object.entries(byAction).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, count]) => {
       const found = Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === id);
       return { id, count, text: found ? found.text : null };
@@ -4277,28 +4540,74 @@ function MyPathScreen({ onBack }) {
         <InfoButton text={tx({ ru: "«Что показал последний чек-ин и какие действия чаще всего реально помогают именно тебе.»", uk: "«Що показав останній чек-ін і які дії найчастіше реально допомагають саме тобі.»", en: "«What your last check-in showed and which actions actually tend to help you.»" })} />
       </div>
       {hasDailyCheck ? (
-        <div style={S.stepsBlock}>
-          <p style={{ margin: "0 0 8px", fontSize: "13px", color: c.inkMuted, fontStyle: "italic" }}>
-            {tx(DAILYCHECK_GROUP_LABEL[dcLast.group] || {})}
-          </p>
-          {dcEnoughForPatterns && dcTopActions.length > 0 ? (
-            <>
-              <p style={{ margin: "14px 0 10px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
-                {tx({ ru: "ЧТО ЧАЩЕ ВСЕГО ПОМОГАЕТ", uk: "ЩО НАЙЧАСТІШЕ ДОПОМАГАЄ", en: "WHAT HELPS MOST OFTEN" })}
+        <>
+          <div style={{ width: "100%" }}>
+            <MetricBlock
+              value={dcAvgPct}
+              rightName={dcWeakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(dcWeakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
+              rightSub={`${tx({ ru: "среднее по", uk: "середнє за", en: "average of" })} ${dcLast3.length} ${tx({ ru: dcLast3.length === 1 ? "отметке" : "отметкам", uk: dcLast3.length === 1 ? "відмітці" : "відміткам", en: dcLast3.length === 1 ? "check-in" : "check-ins" })}`}
+              fillFrom="#241D14"
+              fillTo="#C8A97E"
+              scaleLabels={dcScaleLabels}
+              hiIndex={dcHiIndex}
+              quote={`«${tx(DAILYCHECK_GROUP_LABEL[dcLast.group] || {})}»`}
+              animKey={`dailycheck-${dcAvgPct}`}
+            />
+          </div>
+          <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "16px", boxSizing: "border-box" }}>
+            {dcEnoughForPatterns ? (
+              <>
+                {dcAllTimePct != null && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "12px", paddingBottom: "12px", borderBottom: `1px solid ${c.line}` }}>
+                    <span style={{ fontSize: "12px", color: c.inkMuted }}>
+                      {tx({ ru: `За всё время (${dailyCheckHist.length} тестов)`, uk: `За весь час (${dailyCheckHist.length} тестів)`, en: `All time (${dailyCheckHist.length} check-ins)` })}
+                    </span>
+                    <span style={{ fontSize: "14px", color: c.accent, fontWeight: 600 }}>
+                      {dcAllTimePct}% {dcAllTimeWeakestQ ? `· ${tx({ru:"слабее всего",uk:"найслабше",en:"weakest"})}: ${tx(dcAllTimeWeakestQ.label)}` : ""}
+                    </span>
+                  </div>
+                )}
+                {dcAllTimeBreakdown.length > 0 && (
+                  <div style={{ marginBottom: dcTopActions.length > 0 ? "16px" : "0" }}>
+                    <p style={{ margin: "0 0 12px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+                      {tx({ ru: "ПОКАЗАТЕЛИ ЗА ВСЁ ВРЕМЯ", uk: "ПОКАЗНИКИ ЗА ВЕСЬ ЧАС", en: "INDICATORS OVER TIME" })}
+                    </p>
+                    {dcAllTimeBreakdown.map((item, i) => (
+                      <div key={item.key} style={{ marginBottom: i < dcAllTimeBreakdown.length - 1 ? "13px" : "0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "12px", color: c.inkMuted }}>{tx(item.label)}</span>
+                          <span style={{ fontSize: "12px", color: c.accent, fontWeight: 600 }}>{item.pct}%</span>
+                        </div>
+                        <div style={{ ...S.metricTrack, height: "6px", background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
+                          <div style={{ ...S.metricFill, width: `${item.pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
+                            <span style={{ ...S.metricFillDot, width: "12px", height: "12px", background: "#C8A97E" }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {dcTopActions.length > 0 && (
+                  <>
+                    <p style={{ margin: "0 0 10px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+                      {tx({ ru: "ЧТО ЧАЩЕ ВСЕГО ПОМОГАЕТ", uk: "ЩО НАЙЧАСТІШЕ ДОПОМАГАЄ", en: "WHAT HELPS MOST OFTEN" })}
+                    </p>
+                    {dcTopActions.map((a, i) => (
+                      <div key={a.id} style={{ display: "flex", gap: "10px", marginBottom: i < dcTopActions.length - 1 ? "10px" : "0" }}>
+                        <span style={{ fontSize: "11px", color: c.accent, flexShrink: 0, marginTop: "2px" }}>{i + 1}.</span>
+                        <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(a.text)}</p>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </>
+            ) : (
+              <p style={{ margin: 0, fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
+                {tx({ ru: `Собираем твою историю (${dailyCheckHist.length}/10) — после 10 отметок здесь появятся личные закономерности, и мы начнём учитывать их в советах.`, uk: `Збираємо твою історію (${dailyCheckHist.length}/10) — після 10 відміток тут з'являться особисті закономірності, і ми почнемо враховувати їх у порадах.`, en: `Building your history (${dailyCheckHist.length}/10) — after 10 check-ins, your own patterns will show up here and start shaping your advice.` })}
               </p>
-              {dcTopActions.map((a, i) => (
-                <div key={a.id} style={{ display: "flex", gap: "10px", marginBottom: i < dcTopActions.length - 1 ? "10px" : "0" }}>
-                  <span style={{ fontSize: "11px", color: c.accent, flexShrink: 0, marginTop: "2px" }}>{i + 1}.</span>
-                  <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(a.text)}</p>
-                </div>
-              ))}
-            </>
-          ) : (
-            <p style={{ margin: "10px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
-              {tx({ ru: "Собираем твою историю — после нескольких отметок здесь появятся личные закономерности.", uk: "Збираємо твою історію — після кількох відміток тут з'являться особисті закономірності.", en: "Building your history — after a few check-ins, your own patterns will show up here." })}
-            </p>
-          )}
-        </div>
+            )}
+          </div>
+        </>
       ) : (
         <EmptyMetric text={tx({ ru: "Пройди «Компас состояния» — и здесь появится твой последний результат.", uk: "Пройди «Компас стану» — і тут з'явиться твій останній результат.", en: "Take the State compass — and your latest result will appear here." })} />
       )}
