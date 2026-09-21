@@ -2409,6 +2409,15 @@ const CHALLENGE_GROUP_META = {
   pause: { ru: "Пауза", uk: "Пауза", en: "Pause" },
 };
 
+const CHALLENGE_GROUP_DESC = {
+  recovery: { ru: "Для тех дней, когда сил мало, а сон и отдых страдают.", uk: "Для тих днів, коли сил мало, а сон і відпочинок страждають.", en: "For the days when you're running low and rest keeps slipping." },
+  overload: { ru: "Когда голова перегружена делами и мыслями.", uk: "Коли голова перевантажена справами і думками.", en: "For when your head is overloaded with tasks and thoughts." },
+  anxiety: { ru: "Когда тревожно и трудно успокоиться.", uk: "Коли тривожно і важко заспокоїтися.", en: "For when you're anxious and struggling to settle down." },
+  lowEnergy: { ru: "Когда энергии и мотивации не хватает на обычные дела.", uk: "Коли енергії та мотивації не вистачає на звичні справи.", en: "For when energy and motivation are running short." },
+  focus: { ru: "Когда трудно сосредоточиться и мысли скачут.", uk: "Коли важко зосередитися і думки скачуть.", en: "For when it's hard to focus and thoughts keep jumping around." },
+  pause: { ru: "Когда в целом всё ровно, но хочется научиться делать паузы.", uk: "Коли загалом усе рівно, але хочеться навчитися робити паузи.", en: "For when things are steady, but you want to practice taking real pauses." },
+};
+
 const CHALLENGE_REFLECTIONS = [
   { id: "rf1", text: { ru: "Что сегодня было самым тяжёлым моментом?", uk: "Що сьогодні було найважчим моментом?", en: "What was the hardest moment today?" } },
   { id: "rf2", text: { ru: "В какой момент сегодня стало чуть легче?", uk: "У який момент сьогодні стало трохи легше?", en: "When did things feel a little lighter today?" } },
@@ -2442,20 +2451,357 @@ const CHALLENGE_REFLECTIONS = [
   { id: "rf30", text: { ru: "Одним словом — как прошёл сегодняшний день?", uk: "Одним словом — як минув сьогоднішній день?", en: "In one word — how was today?" } },
 ];
 
+// Ритуалы — многошаговые практики для челленджа (в отличие от короткого совета на день,
+// который остаётся отдельной, доп. заметкой). Опираются на реальные, изученные техники и
+// организованы в 3 яруса нарастающей сложности (та же логика, что в ступенчатой помощи
+// CBT и в progressive-overload подходах к привычкам: не 3 одинаковых действия по кругу,
+// а полноценный путь база → углубление → продвинутый уровень):
+//  easy     — дни 1-10,  лёгкий вход, самые простые и короткие практики
+//  medium   — дни 11-20, требуют больше внимания/времени, работа с причиной, а не симптомом
+//  advanced — дни 21-30, для тех, кто прошёл базу — более длинные/самостоятельные практики
+// Длина челленджа (10/20/30) — это просто "докуда" человек идёт по этому пути.
+const CHALLENGE_RITUALS = {
+  recovery: { easy: [
+    { id: "rr1", title: { ru: "Ритуал вечернего восстановления", uk: "Ритуал вечірнього відновлення", en: "Evening recovery ritual" }, steps: [
+      { ru: "За час до сна убери яркий свет и экраны — приглуши лампы.", uk: "За годину до сну прибери яскраве світло й екрани — приглуш лампи.", en: "An hour before bed, dim the lights and put screens away." },
+      { ru: "Выпей тёплой воды или травяного чая, без кофеина.", uk: "Випий теплої води або трав'яного чаю, без кофеїну.", en: "Drink warm water or herbal tea, no caffeine." },
+      { ru: "Запиши одной фразой, что сегодня получилось.", uk: "Запиши однією фразою, що сьогодні вийшло.", en: "Write down one thing that went well today, in one line." },
+      { ru: "Ляг минимум на 20 минут раньше обычного.", uk: "Ляж мінімум на 20 хвилин раніше звичайного.", en: "Go to bed at least 20 minutes earlier than usual." },
+    ]},
+    { id: "rr2", title: { ru: "Ритуал маленького шага", uk: "Ритуал маленького кроку", en: "Small-step ritual" }, steps: [
+      { ru: "Выбери одно небольшое дело, которое давно откладывал(а).", uk: "Обери одну невелику справу, яку давно відкладав(ла).", en: "Pick one small task you've been putting off." },
+      { ru: "Разбей его на первый шаг, который займёт не больше 5 минут.", uk: "Розбий її на перший крок, який займе не більше 5 хвилин.", en: "Break it down to a first step that takes 5 minutes or less." },
+      { ru: "Сделай только этот шаг — не весь план.", uk: "Зроби лише цей крок — не весь план.", en: "Do only that step — not the whole plan." },
+      { ru: "Отметь, что почувствовал(а) сразу после.", uk: "Відміть, що відчув(ла) одразу після.", en: "Notice what you felt right after." },
+    ]},
+    { id: "rr3", title: { ru: "Ритуал дневного света и воды", uk: "Ритуал денного світла і води", en: "Daylight and water ritual" }, steps: [
+      { ru: "В течение 30 минут после пробуждения выйди на дневной свет.", uk: "Протягом 30 хвилин після пробудження вийди на денне світло.", en: "Get daylight within 30 minutes of waking up." },
+      { ru: "Выпей стакан воды до кофе или чая.", uk: "Випий склянку води до кави чи чаю.", en: "Drink a glass of water before coffee or tea." },
+      { ru: "Сделай 5 минут лёгкой растяжки или ходьбы.", uk: "Зроби 5 хвилин легкої розтяжки або ходьби.", en: "Do 5 minutes of light stretching or walking." },
+    ]},
+  ], medium: [
+    { id: "rm1", title: { ru: "Ритуал полного вечернего отключения", uk: "Ритуал повного вечірнього відключення", en: "Full evening shutdown ritual" }, steps: [
+      { ru: "За 90 минут до сна убери все экраны — не приглуши, а именно убери из комнаты.", uk: "За 90 хвилин до сну прибери всі екрани — не приглуш, а саме прибери з кімнати.", en: "90 minutes before bed, remove all screens from the room — not just dim them." },
+      { ru: "Приготовь одну вещь на завтра: одежду, сумку или список дел.", uk: "Приготуй одну річ на завтра: одяг, сумку або список справ.", en: "Prep one thing for tomorrow: clothes, a bag, or a to-do list." },
+      { ru: "Прими тёплый душ или ванну — тело остывает после, и это помогает уснуть.", uk: "Прийми теплий душ або ванну — тіло охолоджується після, і це допомагає заснути.", en: "Take a warm shower or bath — the body cools afterward, which helps sleep." },
+      { ru: "Ляг в одно и то же время, даже если не хочется спать.", uk: "Ляж в один і той самий час, навіть якщо не хочеться спати.", en: "Go to bed at the same time, even if you don't feel sleepy." },
+    ]},
+    { id: "rm2", title: { ru: "Ритуал телесного сканирования", uk: "Ритуал тілесного сканування", en: "Body scan ritual" }, steps: [
+      { ru: "Ляг удобно, закрой глаза.", uk: "Ляж зручно, заплющ очі.", en: "Lie down comfortably, close your eyes." },
+      { ru: "Пройдись вниманием от макушки до стоп, задерживаясь на каждой части тела 10-15 секунд.", uk: "Пройдись увагою від маківки до стоп, затримуючись на кожній частині тіла 10-15 секунд.", en: "Move your attention from head to feet, pausing 10–15 seconds on each part." },
+      { ru: "Там, где чувствуешь напряжение, сознательно расслабь эту зону.", uk: "Там, де відчуваєш напругу, свідомо розслаб цю зону.", en: "Wherever you feel tension, consciously release it." },
+      { ru: "Не старайся уснуть — просто дай телу почувствовать себя услышанным.", uk: "Не намагайся заснути — просто дай тілу відчути себе почутим.", en: "Don't try to fall asleep — just let the body feel heard." },
+    ]},
+    { id: "rm3", title: { ru: "Ритуал фиксированного подъёма", uk: "Ритуал фіксованого підйому", en: "Fixed wake-up ritual" }, steps: [
+      { ru: "Встань в одно и то же время, даже если спал(а) плохо — это главный рычаг восстановления ритма.", uk: "Встань в один і той самий час, навіть якщо спав(ла) погано — це головний важіль відновлення ритму.", en: "Get up at the same time even after a bad night — it's the main lever for resetting rhythm." },
+      { ru: "Сразу после подъёма — свет и вода, без пролёживания в телефоне.", uk: "Одразу після підйому — світло і вода, без лежання в телефоні.", en: "Right after waking: light and water, no lying in bed scrolling." },
+      { ru: "В течение дня не пытайся «доспать» долгим дневным сном — максимум 20 минут, если совсем нужно.", uk: "Протягом дня не намагайся «доспати» довгим денним сном — максимум 20 хвилин, якщо зовсім треба.", en: "Don't try to catch up with a long nap — 20 minutes max if you really need it." },
+    ]},
+  ], advanced: [
+    { id: "ra1", title: { ru: "Ритуал йога-нидры", uk: "Ритуал йога-нідри", en: "Yoga nidra ritual" }, steps: [
+      { ru: "Ляг в тихом месте на 15-20 минут, включи любую запись йога-нидры или веди себя сам(а) голосом.", uk: "Ляж у тихому місці на 15-20 хвилин, увімкни будь-який запис йога-нідри або веди себе сам(а) голосом.", en: "Lie in a quiet spot for 15–20 minutes; play a yoga nidra recording or guide yourself aloud." },
+      { ru: "Последовательно «отпускай» каждую часть тела, не двигаясь и не засыпая.", uk: "Послідовно «відпускай» кожну частину тіла, не рухаючись і не засинаючи.", en: "Sequentially 'release' each part of the body, without moving or falling asleep." },
+      { ru: "После — не вскакивай, дай себе минуту вернуться.", uk: "Після — не схоплюйся, дай собі хвилину повернутися.", en: "Afterward, don't jump up — give yourself a minute to return." },
+    ]},
+    { id: "ra2", title: { ru: "Ритуал недельного энергоаудита", uk: "Ритуал тижневого енергоаудиту", en: "Weekly energy audit ritual" }, steps: [
+      { ru: "Просмотри последние 7 дней: когда энергия была выше, а когда — на нуле.", uk: "Переглянь останні 7 днів: коли енергія була вищою, а коли — на нулі.", en: "Review the last 7 days: when was energy higher, when was it at zero." },
+      { ru: "Найди одну вещь, которая стабильно забирает силы, и один час, который стабильно их отдаёт.", uk: "Знайди одну річ, яка стабільно забирає сили, і одну годину, яка стабільно їх повертає.", en: "Find one thing that reliably drains you, and one hour that reliably restores you." },
+      { ru: "Реши, что одно из этого ты изменишь на следующей неделе — не всё сразу.", uk: "Вирішь, що одне з цього ти зміниш наступного тижня — не все одразу.", en: "Decide on one single change for next week — not everything at once." },
+    ]},
+    { id: "ra3", title: { ru: "Ритуал полного цифрового вечера офлайн", uk: "Ритуал повного цифрового вечора офлайн", en: "Full offline evening ritual" }, steps: [
+      { ru: "С 19:00 (или за 3 часа до сна) телефон и ноутбук физически уходят в другую комнату.", uk: "З 19:00 (або за 3 години до сну) телефон і ноутбук фізично йдуть в іншу кімнату.", en: "From 7pm (or 3 hours before bed), phone and laptop physically go to another room." },
+      { ru: "Заполни это время тем, что требует рук или тела: готовка, прогулка, книга, разговор.", uk: "Заповни цей час тим, що потребує рук або тіла: готування, прогулянка, книга, розмова.", en: "Fill the time with something hands-on or physical: cooking, a walk, a book, a conversation." },
+      { ru: "Замечай, сколько раз рука тянется к телефону по привычке — не осуждай, просто замечай.", uk: "Помічай, скільки разів рука тягнеться до телефону за звичкою — не засуджуй, просто помічай.", en: "Notice how often your hand reaches for the phone out of habit — no judgment, just notice." },
+    ]},
+  ]},
+  overload: { easy: [
+    { id: "or1", title: { ru: "Ритуал разгрузки головы", uk: "Ритуал розвантаження голови", en: "Mind-dump ritual" }, steps: [
+      { ru: "Возьми лист бумаги и выпиши всё, что крутится в голове, без разбора.", uk: "Візьми аркуш паперу і випиши все, що крутиться в голові, без розбору.", en: "Grab paper and dump everything on your mind, unfiltered." },
+      { ru: "Обведи 1-2 пункта, которые реально важны сегодня.", uk: "Обведи 1-2 пункти, які реально важливі сьогодні.", en: "Circle the 1–2 items that actually matter today." },
+      { ru: "Остальное перенеси на завтра или вычеркни.", uk: "Решту перенеси на завтра або викресли.", en: "Move the rest to tomorrow or cross it out." },
+    ]},
+    { id: "or2", title: { ru: "Ритуал цифрового минимализма", uk: "Ритуал цифрового мінімалізму", en: "Digital minimalism ritual" }, steps: [
+      { ru: "Отключи уведомления на телефоне на 1 час.", uk: "Вимкни сповіщення на телефоні на 1 годину.", en: "Turn off phone notifications for 1 hour." },
+      { ru: "Закрой все вкладки и чаты, кроме одного нужного.", uk: "Закрий усі вкладки й чати, крім одного потрібного.", en: "Close every tab and chat except the one you need." },
+      { ru: "Займись одной задачей весь этот час.", uk: "Займись однією задачею всю цю годину.", en: "Work on just one task for that whole hour." },
+    ]},
+    { id: "or3", title: { ru: "Ритуал одной задачи", uk: "Ритуал однієї задачі", en: "Single-task ritual" }, steps: [
+      { ru: "Выбери 1 задачу на сегодня и честно назови остальное «не сегодня».", uk: "Обери 1 задачу на сьогодні і чесно назви решту «не сьогодні».", en: "Pick 1 task for today and honestly call the rest 'not today'." },
+      { ru: "Поставь таймер на 25 минут (техника Pomodoro).", uk: "Постав таймер на 25 хвилин (техніка Pomodoro).", en: "Set a 25-minute timer (Pomodoro technique)." },
+      { ru: "Работай только над ней до сигнала, потом отдохни 5 минут.", uk: "Працюй лише над нею до сигналу, потім відпочинь 5 хвилин.", en: "Work only on it until it rings, then rest 5 minutes." },
+    ]},
+  ], medium: [
+    { id: "om1", title: { ru: "Ритуал матрицы приоритетов", uk: "Ритуал матриці пріоритетів", en: "Priority matrix ritual" }, steps: [
+      { ru: "Раздели лист на 4 квадрата: срочно/важно, важно/не срочно, срочно/не важно, ни то ни другое.", uk: "Розділи аркуш на 4 квадрати: терміново/важливо, важливо/не терміново, терміново/не важливо, ні те ні інше.", en: "Split a page into 4 quadrants: urgent/important, important/not urgent, urgent/not important, neither." },
+      { ru: "Раскидай сегодняшние дела по квадратам — честно, без прокрастинации.", uk: "Розкидай сьогоднішні справи по квадратах — чесно, без прокрастинації.", en: "Sort today's tasks into the quadrants — honestly, no stalling." },
+      { ru: "Начни с одного дела из «важно/не срочно» — именно эти обычно откладываются, а потом болят сильнее всего.", uk: "Почни з однієї справи з «важливо/не терміново» — саме ці зазвичай відкладаються, а потім болять найсильніше.", en: "Start with one 'important/not urgent' item — those get postponed and cost the most later." },
+    ]},
+    { id: "om2", title: { ru: "Ритуал пакетной обработки", uk: "Ритуал пакетної обробки", en: "Batch-processing ritual" }, steps: [
+      { ru: "Определи 2 фиксированных окна в день для почты и сообщений — например 12:00 и 17:00.", uk: "Визнач 2 фіксовані вікна на день для пошти і повідомлень — наприклад 12:00 і 17:00.", en: "Set 2 fixed windows per day for email/messages — e.g. noon and 5pm." },
+      { ru: "Всё остальное время держи уведомления выключенными.", uk: "Увесь інший час тримай сповіщення вимкненими.", en: "Keep notifications off the rest of the time." },
+      { ru: "В отведённое окно отвечай быстро и по делу, не растягивай его.", uk: "У відведене вікно відповідай швидко і по суті, не розтягуй його.", en: "In the window, reply quickly and to the point — don't let it stretch." },
+    ]},
+    { id: "om3", title: { ru: "Ритуал глубокого блока 50/10", uk: "Ритуал глибокого блоку 50/10", en: "Deep-block 50/10 ritual" }, steps: [
+      { ru: "Выбери одну задачу, требующую сосредоточенности.", uk: "Обери одну задачу, що потребує зосередженості.", en: "Pick one task that needs real focus." },
+      { ru: "Работай 50 минут без единого переключения — телефон вне комнаты.", uk: "Працюй 50 хвилин без жодного перемикання — телефон поза кімнатою.", en: "Work 50 minutes with zero switching — phone out of the room." },
+      { ru: "Отдохни полные 10 минут, не заглядывая в телефон, потом повтори при необходимости.", uk: "Відпочинь повні 10 хвилин, не зазираючи в телефон, потім повтори за потреби.", en: "Rest a full 10 minutes without checking your phone, then repeat if needed." },
+    ]},
+  ], advanced: [
+    { id: "oa1", title: { ru: "Ритуал недельного разбора", uk: "Ритуал тижневого розбору", en: "Weekly review ritual" }, steps: [
+      { ru: "Просмотри все открытые задачи и обязательства за последнюю неделю.", uk: "Переглянь усі відкриті задачі й зобов'язання за останній тиждень.", en: "Review all open tasks and commitments from the last week." },
+      { ru: "Закрой или официально отпусти то, что зависло без действия больше 2 недель.", uk: "Закрий або офіційно відпусти те, що зависло без дії більше 2 тижнів.", en: "Close or formally let go of anything stalled with no action for 2+ weeks." },
+      { ru: "Выпиши только 3 приоритета на следующую неделю — остальное подождёт.", uk: "Випиши лише 3 пріоритети на наступний тиждень — решта почекає.", en: "Write down only 3 priorities for next week — everything else can wait." },
+    ]},
+    { id: "oa2", title: { ru: "Ритуал одного главного дела", uk: "Ритуал однієї головної справи", en: "One main task ritual" }, steps: [
+      { ru: "Определи с вечера самое неприятное или самое важное дело завтрашнего дня.", uk: "Визнач звечора найнеприємнішу або найважливішу справу завтрашнього дня.", en: "The night before, pick tomorrow's most unpleasant or most important task." },
+      { ru: "Сделай именно его первым, до почты и мессенджеров.", uk: "Зроби саме її першою, до пошти і месенджерів.", en: "Do exactly that one first, before email and messaging apps." },
+      { ru: "Заметь, как остальной день ощущается легче после этого.", uk: "Поміть, як решта дня відчувається легшою після цього.", en: "Notice how much lighter the rest of the day feels afterward." },
+    ]},
+    { id: "oa3", title: { ru: "Ритуал системы вместо списка", uk: "Ритуал системи замість списку", en: "System-over-list ritual" }, steps: [
+      { ru: "Раздели день на 3-4 крупных блока: глубокая работа, встречи/общение, рутина, отдых.", uk: "Розділи день на 3-4 великих блоки: глибока робота, зустрічі/спілкування, рутина, відпочинок.", en: "Split the day into 3–4 blocks: deep work, meetings/communication, routine, rest." },
+      { ru: "Заранее реши, какой блок для чего — не решай в моменте, что делать дальше.", uk: "Заздалегідь вирішь, який блок для чого — не вирішуй в моменті, що робити далі.", en: "Decide in advance what each block is for — don't decide in the moment." },
+      { ru: "Следуй блокам один день подряд и оцени вечером, что сработало.", uk: "Дотримуйся блоків один день поспіль і оціни ввечері, що спрацювало.", en: "Follow the blocks for one full day and review in the evening what worked." },
+    ]},
+  ]},
+  anxiety: { easy: [
+    { id: "ar1", title: { ru: "Ритуал дыхания с длинным выдохом", uk: "Ритуал дихання з довгим видихом", en: "Long-exhale breathing ritual" }, steps: [
+      { ru: "Сядь удобно, обе ноги на полу.", uk: "Сядь зручно, обидві ноги на підлозі.", en: "Sit comfortably, both feet on the floor." },
+      { ru: "Вдох на 4 счёта, задержка на 7, выдох на 8.", uk: "Вдих на 4 рахунки, затримка на 7, видих на 8.", en: "Inhale for 4 counts, hold for 7, exhale for 8." },
+      { ru: "Повтори 5-6 циклов подряд.", uk: "Повтори 5-6 циклів поспіль.", en: "Repeat 5–6 cycles in a row." },
+      { ru: "Отметь, что изменилось в теле после.", uk: "Відміть, що змінилося в тілі після.", en: "Notice what changed in your body afterward." },
+    ]},
+    { id: "ar2", title: { ru: "Ритуал заземления 5-4-3-2-1", uk: "Ритуал заземлення 5-4-3-2-1", en: "5-4-3-2-1 grounding ritual" }, steps: [
+      { ru: "Назови вслух 5 вещей, которые видишь.", uk: "Назви вголос 5 речей, які бачиш.", en: "Name 5 things you can see." },
+      { ru: "Назови 4 звука, которые слышишь.", uk: "Назви 4 звуки, які чуєш.", en: "Name 4 sounds you can hear." },
+      { ru: "Назови 3 ощущения в теле, 2 запаха и 1 вкус.", uk: "Назви 3 відчуття в тілі, 2 запахи і 1 смак.", en: "Name 3 things you feel, 2 smells, and 1 taste." },
+    ]},
+    { id: "ar3", title: { ru: "Ритуал переноса тревоги на бумагу", uk: "Ритуал перенесення тривоги на папір", en: "Worry-on-paper ritual" }, steps: [
+      { ru: "Напиши тревожную мысль целиком, как есть.", uk: "Напиши тривожну думку цілком, як є.", en: "Write the anxious thought down exactly as it is." },
+      { ru: "Спроси: что из этого я реально контролирую сейчас?", uk: "Запитай: що з цього я реально контролюю зараз?", en: "Ask: what part of this can I actually control right now?" },
+      { ru: "Запиши один маленький шаг только по контролируемой части.", uk: "Запиши один маленький крок лише щодо контрольованої частини.", en: "Write down one small step for just the controllable part." },
+    ]},
+  ], medium: [
+    { id: "am1", title: { ru: "Ритуал прогрессивной мышечной релаксации", uk: "Ритуал прогресивної м'язової релаксації", en: "Progressive muscle relaxation ritual" }, steps: [
+      { ru: "Начни со стоп: напряги на 5 секунд, резко отпусти.", uk: "Почни зі стоп: напруж на 5 секунд, різко відпусти.", en: "Start with your feet: tense for 5 seconds, release sharply." },
+      { ru: "Поднимайся вверх по телу — голени, бёдра, живот, руки, плечи, лицо — так же напрягая и отпуская каждую группу мышц.", uk: "Піднімайся вгору по тілу — гомілки, стегна, живіт, руки, плечі, обличчя — так само напружуючи й відпускаючи кожну групу м'язів.", en: "Move up the body — calves, thighs, stomach, arms, shoulders, face — tensing and releasing each group." },
+      { ru: "В конце полежи минуту, замечая разницу между напряжением и расслаблением.", uk: "Наприкінці полеж хвилину, помічаючи різницю між напругою і розслабленням.", en: "Finish lying still for a minute, noticing the difference between tension and release." },
+    ]},
+    { id: "am2", title: { ru: "Ритуал запланированного беспокойства", uk: "Ритуал запланованого занепокоєння", en: "Scheduled worry ritual" }, steps: [
+      { ru: "Выбери фиксированные 10 минут в день — например 18:00 — только для тревожных мыслей.", uk: "Обери фіксовані 10 хвилин на день — наприклад 18:00 — лише для тривожних думок.", en: "Pick a fixed 10 minutes daily — say 6pm — just for anxious thoughts." },
+      { ru: "Весь день, когда приходит тревога не по расписанию, запиши её в 2 словах и отложи до назначенного времени.", uk: "Увесь день, коли тривога приходить не за розкладом, запиши її у 2 словах і відклади до призначеного часу.", en: "All day, when worry shows up off-schedule, jot it in 2 words and postpone it to that slot." },
+      { ru: "В назначенное время дай себе подумать об этом столько, сколько нужно, и закрой блокнот.", uk: "У призначений час дай собі подумати про це стільки, скільки треба, і закрий блокнот.", en: "At the scheduled time, let yourself think it through fully, then close the notebook." },
+    ]},
+    { id: "am3", title: { ru: "Ритуал разбора мысли", uk: "Ритуал розбору думки", en: "Thought-record ritual" }, steps: [
+      { ru: "Запиши тревожную мысль дословно.", uk: "Запиши тривожну думку дослівно.", en: "Write the anxious thought down word for word." },
+      { ru: "Спроси: это факт или предположение? Какие есть доказательства за и против?", uk: "Запитай: це факт чи припущення? Які є докази за і проти?", en: "Ask: is this a fact or an assumption? What evidence is for and against it?" },
+      { ru: "Сформулируй более взвешенную версию этой мысли — не «всё будет прекрасно», а честную и спокойную.", uk: "Сформулюй зваженішу версію цієї думки — не «все буде чудово», а чесну і спокійну.", en: "Write a more balanced version — not 'it'll be perfect,' but honest and calm." },
+    ]},
+  ], advanced: [
+    { id: "aa1", title: { ru: "Ритуал лестницы столкновения", uk: "Ритуал драбини зіткнення", en: "Exposure-ladder ritual" }, steps: [
+      { ru: "Выбери одну маленькую, управляемую ситуацию, которая обычно вызывает тревогу.", uk: "Обери одну маленьку, керовану ситуацію, яка зазвичай викликає тривогу.", en: "Pick one small, manageable situation that usually triggers anxiety." },
+      { ru: "Сознательно зайди в неё сегодня, не избегая, на короткое время.", uk: "Свідомо зайди в неї сьогодні, не уникаючи, на короткий час.", en: "Deliberately step into it today, briefly, without avoiding it." },
+      { ru: "После отметь, что тревога поднялась и снизилась сама, без побега.", uk: "Після відміть, що тривога піднялась і знизилась сама, без втечі.", en: "Afterward, notice that anxiety rose and fell on its own — without escaping." },
+    ]},
+    { id: "aa2", title: { ru: "Ритуал паузы самосострадания", uk: "Ритуал паузи самоспівчуття", en: "Self-compassion break ritual" }, steps: [
+      { ru: "Положи руку на грудь и признай вслух: «Сейчас мне тяжело».", uk: "Поклади руку на груди і визнай вголос: «Зараз мені важко».", en: "Put a hand on your chest and say out loud: 'This is hard right now.'" },
+      { ru: "Напомни себе: «Это часть человеческого опыта, не только моего».", uk: "Нагадай собі: «Це частина людського досвіду, не лише мого».", en: "Remind yourself: 'This is part of being human, not just my struggle.'" },
+      { ru: "Спроси себя: что бы я сказал(а) другу в такой ситуации — и скажи это себе.", uk: "Запитай себе: що б я сказав(ла) другу в такій ситуації — і скажи це собі.", en: "Ask: what would I tell a friend in this situation — then say it to yourself." },
+    ]},
+    { id: "aa3", title: { ru: "Ритуал полного заземления через тело", uk: "Ритуал повного заземлення через тіло", en: "Full body-grounding ritual" }, steps: [
+      { ru: "Встань, почувствуй стопы на полу, слегка покачайся из стороны в сторону.", uk: "Встань, відчуй стопи на підлозі, злегка похитайся з боку в бік.", en: "Stand up, feel your feet on the floor, sway gently side to side." },
+      { ru: "Сделай 10 медленных приседаний или растяжек, синхронизируя движение с дыханием.", uk: "Зроби 10 повільних присідань або розтяжок, синхронізуючи рух з диханням.", en: "Do 10 slow squats or stretches, syncing movement with breath." },
+      { ru: "Закончи 3 глубокими вдохами с длинным выдохом, стоя неподвижно.", uk: "Закінчи 3 глибокими вдихами з довгим видихом, стоячи нерухомо.", en: "Finish with 3 deep breaths and long exhales, standing still." },
+    ]},
+  ]},
+  lowEnergy: { easy: [
+    { id: "er1", title: { ru: "Ритуал утреннего запуска", uk: "Ритуал ранкового запуску", en: "Morning kickstart ritual" }, steps: [
+      { ru: "Стакан воды сразу после пробуждения.", uk: "Склянка води одразу після пробудження.", en: "A glass of water right after waking up." },
+      { ru: "5 минут любого движения — потянись, пройдись.", uk: "5 хвилин будь-якого руху — потягнись, пройдись.", en: "5 minutes of any movement — stretch, walk around." },
+      { ru: "Нормальный завтрак, не только кофе.", uk: "Нормальний сніданок, не лише кава.", en: "A real breakfast, not just coffee." },
+    ]},
+    { id: "er2", title: { ru: "Ритуал маленькой победы", uk: "Ритуал маленької перемоги", en: "Small-win ritual" }, steps: [
+      { ru: "Сделай одно маленькое дело, которое откладывал(а).", uk: "Зроби одну маленьку справу, яку відкладав(ла).", en: "Do one small thing you've been putting off." },
+      { ru: "Отметь его как выполненное — вслух или письменно.", uk: "Відміть її як виконану — вголос або письмово.", en: "Mark it done — out loud or in writing." },
+      { ru: "Дай себе 2 минуты просто порадоваться этому.", uk: "Дай собі 2 хвилини просто порадіти цьому.", en: "Give yourself 2 minutes to just feel good about it." },
+    ]},
+    { id: "er3", title: { ru: "Ритуал светового заряда", uk: "Ритуал світлового заряду", en: "Light-charge ritual" }, steps: [
+      { ru: "Выйди на улицу минимум на 10 минут.", uk: "Вийди на вулицю мінімум на 10 хвилин.", en: "Step outside for at least 10 minutes." },
+      { ru: "Не смотри в телефон — просто будь на свету.", uk: "Не дивись у телефон — просто будь на світлі.", en: "Don't look at your phone — just be in the light." },
+      { ru: "Вернувшись, сделай одну простую задачу.", uk: "Повернувшись, зроби одну просту задачу.", en: "When you're back, do one simple task." },
+    ]},
+  ], medium: [
+    { id: "em1", title: { ru: "Ритуал плана «если-то»", uk: "Ритуал плану «якщо-то»", en: "If-then plan ritual" }, steps: [
+      { ru: "Выбери одно действие, которое хочешь сделать сегодня, несмотря на низкую энергию.", uk: "Обери одну дію, яку хочеш зробити сьогодні, попри низьку енергію.", en: "Pick one action you want to do today despite low energy." },
+      { ru: "Сформулируй план: «Если наступит [время/ситуация], то я сделаю [действие]».", uk: "Сформулюй план: «Якщо настане [час/ситуація], то я зроблю [дія]».", en: "Write a plan: 'If [time/situation] happens, then I'll do [action].'" },
+      { ru: "Держи план на виду и просто следуй ему, не спрашивая себя в моменте «хочу ли я».", uk: "Тримай план на видноті і просто дотримуйся його, не питаючи себе в моменті «чи хочу я».", en: "Keep the plan visible and just follow it — don't ask yourself 'do I feel like it' in the moment." },
+    ]},
+    { id: "em2", title: { ru: "Ритуал связки привычек", uk: "Ритуал зв'язки звичок", en: "Habit-stacking ritual" }, steps: [
+      { ru: "Возьми одно действие, которое ты и так делаешь каждый день (чистка зубов, кофе).", uk: "Візьми одну дію, яку ти і так робиш щодня (чищення зубів, кава).", en: "Take one action you already do daily (brushing teeth, morning coffee)." },
+      { ru: "Прикрепи к нему новое маленькое действие сразу после.", uk: "Прикріпи до неї нову маленьку дію одразу після.", en: "Attach a new small action right after it." },
+      { ru: "Сделай связку сегодня хотя бы один раз, не пропуская первое звено.", uk: "Зроби зв'язку сьогодні хоча б один раз, не пропускаючи перше звено.", en: "Do the stack at least once today, without skipping the first link." },
+    ]},
+    { id: "em3", title: { ru: "Ритуал энергетического завтрака", uk: "Ритуал енергетичного сніданку", en: "Energy-breakfast ritual" }, steps: [
+      { ru: "Съешь завтрак с белком в первый час после пробуждения, не только углеводы.", uk: "З'їж сніданок з білком у першу годину після пробудження, не лише вуглеводи.", en: "Eat a protein-forward breakfast in the first hour after waking, not just carbs." },
+      { ru: "Добавь 10 минут движения — быстрая ходьба, лестница, растяжка.", uk: "Додай 10 хвилин руху — швидка ходьба, сходи, розтяжка.", en: "Add 10 minutes of movement — brisk walk, stairs, stretching." },
+      { ru: "Отметь вечером, отличалось ли самочувствие от обычного дня.", uk: "Відміть увечері, чи відрізнявся стан від звичайного дня.", en: "In the evening, notice whether you felt different than a typical day." },
+    ]},
+  ], advanced: [
+    { id: "ea1", title: { ru: "Ритуал приятной связки", uk: "Ритуал приємної зв'язки", en: "Temptation-bundling ritual" }, steps: [
+      { ru: "Выбери задачу, которую откладываешь из-за низкой мотивации.", uk: "Обери задачу, яку відкладаєш через низьку мотивацію.", en: "Pick a task you keep postponing due to low motivation." },
+      { ru: "Разреши себе что-то приятное только вместе с ней — любимую музыку, подкаст, вкусный напиток.", uk: "Дозволь собі щось приємне лише разом з нею — улюблену музику, подкаст, смачний напій.", en: "Allow yourself something enjoyable only while doing it — favorite music, a podcast, a nice drink." },
+      { ru: "Начни задачу только вместе с этим приятным — не раньше и не отдельно.", uk: "Почни задачу лише разом з цим приємним — не раніше і не окремо.", en: "Start the task only paired with that reward — not before, not separately." },
+    ]},
+    { id: "ea2", title: { ru: "Ритуал 2-минутного правила", uk: "Ритуал 2-хвилинного правила", en: "2-minute rule ritual" }, steps: [
+      { ru: "Возьми привычку, которую хочешь закрепить, и сократи её до версии на 2 минуты.", uk: "Візьми звичку, яку хочеш закріпити, і скороти її до версії на 2 хвилини.", en: "Take a habit you want to build and shrink it to a 2-minute version." },
+      { ru: "Сделай только эту версию сегодня — без цели «раскрутиться» на большее.", uk: "Зроби лише цю версію сьогодні — без мети «розкрутитися» на більше.", en: "Do only that version today — no goal of stretching it further." },
+      { ru: "Если появится желание продолжить дольше — это бонус, а не обязательство.", uk: "Якщо з'явиться бажання продовжити довше — це бонус, а не обов'язок.", en: "If you feel like continuing longer, that's a bonus, not a requirement." },
+    ]},
+    { id: "ea3", title: { ru: "Ритуал недельного восстановления ритма", uk: "Ритуал тижневого відновлення ритму", en: "Weekly rhythm-reset ritual" }, steps: [
+      { ru: "Сравни сегодняшний подъём, приёмы пищи и движение с планом на неделю.", uk: "Порівняй сьогоднішній підйом, прийоми їжі й рух із планом на тиждень.", en: "Compare today's wake time, meals, and movement to your weekly plan." },
+      { ru: "Верни на место один сбившийся элемент — время подъёма, обед, вечернюю прогулку.", uk: "Поверни на місце один збитий елемент — час підйому, обід, вечірню прогулянку.", en: "Put one drifted element back in place — wake time, lunch, an evening walk." },
+      { ru: "Не пытайся исправить всё сразу — только один сбившийся ритм за раз.", uk: "Не намагайся виправити все одразу — лише один збитий ритм за раз.", en: "Don't try to fix everything at once — just one drifted rhythm at a time." },
+    ]},
+  ]},
+  focus: { easy: [
+    { id: "fr1", title: { ru: "Ритуал одной вкладки", uk: "Ритуал однієї вкладки", en: "Single-tab ritual" }, steps: [
+      { ru: "Закрой все вкладки и приложения, кроме нужного.", uk: "Закрий усі вкладки й застосунки, крім потрібного.", en: "Close every tab and app except the one you need." },
+      { ru: "Убери телефон в другую комнату или в сумку.", uk: "Прибери телефон в іншу кімнату або в сумку.", en: "Put your phone in another room or bag." },
+      { ru: "Поставь таймер на 20 минут и начни.", uk: "Постав таймер на 20 хвилин і почни.", en: "Set a 20-minute timer and begin." },
+    ]},
+    { id: "fr2", title: { ru: "Ритуал маленьких шагов задачи", uk: "Ритуал маленьких кроків задачі", en: "Task-breakdown ritual" }, steps: [
+      { ru: "Разбей задачу на 2-3 маленьких шага на бумаге.", uk: "Розбий задачу на 2-3 маленькі кроки на папері.", en: "Break the task into 2–3 small steps on paper." },
+      { ru: "Берись только за первый, не думая об остальных.", uk: "Берись лише за перший, не думаючи про решту.", en: "Tackle only the first one, without thinking about the rest." },
+      { ru: "Отметь его как сделанный, прежде чем перейти дальше.", uk: "Відміть його як зроблений, перш ніж перейти далі.", en: "Mark it done before moving on." },
+    ]},
+    { id: "fr3", title: { ru: "Ритуал чистого стола", uk: "Ритуал чистого столу", en: "Clear-desk ritual" }, steps: [
+      { ru: "Убери с рабочего места всё лишнее — 3 минуты.", uk: "Прибери з робочого місця все зайве — 3 хвилини.", en: "Clear anything unneeded off your desk — 3 minutes." },
+      { ru: "Оставь на виду только то, что нужно для текущей задачи.", uk: "Залиш на видноті лише те, що потрібно для поточної задачі.", en: "Keep visible only what's needed for the current task." },
+      { ru: "Сделай один глубокий вдох перед началом.", uk: "Зроби один глибокий вдих перед початком.", en: "Take one deep breath before starting." },
+    ]},
+  ], medium: [
+    { id: "fm1", title: { ru: "Ритуал дизайна пространства", uk: "Ритуал дизайну простору", en: "Space-design ritual" }, steps: [
+      { ru: "Убери из поля зрения всё, что не относится к задаче — физически, не просто отвернись.", uk: "Прибери з поля зору все, що не стосується задачі — фізично, не просто відвернись.", en: "Physically remove everything unrelated to the task from view." },
+      { ru: "Подготовь всё нужное заранее: вода, заметки, инструменты, чтобы не вставать посреди работы.", uk: "Підготуй усе потрібне заздалегідь: вода, нотатки, інструменти, щоб не вставати посеред роботи.", en: "Prep everything you'll need — water, notes, tools — so you don't get up mid-work." },
+      { ru: "Начни с самого понятного шага задачи, чтобы включиться быстрее.", uk: "Почни з найзрозумілішого кроку задачі, щоб швидше увімкнутися.", en: "Start with the clearest, simplest step to get moving faster." },
+    ]},
+    { id: "fm2", title: { ru: "Ритуал монозадачности", uk: "Ритуал монозадачності", en: "Single-tasking ritual" }, steps: [
+      { ru: "Выбери ровно одну задачу на ближайший час — ничего параллельно.", uk: "Обери рівно одну задачу на найближчу годину — нічого паралельно.", en: "Pick exactly one task for the next hour — nothing in parallel." },
+      { ru: "Если приходит другая мысль или дело, запиши её на отдельный листок «потом», не переключайся.", uk: "Якщо приходить інша думка чи справа, запиши її на окремий листок «потім», не перемикайся.", en: "If another thought or task pops up, jot it on a 'later' list — don't switch." },
+      { ru: "В конце часа посмотри на листок «потом» и реши, что из этого действительно срочно.", uk: "Наприкінці години подивись на листок «потім» і вирішь, що з цього справді термінове.", en: "At the end of the hour, look at the 'later' list and decide what's actually urgent." },
+    ]},
+    { id: "fm3", title: { ru: "Ритуал цифрового заката для работы", uk: "Ритуал цифрового заходу для роботи", en: "Work digital-sunset ritual" }, steps: [
+      { ru: "Закрой все вкладки и приложения, не связанные с текущей задачей, на весь блок — не на 20 минут, а на 90.", uk: "Закрий усі вкладки й застосунки, не пов'язані з поточною задачею, на весь блок — не на 20 хвилин, а на 90.", en: "Close every unrelated tab and app for the whole block — 90 minutes, not 20." },
+      { ru: "Переведи телефон в авиарежим или в другую комнату на это время.", uk: "Переведи телефон у режим польоту або в іншу кімнату на цей час.", en: "Put your phone on airplane mode or in another room for that time." },
+      { ru: "После блока осознанно реши, что открыть заново, а не открывай всё по привычке.", uk: "Після блоку свідомо вирішь, що відкрити знову, а не відкривай усе за звичкою.", en: "After the block, deliberately choose what to reopen instead of everything by habit." },
+    ]},
+  ], advanced: [
+    { id: "fa1", title: { ru: "Ритуал глубокой работы 90 минут", uk: "Ритуал глибокої роботи 90 хвилин", en: "90-minute deep work ritual" }, steps: [
+      { ru: "Выбери самую сложную задачу на сегодня — ту, что требует настоящего мышления, не рутины.", uk: "Обери найскладнішу задачу на сьогодні — ту, що потребує справжнього мислення, не рутини.", en: "Pick today's hardest task — one that needs real thinking, not routine work." },
+      { ru: "Работай над ней 90 минут одним заходом, без проверок телефона и почты.", uk: "Працюй над нею 90 хвилин одним заходом, без перевірок телефону й пошти.", en: "Work on it for 90 minutes straight, no phone or email checks." },
+      { ru: "После — обязательный полноценный отдых минимум 20 минут, не полу-отдых с телефоном.", uk: "Після — обов'язковий повноцінний відпочинок мінімум 20 хвилин, не напіввідпочинок з телефоном.", en: "Afterward, take a real 20-minute break — not a half-break with your phone." },
+    ]},
+    { id: "fa2", title: { ru: "Ритуал недельного аудита внимания", uk: "Ритуал тижневого аудиту уваги", en: "Weekly attention-audit ritual" }, steps: [
+      { ru: "Просмотри последнюю неделю: в какие моменты фокус ломался чаще всего?", uk: "Переглянь останній тиждень: у які моменти фокус ламався найчастіше?", en: "Review the last week: when did focus break most often?" },
+      { ru: "Найди один повторяющийся триггер — уведомление, человека, привычку проверять телефон.", uk: "Знайди один повторюваний тригер — сповіщення, людину, звичку перевіряти телефон.", en: "Find one recurring trigger — a notification, a person, a phone-checking habit." },
+      { ru: "Поставь сегодня одно конкретное ограничение именно на этот триггер.", uk: "Постав сьогодні одне конкретне обмеження саме на цей тригер.", en: "Set one specific limit on exactly that trigger today." },
+    ]},
+    { id: "fa3", title: { ru: "Ритуал сложной задачи по частям", uk: "Ритуал складної задачі по частинах", en: "Complex-task-in-stages ritual" }, steps: [
+      { ru: "Раздели крупный проект на 3 этапа с чёткими результатами, а не просто «поработать».", uk: "Розділи великий проєкт на 3 етапи з чіткими результатами, а не просто «попрацювати».", en: "Split a big project into 3 stages with clear outcomes, not just 'work on it.'" },
+      { ru: "Сегодня закрой только первый этап полностью, даже если он кажется маленьким.", uk: "Сьогодні закрий лише перший етап повністю, навіть якщо він здається маленьким.", en: "Today, fully close only stage one, even if it seems small." },
+      { ru: "Отметь готовый этап явно — вычеркни, поставь галочку — мозгу нужно видеть завершение.", uk: "Відміть готовий етап явно — викресли, постав галочку — мозку потрібно бачити завершення.", en: "Mark the finished stage explicitly — cross it out, check it off — the brain needs to see closure." },
+    ]},
+  ]},
+  pause: { easy: [
+    { id: "pr1", title: { ru: "Ритуал чайной паузы", uk: "Ритуал чайної паузи", en: "Tea-break ritual" }, steps: [
+      { ru: "Завари чай или воду, без спешки.", uk: "Завари чай або воду, без поспіху.", en: "Brew tea or water, no rushing." },
+      { ru: "Убери телефон подальше на 10 минут.", uk: "Прибери телефон подалі на 10 хвилин.", en: "Put your phone out of reach for 10 minutes." },
+      { ru: "Пей маленькими глотками, ничего не решая.", uk: "Пий маленькими ковтками, нічого не вирішуючи.", en: "Sip slowly, without solving anything." },
+    ]},
+    { id: "pr2", title: { ru: "Ритуал тишины", uk: "Ритуал тиші", en: "Silence ritual" }, steps: [
+      { ru: "Найди тихое место на 5 минут.", uk: "Знайди тихе місце на 5 хвилин.", en: "Find a quiet spot for 5 minutes." },
+      { ru: "Закрой глаза, просто слушай, что вокруг.", uk: "Закрий очі, просто слухай, що навколо.", en: "Close your eyes, just listen to what's around." },
+      { ru: "Не пытайся ни о чём думать — если мысль пришла, отпусти её.", uk: "Не намагайся ні про що думати — якщо думка прийшла, відпусти її.", en: "Don't try to think about anything — if a thought comes, let it go." },
+    ]},
+    { id: "pr3", title: { ru: "Ритуал маленькой радости", uk: "Ритуал маленької радості", en: "Small-joy ritual" }, steps: [
+      { ru: "Выбери что-то маленькое и приятное — без повода.", uk: "Обери щось маленьке й приємне — без приводу.", en: "Pick something small and nice — no reason needed." },
+      { ru: "Сделай это не спеша, полностью присутствуя в моменте.", uk: "Зроби це не поспішаючи, повністю присутній(я) у моменті.", en: "Do it slowly, fully present in the moment." },
+      { ru: "Отметь, что почувствовал(а).", uk: "Відміть, що відчув(ла).", en: "Notice what you felt." },
+    ]},
+  ], medium: [
+    { id: "pm1", title: { ru: "Ритуал STOP", uk: "Ритуал STOP", en: "STOP ritual" }, steps: [
+      { ru: "Когда чувствуешь, что несёшься по инерции — Остановись.", uk: "Коли відчуваєш, що несешся за інерцією — Зупинись.", en: "When you notice you're running on autopilot — Stop." },
+      { ru: "Сделай один медленный вдох и выдох.", uk: "Зроби один повільний вдих і видих.", en: "Take one slow breath in and out." },
+      { ru: "Заметь, что сейчас происходит внутри и снаружи, и только потом реши, что делать дальше.", uk: "Поміть, що зараз відбувається всередині й зовні, і лише потім вирішуй, що робити далі.", en: "Observe what's happening inside and around you, then decide what's next." },
+    ]},
+    { id: "pm2", title: { ru: "Ритуал осознанной прогулки", uk: "Ритуал усвідомленої прогулянки", en: "Mindful walking ritual" }, steps: [
+      { ru: "Пройдись 10-15 минут без телефона и без цели куда-то успеть.", uk: "Пройдись 10-15 хвилин без телефону і без мети кудись встигнути.", en: "Walk 10–15 minutes with no phone and no destination to rush to." },
+      { ru: "Замечай стопы, касающиеся земли, и то, что видишь вокруг, по очереди.", uk: "Помічай стопи, що торкаються землі, і те, що бачиш навколо, по черзі.", en: "Notice your feet touching the ground, then what's around you, in turn." },
+      { ru: "Когда мысли уносят в дела, мягко возвращай внимание к шагам.", uk: "Коли думки несуть у справи, м'яко повертай увагу до кроків.", en: "When thoughts drift to your to-do list, gently bring attention back to your steps." },
+    ]},
+    { id: "pm3", title: { ru: "Ритуал осознанного приёма пищи", uk: "Ритуал усвідомленого прийому їжі", en: "Mindful eating ritual" }, steps: [
+      { ru: "Один приём пищи сегодня — без экрана и без спешки.", uk: "Один прийом їжі сьогодні — без екрана і без поспіху.", en: "One meal today — no screen, no rushing." },
+      { ru: "Первые 3 кусочка ешь медленно, замечая вкус, текстуру, температуру.", uk: "Перші 3 шматочки їж повільно, помічаючи смак, текстуру, температуру.", en: "Eat the first 3 bites slowly, noticing taste, texture, temperature." },
+      { ru: "Заметь момент, когда наелся(ась) достаточно, а не «доел(а) до конца».", uk: "Поміть момент, коли наївся(лась) достатньо, а не «доїв(ла) до кінця».", en: "Notice the moment you're satisfied, not just when the plate is empty." },
+    ]},
+  ], advanced: [
+    { id: "pa1", title: { ru: "Ритуал доброты к себе и другим", uk: "Ритуал доброти до себе й інших", en: "Loving-kindness ritual" }, steps: [
+      { ru: "Сядь тихо на 5 минут, закрой глаза.", uk: "Сядь тихо на 5 хвилин, заплющ очі.", en: "Sit quietly for 5 minutes, close your eyes." },
+      { ru: "Мысленно пожелай себе спокойствия и добра, своими словами.", uk: "Подумки побажай собі спокою і добра, своїми словами.", en: "Silently wish yourself calm and good, in your own words." },
+      { ru: "Затем пожелай того же одному конкретному человеку, даже если отношения непростые.", uk: "Потім побажай того самого одній конкретній людині, навіть якщо стосунки непрості.", en: "Then extend the same wish to one specific person, even if things are complicated." },
+    ]},
+    { id: "pa2", title: { ru: "Ритуал расширенной благодарности", uk: "Ритуал розширеної вдячності", en: "Extended gratitude ritual" }, steps: [
+      { ru: "Вспомни 3 момента за последнюю неделю, за которые благодарен(на), не общие, а конкретные.", uk: "Згадай 3 моменти за останній тиждень, за які вдячний(на), не загальні, а конкретні.", en: "Recall 3 specific moments from the past week you're grateful for — not generic ones." },
+      { ru: "По каждому распиши, что именно в нём было ценно.", uk: "По кожному розпиши, що саме в ньому було цінне.", en: "For each one, spell out exactly what made it valuable." },
+      { ru: "Запиши это, а не просто подумай — письмо закрепляет иначе, чем мысль.", uk: "Запиши це, а не просто подумай — письмо закріплює інакше, ніж думка.", en: "Write it down rather than just think it — writing anchors differently than thinking." },
+    ]},
+    { id: "pa3", title: { ru: "Ритуал одного чувства", uk: "Ритуал одного відчуття", en: "Single-sense ritual" }, steps: [
+      { ru: "Выбери одно чувство — слух, зрение или осязание — на сегодняшние 10 минут практики.", uk: "Обери одне відчуття — слух, зір або дотик — на сьогоднішні 10 хвилин практики.", en: "Pick one sense — hearing, sight, or touch — for today's 10-minute practice." },
+      { ru: "Направь всё внимание только на него, игнорируя остальные ощущения, насколько получится.", uk: "Спрямуй усю увагу лише на нього, ігноруючи решту відчуттів, наскільки вдасться.", en: "Direct all attention to just that sense, ignoring the others as much as you can." },
+      { ru: "Замечай, как трудно удерживать одно чувство — это нормально, просто возвращайся к нему.", uk: "Помічай, як важко утримувати одне відчуття — це нормально, просто повертайся до нього.", en: "Notice how hard it is to hold one sense — that's normal, just keep returning to it." },
+    ]},
+  ]},
+};
+
+function findRitual(group, ritualId) {
+  const tiers = CHALLENGE_RITUALS[group] || CHALLENGE_RITUALS.pause;
+  return tiers.easy.find(r => r.id === ritualId) || tiers.medium.find(r => r.id === ritualId) || tiers.advanced.find(r => r.id === ritualId) || null;
+}
+
+const CHALLENGE_TIER_META = {
+  easy: { ru: "Базовый уровень", uk: "Базовий рівень", en: "Foundation level" },
+  medium: { ru: "Следующий уровень", uk: "Наступний рівень", en: "Next level" },
+  advanced: { ru: "Продвинутый уровень", uk: "Просунутий рівень", en: "Advanced level" },
+};
+
+
 function suggestChallengeLength(patternCount) {
   if (patternCount >= 10) return 30;
   if (patternCount >= 6) return 20;
   return 10;
 }
 
+// Ярус дня: 1-10 = easy (база), 11-20 = medium (следующий уровень), 21-30 = advanced (продвинутый).
+// Длина челленджа (10/20/30) — это просто "докуда" в этом едином пути человек сегодня идёт.
+function tierForDay(dayNum) {
+  if (dayNum > 20) return "advanced";
+  if (dayNum > 10) return "medium";
+  return "easy";
+}
+const TIER_START = { easy: 0, medium: 10, advanced: 20 };
+
 function buildChallengeDays(group, lengthDays) {
   const pool = DAILYCHECK_ACTIONS[group] || DAILYCHECK_ACTIONS.pause;
+  const ritualTiers = CHALLENGE_RITUALS[group] || CHALLENGE_RITUALS.pause;
   const days = [];
   for (let i = 0; i < lengthDays; i++) {
+    const dayNum = i + 1;
+    const tier = tierForDay(dayNum);
+    const ritualPool = ritualTiers[tier];
+    const ritual = ritualPool[(dayNum - 1 - TIER_START[tier]) % ritualPool.length];
     const action = pool[i % pool.length];
-    const lap = Math.floor(i / pool.length); // 0 = первый круг, 1+ = повтор банка — добавляем пометку
     const reflection = CHALLENGE_REFLECTIONS[i % CHALLENGE_REFLECTIONS.length];
-    days.push({ dayIndex: i + 1, action_id: action.id, reflection_id: reflection.id, deepen: lap > 0, done: false, doneAt: null });
+    const tierStarts = dayNum === 1 || dayNum === 11 || dayNum === 21;
+    days.push({ dayIndex: dayNum, tier, tierStarts, action_id: action.id, ritual_id: ritual.id, reflection_id: reflection.id, done: false, doneAt: null });
   }
   return days;
 }
@@ -2471,6 +2817,133 @@ const INDICATOR_TO_DAILYCHECK_GROUP = {
   fatigue: "recovery", sleep: "recovery", focus: "focus", social: "anxiety",
   motivation: "lowEnergy", calm: "anxiety",
 };
+
+// Развёрнутые пояснения по каждому показателю (4 градации — как в тестах на выгорание/гормоны),
+// а не короткая фраза из варианта ответа.
+const DAILYCHECK_INDICATOR_INSIGHTS = {
+  energy: [
+    { ru: "Сил почти нет — тело сигналит, что пора беречь ресурс, а не выжимать из себя больше.", uk: "Сил майже немає — тіло сигналить, що час берегти ресурс, а не вичавлювати з себе більше.", en: "Almost no strength left — the body is signaling it's time to conserve, not push harder." },
+    { ru: "Энергии хватает через силу — можно двигаться, но легко скатиться в перерасход.", uk: "Енергії вистачає через силу — можна рухатися, але легко скотитися в перевитрату.", en: "There's just enough energy to push through — but it's easy to overspend it." },
+    { ru: "Сил в целом достаточно для повседневных дел, без явного запаса.", uk: "Сил загалом достатньо для повсякденних справ, без явного запасу.", en: "Enough energy for everyday things, without much reserve." },
+    { ru: "Энергии много — хороший момент, чтобы довести дела до конца, не сжигая её впустую.", uk: "Енергії багато — гарний момент, щоб довести справи до кінця, не спалюючи її даремно.", en: "Plenty of energy — a good moment to finish things, without burning it needlessly." },
+  ],
+  mood: [
+    { ru: "Настроение сейчас тяжёлое — это не значит, что с тобой что-то не так, просто день такой.", uk: "Настрій зараз важкий — це не означає, що з тобою щось не так, просто день такий.", en: "Mood is heavy right now — that doesn't mean something's wrong with you, some days are just like this." },
+    { ru: "Настроение неровное — ни хорошее, ни плохое, промежуточное состояние.", uk: "Настрій нерівний — ні хороший, ні поганий, проміжний стан.", en: "Mood is mixed — not great, not bad, somewhere in between." },
+    { ru: "Настроение скорее ровное и спокойное, без резких перепадов.", uk: "Настрій скоріше рівний і спокійний, без різких перепадів.", en: "Mood is fairly steady and calm, no sharp swings." },
+    { ru: "Настроение светлое — хорошая база, чтобы делать что-то важное или приятное.", uk: "Настрій світлий — гарна база, щоб робити щось важливе чи приємне.", en: "Mood is light — a good base for doing something meaningful or enjoyable." },
+  ],
+  tension: [
+    { ru: "Тело сильно напряжено — стоит буквально остановиться и расслабить плечи прямо сейчас.", uk: "Тіло сильно напружене — варто буквально зупинитися і розслабити плечі просто зараз.", en: "The body is quite tense — worth literally stopping and dropping your shoulders right now." },
+    { ru: "Есть заметное напряжение, но оно ещё управляемое.", uk: "Є помітна напруга, але вона ще керована.", en: "There's noticeable tension, but it's still manageable." },
+    { ru: "Тело в целом расслаблено, лёгкое напряжение — это нормально.", uk: "Тіло загалом розслаблене, легка напруга — це нормально.", en: "The body is fairly relaxed, a bit of tension is normal." },
+    { ru: "Тело расслаблено — редкое и ценное состояние, стоит его заметить.", uk: "Тіло розслаблене — рідкісний і цінний стан, варто його помітити.", en: "The body is relaxed — a rare and valuable state, worth noticing." },
+  ],
+  anxiety: [
+    { ru: "Тревога сейчас высокая — организм в режиме тревоги, и это забирает много ресурса.", uk: "Тривога зараз висока — організм у режимі тривоги, і це забирає багато ресурсу.", en: "Anxiety is high right now — the body is in alarm mode, and that drains a lot of resources." },
+    { ru: "Тревожность заметна, но не захлёстывает.", uk: "Тривожність помітна, але не захльостує.", en: "Anxiety is noticeable but not overwhelming." },
+    { ru: "Тревоги почти нет — фон спокойный.", uk: "Тривоги майже немає — фон спокійний.", en: "Almost no anxiety — the background is calm." },
+    { ru: "Полное спокойствие — тревога сейчас совсем не мешает.", uk: "Повний спокій — тривога зараз зовсім не заважає.", en: "Complete calm — anxiety isn't getting in the way at all right now." },
+  ],
+  fatigue: [
+    { ru: "Усталость накопилась сильно — организм явно просит паузу.", uk: "Втома накопичилась сильно — організм явно просить паузу.", en: "Fatigue has built up a lot — the body is clearly asking for a pause." },
+    { ru: "Усталость ощутима, но ещё не критична.", uk: "Втома відчутна, але ще не критична.", en: "Fatigue is noticeable but not critical yet." },
+    { ru: "Усталости немного, в целом бодрое состояние.", uk: "Втоми небагато, загалом бадьорий стан.", en: "Only a little fatigue, mostly an alert state." },
+    { ru: "Усталости почти нет — хороший запас сил.", uk: "Втоми майже немає — гарний запас сил.", en: "Almost no fatigue — a good reserve of energy." },
+  ],
+  sleep: [
+    { ru: "Сон сейчас страдает сильнее всего — это часто тянет за собой остальные показатели.", uk: "Сон зараз страждає найсильніше — це часто тягне за собою решту показників.", en: "Sleep is suffering the most right now — that often drags the other indicators down with it." },
+    { ru: "Сон нестабильный, качество среднее.", uk: "Сон нестабільний, якість середня.", en: "Sleep is unstable, average quality." },
+    { ru: "Сон в целом достаточный, без серьёзных нареканий.", uk: "Сон загалом достатній, без серйозних нарікань.", en: "Sleep is generally adequate, no major complaints." },
+    { ru: "Сон восстанавливает хорошо — отличная основа для остального дня.", uk: "Сон відновлює добре — відмінна основа для решти дня.", en: "Sleep is restorative — a great foundation for the rest of the day." },
+  ],
+  focus: [
+    { ru: "Концентрация сейчас низкая — в голове туман, сложные задачи лучше отложить.", uk: "Концентрація зараз низька — у голові туман, складні задачі краще відкласти.", en: "Focus is low right now — foggy-headed, better to postpone complex tasks." },
+    { ru: "Сосредоточиться получается, но с усилием.", uk: "Зосередитися виходить, але з зусиллям.", en: "You can focus, but it takes effort." },
+    { ru: "Концентрация в целом рабочая, голова достаточно ясная.", uk: "Концентрація загалом робоча, голова досить ясна.", en: "Focus is workable, head is reasonably clear." },
+    { ru: "Голова ясная — хороший момент для сложных задач.", uk: "Голова ясна — гарний момент для складних задач.", en: "Clear-headed — a good moment for complex tasks." },
+  ],
+  social: [
+    { ru: "Сейчас явно хочется побыть одному/одной — нормальный сигнал, не обязательно тревожный.", uk: "Зараз явно хочеться побути на самоті — нормальний сигнал, не обов'язково тривожний.", en: "Right now you clearly want to be alone — a normal signal, not necessarily a worrying one." },
+    { ru: "Желание общаться слабое, но не нулевое.", uk: "Бажання спілкуватися слабке, але не нульове.", en: "The urge to connect is weak, but not zero." },
+    { ru: "Скорее хочется контакта с людьми, чем одиночества.", uk: "Скоріше хочеться контакту з людьми, ніж самотності.", en: "You lean more toward wanting company than solitude." },
+    { ru: "Сильное желание быть с людьми — хороший момент для встреч и разговоров.", uk: "Сильне бажання бути з людьми — гарний момент для зустрічей і розмов.", en: "A strong pull toward people — a good moment for meeting up and talking." },
+  ],
+  motivation: [
+    { ru: "Мотивации почти нет — это не лень, а признак, что ресурс истощён.", uk: "Мотивації майже немає — це не лінь, а ознака, що ресурс вичерпано.", en: "Almost no motivation — that's not laziness, it's a sign resources are depleted." },
+    { ru: "Делать что-то получается через силу.", uk: "Робити щось виходить через силу.", en: "You can get things done, but it takes pushing." },
+    { ru: "Мотивация в целом присутствует, без явного подъёма.", uk: "Мотивація загалом присутня, без явного підйому.", en: "Motivation is present, without a clear boost." },
+    { ru: "Мотивация высокая — хороший момент для действий.", uk: "Мотивація висока — гарний момент для дій.", en: "Motivation is high — a good moment to act." },
+  ],
+  calm: [
+    { ru: "Внутреннего спокойствия сейчас почти нет — состояние близко к перегрузке.", uk: "Внутрішнього спокою зараз майже немає — стан близький до перевантаження.", en: "Almost no inner calm right now — close to an overloaded state." },
+    { ru: "Спокойствие неустойчивое, легко сбивается.", uk: "Спокій нестійкий, легко збивається.", en: "Calm is fragile, easily thrown off." },
+    { ru: "Внутри в целом спокойно, без сильных потрясений.", uk: "Всередині загалом спокійно, без сильних потрясінь.", en: "Fairly calm inside, no major upheaval." },
+    { ru: "Полный внутренний покой — редкое и ценное состояние.", uk: "Повний внутрішній спокій — рідкісний і цінний стан.", en: "Complete inner peace — a rare and valuable state." },
+  ],
+};
+
+// Переиспользуемая строка одного показателя: шкала с делениями на 25/50/75%,
+// 4-словная градация (как в остальных тестах) и развёрнутое пояснение состояния.
+function IndicatorBarRow({ q, pct, avgScore }) {
+  const { tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const hiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
+  const scaleWords = [
+    { ru: "ТЯЖЕЛО", uk: "ВАЖКО", en: "HEAVY" },
+    { ru: "СРЕДНЕ", uk: "СЕРЕДНЬО", en: "MID" },
+    { ru: "РОВНО", uk: "РІВНО", en: "STEADY" },
+    { ru: "НА ПОДЪЁМЕ", uk: "НА ПІДЙОМІ", en: "ON THE RISE" },
+  ];
+  const insight = (DAILYCHECK_INDICATOR_INSIGHTS[q.key] || [])[hiIndex];
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+        <span style={{ fontSize: "13px", color: c.inkMuted }}>{tx(q.label)}</span>
+        <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>{pct}%</span>
+      </div>
+      <div style={{ position: "relative" }}>
+        <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
+          <div style={{ ...S.metricFill, width: `${pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
+            <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
+          </div>
+        </div>
+        {[25, 50, 75].map(tick => (
+          <div key={tick} style={{ position: "absolute", left: `${tick}%`, top: "1px", bottom: "1px", width: "1px", background: "rgba(0,0,0,0.3)", pointerEvents: "none" }} />
+        ))}
+      </div>
+      <div style={{ ...S.scaleLabels, marginTop: "6px" }}>
+        {scaleWords.map((w, i) => (
+          <span key={i} style={i === hiIndex ? { ...S.scaleLabelHi, fontSize: "9px" } : { ...S.scaleLabel, fontSize: "9px" }}>
+            {tx(w)}{i === hiIndex ? " ◉" : ""}
+          </span>
+        ))}
+      </div>
+      {insight && <p style={{ margin: "6px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>{tx(insight)}</p>}
+    </div>
+  );
+}
+
+// Короткая помощь читать сочетания показателей вместе (все 10 выровнены так, что
+// БОЛЬШЕ = ЛУЧШЕ по каждому — это правило одно на все показатели без исключений).
+function interpretIndicatorCombo(scores) {
+  const entries = Object.entries(scores);
+  const low = entries.filter(([, v]) => v <= 2).map(([k]) => k);
+  const high = entries.filter(([, v]) => v >= 4).map(([k]) => k);
+  const labelOf = k => DAILYCHECK_QUESTIONS.find(q => q.key === k)?.label;
+  if (low.length === 0 && high.length >= 6) {
+    return { ru: "Почти всё в зелёной зоне — сейчас скорее ресурсное состояние в целом.", uk: "Майже все в зеленій зоні — зараз скоріше ресурсний стан загалом.", en: "Almost everything is in the green zone — this looks like a resourced state overall." };
+  }
+  if (low.length >= 3) {
+    return { ru: "Просело сразу несколько показателей — это и есть тот самый сигнал, который выбрал сегодняшний совет.", uk: "Просіло одразу кілька показників — це і є той самий сигнал, який обрав сьогоднішню пораду.", en: "Several indicators dropped at once — that's exactly the signal behind today's advice." };
+  }
+  if (low.length === 1 || low.length === 2) {
+    const names = low.map(k => tx0(labelOf(k))).join(", ");
+    return { ru: `Просело точечно: ${names}. Остальное держится — это скорее локальная просадка, чем общий спад.`, uk: `Просіло точково: ${names}. Решта тримається — це скоріше локальна просадка, ніж загальний спад.`, en: `A specific dip: ${names}. Everything else is holding — this looks local rather than a broad decline.` };
+  }
+  return { ru: "Показатели умеренные без явных перекосов — это нормальный рабочий диапазон.", uk: "Показники помірні без явних перекосів — це нормальний робочий діапазон.", en: "Indicators are moderate without a clear skew — a normal working range." };
+}
+function tx0(v) { if (!v) return ""; if (typeof v === "string") return v; return v.ru || v.uk || v.en || ""; }
 
 function pickDailyCheckGroup(scores, ctx = {}) {
   const { hormoneWeakestKey, burnoutPct, moodHeavy, recentActionIds = [], allTimeWeakestKey, allTimeCount = 0 } = ctx;
@@ -2495,7 +2968,7 @@ function pickDailyCheckGroup(scores, ctx = {}) {
   const allFine = Object.values(scores).every(v => v >= 3);
 
   // накопленная личная история (10+ тестов) — приоритетнее гормонов, если чек-ин пограничный
-  if (allFine && allTimeCount >= 10 && allTimeWeakestKey && INDICATOR_TO_DAILYCHECK_GROUP[allTimeWeakestKey]) {
+  if (allFine && allTimeCount >= 5 && allTimeWeakestKey && INDICATOR_TO_DAILYCHECK_GROUP[allTimeWeakestKey]) {
     group = INDICATOR_TO_DAILYCHECK_GROUP[allTimeWeakestKey];
     reason = { type: "pattern", key: allTimeWeakestKey };
   } else if (allFine && hormoneWeakestKey && HORMONE_TO_DAILYCHECK_GROUP[hormoneWeakestKey]) {
@@ -2725,7 +3198,7 @@ function DailyCheckScreen({ onBack }) {
         const vals = last3.map(h => h.indicators?.[qq.key]).filter(v => typeof v === "number");
         if (!vals.length) return null;
         const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
-        return { key: qq.key, label: qq.label, pct: Math.round(((avg - 1) / 4) * 100) };
+        return { key: qq.key, q: qq, avgScore: avg, pct: Math.round(((avg - 1) / 4) * 100) };
       }).filter(Boolean);
     }
     const introScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
@@ -2752,22 +3225,12 @@ function DailyCheckScreen({ onBack }) {
                 />
               </div>
               {introBreakdown.length > 0 && (
-                <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "20px", boxSizing: "border-box" }}>
+                <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "6px", boxSizing: "border-box" }}>
                   <p style={{ margin: "0 0 18px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
                     {tx({ ru: "ВСЕ 10 ПОКАЗАТЕЛЕЙ", uk: "УСІ 10 ПОКАЗНИКІВ", en: "ALL 10 INDICATORS" })}
                   </p>
-                  {introBreakdown.map((item, i) => (
-                    <div key={item.key} style={{ marginBottom: i < introBreakdown.length - 1 ? "16px" : "0" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <span style={{ fontSize: "13px", color: c.inkMuted }}>{tx(item.label)}</span>
-                        <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>{item.pct}%</span>
-                      </div>
-                      <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
-                        <div style={{ ...S.metricFill, width: `${item.pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
-                          <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
-                        </div>
-                      </div>
-                    </div>
+                  {introBreakdown.map(item => (
+                    <IndicatorBarRow key={item.key} q={item.q} pct={item.pct} avgScore={item.avgScore} />
                   ))}
                 </div>
               )}
@@ -2813,27 +3276,18 @@ function DailyCheckScreen({ onBack }) {
               animKey={`dc-advice-${result.avgPct}`}
             />
           </div>
-          <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "20px", marginBottom: "16px", boxSizing: "border-box" }}>
+          <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", paddingTop: "18px", paddingBottom: "6px", marginBottom: "16px", boxSizing: "border-box" }}>
             <p style={{ margin: "0 0 18px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
               {tx({ ru: "ВСЕ 10 ПОКАЗАТЕЛЕЙ", uk: "УСІ 10 ПОКАЗНИКІВ", en: "ALL 10 INDICATORS" })}
             </p>
-            {DAILYCHECK_QUESTIONS.map((q, i) => {
+            {DAILYCHECK_QUESTIONS.map(q => {
               const avgScore = result.avgScores[q.key];
               const pct = Math.round(((avgScore - 1) / 4) * 100);
-              return (
-                <div key={q.key} style={{ marginBottom: i < DAILYCHECK_QUESTIONS.length - 1 ? "16px" : "0" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "13px", color: c.inkMuted }}>{tx(q.label)}</span>
-                    <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>{pct}%</span>
-                  </div>
-                  <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
-                    <div style={{ ...S.metricFill, width: `${pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
-                      <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
-                    </div>
-                  </div>
-                </div>
-              );
+              return <IndicatorBarRow key={q.key} q={q} pct={pct} avgScore={avgScore} />;
             })}
+            <p style={{ margin: "4px 0 14px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.5, borderTop: `1px solid ${c.line}`, paddingTop: "14px" }}>
+              {tx(interpretIndicatorCombo(result.scores))}
+            </p>
           </div>
           <p style={S.resultSubtitle}>{tx({ ru: "Сегодня попробуй только одно", uk: "Сьогодні спробуй лише одне", en: "Just try one thing today" })}</p>
           {dailyCheckReasonText(result.reason) && (
@@ -2843,7 +3297,13 @@ function DailyCheckScreen({ onBack }) {
           )}
           <div style={S.stepsBlock}>
             <p style={{ margin: 0, fontSize: "16px", color: c.ink, lineHeight: 1.6 }}>{tx(result.action.text)}</p>
+            <p style={{ margin: "10px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
+              {tx({ ru: "Зачем: ", uk: "Навіщо: ", en: "Why: " })}{tx(CHALLENGE_GROUP_DESC[result.group] || {})}
+            </p>
           </div>
+          <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "10px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+            <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
+          </button>
           {result.groupRecentCount >= 3 && (
             <div style={{ ...S.metricBlock, width: "100%", marginTop: "12px", boxSizing: "border-box", border: "1px solid rgba(200,169,126,0.35)" }}>
               <p style={{ margin: "0 0 10px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.5 }}>
@@ -2926,27 +3386,32 @@ function ChallengeScreen({ onBack, presetGroup }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState(null); // {group, lengthDays, startedAt, days: [...]}
-  const [dcHist, setDcHist] = useState([]);
+  const [active, setActive] = useState(null); // {group, lengthDays, pace, startedAt, days: [...]}
+  const [pastChallenges, setPastChallenges] = useState([]);
   const [pickGroup, setPickGroup] = useState(presetGroup || "recovery");
   const [pickLength, setPickLength] = useState(10);
-  const [justFinished, setJustFinished] = useState(false);
+  const [recommendedLength, setRecommendedLength] = useState(10);
+  const [pickPace, setPickPace] = useState("normal"); // normal | intensive
+  const [justFinished, setJustFinished] = useState(null); // {group, lengthDays, elapsedDays} после оценки
+  const [pendingCompletion, setPendingCompletion] = useState(null); // готов, ждёт оценки
   const [showNotes, setShowNotes] = useState(false);
+  const [showLog, setShowLog] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const [raw, hist] = await Promise.all([CS.get("active_challenge"), getHistory("dailycheck_history")]);
-      setDcHist(hist);
+      const [raw, hist, pastRaw] = await Promise.all([CS.get("active_challenge"), getHistory("dailycheck_history"), getHistory("challenge_history")]);
+      setPastChallenges(pastRaw.slice().reverse());
       if (raw) {
         try { setActive(JSON.parse(raw)); } catch { setActive(null); }
       }
-      // рекомендуемая длина по частоте группы за последние ~20 отметок
       const recent = hist.slice(-20);
       const counts = {};
       recent.forEach(h => { if (h.group) counts[h.group] = (counts[h.group] || 0) + 1; });
       const targetGroup = presetGroup || Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "recovery";
+      const rec = suggestChallengeLength(counts[targetGroup] || 0);
       setPickGroup(targetGroup);
-      setPickLength(suggestChallengeLength(counts[targetGroup] || 0));
+      setPickLength(rec);
+      setRecommendedLength(rec);
       setLoading(false);
     })();
   }, []);
@@ -2959,31 +3424,42 @@ function ChallengeScreen({ onBack, presetGroup }) {
   };
 
   const startChallenge = async () => {
-    const obj = { group: pickGroup, lengthDays: pickLength, startedAt: new Date().toISOString(), days: buildChallengeDays(pickGroup, pickLength) };
+    const obj = { group: pickGroup, lengthDays: pickLength, pace: pickPace, startedAt: new Date().toISOString(), days: buildChallengeDays(pickGroup, pickLength) };
     statEvent("challenge_start");
     await saveActive(obj);
   };
 
   const markDay = async () => {
     if (!active) return;
-    const idx = active.days.findIndex(d => !d.done);
-    if (idx === -1) return;
-    const days = active.days.map((d, i) => i === idx ? { ...d, done: true, doneAt: new Date().toISOString() } : d);
-    const obj = { ...active, days };
+    const step = active.pace === "intensive" ? 2 : 1;
+    const notDone = active.days.filter(d => !d.done);
+    if (!notDone.length) return;
+    const toMark = notDone.slice(0, step).map(d => d.dayIndex);
+    const nowIso = new Date().toISOString();
+    const days = active.days.map(d => toMark.includes(d.dayIndex) ? { ...d, done: true, doneAt: nowIso } : d);
     const allDone = days.every(d => d.done);
     if (allDone) {
-      await pushHistory("challenge_history", { group: active.group, lengthDays: active.lengthDays, startedAt: active.startedAt, completedAt: new Date().toISOString(), abandoned: false });
+      const elapsedDays = Math.max(1, Math.round((new Date(nowIso) - new Date(active.startedAt)) / 86400000) + 1);
+      setPendingCompletion({ group: active.group, lengthDays: active.lengthDays, pace: active.pace, startedAt: active.startedAt, completedAt: nowIso, elapsedDays, abandoned: false, days });
       await CS.set("active_challenge", "");
       setActive(null);
-      setJustFinished(true);
     } else {
-      await saveActive(obj);
+      await saveActive({ ...active, days });
     }
+  };
+
+  const finalizeCompletion = async (rating) => {
+    if (!pendingCompletion) return;
+    const { days, ...rest } = pendingCompletion;
+    await pushHistory("challenge_history", { ...rest, rating });
+    setJustFinished(pendingCompletion);
+    setPendingCompletion(null);
   };
 
   const abandonChallenge = async () => {
     if (!active) return;
-    await pushHistory("challenge_history", { group: active.group, lengthDays: active.lengthDays, startedAt: active.startedAt, completedAt: new Date().toISOString(), abandoned: true, daysCompleted: active.days.filter(d => d.done).length });
+    const elapsedDays = Math.max(1, Math.round((new Date() - new Date(active.startedAt)) / 86400000) + 1);
+    await pushHistory("challenge_history", { group: active.group, lengthDays: active.lengthDays, pace: active.pace, startedAt: active.startedAt, completedAt: new Date().toISOString(), abandoned: true, elapsedDays, daysCompleted: active.days.filter(d => d.done).length });
     await CS.set("active_challenge", "");
     setActive(null);
   };
@@ -2997,6 +3473,30 @@ function ChallengeScreen({ onBack, presetGroup }) {
     );
   }
 
+  if (pendingCompletion) {
+    return (
+      <div style={S.screen}>
+        <div style={{ ...S.resultContainer, width: "100%" }}>
+          <h2 style={S.resultTitle}>{tx({ ru: "Все дни отмечены 🌱", uk: "Усі дні відмічено 🌱", en: "All days marked 🌱" })}</h2>
+          <p style={S.resultSubtitle}>{tx({ ru: "Как прошёл челлендж в целом?", uk: "Як пройшов челендж загалом?", en: "How did the challenge go overall?" })}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "10px" }}>
+            {[
+              { v: 5, label: { ru: "Реально помогло", uk: "Реально допомогло", en: "Really helped" } },
+              { v: 4, label: { ru: "Скорее помогло", uk: "Скоріше допомогло", en: "Mostly helped" } },
+              { v: 3, label: { ru: "Средне, не то чтобы заметно", uk: "Середньо, не те щоб помітно", en: "So-so, not very noticeable" } },
+              { v: 2, label: { ru: "Скорее не помогло", uk: "Скоріше не допомогло", en: "Didn't really help" } },
+              { v: 1, label: { ru: "Не помогло совсем", uk: "Не допомогло зовсім", en: "Didn't help at all" } },
+            ].map(opt => (
+              <button key={opt.v} onClick={() => finalizeCompletion(opt.v)} style={S.optionBtn}>
+                <span style={S.optionText}>{tx(opt.label)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (justFinished) {
     return (
       <div style={S.screen}>
@@ -3004,6 +3504,9 @@ function ChallengeScreen({ onBack, presetGroup }) {
         <div style={{ ...S.resultContainer, width: "100%" }}>
           <h2 style={S.resultTitle}>{tx({ ru: "Челлендж завершён 🌱", uk: "Челендж завершено 🌱", en: "Challenge complete 🌱" })}</h2>
           <p style={S.resultSubtitle}>
+            {tx({ ru: `«${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}», план ${justFinished.lengthDays} дней — прошёл(а) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "дней"}.`, uk: `«${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}», план ${justFinished.lengthDays} днів — пройшов(ла) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "днів"}.`, en: `"${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}", planned ${justFinished.lengthDays} days — done in ${justFinished.elapsedDays} day(s).` })}
+          </p>
+          <p style={{ ...S.resultSubtitle, marginTop: "10px" }}>
             {tx({ ru: "Это не значит, что стало привычкой навсегда — но ты дал(а) себе честную серию попыток подряд и увидел(а) настоящие данные о себе.", uk: "Це не означає, що стало звичкою назавжди — але ти дав(ла) собі чесну серію спроб поспіль і побачив(ла) справжні дані про себе.", en: "This doesn't mean it's now a lifelong habit — but you gave yourself an honest run of real attempts and saw real data about yourself." })}
           </p>
           <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "16px" }}>{t.back}</button>
@@ -3013,53 +3516,113 @@ function ChallengeScreen({ onBack, presetGroup }) {
   }
 
   if (active) {
+    if (showLog) {
+      const doneDays = active.days.filter(d => d.done);
+      return (
+        <div style={S.screen}>
+          <button onClick={() => setShowLog(false)} style={S.backBtn}>{t.back}</button>
+          <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
+            <h2 style={{ ...S.resultTitle, textAlign: "center" }}>{tx({ ru: "Пройденные дни", uk: "Пройдені дні", en: "Completed days" })}</h2>
+            {doneDays.length === 0 ? (
+              <p style={{ ...S.resultSubtitle, textAlign: "center" }}>{tx({ ru: "Пока ни одного дня не отмечено.", uk: "Поки жодного дня не відмічено.", en: "No days marked yet." })}</p>
+            ) : doneDays.map(d => {
+              const ritual = findRitual(active.group, d.ritual_id);
+              const dt = new Date(d.doneAt);
+              const dateStr = `${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;
+              return (
+                <div key={d.dayIndex} style={{ ...S.metricBlock, width: "100%", marginTop: "10px", boxSizing: "border-box" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                    <span style={{ fontSize: "12px", color: c.accent }}>{tx({ ru: `День ${d.dayIndex}`, uk: `День ${d.dayIndex}`, en: `Day ${d.dayIndex}` })}</span>
+                    <span style={{ fontSize: "11px", color: c.inkSoft }}>{dateStr}</span>
+                  </div>
+                  {ritual && <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted }}>{tx(ritual.title)}</p>}
+                  {d.tier && <p style={{ margin: "3px 0 0", fontSize: "10px", letterSpacing: "0.06em", color: c.inkSoft }}>{tx(CHALLENGE_TIER_META[d.tier] || {})}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
     const doneCount = active.days.filter(d => d.done).length;
-    const currentDay = active.days.find(d => !d.done);
-    const action = currentDay ? Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === currentDay.action_id) : null;
-    const reflection = currentDay ? CHALLENGE_REFLECTIONS.find(r => r.id === currentDay.reflection_id) : null;
+    const step = active.pace === "intensive" ? 2 : 1;
+    const notDone = active.days.filter(d => !d.done);
+    const currentBatch = notDone.slice(0, step);
     const pct = Math.round((doneCount / active.lengthDays) * 100);
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
         <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
           <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, textAlign: "center", marginBottom: "8px" }}>
-            {tx(CHALLENGE_GROUP_META[active.group] || {}).toUpperCase?.() || tx(CHALLENGE_GROUP_META[active.group] || {})}
+            {tx(CHALLENGE_GROUP_META[active.group] || {})}{active.pace === "intensive" ? ` · ${tx({ ru: "интенсив", uk: "інтенсив", en: "intensive" })}` : ""}
           </p>
           <h2 style={{ ...S.resultTitle, textAlign: "center" }}>
-            {tx({ ru: `День ${currentDay ? currentDay.dayIndex : active.lengthDays} из ${active.lengthDays}`, uk: `День ${currentDay ? currentDay.dayIndex : active.lengthDays} з ${active.lengthDays}`, en: `Day ${currentDay ? currentDay.dayIndex : active.lengthDays} of ${active.lengthDays}` })}
+            {currentBatch.length > 1
+              ? tx({ ru: `Дни ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} из ${active.lengthDays}`, uk: `Дні ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} з ${active.lengthDays}`, en: `Days ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} of ${active.lengthDays}` })
+              : tx({ ru: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} из ${active.lengthDays}`, uk: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} з ${active.lengthDays}`, en: `Day ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} of ${active.lengthDays}` })}
           </h2>
           <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box", marginTop: "8px" }}>
             <div style={{ ...S.metricFill, width: `${pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
               <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />
             </div>
           </div>
-          {currentDay && action && (
-            <>
-              {currentDay.deepen && (
-                <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginTop: "16px", textAlign: "center" }}>
-                  {tx({ ru: "Ты уже пробовал(а) это раньше — сегодня попробуй чуть дольше или глубже, чем в первый раз.", uk: "Ти вже пробував(ла) це раніше — сьогодні спробуй трохи довше або глибше, ніж першого разу.", en: "You've tried this before — today, go a little longer or deeper than the first time." })}
-                </p>
-              )}
-              <div style={{ ...S.metricBlock, width: "100%", marginTop: "16px", boxSizing: "border-box" }}>
-                <p style={{ margin: 0, fontSize: "16px", color: c.ink, lineHeight: 1.6 }}>{tx(action.text)}</p>
-              </div>
-              <button onClick={markDay} style={{ ...S.primaryBtn, marginTop: "16px" }}>
-                {tx({ ru: "Отметил(а) день", uk: "Відмітив(ла) день", en: "Mark day done" })}
-              </button>
-              {reflection && (
-                <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: `1px solid ${c.line}` }}>
-                  <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginBottom: "8px" }}>
-                    {tx({ ru: "ЕСЛИ ЗАХОЧЕШЬ ЗАПИСАТЬ", uk: "ЯКЩО ЗАХОЧЕШ ЗАПИСАТИ", en: "IF YOU FEEL LIKE WRITING" })}
+          {currentBatch.map(day => {
+            const ritual = findRitual(active.group, day.ritual_id);
+            const action = Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === day.action_id);
+            const reflection = CHALLENGE_REFLECTIONS.find(r => r.id === day.reflection_id);
+            if (!ritual) return null;
+            return (
+              <div key={day.dayIndex} style={{ marginTop: "16px" }}>
+                {currentBatch.length > 1 && (
+                  <p style={{ fontSize: "11px", color: c.inkSoft, marginBottom: "6px" }}>
+                    {tx({ ru: `День ${day.dayIndex}`, uk: `День ${day.dayIndex}`, en: `Day ${day.dayIndex}` })}
                   </p>
-                  <p style={{ fontSize: "14px", color: c.inkMuted, fontStyle: "italic", marginBottom: "10px" }}>{tx(reflection.text)}</p>
-                  <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                    <span>🌙</span><span>{t.notebook}</span>
-                  </button>
+                )}
+                {day.tierStarts && (
+                  <p style={{ fontSize: "12px", color: c.accent, fontStyle: "italic", marginBottom: "8px" }}>
+                    {day.tier === "medium"
+                      ? tx({ ru: "Новый уровень: эти практики требуют чуть больше времени и внимания к причине, а не только к симптому.", uk: "Новий рівень: ці практики потребують трохи більше часу й уваги до причини, а не лише до симптому.", en: "New level: these practices ask for a bit more time and attention to the cause, not just the symptom." })
+                      : day.tier === "advanced"
+                      ? tx({ ru: "Продвинутый уровень: ты прошёл(а) базу — эти практики длиннее и требуют больше самостоятельности.", uk: "Просунутий рівень: ти пройшов(ла) базу — ці практики довші і потребують більше самостійності.", en: "Advanced level: you've covered the basics — these practices are longer and more self-directed." })
+                      : tx({ ru: "Базовый уровень: короткие, простые шаги на вход в тему.", uk: "Базовий рівень: короткі, прості кроки на вхід у тему.", en: "Foundation level: short, simple steps to ease in." })}
+                  </p>
+                )}
+                <p style={{ fontSize: "10px", letterSpacing: "0.08em", color: c.inkSoft, marginBottom: "4px" }}>{tx(CHALLENGE_TIER_META[day.tier] || {})}</p>
+                <div style={{ ...S.metricBlock, width: "100%", boxSizing: "border-box" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: "15px", color: c.accent, fontWeight: 600 }}>{tx(ritual.title)}</p>
+                  {ritual.steps.map((s, si) => (
+                    <div key={si} style={{ display: "flex", gap: "8px", marginBottom: si < ritual.steps.length - 1 ? "8px" : "0" }}>
+                      <span style={{ fontSize: "13px", color: c.inkSoft, flexShrink: 0 }}>{si + 1}.</span>
+                      <p style={{ margin: 0, fontSize: "14px", color: c.ink, lineHeight: 1.5 }}>{tx(s)}</p>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-          <button onClick={abandonChallenge} style={{ ...S.backBtnBottom, marginTop: "18px" }}>
+                {action && (
+                  <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginTop: "8px" }}>
+                    {tx({ ru: "Доп. совет на день: ", uk: "Дод. порада на день: ", en: "Extra tip for today: " })}{tx(action.text)}
+                  </p>
+                )}
+                {reflection && (
+                  <p style={{ fontSize: "13px", color: c.inkMuted, fontStyle: "italic", marginTop: "6px" }}>
+                    {tx({ ru: "Рефлексия: ", uk: "Рефлексія: ", en: "Reflection: " })}{tx(reflection.text)}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+          <button onClick={markDay} style={{ ...S.primaryBtn, marginTop: "18px" }}>
+            {currentBatch.length > 1
+              ? tx({ ru: "Отметил(а) эти дни", uk: "Відмітив(ла) ці дні", en: "Mark these days done" })
+              : tx({ ru: "Отметил(а) день", uk: "Відмітив(ла) день", en: "Mark day done" })}
+          </button>
+          <button onClick={() => setShowLog(true)} style={{ width: "100%", padding: "12px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px" }}>
+            {tx({ ru: `Пройденные дни (${doneCount})`, uk: `Пройдені дні (${doneCount})`, en: `Completed days (${doneCount})` })}
+          </button>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🌙</span><span>{t.notebook}</span>
+          </button>
+          <button onClick={abandonChallenge} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkSoft, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "14px" }}>
             {tx({ ru: "Остановить челлендж", uk: "Зупинити челендж", en: "Stop challenge" })}
           </button>
         </div>
@@ -3075,38 +3638,92 @@ function ChallengeScreen({ onBack, presetGroup }) {
       <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
         <h2 style={{ ...S.resultTitle, textAlign: "center" }}>{tx({ ru: "Челленджи", uk: "Челенджі", en: "Challenges" })}</h2>
         <p style={{ ...S.resultSubtitle, textAlign: "center" }}>
-          {tx({ ru: "Короткая серия одинаковых попыток подряд — не обещание привычки, а честный эксперимент над собой.", uk: "Коротка серія однакових спроб поспіль — не обіцянка звички, а чесний експеримент над собою.", en: "A short run of the same attempt, day after day — not a habit guarantee, just an honest experiment." })}
+          {tx({ ru: "Не 3 действия по кругу, а полноценный путь на 10, 20 или 30 дней: с каждым новым уровнем практики становятся чуть глубже.", uk: "Не 3 дії по колу, а повноцінний шлях на 10, 20 або 30 днів: з кожним новим рівнем практики стають трохи глибшими.", en: "Not 3 actions on repeat — a full 10/20/30-day path where each new level goes a bit deeper." })}
         </p>
+
         <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginTop: "20px", marginBottom: "10px" }}>
           {tx({ ru: "НАПРАВЛЕНИЕ", uk: "НАПРЯМОК", en: "DIRECTION" })}
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "18px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "10px", width: "100%", boxSizing: "border-box" }}>
           {groupKeys.map(g => (
-            <button key={g} onClick={() => setPickGroup(g)} style={{ padding: "10px 14px", borderRadius: "20px", border: `1px solid ${g === pickGroup ? "#C8A97E" : c.line}`, background: g === pickGroup ? "rgba(200,169,126,0.12)" : "transparent", color: g === pickGroup ? c.accent : c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+            <button key={g} onClick={() => setPickGroup(g)} style={{ width: "100%", boxSizing: "border-box", padding: "10px 4px", borderRadius: "14px", border: `1px solid ${g === pickGroup ? "#C8A97E" : c.line}`, background: g === pickGroup ? "rgba(200,169,126,0.12)" : "transparent", color: g === pickGroup ? c.accent : c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", textAlign: "center", lineHeight: 1.3 }}>
               {tx(CHALLENGE_GROUP_META[g])}
             </button>
           ))}
         </div>
+        <p style={{ fontSize: "13px", color: c.inkMuted, fontStyle: "italic", marginBottom: "20px" }}>          {tx(CHALLENGE_GROUP_DESC[pickGroup] || {})}
+        </p>
+
         <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginBottom: "10px" }}>
           {tx({ ru: "ДЛИТЕЛЬНОСТЬ", uk: "ТРИВАЛІСТЬ", en: "LENGTH" })}
         </p>
         <div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
           {[10, 20, 30].map(len => (
-            <button key={len} onClick={() => setPickLength(len)} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: `1px solid ${len === pickLength ? "#C8A97E" : c.line}`, background: len === pickLength ? "rgba(200,169,126,0.12)" : "transparent", color: len === pickLength ? c.accent : c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
-              {len} {tx({ ru: "дней", uk: "днів", en: "days" })}
+            <button key={len} onClick={() => setPickLength(len)} style={{ flex: 1, padding: "12px 6px", borderRadius: "12px", border: `1px solid ${len === pickLength ? "#C8A97E" : c.line}`, background: len === pickLength ? "rgba(200,169,126,0.12)" : "transparent", color: len === pickLength ? c.accent : c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+              <div>{len} {tx({ ru: "дней", uk: "днів", en: "days" })}</div>
+              <div style={{ fontSize: "10px", marginTop: "2px", color: len === pickLength ? c.accent : c.inkSoft }}>
+                {tx(CHALLENGE_TIER_META[len === 10 ? "easy" : len === 20 ? "medium" : "advanced"])}
+              </div>
+              {len === recommendedLength && (
+                <div style={{ fontSize: "9px", letterSpacing: "0.08em", marginTop: "3px", color: c.accent }}>
+                  {tx({ ru: "РЕКОМЕНДОВАНО", uk: "РЕКОМЕНДОВАНО", en: "RECOMMENDED" })}
+                </div>
+              )}
             </button>
           ))}
         </div>
-        <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginBottom: "18px" }}>
-          {tx({ ru: "Рекомендация подобрана по тому, как часто это направление повторялось в твоих последних отметках.", uk: "Рекомендація підібрана за тим, як часто цей напрямок повторювався в твоїх останніх відмітках.", en: "The suggested length is based on how often this direction has come up in your recent check-ins." })}
+        <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginBottom: "20px" }}>
+          {tx({ ru: "Это один путь: 10 дней — только база, 20 — база + следующий уровень, 30 — полный путь до продвинутых практик. Рекомендация подобрана по тому, как часто это направление повторялось в твоих последних отметках.", uk: "Це один шлях: 10 днів — лише база, 20 — база + наступний рівень, 30 — повний шлях до просунутих практик. Рекомендація підібрана за тим, як часто цей напрямок повторювався в твоїх останніх відмітках.", en: "It's one path: 10 days is just the foundation, 20 adds the next level, 30 is the full path to advanced practice. The suggested length is based on how often this direction has come up in your recent check-ins." })}
         </p>
+
+        <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginBottom: "10px" }}>
+          {tx({ ru: "ТЕМП", uk: "ТЕМП", en: "PACE" })}
+        </p>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
+          <button onClick={() => setPickPace("normal")} style={{ flex: 1, padding: "12px 6px", borderRadius: "12px", border: `1px solid ${pickPace === "normal" ? "#C8A97E" : c.line}`, background: pickPace === "normal" ? "rgba(200,169,126,0.12)" : "transparent", color: pickPace === "normal" ? c.accent : c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+            {tx({ ru: "Обычный", uk: "Звичайний", en: "Normal" })}
+          </button>
+          <button onClick={() => setPickPace("intensive")} style={{ flex: 1, padding: "12px 6px", borderRadius: "12px", border: `1px solid ${pickPace === "intensive" ? "#C8A97E" : c.line}`, background: pickPace === "intensive" ? "rgba(200,169,126,0.12)" : "transparent", color: pickPace === "intensive" ? c.accent : c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+            {tx({ ru: "Интенсивный", uk: "Інтенсивний", en: "Intensive" })}
+          </button>
+        </div>
+        <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginBottom: "18px" }}>
+          {pickPace === "intensive"
+            ? tx({ ru: "По 2 дня плана за один заход — если ритуалы кажутся слишком простыми, чтобы растягивать их по одному в сутки.", uk: "По 2 дні плану за один захід — якщо ритуали здаються надто простими, щоб розтягувати їх по одному на добу.", en: "2 plan-days per sitting — for when the rituals feel too simple to spread out one per calendar day." })
+            : tx({ ru: "По 1 дню плана за один заход — свободный темп, отмечай, когда готов(а).", uk: "По 1 дню плану за один захід — вільний темп, відмічай, коли готовий(а).", en: "1 plan-day per sitting — free pace, mark it whenever you're ready." })}
+        </p>
+
         <button onClick={startChallenge} style={S.primaryBtn}>
           {tx({ ru: "Начать челлендж", uk: "Почати челендж", en: "Start challenge" })}
         </button>
+
+        {pastChallenges.length > 0 && (
+          <div style={{ ...S.metricBlock, width: "100%", marginTop: "24px", boxSizing: "border-box" }}>
+            <p style={{ margin: "0 0 12px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
+              {tx({ ru: "ПРОШЛЫЕ ЧЕЛЛЕНДЖИ", uk: "МИНУЛІ ЧЕЛЕНДЖІ", en: "PAST CHALLENGES" })}
+            </p>
+            {pastChallenges.map((ch, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: i > 0 ? `1px solid ${c.line}` : "none" }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted }}>{tx(CHALLENGE_GROUP_META[ch.group] || {})} · {ch.lengthDays} {tx({ ru: "дней", uk: "днів", en: "d" })}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color: c.inkSoft }}>
+                    {ch.abandoned
+                      ? tx({ ru: `остановлен, ${ch.daysCompleted || 0} из ${ch.lengthDays}`, uk: `зупинено, ${ch.daysCompleted || 0} з ${ch.lengthDays}`, en: `stopped, ${ch.daysCompleted || 0} of ${ch.lengthDays}` })
+                      : tx({ ru: `завершён за ${ch.elapsedDays || "?"} дн.`, uk: `завершено за ${ch.elapsedDays || "?"} дн.`, en: `finished in ${ch.elapsedDays || "?"} d.` })}
+                  </p>
+                </div>
+                {typeof ch.rating === "number" && (
+                  <span style={{ fontSize: "13px", color: c.accent }}>{"★".repeat(ch.rating)}{"☆".repeat(5 - ch.rating)}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // ЭКРАН: СОВЕТ ДНЯ
@@ -4637,7 +5254,8 @@ function MyPathScreen({ onBack }) {
   const dcWeakestQ = dcWeakestKey ? DAILYCHECK_QUESTIONS.find(q => q.key === dcWeakestKey) : null;
   const dcScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
   const dcHiIndex = dcAvgPct == null ? 0 : dcAvgPct <= 25 ? 0 : dcAvgPct <= 50 ? 1 : dcAvgPct <= 75 ? 2 : 3;
-  const dcEnoughForPatterns = dailyCheckHist.length >= 10;
+  const dcEnoughForPatterns = dailyCheckHist.length >= 1;
+  const dcEnoughForTopActions = dailyCheckHist.length >= 5; // топ-действия нужны хотя бы с несколькими повторами, иначе список из 1 пункта бессмысленный
   let dcTopActions = [];
   let dcAllTimePct = null;
   let dcAllTimeWeakestQ = null;
@@ -4659,11 +5277,11 @@ function MyPathScreen({ onBack }) {
       dcAllTimePct = Math.round(((overallAvg - 1) / 4) * 100);
       const weakest = avgs.reduce((min, e) => (e[1] < min[1] ? e : min), avgs[0])[0];
       dcAllTimeWeakestQ = DAILYCHECK_QUESTIONS.find(q => q.key === weakest);
-      dcAllTimeBreakdown = DAILYCHECK_QUESTIONS.map(q => ({
-        key: q.key,
-        label: q.label,
-        pct: sums[q.key] != null ? Math.round(((sums[q.key] / counts[q.key] - 1) / 4) * 100) : null,
-      })).filter(x => x.pct != null);
+      dcAllTimeBreakdown = DAILYCHECK_QUESTIONS.map(q => {
+        if (sums[q.key] == null) return null;
+        const avg = sums[q.key] / counts[q.key];
+        return { key: q.key, q, avgScore: avg, pct: Math.round(((avg - 1) / 4) * 100) };
+      }).filter(Boolean);
     }
     dcTopActions = Object.entries(byAction).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, count]) => {
       const found = Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === id);
@@ -4876,22 +5494,12 @@ function MyPathScreen({ onBack }) {
                     <p style={{ margin: "0 0 12px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
                       {tx({ ru: "ПОКАЗАТЕЛИ ЗА ВСЁ ВРЕМЯ", uk: "ПОКАЗНИКИ ЗА ВЕСЬ ЧАС", en: "INDICATORS OVER TIME" })}
                     </p>
-                    {dcAllTimeBreakdown.map((item, i) => (
-                      <div key={item.key} style={{ marginBottom: i < dcAllTimeBreakdown.length - 1 ? "13px" : "0" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span style={{ fontSize: "12px", color: c.inkMuted }}>{tx(item.label)}</span>
-                          <span style={{ fontSize: "12px", color: c.accent, fontWeight: 600 }}>{item.pct}%</span>
-                        </div>
-                        <div style={{ ...S.metricTrack, height: "6px", background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
-                          <div style={{ ...S.metricFill, width: `${item.pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
-                            <span style={{ ...S.metricFillDot, width: "12px", height: "12px", background: "#C8A97E" }} />
-                          </div>
-                        </div>
-                      </div>
+                    {dcAllTimeBreakdown.map(item => (
+                      <IndicatorBarRow key={item.key} q={item.q} pct={item.pct} avgScore={item.avgScore} />
                     ))}
                   </div>
                 )}
-                {dcTopActions.length > 0 && (
+                {dcTopActions.length > 0 && dcEnoughForTopActions && (
                   <>
                     <p style={{ margin: "0 0 10px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>
                       {tx({ ru: "ЧТО ЧАЩЕ ВСЕГО ПОМОГАЕТ", uk: "ЩО НАЙЧАСТІШЕ ДОПОМАГАЄ", en: "WHAT HELPS MOST OFTEN" })}
@@ -4904,11 +5512,14 @@ function MyPathScreen({ onBack }) {
                     ))}
                   </>
                 )}
+                {!dcEnoughForTopActions && (
+                  <p style={{ margin: "10px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
+                    {tx({ ru: `Что помогает чаще всего — появится через несколько отметок (сейчас ${dailyCheckHist.length}). Каждый тест уже уточняет цифры выше.`, uk: `Що допомагає найчастіше — з'явиться через кілька відміток (зараз ${dailyCheckHist.length}). Кожен тест вже уточнює цифри вище.`, en: `What helps most often will show up after a few more check-ins (currently ${dailyCheckHist.length}). Every test already refines the numbers above.` })}
+                  </p>
+                )}
               </>
             ) : (
-              <p style={{ margin: 0, fontSize: "12px", color: c.inkSoft, fontStyle: "italic" }}>
-                {tx({ ru: `Собираем твою историю (${dailyCheckHist.length}/10) — после 10 отметок здесь появятся личные закономерности, и мы начнём учитывать их в советах.`, uk: `Збираємо твою історію (${dailyCheckHist.length}/10) — після 10 відміток тут з'являться особисті закономірності, і ми почнемо враховувати їх у порадах.`, en: `Building your history (${dailyCheckHist.length}/10) — after 10 check-ins, your own patterns will show up here and start shaping your advice.` })}
-              </p>
+              <EmptyMetric text={tx({ ru: "Пройди «Компас состояния» — и здесь появится твой результат.", uk: "Пройди «Компас стану» — і тут з'явиться твій результат.", en: "Take the State compass — and your result will appear here." })} />
             )}
           </div>
         </>
