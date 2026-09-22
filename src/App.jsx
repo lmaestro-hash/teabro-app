@@ -1318,7 +1318,7 @@ const HORMONE_LEVEL_TEXTS = {
   ],
   testosterone: [
     { ru: "Страх идёт впереди действия — веры в свои силы сейчас не хватает.", uk: "Страх іде попереду дії — віри у свої сили зараз не вистачає.", en: "Fear goes ahead of action — faith in your strength is short right now." },
-    { ru: "Ты пробуешь, но сдаёшься быстрее, чем могла бы/мог.", uk: "Ти пробуєш, але здаєшся швидше, ніж могла б/міг.", en: "You try, but give up sooner than you could." },
+    { ru: "Ты пробуешь, но сдаёшься быстрее, чем мог(ла) бы.", uk: "Ти пробуєш, але здаєшся швидше, ніж міг(ла) б.", en: "You try, but give up sooner than you could." },
     { ru: "Иногда хватает воли пройти препятствие, иногда нет — зависит от дня.", uk: "Іноді вистачає волі пройти перешкоду, іноді ні — залежить від дня.", en: "Sometimes will is enough to clear the obstacle, sometimes not — depends on the day." },
     { ru: "Обычно идёшь до конца, даже когда страшно — воля работает.", uk: "Зазвичай ідеш до кінця, навіть коли страшно — воля працює.", en: "Usually you go all the way even when scared — will works." },
     { ru: "Вызовы зажигают, а не пугают — редкий и сильный ресурс.", uk: "Виклики запалюють, а не лякають — рідкісний і сильний ресурс.", en: "Challenges light you up rather than scare you — a rare and strong resource." },
@@ -1407,16 +1407,133 @@ const HORMONE_ADVICE = {
 };
 
 
-function HormoneScreen({ onBack }) {
+// ─────────────────────────────────────────────
+// ГОРМОНЫ: РОЛЬ / ПРИЗНАКИ ДЕФИЦИТА / КАК ПОДНЯТЬ ЕСТЕСТВЕННО
+// (биологический угол — сон, свет, еда, тренировки; дополняет
+// поведенческие HORMONE_ADVICE выше)
+// ─────────────────────────────────────────────
+const HORMONE_INFO = {
+  dopamine: {
+    role: { ru: "Мотивация, предвкушение награды, фокус, желание действовать. Именно он даёт ощущение «я хочу и могу».", uk: "Мотивація, передчуття нагороди, фокус, бажання діяти. Саме він дає відчуття «я хочу і можу».", en: "Motivation, anticipation of reward, focus, the drive to act. It's what gives the feeling 'I want to and I can'." },
+    signs: { ru: "Апатия, прокрастинация, трудности с концентрацией, зависимость от быстрых удовольствий (соцсети, еда, короткие видео).", uk: "Апатія, прокрастинація, труднощі з концентрацією, залежність від швидких задоволень (соцмережі, їжа, короткі відео).", en: "Apathy, procrastination, trouble concentrating, dependence on quick pleasures (social media, food, short videos)." },
+    raise: [
+      { ru: "Ставь и закрывай небольшие цели — мозг любит «маленькие победы»", uk: "Став і закривай невеликі цілі — мозок любить «маленькі перемоги»", en: "Set and complete small goals — the brain loves 'small wins'" },
+      { ru: "Силовые и любые регулярные тренировки", uk: "Силові й будь-які регулярні тренування", en: "Strength training and any regular exercise" },
+      { ru: "Продукты с тирозином: яйца, мясо, бобовые, орехи, сыр, творог", uk: "Продукти з тирозином: яйця, м'ясо, бобові, горіхи, сир, творог", en: "Tyrosine-rich food: eggs, meat, legumes, nuts, cheese, cottage cheese" },
+      { ru: "Хороший сон и утренний солнечный свет", uk: "Хороший сон і ранкове сонячне світло", en: "Good sleep and morning sunlight" },
+      { ru: "Ограничь «дешёвый дофамин»: скроллинг, сладкое, постоянные уведомления", uk: "Обмеж «дешевий дофамін»: скролінг, солодке, постійні сповіщення", en: "Limit 'cheap dopamine': scrolling, sweets, constant notifications" },
+    ],
+  },
+  serotonin: {
+    role: { ru: "Настроение, сон, аппетит, снижает тревогу и раздражительность. Около 90% вырабатывается в кишечнике.", uk: "Настрій, сон, апетит, знижує тривогу і дратівливість. Близько 90% виробляється в кишечнику.", en: "Mood, sleep, appetite; lowers anxiety and irritability. About 90% is produced in the gut." },
+    signs: { ru: "Тревога, внутреннее напряжение, проблемы со сном, тяга к сладкому и углеводам, ощущение «всё не так».", uk: "Тривога, внутрішнє напруження, проблеми зі сном, тяга до солодкого і вуглеводів, відчуття «все не так».", en: "Anxiety, inner tension, sleep problems, cravings for sweets and carbs, a sense that 'nothing is right'." },
+    raise: [
+      { ru: "Утренний яркий солнечный свет + ежедневные прогулки", uk: "Ранкове яскраве сонячне світло + щоденні прогулянки", en: "Bright morning sunlight + daily walks" },
+      { ru: "Триптофан: индейка, курица, яйца, сыр, бананы, орехи + сложные углеводы", uk: "Триптофан: індичка, курка, яйця, сир, банани, горіхи + складні вуглеводи", en: "Tryptophan: turkey, chicken, eggs, cheese, bananas, nuts + complex carbs" },
+      { ru: "Регулярные умеренные тренировки", uk: "Регулярні помірні тренування", en: "Regular moderate exercise" },
+      { ru: "Здоровый кишечник: клетчатка, кефир, квашеная капуста", uk: "Здоровий кишечник: клітковина, кефір, квашена капуста", en: "Healthy gut: fiber, kefir, fermented food" },
+      { ru: "Сон 7–9 часов и меньше хронического стресса", uk: "Сон 7–9 годин і менше хронічного стресу", en: "7–9 hours of sleep and less chronic stress" },
+    ],
+  },
+  oxytocin: {
+    role: { ru: "Усиливает привязанность, эмпатию, доверие, снижает стресс и чувство одиночества. Важен для отношений.", uk: "Посилює прив'язаність, емпатію, довіру, знижує стрес і почуття самотності. Важливий для стосунків.", en: "Strengthens attachment, empathy, trust; lowers stress and loneliness. Important for relationships." },
+    signs: { ru: "Мало доверия, ощущение одиночества, дистанция в отношениях, трудно сближаться.", uk: "Мало довіри, відчуття самотності, дистанція у стосунках, важко зближуватись.", en: "Low trust, a sense of loneliness, distance in relationships, hard to get close to people." },
+    raise: [
+      { ru: "Физический контакт: объятия, массаж, рукопожатия", uk: "Фізичний контакт: обійми, масаж, рукостискання", en: "Physical contact: hugs, massage, handshakes" },
+      { ru: "Качественное общение и время с близкими людьми", uk: "Якісне спілкування і час із близькими людьми", en: "Quality time and conversation with close people" },
+      { ru: "Акты доброты и помощь другим", uk: "Акти доброти і допомога іншим", en: "Acts of kindness and helping others" },
+      { ru: "Совместные активности и чувство принадлежности к группе", uk: "Спільні активності і відчуття приналежності до групи", en: "Shared activities and a sense of belonging to a group" },
+    ],
+  },
+  cortisol: {
+    role: { ru: "Помогает реагировать на стресс, поддерживает сахар в крови и давление. При хроническом повышении — разрушителен: подавляет тестостерон, серотонин, сон.", uk: "Допомагає реагувати на стрес, підтримує цукор у крові і тиск. При хронічному підвищенні — руйнівний: пригнічує тестостерон, серотонін, сон.", en: "Helps respond to stress, supports blood sugar and pressure. When chronically elevated it's destructive: suppresses testosterone, serotonin, sleep." },
+    signs: { ru: "Жир на животе, тяга к сладкому, плохой сон, усталость с утра, тревога, снижение иммунитета.", uk: "Жир на животі, тяга до солодкого, поганий сон, втома з ранку, тривога, зниження імунітету.", en: "Belly fat, sugar cravings, poor sleep, morning fatigue, anxiety, weaker immunity." },
+    raise: [
+      { ru: "Качественный сон и стабильный режим", uk: "Якісний сон і стабільний режим", en: "Quality sleep and a stable routine" },
+      { ru: "Дыхательные практики, медитация, прогулки на природе", uk: "Дихальні практики, медитація, прогулянки на природі", en: "Breathwork, meditation, walks in nature" },
+      { ru: "Не перетренировываться", uk: "Не перетреновуватись", en: "Avoid overtraining" },
+      { ru: "Стабильный сахар в крови: белок + жиры + клетчатка", uk: "Стабільний цукор у крові: білок + жири + клітковина", en: "Stable blood sugar: protein + fats + fiber" },
+      { ru: "Ограничь кофеин после обеда", uk: "Обмеж кофеїн після обіду", en: "Limit caffeine after midday" },
+    ],
+  },
+  gaba: {
+    role: { ru: "Главный тормозной нейромедиатор. Успокаивает нервную систему, снижает возбуждение, тревогу и мышечное напряжение.", uk: "Головний гальмівний нейромедіатор. Заспокоює нервову систему, знижує збудження, тривогу і м'язову напругу.", en: "The main inhibitory neurotransmitter. Calms the nervous system, lowers arousal, anxiety and muscle tension." },
+    signs: { ru: "Внутреннее напряжение, «не могу расслабиться», раздражительность, поверхностный сон.", uk: "Внутрішнє напруження, «не можу розслабитись», дратівливість, поверхневий сон.", en: "Inner tension, 'can't relax', irritability, shallow sleep." },
+    raise: [
+      { ru: "Качественный глубокий сон", uk: "Якісний глибокий сон", en: "Quality deep sleep" },
+      { ru: "Магний (особенно глицинат или треонат)", uk: "Магній (особливо гліцинат або треонат)", en: "Magnesium (especially glycinate or threonate)" },
+      { ru: "Дыхательные практики, йога, медитация", uk: "Дихальні практики, йога, медитація", en: "Breathwork, yoga, meditation" },
+      { ru: "Меньше стимуляции вечером: кофеин, экраны", uk: "Менше стимуляції ввечері: кофеїн, екрани", en: "Less evening stimulation: caffeine, screens" },
+    ],
+  },
+  testosterone: {
+    role: { ru: "Рост мышц и силы, либидо, уверенность, энергия, мотивация. Важен и для мужчин, и для женщин.", uk: "Зростання м'язів і сили, лібідо, впевненість, енергія, мотивація. Важливий і для чоловіків, і для жінок.", en: "Muscle and strength growth, libido, confidence, energy, motivation. Important for both men and women." },
+    signs: { ru: "Усталость, снижение либидо, набор жира (особенно на животе), потеря мышц, раздражительность или апатия.", uk: "Втома, зниження лібідо, набір жиру (особливо на животі), втрата м'язів, дратівливість або апатія.", en: "Fatigue, lower libido, gaining fat (especially belly), muscle loss, irritability or apathy." },
+    raise: [
+      { ru: "Силовые тренировки 3–4 раза в неделю (приседания, становая, жим, подтягивания)", uk: "Силові тренування 3–4 рази на тиждень (присідання, станова, жим, підтягування)", en: "Strength training 3–4x/week (squats, deadlift, press, pull-ups)" },
+      { ru: "Сон 7–9 часов — тестостерон активно вырабатывается в глубоком сне", uk: "Сон 7–9 годин — тестостерон активно виробляється в глибокому сні", en: "7–9 hours of sleep — testosterone is produced mainly in deep sleep" },
+      { ru: "Снижение избыточного жира (жировая ткань превращает тестостерон в эстроген)", uk: "Зниження надлишкового жиру (жирова тканина перетворює тестостерон на естроген)", en: "Reducing excess body fat (fat tissue converts testosterone into estrogen)" },
+      { ru: "Цинк, магний, витамин D, достаточно холестерина в рационе", uk: "Цинк, магній, вітамін D, достатньо холестерину в раціоні", en: "Zinc, magnesium, vitamin D, enough dietary cholesterol" },
+      { ru: "Управление стрессом — высокий кортизол подавляет тестостерон", uk: "Управління стресом — високий кортизол пригнічує тестостерон", en: "Managing stress — high cortisol suppresses testosterone" },
+    ],
+  },
+  acetylcholine: {
+    role: { ru: "Отвечает за память, обучение, концентрацию, ясность ума и когнитивные функции.", uk: "Відповідає за пам'ять, навчання, концентрацію, ясність розуму і когнітивні функції.", en: "Responsible for memory, learning, concentration, mental clarity and cognitive function." },
+    signs: { ru: "Туман в голове, трудно сосредоточиться, забывчивость, рассеянное внимание.", uk: "Туман у голові, важко зосередитись, забудькуватість, розсіяна увага.", en: "Brain fog, trouble concentrating, forgetfulness, scattered attention." },
+    raise: [
+      { ru: "Холин в питании: яйца, печень, жирная рыба", uk: "Холін у харчуванні: яйця, печінка, жирна риба", en: "Dietary choline: eggs, liver, fatty fish" },
+      { ru: "Умственная нагрузка + регулярная физическая активность", uk: "Розумове навантаження + регулярна фізична активність", en: "Mental effort + regular physical activity" },
+      { ru: "Качественный сон", uk: "Якісний сон", en: "Quality sleep" },
+    ],
+  },
+};
+
+const RESPONSIBILITY_DISCLAIMER = { ru: "Это ориентиры на основе общих научных данных и практик, а не медицинская консультация и не диагноз. Перед серьёзными изменениями — особенно добавками — сдай анализы и посоветуйся со специалистом. Решения о своём здоровье и их результат — на тебе.", uk: "Це орієнтири на основі загальних наукових даних і практик, а не медична консультація і не діагноз. Перед серйозними змінами — особливо добавками — здай аналізи і порадься з фахівцем. Рішення про своє здоров'я і їх результат — на тобі.", en: "These are pointers based on general research and practice — not medical advice or a diagnosis. Before any serious change, especially supplements, get tested and consult a specialist. Decisions about your health, and their outcome, are yours." };
+
+function HormoneInfoBlock({ hormoneKey, color }) {
+  const { tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const [open, setOpen] = useState(false);
+  const info = HORMONE_INFO[hormoneKey];
+  if (!info) return null;
+  return (
+    <div style={{ marginTop: "6px" }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background: "none", border: "none", color: color || c.accent, fontSize: "12px", cursor: "pointer", padding: "4px 0", fontFamily: "'Georgia',serif", display: "flex", alignItems: "center", gap: "5px" }}>
+        <span>{open ? "▾" : "▸"}</span>
+        <span>{tx({ ru: "Что это и как поднять", uk: "Що це і як підняти", en: "What it is and how to raise it" })}</span>
+      </button>
+      {open && (
+        <div style={{ padding: "10px 12px", background: "rgba(255,255,255,0.02)", border: `1px solid ${c.line}`, borderRadius: "10px", marginTop: "4px" }}>
+          <p style={{ margin: "0 0 8px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(info.role)}</p>
+          <p style={{ margin: "0 0 8px", fontSize: "11px", color: c.inkSoft, lineHeight: 1.6 }}>
+            <span style={{ color: color || c.accent }}>{tx({ ru: "Признаки дефицита: ", uk: "Ознаки дефіциту: ", en: "Signs of deficiency: " })}</span>
+            {tx(info.signs)}
+          </p>
+          <p style={{ margin: "0 0 6px", fontSize: "11px", letterSpacing: "0.08em", color: c.inkSoft }}>{tx({ ru: "КАК ПОДНЯТЬ ЕСТЕСТВЕННО", uk: "ЯК ПІДНЯТИ ПРИРОДНО", en: "HOW TO RAISE IT NATURALLY" })}</p>
+          {info.raise.map((item, i) => (
+            <p key={i} style={{ margin: "0 0 4px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>· {tx(item)}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HormoneScreen({ onBack, onGoCompass }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
+  const [showChallenge, setShowChallenge] = useState(false);
+  const [challengePresetHormone, setChallengePresetHormone] = useState(null);
   const ALL_Q = [...HORMONE_QUESTIONS, ...HORMONE_CROSS_QUESTIONS];
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   useEffect(() => { statEvent("hormones"); }, []);
+  if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} hormoneMode presetHormone={challengePresetHormone} />;
+  if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
   const q = ALL_Q[current];
 
   const handleNext = () => {
@@ -1504,6 +1621,10 @@ function HormoneScreen({ onBack }) {
                 quote={`«${r.text}»`}
                 animKey={`horm-${r.key}-${r.pct}`}
               />
+              <HormoneInfoBlock hormoneKey={r.key} color={r.meta.color} />
+              <button onClick={() => { setChallengePresetHormone(r.key); setShowChallenge(true); }} style={{ background: "none", border: "none", color: r.meta.color, fontSize: "11px", cursor: "pointer", padding: "4px 0 0", fontFamily: "'Georgia',serif", opacity: 0.85 }}>
+                🧭 {tx({ ru: "Челлендж по этой системе", uk: "Челендж за цією системою", en: "Challenge for this system" })}
+              </button>
             </div>
           ))}
 
@@ -1519,6 +1640,19 @@ function HormoneScreen({ onBack }) {
               <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft }}>⏱ {tx(advice.duration)}</p>
             </div>
           </div>
+
+          <button onClick={() => { setChallengePresetHormone(weakest.key); setShowChallenge(true); }} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
+          </button>
+          {onGoCompass && (
+            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
+            </button>
+          )}
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🌙</span><span>{t.notebook}</span>
+          </button>
+          <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
 
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration: "none", display: "block", textAlign: "center", marginTop: "18px" }}>{t.goChannel}</a>
@@ -2919,7 +3053,11 @@ function IndicatorBarRow({ q, pct, avgScore }) {
           </span>
         ))}
       </div>
-      {insight && <p style={{ margin: "6px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>{tx(insight)}</p>}
+      {insight && (
+        <div style={{ ...S.metricQuote, marginTop: "10px" }}>
+          <p style={S.metricQuoteText}>«{tx(insight)}»</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -3317,6 +3455,7 @@ function DailyCheckScreen({ onBack }) {
           <button onClick={handleDone} style={{ ...S.primaryBtn, marginTop: "18px" }}>
             {tx({ ru: "Я сделал(а)", uk: "Я зробив(ла)", en: "I did it" })}
           </button>
+          <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
           <ShareButton text={shareMsg} />
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -3382,36 +3521,53 @@ function DailyCheckScreen({ onBack }) {
 // ─────────────────────────────────────────────
 // ЭКРАН: ЧЕЛЛЕНДЖИ
 // ─────────────────────────────────────────────
-function ChallengeScreen({ onBack, presetGroup }) {
+function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState(null); // {group, lengthDays, pace, startedAt, days: [...]}
+  const [active, setActive] = useState(null); // {group, hormoneKey, lengthDays, pace, startedAt, days: [...]}
   const [pastChallenges, setPastChallenges] = useState([]);
-  const [pickGroup, setPickGroup] = useState(presetGroup || "recovery");
+  const [pickHormone, setPickHormone] = useState(hormoneMode ? (presetHormone || "dopamine") : null);
+  const [pickGroup, setPickGroup] = useState(hormoneMode ? (HORMONE_TO_DAILYCHECK_GROUP[presetHormone] || HORMONE_TO_DAILYCHECK_GROUP.dopamine) : (presetGroup || "recovery"));
   const [pickLength, setPickLength] = useState(10);
   const [recommendedLength, setRecommendedLength] = useState(10);
-  const [pickPace, setPickPace] = useState("normal"); // normal | intensive
   const [justFinished, setJustFinished] = useState(null); // {group, lengthDays, elapsedDays} после оценки
   const [pendingCompletion, setPendingCompletion] = useState(null); // готов, ждёт оценки
   const [showNotes, setShowNotes] = useState(false);
   const [showLog, setShowLog] = useState(false);
+
+  const pickHormoneAndGroup = (hKey) => {
+    setPickHormone(hKey);
+    setPickGroup(HORMONE_TO_DAILYCHECK_GROUP[hKey] || "recovery");
+  };
+
+  const directionLabel = (group, hKey) => hKey ? tx(HORMONE_META[hKey]?.name || {}) : tx(CHALLENGE_GROUP_META[group] || {});
 
   useEffect(() => {
     (async () => {
       const [raw, hist, pastRaw] = await Promise.all([CS.get("active_challenge"), getHistory("dailycheck_history"), getHistory("challenge_history")]);
       setPastChallenges(pastRaw.slice().reverse());
       if (raw) {
-        try { setActive(JSON.parse(raw)); } catch { setActive(null); }
+        try {
+          const parsed = JSON.parse(raw);
+          setActive(parsed);
+          if (parsed.hormoneKey) setPickHormone(parsed.hormoneKey);
+        } catch { setActive(null); }
       }
-      const recent = hist.slice(-20);
-      const counts = {};
-      recent.forEach(h => { if (h.group) counts[h.group] = (counts[h.group] || 0) + 1; });
-      const targetGroup = presetGroup || Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "recovery";
-      const rec = suggestChallengeLength(counts[targetGroup] || 0);
-      setPickGroup(targetGroup);
-      setPickLength(rec);
-      setRecommendedLength(rec);
+      if (hormoneMode) {
+        const rec = suggestChallengeLength(0);
+        setPickLength(rec);
+        setRecommendedLength(rec);
+      } else {
+        const recent = hist.slice(-20);
+        const counts = {};
+        recent.forEach(h => { if (h.group) counts[h.group] = (counts[h.group] || 0) + 1; });
+        const targetGroup = presetGroup || Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "recovery";
+        const rec = suggestChallengeLength(counts[targetGroup] || 0);
+        setPickGroup(targetGroup);
+        setPickLength(rec);
+        setRecommendedLength(rec);
+      }
       setLoading(false);
     })();
   }, []);
@@ -3424,23 +3580,22 @@ function ChallengeScreen({ onBack, presetGroup }) {
   };
 
   const startChallenge = async () => {
-    const obj = { group: pickGroup, lengthDays: pickLength, pace: pickPace, startedAt: new Date().toISOString(), days: buildChallengeDays(pickGroup, pickLength) };
+    const obj = { group: pickGroup, hormoneKey: hormoneMode ? pickHormone : null, lengthDays: pickLength, startedAt: new Date().toISOString(), days: buildChallengeDays(pickGroup, pickLength) };
     statEvent("challenge_start");
     await saveActive(obj);
   };
 
   const markDay = async () => {
     if (!active) return;
-    const step = active.pace === "intensive" ? 2 : 1;
     const notDone = active.days.filter(d => !d.done);
     if (!notDone.length) return;
-    const toMark = notDone.slice(0, step).map(d => d.dayIndex);
+    const toMark = notDone.slice(0, 1).map(d => d.dayIndex);
     const nowIso = new Date().toISOString();
     const days = active.days.map(d => toMark.includes(d.dayIndex) ? { ...d, done: true, doneAt: nowIso } : d);
     const allDone = days.every(d => d.done);
     if (allDone) {
       const elapsedDays = Math.max(1, Math.round((new Date(nowIso) - new Date(active.startedAt)) / 86400000) + 1);
-      setPendingCompletion({ group: active.group, lengthDays: active.lengthDays, pace: active.pace, startedAt: active.startedAt, completedAt: nowIso, elapsedDays, abandoned: false, days });
+      setPendingCompletion({ group: active.group, hormoneKey: active.hormoneKey || null, lengthDays: active.lengthDays, startedAt: active.startedAt, completedAt: nowIso, elapsedDays, abandoned: false, days });
       await CS.set("active_challenge", "");
       setActive(null);
     } else {
@@ -3459,7 +3614,7 @@ function ChallengeScreen({ onBack, presetGroup }) {
   const abandonChallenge = async () => {
     if (!active) return;
     const elapsedDays = Math.max(1, Math.round((new Date() - new Date(active.startedAt)) / 86400000) + 1);
-    await pushHistory("challenge_history", { group: active.group, lengthDays: active.lengthDays, pace: active.pace, startedAt: active.startedAt, completedAt: new Date().toISOString(), abandoned: true, elapsedDays, daysCompleted: active.days.filter(d => d.done).length });
+    await pushHistory("challenge_history", { group: active.group, hormoneKey: active.hormoneKey || null, lengthDays: active.lengthDays, startedAt: active.startedAt, completedAt: new Date().toISOString(), abandoned: true, elapsedDays, daysCompleted: active.days.filter(d => d.done).length });
     await CS.set("active_challenge", "");
     setActive(null);
   };
@@ -3504,7 +3659,7 @@ function ChallengeScreen({ onBack, presetGroup }) {
         <div style={{ ...S.resultContainer, width: "100%" }}>
           <h2 style={S.resultTitle}>{tx({ ru: "Челлендж завершён 🌱", uk: "Челендж завершено 🌱", en: "Challenge complete 🌱" })}</h2>
           <p style={S.resultSubtitle}>
-            {tx({ ru: `«${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}», план ${justFinished.lengthDays} дней — прошёл(а) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "дней"}.`, uk: `«${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}», план ${justFinished.lengthDays} днів — пройшов(ла) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "днів"}.`, en: `"${tx(CHALLENGE_GROUP_META[justFinished.group] || {})}", planned ${justFinished.lengthDays} days — done in ${justFinished.elapsedDays} day(s).` })}
+            {tx({ ru: `«${directionLabel(justFinished.group, justFinished.hormoneKey)}», план ${justFinished.lengthDays} дней — прошёл(а) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "дней"}.`, uk: `«${directionLabel(justFinished.group, justFinished.hormoneKey)}», план ${justFinished.lengthDays} днів — пройшов(ла) за ${justFinished.elapsedDays} ${justFinished.elapsedDays === 1 ? "день" : "днів"}.`, en: `"${directionLabel(justFinished.group, justFinished.hormoneKey)}", planned ${justFinished.lengthDays} days — done in ${justFinished.elapsedDays} day(s).` })}
           </p>
           <p style={{ ...S.resultSubtitle, marginTop: "10px" }}>
             {tx({ ru: "Это не значит, что стало привычкой навсегда — но ты дал(а) себе честную серию попыток подряд и увидел(а) настоящие данные о себе.", uk: "Це не означає, що стало звичкою назавжди — але ти дав(ла) собі чесну серію спроб поспіль і побачив(ла) справжні дані про себе.", en: "This doesn't mean it's now a lifelong habit — but you gave yourself an honest run of real attempts and saw real data about yourself." })}
@@ -3546,21 +3701,18 @@ function ChallengeScreen({ onBack, presetGroup }) {
     }
 
     const doneCount = active.days.filter(d => d.done).length;
-    const step = active.pace === "intensive" ? 2 : 1;
     const notDone = active.days.filter(d => !d.done);
-    const currentBatch = notDone.slice(0, step);
+    const currentBatch = notDone.slice(0, 1);
     const pct = Math.round((doneCount / active.lengthDays) * 100);
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
         <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
           <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, textAlign: "center", marginBottom: "8px" }}>
-            {tx(CHALLENGE_GROUP_META[active.group] || {})}{active.pace === "intensive" ? ` · ${tx({ ru: "интенсив", uk: "інтенсив", en: "intensive" })}` : ""}
+            {directionLabel(active.group, active.hormoneKey)}
           </p>
           <h2 style={{ ...S.resultTitle, textAlign: "center" }}>
-            {currentBatch.length > 1
-              ? tx({ ru: `Дни ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} из ${active.lengthDays}`, uk: `Дні ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} з ${active.lengthDays}`, en: `Days ${currentBatch[0].dayIndex}-${currentBatch[currentBatch.length - 1].dayIndex} of ${active.lengthDays}` })
-              : tx({ ru: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} из ${active.lengthDays}`, uk: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} з ${active.lengthDays}`, en: `Day ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} of ${active.lengthDays}` })}
+            {tx({ ru: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} из ${active.lengthDays}`, uk: `День ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} з ${active.lengthDays}`, en: `Day ${currentBatch[0] ? currentBatch[0].dayIndex : active.lengthDays} of ${active.lengthDays}` })}
           </h2>
           <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box", marginTop: "8px" }}>
             <div style={{ ...S.metricFill, width: `${pct}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
@@ -3569,16 +3721,9 @@ function ChallengeScreen({ onBack, presetGroup }) {
           </div>
           {currentBatch.map(day => {
             const ritual = findRitual(active.group, day.ritual_id);
-            const action = Object.values(DAILYCHECK_ACTIONS).flat().find(a => a.id === day.action_id);
-            const reflection = CHALLENGE_REFLECTIONS.find(r => r.id === day.reflection_id);
             if (!ritual) return null;
             return (
               <div key={day.dayIndex} style={{ marginTop: "16px" }}>
-                {currentBatch.length > 1 && (
-                  <p style={{ fontSize: "11px", color: c.inkSoft, marginBottom: "6px" }}>
-                    {tx({ ru: `День ${day.dayIndex}`, uk: `День ${day.dayIndex}`, en: `Day ${day.dayIndex}` })}
-                  </p>
-                )}
                 {day.tierStarts && (
                   <p style={{ fontSize: "12px", color: c.accent, fontStyle: "italic", marginBottom: "8px" }}>
                     {day.tier === "medium"
@@ -3598,23 +3743,11 @@ function ChallengeScreen({ onBack, presetGroup }) {
                     </div>
                   ))}
                 </div>
-                {action && (
-                  <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginTop: "8px" }}>
-                    {tx({ ru: "Доп. совет на день: ", uk: "Дод. порада на день: ", en: "Extra tip for today: " })}{tx(action.text)}
-                  </p>
-                )}
-                {reflection && (
-                  <p style={{ fontSize: "13px", color: c.inkMuted, fontStyle: "italic", marginTop: "6px" }}>
-                    {tx({ ru: "Рефлексия: ", uk: "Рефлексія: ", en: "Reflection: " })}{tx(reflection.text)}
-                  </p>
-                )}
               </div>
             );
           })}
           <button onClick={markDay} style={{ ...S.primaryBtn, marginTop: "18px" }}>
-            {currentBatch.length > 1
-              ? tx({ ru: "Отметил(а) эти дни", uk: "Відмітив(ла) ці дні", en: "Mark these days done" })
-              : tx({ ru: "Отметил(а) день", uk: "Відмітив(ла) день", en: "Mark day done" })}
+            {tx({ ru: "Отметил(а) день", uk: "Відмітив(ла) день", en: "Mark day done" })}
           </button>
           <button onClick={() => setShowLog(true)} style={{ width: "100%", padding: "12px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px" }}>
             {tx({ ru: `Пройденные дни (${doneCount})`, uk: `Пройдені дні (${doneCount})`, en: `Completed days (${doneCount})` })}
@@ -3632,26 +3765,32 @@ function ChallengeScreen({ onBack, presetGroup }) {
 
   // экран выбора
   const groupKeys = Object.keys(CHALLENGE_GROUP_META);
+  const hormoneKeysList = Object.keys(HORMONE_META);
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={{ ...S.resultContainer, alignItems: "stretch", width: "100%" }}>
-        <h2 style={{ ...S.resultTitle, textAlign: "center" }}>{tx({ ru: "Челленджи", uk: "Челенджі", en: "Challenges" })}</h2>
+        <h2 style={{ ...S.resultTitle, textAlign: "center" }}>{hormoneMode ? tx({ ru: "Челлендж — Гормональный код", uk: "Челендж — Гормональний код", en: "Challenge — Hormonal code" }) : tx({ ru: "Челленджи", uk: "Челенджі", en: "Challenges" })}</h2>
         <p style={{ ...S.resultSubtitle, textAlign: "center" }}>
           {tx({ ru: "Не 3 действия по кругу, а полноценный путь на 10, 20 или 30 дней: с каждым новым уровнем практики становятся чуть глубже.", uk: "Не 3 дії по колу, а повноцінний шлях на 10, 20 або 30 днів: з кожним новим рівнем практики стають трохи глибшими.", en: "Not 3 actions on repeat — a full 10/20/30-day path where each new level goes a bit deeper." })}
         </p>
 
         <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginTop: "20px", marginBottom: "10px" }}>
-          {tx({ ru: "НАПРАВЛЕНИЕ", uk: "НАПРЯМОК", en: "DIRECTION" })}
+          {hormoneMode ? tx({ ru: "СЛАБОЕ ЗВЕНО", uk: "СЛАБКА ЛАНКА", en: "WEAK LINK" }) : tx({ ru: "НАПРАВЛЕНИЕ", uk: "НАПРЯМОК", en: "DIRECTION" })}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "10px", width: "100%", boxSizing: "border-box" }}>
-          {groupKeys.map(g => (
+          {hormoneMode ? hormoneKeysList.map(h => (
+            <button key={h} onClick={() => pickHormoneAndGroup(h)} style={{ width: "100%", boxSizing: "border-box", padding: "10px 4px", borderRadius: "14px", border: `1px solid ${h === pickHormone ? (HORMONE_META[h].color) : c.line}`, background: h === pickHormone ? `${HORMONE_META[h].color}20` : "transparent", color: h === pickHormone ? HORMONE_META[h].color : c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", textAlign: "center", lineHeight: 1.3 }}>
+              {tx(HORMONE_META[h].name)}
+            </button>
+          )) : groupKeys.map(g => (
             <button key={g} onClick={() => setPickGroup(g)} style={{ width: "100%", boxSizing: "border-box", padding: "10px 4px", borderRadius: "14px", border: `1px solid ${g === pickGroup ? "#C8A97E" : c.line}`, background: g === pickGroup ? "rgba(200,169,126,0.12)" : "transparent", color: g === pickGroup ? c.accent : c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", textAlign: "center", lineHeight: 1.3 }}>
               {tx(CHALLENGE_GROUP_META[g])}
             </button>
           ))}
         </div>
-        <p style={{ fontSize: "13px", color: c.inkMuted, fontStyle: "italic", marginBottom: "20px" }}>          {tx(CHALLENGE_GROUP_DESC[pickGroup] || {})}
+        <p style={{ fontSize: "13px", color: c.inkMuted, fontStyle: "italic", marginBottom: "20px" }}>
+          {hormoneMode ? tx(HORMONE_INFO[pickHormone]?.role || {}) : tx(CHALLENGE_GROUP_DESC[pickGroup] || {})}
         </p>
 
         <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginBottom: "10px" }}>
@@ -3676,23 +3815,6 @@ function ChallengeScreen({ onBack, presetGroup }) {
           {tx({ ru: "Это один путь: 10 дней — только база, 20 — база + следующий уровень, 30 — полный путь до продвинутых практик. Рекомендация подобрана по тому, как часто это направление повторялось в твоих последних отметках.", uk: "Це один шлях: 10 днів — лише база, 20 — база + наступний рівень, 30 — повний шлях до просунутих практик. Рекомендація підібрана за тим, як часто цей напрямок повторювався в твоїх останніх відмітках.", en: "It's one path: 10 days is just the foundation, 20 adds the next level, 30 is the full path to advanced practice. The suggested length is based on how often this direction has come up in your recent check-ins." })}
         </p>
 
-        <p style={{ fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft, marginBottom: "10px" }}>
-          {tx({ ru: "ТЕМП", uk: "ТЕМП", en: "PACE" })}
-        </p>
-        <div style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
-          <button onClick={() => setPickPace("normal")} style={{ flex: 1, padding: "12px 6px", borderRadius: "12px", border: `1px solid ${pickPace === "normal" ? "#C8A97E" : c.line}`, background: pickPace === "normal" ? "rgba(200,169,126,0.12)" : "transparent", color: pickPace === "normal" ? c.accent : c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
-            {tx({ ru: "Обычный", uk: "Звичайний", en: "Normal" })}
-          </button>
-          <button onClick={() => setPickPace("intensive")} style={{ flex: 1, padding: "12px 6px", borderRadius: "12px", border: `1px solid ${pickPace === "intensive" ? "#C8A97E" : c.line}`, background: pickPace === "intensive" ? "rgba(200,169,126,0.12)" : "transparent", color: pickPace === "intensive" ? c.accent : c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
-            {tx({ ru: "Интенсивный", uk: "Інтенсивний", en: "Intensive" })}
-          </button>
-        </div>
-        <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", marginBottom: "18px" }}>
-          {pickPace === "intensive"
-            ? tx({ ru: "По 2 дня плана за один заход — если ритуалы кажутся слишком простыми, чтобы растягивать их по одному в сутки.", uk: "По 2 дні плану за один захід — якщо ритуали здаються надто простими, щоб розтягувати їх по одному на добу.", en: "2 plan-days per sitting — for when the rituals feel too simple to spread out one per calendar day." })
-            : tx({ ru: "По 1 дню плана за один заход — свободный темп, отмечай, когда готов(а).", uk: "По 1 дню плану за один захід — вільний темп, відмічай, коли готовий(а).", en: "1 plan-day per sitting — free pace, mark it whenever you're ready." })}
-        </p>
-
         <button onClick={startChallenge} style={S.primaryBtn}>
           {tx({ ru: "Начать челлендж", uk: "Почати челендж", en: "Start challenge" })}
         </button>
@@ -3705,7 +3827,7 @@ function ChallengeScreen({ onBack, presetGroup }) {
             {pastChallenges.map((ch, i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: i > 0 ? `1px solid ${c.line}` : "none" }}>
                 <div>
-                  <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted }}>{tx(CHALLENGE_GROUP_META[ch.group] || {})} · {ch.lengthDays} {tx({ ru: "дней", uk: "днів", en: "d" })}</p>
+                  <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted }}>{directionLabel(ch.group, ch.hormoneKey)} · {ch.lengthDays} {tx({ ru: "дней", uk: "днів", en: "d" })}</p>
                   <p style={{ margin: "2px 0 0", fontSize: "11px", color: c.inkSoft }}>
                     {ch.abandoned
                       ? tx({ ru: `остановлен, ${ch.daysCompleted || 0} из ${ch.lengthDays}`, uk: `зупинено, ${ch.daysCompleted || 0} з ${ch.lengthDays}`, en: `stopped, ${ch.daysCompleted || 0} of ${ch.lengthDays}` })
@@ -3807,7 +3929,7 @@ function WisdomScreen({ onBack, currentMood }) {
 // ─────────────────────────────────────────────
 // ЭКРАН: ОПРОСНИК
 // ─────────────────────────────────────────────
-function QuizScreen({ onBack }) {
+function QuizScreen({ onBack, onGoCompass }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
@@ -3817,6 +3939,7 @@ function QuizScreen({ onBack }) {
   const [finished, setFinished] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [showAdvice, setShowAdvice] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   useEffect(() => { statEvent("quiz"); }, []);
   const q = QUESTIONS_QUIZ[current];
   const total = scores.reduce((a,b) => a+b, 0);
@@ -3824,6 +3947,7 @@ function QuizScreen({ onBack }) {
   const burnoutMax = 75;
   const burnoutPct = Math.round((burnoutTotal / burnoutMax) * 100);
   const result = finished ? QUIZ_RESULTS.find(r => total >= r.range[0] && total <= r.range[1]) : null;
+  if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
 
   const handleNext = () => {
     if (selected === null) return;
@@ -3899,6 +4023,16 @@ function QuizScreen({ onBack }) {
               <p style={{ margin:0, fontSize:"11px", color:c.inkSoft }}>⏱ {tx(advice.duration)}</p>
             </div>
           </div>
+
+          {onGoCompass && (
+            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
+            </button>
+          )}
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
+          </button>
+          <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
 
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>{t.goChannel}</a>
@@ -5577,32 +5711,28 @@ function MyPathScreen({ onBack }) {
         <p style={S.sectionTitle}>{tx({ru:'ПРОГРЕСС',uk:'ПРОГРЕС',en:'PROGRESS'})}</p>
         <InfoButton text={tx({ ru: "«Сколько всего ты сделал(а) в Tea Bro. Каждое прохождение — шаг к себе.»", uk: "«Скільки всього ти зробив(ла) у Tea Bro. Кожне проходження — крок до себе.»", en: "«How much you have done in Tea Bro overall. Each run is a step toward yourself.»" })} />
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px", marginBottom:"4px" }}>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasQuiz ? `${assemblyPct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.assemblyStat}</p>
-        </div>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasQuiz ? `${burnoutPct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.burnoutStat}</p>
-        </div>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasSelfHonesty ? `${selfHonestyPct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.selfDeceptStat}</p>
-        </div>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasTea ? `${topTea.pct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.favTeaStat}</p>
-        </div>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasMed ? `${topMed.pct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.favPractStat}</p>
-        </div>
-        <div style={S.statCard}>
-          <p style={S.statNum}>{hasMood ? `${moodPct}%` : "—"}</p>
-          <p style={S.statLabel}>{t.dominantMood}</p>
-          <p style={{ margin:"2px 0 0", fontSize:"9px", color:c.inkSoft }}>90 дней</p>
-        </div>
+      <div style={{ width: "100%" }}>
+        {[
+          { pct: hasQuiz ? assemblyPct : null, label: t.assemblyStat, caption: { ru: "Насколько ты сейчас близко к себе — по последнему «Честному разговору с собой».", uk: "Наскільки ти зараз близько до себе — за останнім «Чесною розмовою з собою».", en: "How close you are to yourself right now — from your last 'Honest talk with yourself'." } },
+          { pct: hasQuiz ? burnoutPct : null, label: t.burnoutStat, caption: { ru: "Накопленная усталость и опустошение — из того же теста.", uk: "Накопичена втома і спустошення — з того самого тесту.", en: "Accumulated fatigue and depletion — from the same test." } },
+          { pct: hasSelfHonesty ? selfHonestyPct : null, label: t.selfDeceptStat, caption: { ru: "Насколько легко ты обманываешь сам(а) себя, а не видишь, как есть.", uk: "Наскільки легко ти обманюєш сам(а) себе, а не бачиш, як є.", en: "How easily you deceive yourself instead of seeing things as they are." } },
+          { pct: hasTea ? topTea.pct : null, label: t.favTeaStat, caption: { ru: "Какой чай выбираешь чаще всего — и насколько сильно он перевешивает остальные.", uk: "Який чай обираєш найчастіше — і наскільки сильно він переважує решту.", en: "Which tea you pick most often — and how far ahead it is of the rest." } },
+          { pct: hasMed ? topMed.pct : null, label: t.favPractStat, caption: { ru: "Какая медитативная практика откликается тебе больше других.", uk: "Яка медитативна практика відгукується тобі більше за інші.", en: "Which meditation practice resonates with you the most." } },
+          { pct: hasMood ? moodPct : null, label: t.dominantMood, sub: "90 " + tx({ ru: "дней", uk: "днів", en: "days" }), caption: { ru: "Какое состояние преобладало за последние 90 отметок настроения.", uk: "Який стан переважав за останні 90 відміток настрою.", en: "Which state predominated over your last 90 mood check-ins." } },
+        ].map((row, i) => (
+          <div key={i} style={{ marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+              <span style={{ fontSize: "12px", color: c.inkMuted }}>{row.label}{row.sub ? ` · ${row.sub}` : ""}</span>
+              <span style={{ fontSize: "12px", color: c.accent, fontWeight: 600 }}>{row.pct != null ? `${row.pct}%` : "—"}</span>
+            </div>
+            <div style={{ ...S.metricTrack, background: "rgba(128,110,90,0.28)", border: `1px solid ${c.line}`, boxSizing: "border-box" }}>
+              <div style={{ ...S.metricFill, width: `${row.pct || 0}%`, background: "linear-gradient(90deg, #241D14, #C8A97E)" }}>
+                {row.pct != null && <span style={{ ...S.metricFillDot, background: "#C8A97E" }} />}
+              </div>
+            </div>
+            {row.caption && <p style={{ margin: "6px 0 0", fontSize: "11px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>{tx(row.caption)}</p>}
+          </div>
+        ))}
       </div>
 
       {/* КУДА ДВИЖЕШЬСЯ */}
@@ -5810,9 +5940,9 @@ export default function App() {
   ];
 
   let body = null;
-  if (screen === "quiz") body = <QuizScreen onBack={() => setScreen("home")} />;
+  if (screen === "quiz") body = <QuizScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
   else if (screen === "selfhonesty") body = <SelfHonestyScreen onBack={() => setScreen("home")} />;
-  else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} />;
+  else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
   else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} />;
   else if (screen === "dailycheck") body = <DailyCheckScreen onBack={() => setScreen("home")} />;
   else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
