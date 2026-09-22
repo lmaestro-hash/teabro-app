@@ -106,6 +106,7 @@ const UI = {
       hormones: { title: "Гормональный код", desc: "7 систем · 10 вопросов" },
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
+      meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
       dailycheck: { title: "Компас состояния", desc: "Точно узнай, что сейчас не так, и что с этим делать · 10 вопросов" },
       mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
       mypath: { title: "Мой профиль", desc: "Мои результаты и прогресс" },
@@ -190,6 +191,7 @@ const UI = {
       hormones: { title: "Гормональний код", desc: "7 систем · 10 питань" },
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
+      meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
       dailycheck: { title: "Компас стану", desc: "Точно дізнайся, що зараз не так, і що з цим робити · 10 питань" },
       mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
       mypath: { title: "Мій профіль", desc: "Мої результати та прогрес" },
@@ -274,6 +276,7 @@ const UI = {
       hormones: { title: "Hormonal code", desc: "7 systems · 10 questions" },
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
+      meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
       dailycheck: { title: "State compass", desc: "Find out exactly what's off, and what to do about it · 10 questions" },
       mood: { title: "My day today", desc: "Mark how you feel" },
       mypath: { title: "My profile", desc: "My results and progress" },
@@ -2526,6 +2529,18 @@ const DAILYCHECK_ACTIONS = {
     { id: "p7", text: { ru: "Заведи дневник состояния — запиши одной строкой, как прошёл день.", uk: "Заведи щоденник стану — запиши одним рядком, як минув день.", en: "Jot down the day in one short line — a tiny check-in with yourself." } },
     { id: "p8", text: { ru: "Сделай себе что-то маленькое и приятное — без повода, просто так.", uk: "Зроби собі щось маленьке й приємне — без приводу, просто так.", en: "Do something small and nice for yourself — no reason needed." } },
   ],
+  meditationbreath: [
+    { id: "mb1", text: { ru: "Сегодня посвяти сессии осознанного дыхания хотя бы 8 минут — не меньше вчерашнего.", uk: "Сьогодні присвяти сесії усвідомленого дихання хоча б 8 хвилин — не менше за вчора.", en: "Give today's mindful-breathing session at least 8 minutes — no less than yesterday." } },
+    { id: "mb2", text: { ru: "Перед сессией сделай три медленных вдоха-выдоха, чтобы тело почувствовало паузу.", uk: "Перед сесією зроби три повільних вдихи-видихи, щоб тіло відчуло паузу.", en: "Before the session, take three slow breaths so the body feels the pause begin." } },
+    { id: "mb3", text: { ru: "Сегодня выбери одну точку внимания — кончик носа или движение живота — и держись за неё весь сет.", uk: "Сьогодні обери одну точку уваги — кінчик носа або рух живота — і тримайся за неї весь сет.", en: "Today pick one point of attention — the tip of the nose or the belly's movement — and hold it the whole session." } },
+    { id: "mb4", text: { ru: "Когда ум уйдёт в мысли — а он уйдёт — просто отметь «ушёл» и мягко верни его к дыханию.", uk: "Коли розум піде в думки — а він піде — просто відміть «пішов» і м'яко поверни його до дихання.", en: "When the mind wanders — and it will — just note 'wandered' and gently bring it back to the breath." } },
+    { id: "mb5", text: { ru: "Сядь сегодня в то же время, что вчера — тело быстрее привыкает к практике по расписанию.", uk: "Сядь сьогодні в той самий час, що вчора — тіло швидше звикає до практики за розкладом.", en: "Sit at the same time as yesterday — the body settles into a scheduled practice faster." } },
+    { id: "mb6", text: { ru: "После сессии одной фразой отметь, что было легче удерживать сегодня: тело, звук или сам счёт дыхания.", uk: "Після сесії однією фразою відміть, що було легше утримувати сьогодні: тіло, звук чи сам рахунок дихання.", en: "After the session, note in one line what was easier to hold today: the body, sound, or the breath count." } },
+    { id: "mb7", text: { ru: "Если сегодня совсем нет сил на полную сессию — хотя бы 3 осознанных вдоха-выдоха посреди дня.", uk: "Якщо сьогодні зовсім немає сил на повну сесію — хоча б 3 усвідомлених вдихи-видихи посеред дня.", en: "If there's truly no energy for a full session today — at least 3 mindful breaths sometime during the day." } },
+    { id: "mb8", text: { ru: "Заметь сегодня один момент за день, когда дыхание само стало короче или зажатее — и просто выдохни длиннее.", uk: "Поміть сьогодні один момент за день, коли дихання саме стало коротшим чи затиснутим — і просто видихни довше.", en: "Notice one moment today when the breath got shorter or tighter on its own — and just exhale a bit longer." } },
+    { id: "mb9", text: { ru: "Сегодня не оценивай сессию как «хорошую» или «плохую» — просто отметь, что она случилась.", uk: "Сьогодні не оцінюй сесію як «хорошу» чи «погану» — просто відміть, що вона відбулася.", en: "Don't rate today's session as 'good' or 'bad' — just note that it happened." } },
+    { id: "mb10", text: { ru: "Перед сном вспомни сегодняшнюю сессию одним образом или ощущением — и отпусти день.", uk: "Перед сном згадай сьогоднішню сесію одним образом чи відчуттям — і відпусти день.", en: "Before sleep, recall today's session with one image or sensation — and let the day go." } },
+  ],
 };
 
 // Модификатор по слабому звену гормонов → приоритетная группа
@@ -2541,6 +2556,7 @@ const CHALLENGE_GROUP_META = {
   lowEnergy: { ru: "Энергия", uk: "Енергія", en: "Energy" },
   focus: { ru: "Концентрация", uk: "Концентрація", en: "Focus" },
   pause: { ru: "Пауза", uk: "Пауза", en: "Pause" },
+  meditationbreath: { ru: "Осознанное дыхание", uk: "Усвідомлене дихання", en: "Mindful breathing" },
 };
 
 const CHALLENGE_GROUP_DESC = {
@@ -2550,6 +2566,7 @@ const CHALLENGE_GROUP_DESC = {
   lowEnergy: { ru: "Когда энергии и мотивации не хватает на обычные дела.", uk: "Коли енергії та мотивації не вистачає на звичні справи.", en: "For when energy and motivation are running short." },
   focus: { ru: "Когда трудно сосредоточиться и мысли скачут.", uk: "Коли важко зосередитися і думки скачуть.", en: "For when it's hard to focus and thoughts keep jumping around." },
   pause: { ru: "Когда в целом всё ровно, но хочется научиться делать паузы.", uk: "Коли загалом усе рівно, але хочеться навчитися робити паузи.", en: "For when things are steady, but you want to practice taking real pauses." },
+  meditationbreath: { ru: "Ежедневная практика осознанного дыхания из «Наставлений по медитации» — база, на которой строятся остальные техники.", uk: "Щоденна практика усвідомленого дихання з «Настанов з медитації» — база, на якій будуються інші техніки.", en: "The daily mindful-breathing practice from Meditation guidance — the foundation the other techniques build on." },
 };
 
 const CHALLENGE_REFLECTIONS = [
@@ -2892,6 +2909,53 @@ const CHALLENGE_RITUALS = {
       { ru: "Выбери одно чувство — слух, зрение или осязание — на сегодняшние 10 минут практики.", uk: "Обери одне відчуття — слух, зір або дотик — на сьогоднішні 10 хвилин практики.", en: "Pick one sense — hearing, sight, or touch — for today's 10-minute practice." },
       { ru: "Направь всё внимание только на него, игнорируя остальные ощущения, насколько получится.", uk: "Спрямуй усю увагу лише на нього, ігноруючи решту відчуттів, наскільки вдасться.", en: "Direct all attention to just that sense, ignoring the others as much as you can." },
       { ru: "Замечай, как трудно удерживать одно чувство — это нормально, просто возвращайся к нему.", uk: "Помічай, як важко утримувати одне відчуття — це нормально, просто повертайся до нього.", en: "Notice how hard it is to hold one sense — that's normal, just keep returning to it." },
+    ]},
+  ]},
+  meditationbreath: { easy: [
+    { id: "mbe1", title: { ru: "Сессия «Осознанное дыхание» — база", uk: "Сесія «Усвідомлене дихання» — база", en: "'Mindful breathing' session — foundation" }, steps: [
+      { ru: "Сядь ровно, руки на коленях, глаза прикрыты или полуоткрыты.", uk: "Сядь рівно, руки на колінах, очі прикриті або напіввідкриті.", en: "Sit upright, hands on your knees, eyes closed or half-open." },
+      { ru: "Три медленных вдоха-выдоха — чтобы тело почувствовало паузу.", uk: "Три повільних вдихи-видихи — щоб тіло відчуло паузу.", en: "Three slow breaths — so the body feels the pause begin." },
+      { ru: "5-8 минут дыши обычно, удерживая внимание на ощущении воздуха у кончика носа.", uk: "5-8 хвилин дихай звично, утримуючи увагу на відчутті повітря біля кінчика носа.", en: "Breathe normally for 5–8 minutes, holding attention on the air at the tip of the nose." },
+      { ru: "Каждый раз, когда ум уходит в мысли, мягко возвращай его к дыханию — без раздражения на себя.", uk: "Щоразу, коли розум іде в думки, м'яко повертай його до дихання — без роздратування на себе.", en: "Each time the mind wanders, gently bring it back to the breath — without frustration." },
+    ]},
+    { id: "mbe2", title: { ru: "Счёт дыхания", uk: "Рахунок дихання", en: "Counting the breath" }, steps: [
+      { ru: "Сядь так же, как обычно для практики, сделай три спокойных вдоха-выдоха.", uk: "Сядь так само, як зазвичай для практики, зроби три спокійних вдихи-видихи.", en: "Sit as usual for practice, take three calm breaths." },
+      { ru: "Считай про себя каждый выдох от 1 до 10, затем начинай заново.", uk: "Рахуй про себе кожен видих від 1 до 10, потім починай знову.", en: "Silently count each exhale from 1 to 10, then start over." },
+      { ru: "Если сбился со счёта или забыл, на чём остановился — это нормально, просто начни с 1.", uk: "Якщо збився з рахунку або забув, на чому зупинився — це нормально, просто почни з 1.", en: "If you lose count or forget where you were — that's normal, just start again at 1." },
+      { ru: "Держи так 6-10 минут.", uk: "Тримай так 6-10 хвилин.", en: "Keep this up for 6–10 minutes." },
+    ]},
+    { id: "mbe3", title: { ru: "Дыхание животом", uk: "Дихання животом", en: "Belly breathing" }, steps: [
+      { ru: "Сядь или ляг, одну руку положи на живот.", uk: "Сядь або ляж, одну руку поклади на живіт.", en: "Sit or lie down, place one hand on your belly." },
+      { ru: "Дыши так, чтобы рука на вдохе поднималась, а на выдохе опускалась — без усилия, естественно.", uk: "Дихай так, щоб рука на вдиху підіймалась, а на видиху опускалась — без зусилля, природно.", en: "Breathe so the hand rises on the inhale and falls on the exhale — naturally, without forcing it." },
+      { ru: "Удерживай внимание на этом движении 6-10 минут.", uk: "Утримуй увагу на цьому русі 6-10 хвилин.", en: "Hold attention on this movement for 6–10 minutes." },
+    ]},
+  ], medium: [
+    { id: "mbm1", title: { ru: "Дыхание + тело", uk: "Дихання + тіло", en: "Breath + body" }, steps: [
+      { ru: "Начни как обычно: три вдоха-выдоха, 5 минут на дыхании у носа.", uk: "Почни як зазвичай: три вдихи-видихи, 5 хвилин на диханні біля носа.", en: "Start as usual: three breaths, then 5 minutes on the breath at the nose." },
+      { ru: "Дальше расширь внимание на всё тело целиком — как оно ощущается сидящим и дышащим.", uk: "Далі розшир увагу на все тіло цілком — як воно відчувається сидячим і дихаючим.", en: "Then widen attention to the whole body — how it feels sitting and breathing." },
+      { ru: "Держи это более широкое внимание ещё 8-10 минут, возвращаясь к дыханию как к якорю.", uk: "Тримай цю ширшу увагу ще 8-10 хвилин, повертаючись до дихання як до якоря.", en: "Hold this wider attention for another 8–10 minutes, using the breath as an anchor." },
+    ]},
+    { id: "mbm2", title: { ru: "Дыхание + звуки", uk: "Дихання + звуки", en: "Breath + sounds" }, steps: [
+      { ru: "5 минут обычной практики на дыхании.", uk: "5 хвилин звичної практики на диханні.", en: "5 minutes of the usual breath practice." },
+      { ru: "Затем на 10 минут перенеси внимание на звуки вокруг — не называя их, просто слушая, как они приходят и уходят.", uk: "Потім на 10 хвилин перенеси увагу на звуки навколо — не називаючи їх, просто слухаючи, як вони приходять і йдуть.", en: "Then for 10 minutes shift attention to the sounds around you — not naming them, just hearing them arise and pass." },
+      { ru: "Если ум цепляется за звук и начинает думать о нём — мягко возвращай к простому слушанию.", uk: "Якщо розум чіпляється за звук і починає думати про нього — м'яко повертай до простого слухання.", en: "If the mind grabs a sound and starts thinking about it, gently return to simple listening." },
+    ]},
+    { id: "mbm3", title: { ru: "Удлинённая сессия", uk: "Подовжена сесія", en: "Extended session" }, steps: [
+      { ru: "Сядь на 15 минут без будильника, если получается, или с мягким таймером.", uk: "Сядь на 15 хвилин без будильника, якщо виходить, або з м'яким таймером.", en: "Sit for 15 minutes without an alarm if you can, or with a gentle timer." },
+      { ru: "Первые 5 минут — дыхание у носа. Следующие 5 — всё тело. Последние 5 — просто открытое внимание, без выбора точки.", uk: "Перші 5 хвилин — дихання біля носа. Наступні 5 — все тіло. Останні 5 — просто відкрита увага, без вибору точки.", en: "First 5 minutes: breath at the nose. Next 5: the whole body. Last 5: just open awareness, no fixed point." },
+    ]},
+  ], advanced: [
+    { id: "mba1", title: { ru: "Долгая сессия", uk: "Довга сесія", en: "Long sitting" }, steps: [
+      { ru: "Сядь на 20-25 минут — телефон в другой комнате, таймер на негромкий сигнал.", uk: "Сядь на 20-25 хвилин — телефон в іншій кімнаті, таймер на негучний сигнал.", en: "Sit for 20–25 minutes — phone in another room, timer set to a quiet chime." },
+      { ru: "Двигайся между дыханием, телом и открытым вниманием так, как чувствуешь сам(а), без жёсткой схемы.", uk: "Рухайся між диханням, тілом і відкритою увагою так, як відчуваєш сам(а), без жорсткої схеми.", en: "Move between breath, body, and open awareness however feels right — no rigid script." },
+    ]},
+    { id: "mba2", title: { ru: "Практика в движении", uk: "Практика в русі", en: "Walking practice" }, steps: [
+      { ru: "10-15 минут медленной ходьбы, желательно без цели и без телефона.", uk: "10-15 хвилин повільної ходьби, бажано без мети і без телефону.", en: "10–15 minutes of slow walking, ideally with no destination and no phone." },
+      { ru: "Перенеси то же качество внимания с сидячей практики на ощущение стоп и дыхания в движении.", uk: "Перенеси ту саму якість уваги з сидячої практики на відчуття стоп і дихання в русі.", en: "Bring the same quality of attention from the seated practice to the feet and the breath while moving." },
+    ]},
+    { id: "mba3", title: { ru: "Мини-паузы в течение дня", uk: "Міні-паузи протягом дня", en: "Mini-pauses through the day" }, steps: [
+      { ru: "Помимо основной сессии, сделай сегодня 3 мини-паузы по 1 минуте — между делами, без повода.", uk: "Окрім основної сесії, зроби сьогодні 3 міні-паузи по 1 хвилині — між справами, без приводу.", en: "Besides the main session, take 3 one-minute pauses today — between tasks, no special reason." },
+      { ru: "В каждой — просто 5-6 осознанных вдохов-выдохов, и обратно к делам.", uk: "У кожній — просто 5-6 усвідомлених вдихів-видихів, і назад до справ.", en: "In each one, just 5–6 mindful breaths, then back to what you were doing." },
     ]},
   ]},
 };
@@ -4186,7 +4250,7 @@ function SelfHonestyScreen({ onBack }) {
 // ─────────────────────────────────────────────
 // ЭКРАН: ТЕСТ МЕДИТАЦИЙ
 // ─────────────────────────────────────────────
-function MeditationQuizScreen({ onBack }) {
+function MeditationQuizScreen({ onBack, onGoGuidance }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
@@ -4275,6 +4339,7 @@ function MeditationQuizScreen({ onBack }) {
           >{t.findYoutube}</a>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.goChannel}</a>
+          {onGoGuidance && <button onClick={onGoGuidance} style={S.ghostBtn}>🧘 {tx({ ru: "Наставления по медитации", uk: "Настанови з медитації", en: "Meditation guidance" })}</button>}
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4502,8 +4567,63 @@ function TrajectoryScreen({ onBack, weekData, monthData, allData }) {
 }
 
 // ─────────────────────────────────────────────
-// ЭКРАН: ТИХИЕ ЗАПИСИ
+// ЭКРАН: НАСТАВЛЕНИЯ ПО МЕДИТАЦИИ
+// Одна простая и наиболее действенная практика — осознанное дыхание.
+// Изложена своими словами (по мотивам общеизвестных техник тибетской
+// созерцательной традиции), без дословного цитирования какой-либо
+// конкретной книги — авторские права на исходный текст не позволяют
+// воспроизводить его напрямую.
 // ─────────────────────────────────────────────
+const MEDITATION_GUIDANCE_STEPS = [
+  { ru: "Сядь ровно — на стуле или на полу, спина прямая, но не напряжённая. Руки свободно лежат на коленях. Глаза можно прикрыть или оставить чуть приоткрытыми.", uk: "Сядь рівно — на стільці або на підлозі, спина пряма, але не напружена. Руки вільно лежать на колінах. Очі можна прикрити або залишити трохи прочиненими.", en: "Sit upright — on a chair or on the floor, spine straight but not tense. Hands rest loosely on your knees. Eyes can be closed or half-open." },
+  { ru: "Сделай три медленных вдоха и выдоха — просто чтобы тело почувствовало: сейчас пауза, отдельная от всего остального дня.", uk: "Зроби три повільних вдихи і видихи — просто щоб тіло відчуло: зараз пауза, окрема від усього іншого дня.", en: "Take three slow breaths in and out — just so the body feels: this is a pause, separate from the rest of the day." },
+  { ru: "Дальше дыши как обычно, ничего не меняя. Просто замечай сам вдох и выдох — без попытки сделать дыхание «правильным».", uk: "Далі дихай як зазвичай, нічого не змінюючи. Просто помічай сам вдих і видих — без спроби зробити дихання «правильним».", en: "From here, breathe normally — don't change anything. Just notice the inhale and exhale, without trying to make the breathing 'correct'." },
+  { ru: "Выбери одну точку внимания — прохладу воздуха у кончика носа, движение живота или ощущение дыхания во всём теле сразу — и мягко держись за неё.", uk: "Обери одну точку уваги — прохолоду повітря біля кінчика носа, рух живота або відчуття дихання в усьому тілі одразу — і м'яко тримайся за неї.", en: "Pick one point of attention — the cool air at the tip of the nose, the movement of the belly, or the sensation of breathing through the whole body — and gently hold to it." },
+  { ru: "Ум будет уходить в мысли — это нормально и случится не раз. Как только заметил уход, без раздражения на себя мягко возвращай внимание обратно к дыханию. Само это возвращение и есть практика, а не помеха ей.", uk: "Розум буде йти в думки — це нормально і трапиться не раз. Щойно помітив відхід, без роздратування на себе м'яко повертай увагу назад до дихання. Саме це повернення і є практикою, а не завадою їй.", en: "The mind will wander into thoughts — that's normal and will happen more than once. The moment you notice it, gently bring attention back to the breath, without frustration. That returning is the practice itself, not a failure of it." },
+  { ru: "Заверши: одна спокойная мысль о том, зачем ты сегодня это делал, и мягко открой глаза.", uk: "Заверши: одна спокійна думка про те, навіщо ти сьогодні це робив, і м'яко відкрий очі.", en: "Finish with one calm thought about why you did this today, and gently open your eyes." },
+];
+function MeditationGuidanceScreen({ onBack, onGoPractice }) {
+  const { t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const [showNotes, setShowNotes] = useState(false);
+  const [showChallenge, setShowChallenge] = useState(false);
+  if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
+  if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} presetGroup="meditationbreath" />;
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <div style={{ textAlign: "center", marginBottom: "22px" }}>
+        <div style={{ fontSize: "28px", marginBottom: "8px" }}>🧘</div>
+        <p style={{ margin: "0 0 4px", fontSize: "11px", letterSpacing: "0.25em", color: c.accent }}>{tx({ ru: "НАСТАВЛЕНИЯ", uk: "НАСТАНОВИ", en: "GUIDANCE" })}</p>
+        <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "normal", color: c.ink, letterSpacing: "0.04em" }}>{tx({ ru: "Наставления по медитации", uk: "Настанови з медитації", en: "Meditation guidance" })}</h2>
+      </div>
+      <p style={{ margin: "0 0 20px", fontSize: "13px", color: c.inkSoft, lineHeight: 1.7, fontStyle: "italic" }}>
+        {tx({ ru: "Если выбирать всего одну практику — самую простую и при этом самую действенную — это осознанное дыхание. Она не требует условий, подходит новичку и лежит в основе большинства техник из раздела «Моя практика».", uk: "Якщо обирати лише одну практику — найпростішу і водночас найдієвішу — це усвідомлене дихання. Вона не потребує умов, підходить новачку і лежить в основі більшості технік з розділу «Моя практика».", en: "If you were to choose just one practice — the simplest and also the most effective — it's mindful breathing. It needs no special conditions, suits beginners, and underlies most techniques in the 'My practice' section." })}
+      </p>
+      <div style={S.stepsBlock}>
+        <p style={S.stepsTitle}>{tx({ ru: "ОСОЗНАННОЕ ДЫХАНИЕ", uk: "УСВІДОМЛЕНЕ ДИХАННЯ", en: "MINDFUL BREATHING" })}</p>
+        {MEDITATION_GUIDANCE_STEPS.map((step, i) => (
+          <div key={i} style={{ display: "flex", gap: "10px", marginBottom: i < MEDITATION_GUIDANCE_STEPS.length - 1 ? "12px" : "0" }}>
+            <span style={{ fontSize: "11px", color: c.accent, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
+            <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.7 }}>{tx(step)}</p>
+          </div>
+        ))}
+        <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: `1px solid ${c.line}` }}>
+          <p style={{ margin: "0 0 4px", fontSize: "11px", color: c.inkSoft }}>⏱ {tx({ ru: "8–15 минут в день, лучше в одно и то же время", uk: "8–15 хвилин на день, краще в один і той самий час", en: "8–15 minutes a day, ideally at the same time" })}</p>
+          <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft, fontStyle: "italic" }}>🔍 {tx({ ru: "по мотивам классических техник осознанного дыхания тибетской созерцательной традиции", uk: "за мотивами класичних технік усвідомленого дихання тибетської споглядальної традиції", en: "inspired by classic mindful-breathing techniques of the Tibetan contemplative tradition" })}</p>
+        </div>
+      </div>
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={() => setShowChallenge(true)} style={S.primaryBtn}>{tx({ ru: "🧭 Начать 10-дневный челлендж", uk: "🧭 Почати 10-денний челендж", en: "🧭 Start a 10-day challenge" })}</button>
+        <button onClick={onGoPractice} style={{ ...S.ghostBtn, marginBottom: "10px" }}>{tx({ ru: "Подобрать практику под своё состояние", uk: "Підібрати практику під свій стан", en: "Match a practice to my state" })}</button>
+        <button onClick={() => setShowNotes(true)} style={S.ghostBtn}>🌙 {t.notebook}</button>
+      </div>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
+    </div>
+  );
+}
+
+
 const NOTE_EMOTIONS = [
   { id: "calm", emoji: "🌙", label: { ru: "тихо", uk: "тихо", en: "quiet" } },
   { id: "tired", emoji: "🌫", label: { ru: "устало", uk: "втомлено", en: "tired" } },
@@ -5009,9 +5129,9 @@ function AdminScreen({ onBack }) {
     color: c.inkSoft,
     letterSpacing: "0.08em",
     lineHeight: 1.3,
-    overflowWrap: "break-word",
-    wordBreak: "break-word",
-    hyphens: "auto",
+    overflowWrap: "normal",
+    wordBreak: "keep-all",
+    hyphens: "none",
   };
   const rowStyle = {
     display: "flex",
@@ -5615,10 +5735,10 @@ function MyPathScreen({ onBack }) {
               <>
                 {dcAllTimePct != null && (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "12px", paddingBottom: "12px", borderBottom: `1px solid ${c.line}` }}>
-                    <span style={{ fontSize: "12px", color: c.inkMuted }}>
+                    <span style={{ fontSize: "13px", color: c.inkMuted }}>
                       {tx({ ru: `За всё время (${dailyCheckHist.length} тестов)`, uk: `За весь час (${dailyCheckHist.length} тестів)`, en: `All time (${dailyCheckHist.length} check-ins)` })}
                     </span>
-                    <span style={{ fontSize: "14px", color: c.accent, fontWeight: 600 }}>
+                    <span style={{ fontSize: "13px", color: c.accent, fontWeight: 600 }}>
                       {dcAllTimePct}% {dcAllTimeWeakestQ ? `· ${tx({ru:"слабее всего",uk:"найслабше",en:"weakest"})}: ${tx(dcAllTimeWeakestQ.label)}` : ""}
                     </span>
                   </div>
@@ -5934,6 +6054,7 @@ export default function App() {
     { id: "hormones", ...t.menu.hormones },
     { id: "teaquiz", ...t.menu.teaquiz },
     { id: "meditation", ...t.menu.meditation },
+    { id: "meditationguidance", ...t.menu.meditationguidance },
     { id: "dailycheck", ...t.menu.dailycheck },
     { id: "mood", ...t.menu.mood },
     { id: "mypath", ...t.menu.mypath },
@@ -5943,7 +6064,8 @@ export default function App() {
   if (screen === "quiz") body = <QuizScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
   else if (screen === "selfhonesty") body = <SelfHonestyScreen onBack={() => setScreen("home")} />;
   else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
-  else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} />;
+  else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} onGoGuidance={() => setScreen("meditationguidance")} />;
+  else if (screen === "meditationguidance") body = <MeditationGuidanceScreen onBack={() => setScreen("home")} onGoPractice={() => setScreen("meditation")} />;
   else if (screen === "dailycheck") body = <DailyCheckScreen onBack={() => setScreen("home")} />;
   else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
