@@ -104,6 +104,7 @@ const UI = {
       quiz: { title: "Честный разговор с собой", desc: "Самооценка · выгорание · 25 вопросов" },
       selfhonesty: { title: "Склонность к самообману", desc: "Тест на самообман · 14 вопросов" },
       hormones: { title: "Гормональный код", desc: "7 систем · 10 вопросов" },
+      hormoneguide: { title: "Всё о гормонах", desc: "Гид: как привести 7 систем в порядок" },
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
       meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
@@ -189,6 +190,7 @@ const UI = {
       quiz: { title: "Чесна розмова з собою", desc: "Самооцінка · вигорання · 25 питань" },
       selfhonesty: { title: "Схильність до самообману", desc: "Тест на самообман · 14 питань" },
       hormones: { title: "Гормональний код", desc: "7 систем · 10 питань" },
+      hormoneguide: { title: "Все про гормони", desc: "Гід: як привести 7 систем до ладу" },
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
       meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
@@ -274,6 +276,7 @@ const UI = {
       quiz: { title: "Honest talk with yourself", desc: "Self-assessment · burnout · 25 questions" },
       selfhonesty: { title: "Tendency to self-deception", desc: "Self-deception test · 14 questions" },
       hormones: { title: "Hormonal code", desc: "7 systems · 10 questions" },
+      hormoneguide: { title: "All about hormones", desc: "Guide: bringing 7 systems into balance" },
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
       meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
@@ -1522,7 +1525,7 @@ function HormoneInfoBlock({ hormoneKey, color }) {
   );
 }
 
-function HormoneScreen({ onBack, onGoCompass }) {
+function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [showChallenge, setShowChallenge] = useState(false);
@@ -1540,7 +1543,7 @@ function HormoneScreen({ onBack, onGoCompass }) {
   const q = ALL_Q[current];
 
   const handleNext = () => {
-    if (selected === null) return;
+    if (selected === null || animating) return;
     setAnimating(true);
     const na = [...answers, { key: q.key, score: selected }];
     setTimeout(() => {
@@ -1652,6 +1655,11 @@ function HormoneScreen({ onBack, onGoCompass }) {
               <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
             </button>
           )}
+          {onGoGuide && (
+            <button onClick={onGoGuide} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 7 системам", uk: "Все про гормони — гід по всіх 7 системах", en: "All about hormones — guide to all 7 systems" })}</span>
+            </button>
+          )}
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span>
           </button>
@@ -1684,6 +1692,57 @@ function HormoneScreen({ onBack, onGoCompass }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{current + 1 === ALL_Q.length ? t.resultBtn : t.next}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ЭКРАН: ВСЁ О ГОРМОНАХ (информационный гид)
+// ─────────────────────────────────────────────
+function HormoneGuideScreen({ onBack, onGoTest }) {
+  const { t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const [showNotes, setShowNotes] = useState(false);
+  if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
+  const keys = Object.keys(HORMONE_META);
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <div style={{ textAlign: "center", marginBottom: "18px" }}>
+        <div style={{ fontSize: "28px", marginBottom: "8px" }}>🧬</div>
+        <p style={{ margin: "0 0 4px", fontSize: "11px", letterSpacing: "0.25em", color: c.accent }}>{tx({ ru: "ГИД", uk: "ГІД", en: "GUIDE" })}</p>
+        <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "normal", color: c.ink, letterSpacing: "0.04em" }}>{tx({ ru: "Всё о гормонах", uk: "Все про гормони", en: "All about your hormones" })}</h2>
+      </div>
+      <p style={{ margin: "0 0 20px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>
+        {tx({ ru: "Семь систем ниже управляют мотивацией, спокойствием, сном, близостью и фокусом. Они не работают по отдельности — просевший сон почти всегда тянет вниз и мотивацию, и настроение. Поэтому для продуктивной и приятной жизни важнее не «взвинтить» одну систему, а убрать то, что тянет вниз сразу несколько: обычно это сон, хронический стресс и постоянная стимуляция экранами.", uk: "Сім систем нижче керують мотивацією, спокоєм, сном, близькістю і фокусом. Вони не працюють окремо — просілий сон майже завжди тягне вниз і мотивацію, і настрій. Тому для продуктивного і приємного життя важливіше не «розкрутити» одну систему, а прибрати те, що тягне вниз одразу кілька: зазвичай це сон, хронічний стрес і постійна стимуляція екранами.", en: "The seven systems below drive motivation, calm, sleep, closeness and focus. They don't work in isolation — poor sleep almost always drags down motivation and mood too. So for a productive, pleasant life it matters more to remove what's dragging several systems down at once — usually sleep, chronic stress, and constant screen stimulation — than to try to max out any single one." })}
+      </p>
+      {keys.map(k => {
+        const meta = HORMONE_META[k];
+        const info = HORMONE_INFO[k];
+        if (!info) return null;
+        return (
+          <div key={k} style={{ ...S.metricBlock, width: "100%", marginBottom: "14px", boxSizing: "border-box", borderLeft: `3px solid ${meta.color}` }}>
+            <p style={{ margin: "0 0 2px", fontSize: "16px", color: meta.color, fontWeight: 600 }}>{tx(meta.name)}</p>
+            <p style={{ margin: "0 0 10px", fontSize: "11px", color: c.inkSoft, fontStyle: "italic" }}>{tx(meta.short)}</p>
+            <p style={{ margin: "0 0 8px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(info.role)}</p>
+            <p style={{ margin: "0 0 10px", fontSize: "11px", color: c.inkSoft, lineHeight: 1.6 }}>
+              <span style={{ color: meta.color }}>{tx({ ru: "Признаки дисбаланса: ", uk: "Ознаки дисбалансу: ", en: "Signs of imbalance: " })}</span>
+              {tx(info.signs)}
+            </p>
+            <p style={{ margin: "0 0 6px", fontSize: "10.5px", letterSpacing: "0.08em", color: c.inkSoft }}>{tx({ ru: "КАК ПРИВЕСТИ В ПОРЯДОК", uk: "ЯК ПРИВЕСТИ ДО ЛАДУ", en: "HOW TO BRING IT INTO BALANCE" })}</p>
+            {info.raise.map((item, i) => (
+              <p key={i} style={{ margin: "0 0 4px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>· {tx(item)}</p>
+            ))}
+          </div>
+        );
+      })}
+      <p style={{ margin: "4px 0 18px", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
+      {onGoTest && (
+        <button onClick={onGoTest} style={{ ...S.ghostBtn, marginBottom: "10px" }}>🧬 {tx({ ru: "Пройти «Гормональный код» — узнать свои показатели", uk: "Пройти «Гормональний код» — дізнатись свої показники", en: "Take 'Hormonal code' — check your own levels" })}</button>
+      )}
+      <button onClick={() => setShowNotes(true)} style={S.ghostBtn}>🌙 {t.notebook}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -3258,7 +3317,7 @@ function DailyCheckScreen({ onBack }) {
   const q = DAILYCHECK_QUESTIONS[current];
 
   const handleNext = () => {
-    if (selected === null) return;
+    if (selected === null || animating) return;
     setAnimating(true);
     const na = [...answers, { key: q.key, score: selected }];
     setTimeout(() => {
@@ -3451,6 +3510,7 @@ function DailyCheckScreen({ onBack }) {
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
+          <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
       </div>
     );
@@ -3539,6 +3599,7 @@ function DailyCheckScreen({ onBack }) {
             <button onClick={() => saveFollowUp("same")} style={S.optionBtn}><span style={S.optionText}>{tx({ ru: "Без изменений", uk: "Без змін", en: "No change" })}</span></button>
             <button onClick={() => saveFollowUp("worse")} style={S.optionBtn}><span style={S.optionText}>{tx({ ru: "Стало хуже", uk: "Стало гірше", en: "Worse" })}</span></button>
           </div>
+          <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
       </div>
     );
@@ -3578,6 +3639,7 @@ function DailyCheckScreen({ onBack }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selected === null} style={{ ...S.primaryBtn, opacity: selected === null ? 0.3 : 1 }}>{t.next}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -3695,6 +3757,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
   if (pendingCompletion) {
     return (
       <div style={S.screen}>
+        <button onClick={onBack} style={S.backBtn}>{t.back}</button>
         <div style={{ ...S.resultContainer, width: "100%" }}>
           <h2 style={S.resultTitle}>{tx({ ru: "Все дни отмечены 🌱", uk: "Усі дні відмічено 🌱", en: "All days marked 🌱" })}</h2>
           <p style={S.resultSubtitle}>{tx({ ru: "Как прошёл челлендж в целом?", uk: "Як пройшов челендж загалом?", en: "How did the challenge go overall?" })}</p>
@@ -3711,6 +3774,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
               </button>
             ))}
           </div>
+          <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
       </div>
     );
@@ -3759,6 +3823,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
                 </div>
               );
             })}
+            <button onClick={() => setShowLog(false)} style={S.backBtnBottom}>{t.back}</button>
           </div>
         </div>
       );
@@ -3822,6 +3887,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
           <button onClick={abandonChallenge} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkSoft, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "14px" }}>
             {tx({ ru: "Остановить челлендж", uk: "Зупинити челендж", en: "Stop challenge" })}
           </button>
+          <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
       </div>
     );
@@ -3905,6 +3971,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
             ))}
           </div>
         )}
+        <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
       </div>
     </div>
   );
@@ -4014,7 +4081,7 @@ function QuizScreen({ onBack, onGoCompass }) {
   if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
 
   const handleNext = () => {
-    if (selected === null) return;
+    if (selected === null || animating) return;
     setAnimating(true);
     const ns = [...scores, selected.score];
     const nb = [...burnouts, selected.burnout];
@@ -4124,6 +4191,7 @@ function QuizScreen({ onBack, onGoCompass }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selected===null} style={{ ...S.primaryBtn, opacity: selected===null ? 0.3 : 1 }}>{current+1===QUESTIONS_QUIZ.length ? t.resultBtn : t.next}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -4158,7 +4226,7 @@ function SelfHonestyScreen({ onBack }) {
   const result = finished ? (SELF_HONESTY_RESULTS.find(r => pct >= r.range[0] && pct <= r.range[1]) || SELF_HONESTY_RESULTS[0]) : null;
 
   const handleNext = () => {
-    if (selected === null) return;
+    if (selected === null || animating) return;
     setAnimating(true);
     const scored = q.reverse ? (6 - selected) : selected;
     const na = [...answers, scored];
@@ -4243,6 +4311,7 @@ function SelfHonestyScreen({ onBack }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selected===null} style={{ ...S.primaryBtn, opacity: selected===null ? 0.3 : 1 }}>{current+1===SELF_HONESTY_QUESTIONS.length ? t.resultBtn : t.next}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -4264,7 +4333,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
   const q = MEDITATION_QUESTIONS[current];
 
   const handleNext = () => {
-    if (selectedIdx === null) return;
+    if (selectedIdx === null || animating) return;
     setAnimating(true);
     const ns = { ...scores };
     const pts = q.options[selectedIdx].p;
@@ -4372,6 +4441,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
       <button onClick={handleNext} disabled={selectedIdx===null} style={{ ...S.primaryBtn, opacity: selectedIdx===null ? 0.3 : 1, backgroundColor:"#8B9EB0" }}>
         {current+1===MEDITATION_QUESTIONS.length ? "Узнать практику" : t.next}
       </button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -4391,7 +4461,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
   useEffect(() => { statEvent("tea"); }, []);
   const q = TEA_QUESTIONS[current];
   const handleNext = () => {
-    if (selectedIdx === null) return;
+    if (selectedIdx === null || animating) return;
     setAnimating(true);
     const ns = { ...teaScores };
     Object.keys(q.options[selectedIdx].teas).forEach(k => { ns[k] += q.options[selectedIdx].teas[k]; });
@@ -4465,6 +4535,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
         ))}
       </div>
       <button onClick={handleNext} disabled={selectedIdx===null} style={{ ...S.primaryBtn, opacity: selectedIdx===null ? 0.3 : 1 }}>{current+1===TEA_QUESTIONS.length ? "Узнать свой чай" : t.next}</button>
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
 }
@@ -6063,7 +6134,8 @@ export default function App() {
   let body = null;
   if (screen === "quiz") body = <QuizScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
   else if (screen === "selfhonesty") body = <SelfHonestyScreen onBack={() => setScreen("home")} />;
-  else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} />;
+  else if (screen === "hormones") body = <HormoneScreen onBack={() => setScreen("home")} onGoCompass={() => setScreen("dailycheck")} onGoGuide={() => setScreen("hormoneguide")} />;
+  else if (screen === "hormoneguide") body = <HormoneGuideScreen onBack={() => setScreen("home")} onGoTest={() => setScreen("hormones")} />;
   else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} onGoGuidance={() => setScreen("meditationguidance")} />;
   else if (screen === "meditationguidance") body = <MeditationGuidanceScreen onBack={() => setScreen("home")} onGoPractice={() => setScreen("meditation")} />;
   else if (screen === "dailycheck") body = <DailyCheckScreen onBack={() => setScreen("home")} />;
