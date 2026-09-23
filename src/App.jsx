@@ -109,6 +109,7 @@ const UI = {
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
       meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
       dailycheck: { title: "Компас состояния", desc: "Точно узнай, что сейчас не так, и что с этим делать · 10 вопросов" },
+      challenges: { title: "Челленджи", desc: "10, 20 или 30 дней практики под своё состояние" },
       mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
       mypath: { title: "Мой профиль", desc: "Мои результаты и прогресс" },
     },
@@ -195,6 +196,7 @@ const UI = {
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
       meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
       dailycheck: { title: "Компас стану", desc: "Точно дізнайся, що зараз не так, і що з цим робити · 10 питань" },
+      challenges: { title: "Челенджі", desc: "10, 20 або 30 днів практики під свій стан" },
       mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
       mypath: { title: "Мій профіль", desc: "Мої результати та прогрес" },
     },
@@ -281,6 +283,7 @@ const UI = {
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
       meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
       dailycheck: { title: "State compass", desc: "Find out exactly what's off, and what to do about it · 10 questions" },
+      challenges: { title: "Challenges", desc: "10, 20 or 30 days of practice matched to your state" },
       mood: { title: "My day today", desc: "Mark how you feel" },
       mypath: { title: "My profile", desc: "My results and progress" },
     },
@@ -2600,6 +2603,30 @@ const DAILYCHECK_ACTIONS = {
     { id: "mb9", text: { ru: "Сегодня не оценивай сессию как «хорошую» или «плохую» — просто отметь, что она случилась.", uk: "Сьогодні не оцінюй сесію як «хорошу» чи «погану» — просто відміть, що вона відбулася.", en: "Don't rate today's session as 'good' or 'bad' — just note that it happened." } },
     { id: "mb10", text: { ru: "Перед сном вспомни сегодняшнюю сессию одним образом или ощущением — и отпусти день.", uk: "Перед сном згадай сьогоднішню сесію одним образом чи відчуттям — і відпусти день.", en: "Before sleep, recall today's session with one image or sensation — and let the day go." } },
   ],
+  teabreath: [
+    { id: "tb1", text: { ru: "Пока чай заваривается — не проверяй телефон. Просто смотри, как меняется цвет воды.", uk: "Поки чай заварюється — не перевіряй телефон. Просто дивись, як змінюється колір води.", en: "While the tea steeps — don't check your phone. Just watch the water's color change." } },
+    { id: "tb2", text: { ru: "Первый глоток сделай с закрытыми глазами — просто вкус, без мыслей о нём.", uk: "Перший ковток зроби із заплющеними очима — просто смак, без думок про нього.", en: "Take the first sip with your eyes closed — just taste, no thoughts about it." } },
+    { id: "tb3", text: { ru: "Сегодня 3 медленных вдоха-выдоха перед каждой чашкой, а не только перед первой.", uk: "Сьогодні 3 повільних вдихи-видихи перед кожною чашкою, а не лише перед першою.", en: "Today take 3 slow breaths before every cup, not just the first." } },
+    { id: "tb4", text: { ru: "Согрей ладони о чашку минуту, прежде чем пить — просто тепло, без спешки.", uk: "Зігрій долоні об чашку хвилину, перш ніж пити — просто тепло, без поспіху.", en: "Warm your hands on the cup for a minute before drinking — just the warmth, no rush." } },
+    { id: "tb5", text: { ru: "Выпей чай сегодня без телефона и без экрана рядом — хотя бы одну чашку.", uk: "Випий чай сьогодні без телефону і без екрана поруч — хоча б одну чашку.", en: "Drink your tea today with no phone or screen nearby — at least one cup." } },
+    { id: "tb6", text: { ru: "Заметь запах чая до того, как сделать глоток — задержись на нём секунд 10.", uk: "Поміть запах чаю до того, як зробити ковток — затримайся на ньому секунд 10.", en: "Notice the tea's smell before the first sip — linger on it for about 10 seconds." } },
+    { id: "tb7", text: { ru: "Сделай сегодня паузу-чаепитие в момент, когда обычно тянешься к телефону от скуки.", uk: "Зроби сьогодні паузу-чаювання в момент, коли зазвичай тягнешся до телефону від нудьги.", en: "Take your tea pause today at the moment you'd normally reach for your phone out of boredom." } },
+    { id: "tb8", text: { ru: "Между глотками — один спокойный вдох через нос, выдох чуть длиннее вдоха.", uk: "Між ковтками — один спокійний вдих через ніс, видих трохи довший за вдих.", en: "Between sips — one calm breath through the nose, exhale a bit longer than the inhale." } },
+    { id: "tb9", text: { ru: "Сегодня пей чай сидя, а не на ходу — хотя бы одну чашку целиком.", uk: "Сьогодні пий чай сидячи, а не на ходу — хоча б одну чашку цілком.", en: "Drink your tea sitting down today, not on the move — at least one full cup." } },
+    { id: "tb10", text: { ru: "После последнего глотка — 5 секунд просто тишины, прежде чем вернуться к делам.", uk: "Після останнього ковтка — 5 секунд просто тиші, перш ніж повернутися до справ.", en: "After the last sip — 5 seconds of quiet before going back to things." } },
+  ],
+  gongfu: [
+    { id: "gf1", text: { ru: "Сегодня замерь воду термометром или на глаз — не заливай кипятком чай, который этого не любит.", uk: "Сьогодні заміряй воду термометром або на око — не заливай окропом чай, який цього не любить.", en: "Check the water temperature today, by thermometer or by eye — don't pour boiling water on a tea that doesn't want it." } },
+    { id: "gf2", text: { ru: "Перед завариванием ополосни гайвань или чайник кипятком — прогрей посуду.", uk: "Перед завариванням обполосни гайвань або чайник окропом — прогрій посуд.", en: "Before brewing, rinse the gaiwan or pot with hot water — warm the vessel." } },
+    { id: "gf3", text: { ru: "Сделай сегодня «пробуждающий» пролив — залей чай водой на пару секунд и сразу слей, прежде чем пить.", uk: "Зроби сьогодні «пробуджувальний» пролив — залий чай водою на пару секунд і одразу злий, перш ніж пити.", en: "Do a 'waking' rinse today — pour water over the leaves for a couple of seconds and drain it before drinking." } },
+    { id: "gf4", text: { ru: "Сегодня держи проливы короче, чем обычно — 5-15 секунд вместо долгого настаивания.", uk: "Сьогодні тримай проливи коротшими, ніж зазвичай — 5-15 секунд замість довгого настоювання.", en: "Keep today's infusions shorter than usual — 5–15 seconds instead of a long steep." } },
+    { id: "gf5", text: { ru: "Понюхай пустую чашку после того, как отпил(а) — аромат на стенках говорит о чае не меньше вкуса.", uk: "Понюхай порожню чашку після того, як відпив(ла) — аромат на стінках говорить про чай не менше за смак.", en: "Smell the empty cup after drinking — the aroma left behind says as much as the taste." } },
+    { id: "gf6", text: { ru: "Сегодня взвесь или отмерь чай на глаз внимательнее обычного — плотность заварки сильно меняет вкус.", uk: "Сьогодні зваж або відміряй чай на око уважніше за звичайне — щільність заварки сильно змінює смак.", en: "Weigh or eyeball the leaf amount more carefully today — the strength of the brew changes the taste a lot." } },
+    { id: "gf7", text: { ru: "Сравни первый и третий пролив одного и того же чая — просто замечая разницу, без оценки.", uk: "Порівняй перший і третій пролив того самого чаю — просто помічаючи різницю, без оцінки.", en: "Compare the first and third infusion of the same tea — just notice the difference, no judgment." } },
+    { id: "gf8", text: { ru: "Каждый следующий пролив сегодня держи на пару секунд дольше предыдущего.", uk: "Кожен наступний пролив сьогодні тримай на пару секунд довше за попередній.", en: "Hold each next infusion a couple of seconds longer than the last one today." } },
+    { id: "gf9", text: { ru: "Разлей чай по чашкам ровно, по чуть-чуть в каждую по кругу, а не одну чашку до полна.", uk: "Розлий чай по чашках рівно, потроху в кожну по колу, а не одну чашку до повна.", en: "Pour the tea evenly, a little into each cup in turn, rather than filling one cup at a time." } },
+    { id: "gf10", text: { ru: "Разверни заваренный лист и посмотри на него — целый лист или ломаный многое говорит о чае.", uk: "Розгорни заварений лист і подивись на нього — цілий лист чи ламаний багато говорить про чай.", en: "Unfurl a steeped leaf and look at it — whole or broken leaves say a lot about the tea." } },
+  ],
 };
 
 // Модификатор по слабому звену гормонов → приоритетная группа
@@ -2616,6 +2643,8 @@ const CHALLENGE_GROUP_META = {
   focus: { ru: "Концентрация", uk: "Концентрація", en: "Focus" },
   pause: { ru: "Пауза", uk: "Пауза", en: "Pause" },
   meditationbreath: { ru: "Осознанное дыхание", uk: "Усвідомлене дихання", en: "Mindful breathing" },
+  teabreath: { ru: "Чай и дыхание", uk: "Чай і дихання", en: "Tea and breath" },
+  gongfu: { ru: "Гунфу чаепитие", uk: "Гунфу чаювання", en: "Gongfu tea" },
 };
 
 const CHALLENGE_GROUP_DESC = {
@@ -2626,6 +2655,8 @@ const CHALLENGE_GROUP_DESC = {
   focus: { ru: "Когда трудно сосредоточиться и мысли скачут.", uk: "Коли важко зосередитися і думки скачуть.", en: "For when it's hard to focus and thoughts keep jumping around." },
   pause: { ru: "Когда в целом всё ровно, но хочется научиться делать паузы.", uk: "Коли загалом усе рівно, але хочеться навчитися робити паузи.", en: "For when things are steady, but you want to practice taking real pauses." },
   meditationbreath: { ru: "Ежедневная практика осознанного дыхания из «Наставлений по медитации» — база, на которой строятся остальные техники.", uk: "Щоденна практика усвідомленого дихання з «Настанов з медитації» — база, на якій будуються інші техніки.", en: "The daily mindful-breathing practice from Meditation guidance — the foundation the other techniques build on." },
+  teabreath: { ru: "Самый мягкий и приятный челлендж — час неспешного чаепития в день, с чаем, подобранным под сегодняшнее состояние.", uk: "Найм'якіший і найприємніший челендж — година неспішного чаювання на день, з чаєм, підібраним під сьогоднішній стан.", en: "The gentlest, most pleasant challenge — an hour of unhurried tea a day, with the tea chosen for today's state." },
+  gongfu: { ru: "Для тех, кто хочет научиться заваривать чай правильно — температура, пропорции, короткие проливы, гунфу-техника вместо чая «на автомате».", uk: "Для тих, хто хоче навчитися заварювати чай правильно — температура, пропорції, короткі проливи, гунфу-техніка замість чаю «на автоматі».", en: "For learning to brew tea properly — temperature, ratios, short infusions, gongfu technique instead of tea on autopilot." },
 };
 
 const CHALLENGE_REFLECTIONS = [
@@ -3015,6 +3046,88 @@ const CHALLENGE_RITUALS = {
     { id: "mba3", title: { ru: "Мини-паузы в течение дня", uk: "Міні-паузи протягом дня", en: "Mini-pauses through the day" }, steps: [
       { ru: "Помимо основной сессии, сделай сегодня 3 мини-паузы по 1 минуте — между делами, без повода.", uk: "Окрім основної сесії, зроби сьогодні 3 міні-паузи по 1 хвилині — між справами, без приводу.", en: "Besides the main session, take 3 one-minute pauses today — between tasks, no special reason." },
       { ru: "В каждой — просто 5-6 осознанных вдохов-выдохов, и обратно к делам.", uk: "У кожній — просто 5-6 усвідомлених вдихів-видихів, і назад до справ.", en: "In each one, just 5–6 mindful breaths, then back to what you were doing." },
+    ]},
+  ]},
+  teabreath: { easy: [
+    { id: "tbe1", title: { ru: "Час с чаем — под своё состояние", uk: "Година з чаєм — під свій стан", en: "An hour with tea — matched to your state" }, steps: [
+      { ru: "Прежде чем заваривать, на минуту загляни внутрь: что сейчас ближе всего — жар и раздражение, туман в голове, тревога и сжатие, усталость от людей, упадок сил, или энергия, которую хочется выровнять?", uk: "Перш ніж заварювати, на хвилину загляни всередину: що зараз найближче — жар і роздратування, туман у голові, тривога і стиснення, втома від людей, занепад сил, чи енергія, яку хочеться вирівняти?", en: "Before brewing, take a minute to check in: what's closest right now — heat and irritation, mental fog, anxiety and tightness, tiredness of people, low energy, or energy you want to level out?" },
+      { ru: "Под это состояние выбери чай — так же, как в тесте «Найти свой чай»: тёмный тяжёлый (шу пуэр) для жара и раздражения, свежий резкий (шэн пуэр) для тумана, мягкий белый для тревоги, Те Гуань Инь для усталости от людей, тёплый насыщенный (Да Хун Пао) для упадка сил, мягкий улун для избытка энергии. Если не уверен(а) — открой сам тест, он подскажет точнее.", uk: "Під цей стан обери чай — так само, як у тесті «Знайти свій чай»: темний важкий (шу пуер) для жару й роздратування, свіжий різкий (шен пуер) для туману, м'який білий для тривоги, Те Гуань Інь для втоми від людей, теплий насичений (Да Хун Пао) для занепаду сил, м'який улун для надлишку енергії. Якщо не впевнений(а) — відкрий сам тест, він підкаже точніше.", en: "Pick a tea for that state — the same way the 'Find your tea' test does: dark and heavy (shou puerh) for heat and irritation, fresh and sharp (sheng puerh) for fog, soft white tea for anxiety, Tie Guan Yin for people-fatigue, warm rich Da Hong Pao for low energy, soft oolong for excess energy. Not sure — open the test itself, it'll narrow it down." },
+      { ru: "Завари так, чтобы хватило минимум на 3-4 пролива (гунфу-стиль) или на полный чайник — рассчитывай примерно на час, а не на 15 минут.", uk: "Завари так, щоб вистачило щонайменше на 3-4 проливи (гунфу-стиль) або на повний чайник — розраховуй приблизно на годину, а не на 15 хвилин.", en: "Brew enough for at least 3–4 infusions (gongfu-style) or a full pot — plan for around an hour, not 15 minutes." },
+      { ru: "Первую чашку пей молча, без телефона, просто отмечая вкус и тепло.", uk: "Першу чашку пий мовчки, без телефону, просто відмічаючи смак і тепло.", en: "Drink the first cup in silence, no phone, just noticing taste and warmth." },
+      { ru: "Между следующими чашками — по 3-5 спокойных вдохов-выдохов, без спешки долить и выпить сразу.", uk: "Між наступними чашками — по 3-5 спокійних вдихів-видихів, без поспіху долити й випити одразу.", en: "Between the following cups — 3–5 calm breaths each time, no rush to refill and drink right away." },
+      { ru: "В конце часа одной фразой отметь: что изменилось внутри по сравнению с началом?", uk: "Наприкінці години однією фразою відміть: що змінилося всередині порівняно з початком?", en: "At the end of the hour, note in one line: what changed inside compared to the start?" },
+    ]},
+    { id: "tbe2", title: { ru: "Тепло в ладонях, час без спешки", uk: "Тепло в долонях, година без поспіху", en: "Warmth in the hands, an unhurried hour" }, steps: [
+      { ru: "Завари чай, который откликается сегодняшнему состоянию (см. предыдущий день — те же 6 состояний из теста чая).", uk: "Завари чай, який відгукується сьогоднішньому стану (див. попередній день — ті самі 6 станів з тесту чаю).", en: "Brew the tea that matches today's state (see the previous day — the same 6 states from the tea test)." },
+      { ru: "Перед первым глотком минуту просто держи чашку в ладонях, чувствуя тепло, дыша обычно.", uk: "Перед першим ковтком хвилину просто тримай чашку в долонях, відчуваючи тепло, дихаючи звично.", en: "Before the first sip, just hold the cup for a minute, feeling the warmth, breathing normally." },
+      { ru: "Пей неспеша весь час, что есть — минимум 45 минут, если получится. Долей чайник, когда чашка опустеет, вместо того чтобы заканчивать чаепитие.", uk: "Пий неспішно весь час, що є — щонайменше 45 хвилин, якщо вийде. Долий чайник, коли чашка спорожніє, замість того щоб закінчувати чаювання.", en: "Drink unhurried for as long as you have — at least 45 minutes if you can. Refill the pot when the cup empties instead of ending the session." },
+      { ru: "Между чашками — короткая пауза с закрытыми глазами, 3 вдоха-выдоха.", uk: "Між чашками — коротка пауза із заплющеними очима, 3 вдихи-видихи.", en: "Between cups — a short pause with eyes closed, 3 breaths." },
+    ]},
+    { id: "tbe3", title: { ru: "Чай без экрана, целый час", uk: "Чай без екрана, ціла година", en: "Screen-free tea, a full hour" }, steps: [
+      { ru: "Выбери чай под состояние (жар/туман/тревога/усталость от людей/упадок сил/избыток энергии — как в тесте чая) и завари с запасом на несколько проливов.", uk: "Обери чай під стан (жар/туман/тривога/втома від людей/занепад сил/надлишок енергії — як у тесті чаю) і завари із запасом на кілька проливів.", en: "Pick a tea for the state (heat/fog/anxiety/people-fatigue/low energy/excess energy — as in the tea test) and brew enough for several infusions." },
+      { ru: "Убери телефон в другую комнату на весь час чаепития.", uk: "Прибери телефон в іншу кімнату на весь час чаювання.", en: "Put your phone in another room for the whole session." },
+      { ru: "Пей около часа, ни на что не отвлекаясь — только чашка, вкус и дыхание между глотками.", uk: "Пий близько години, ні на що не відволікаючись — тільки чашка, смак і дихання між ковтками.", en: "Drink for about an hour with no distractions — just the cup, the taste, and breath between sips." },
+    ]},
+  ], medium: [
+    { id: "tbm1", title: { ru: "Точный выбор чая + счёт дыхания", uk: "Точний вибір чаю + рахунок дихання", en: "Precise tea choice + breath counting" }, steps: [
+      { ru: "Если давно не проходил(а) тест «Найти свой чай» — пройди его сейчас, чтобы точнее понять, какой чай нужен именно сегодня.", uk: "Якщо давно не проходив(ла) тест «Знайти свій чай» — пройди його зараз, щоб точніше зрозуміти, який чай потрібен саме сьогодні.", en: "If it's been a while since the 'Find your tea' test — take it now to pin down exactly which tea fits today." },
+      { ru: "Завари рекомендованный чай на весь час, с 3-4 проливами.", uk: "Завари рекомендований чай на всю годину, з 3-4 проливами.", en: "Brew the recommended tea for the full hour, with 3–4 infusions." },
+      { ru: "Пей, считая про себя выдохи от 1 до 10 между глотками, затем начинай заново — так все 45-60 минут.", uk: "Пий, рахуючи про себе видихи від 1 до 10 між ковтками, потім починай знову — так усі 45-60 хвилин.", en: "Drink while silently counting exhales from 1 to 10 between sips, then start over — for the full 45–60 minutes." },
+      { ru: "Если сбился со счёта — не страшно, просто начни с 1.", uk: "Якщо збився з рахунку — не страшно, просто почни з 1.", en: "If you lose count, no problem — just start again at 1." },
+    ]},
+    { id: "tbm2", title: { ru: "Чай + тело, целый час", uk: "Чай + тіло, ціла година", en: "Tea + body, a full hour" }, steps: [
+      { ru: "Выбери и завари чай под сегодняшнее состояние, рассчитывая на час, а не на быструю чашку.", uk: "Обери і завари чай під сьогоднішній стан, розраховуючи на годину, а не на швидку чашку.", en: "Choose and brew tea for today's state, planning for an hour, not a quick cup." },
+      { ru: "Пока пьёшь, каждую чашку замечай, как тепло чая ощущается в теле — руки, горло, грудь — по-своему на каждом проливе.", uk: "Поки п'єш, кожну чашку помічай, як тепло чаю відчувається в тілі — руки, горло, груди — по-своєму на кожному проливі.", en: "As you drink each cup, notice how the warmth is felt in the body — hands, throat, chest — a little differently each infusion." },
+      { ru: "45-60 минут чаепития полностью в этом ощущении, без параллельных дел и телефона.", uk: "45-60 хвилин чаювання повністю в цьому відчутті, без паралельних справ і телефону.", en: "45–60 minutes of tea time fully in this sensation, no multitasking, no phone." },
+    ]},
+  ], advanced: [
+    { id: "tba1", title: { ru: "Полноценная чайная церемония", uk: "Повноцінна чайна церемонія", en: "A full tea ceremony" }, steps: [
+      { ru: "Выдели час без прерываний. Выбери чай под сегодняшнее состояние (см. базу) и завари гунфу-стилем — много коротких проливов вместо одного долгого.", uk: "Виділи годину без переривань. Обери чай під сьогоднішній стан (див. базу) і завари гунфу-стилем — багато коротких проливів замість одного довгого.", en: "Set aside a full hour, no interruptions. Choose a tea for today's state (see the foundation tier) and brew gongfu-style — many short infusions instead of one long one." },
+      { ru: "Первые минуты — просто дыхание, пока настаивается первый пролив. Дальше — медленное чаепитие с вниманием на вкусе, тепле, дыхании, на протяжении всех проливов.", uk: "Перші хвилини — просто дихання, поки настоюється перший пролив. Далі — повільне чаювання з увагою на смаку, теплі, диханні, протягом усіх проливів.", en: "The first minutes: just breathing while the first infusion steeps. Then slow drinking with attention on taste, warmth, breath — across every infusion." },
+    ]},
+    { id: "tba2", title: { ru: "До и после — заметить перемену", uk: "До і після — помітити зміну", en: "Before and after — notice the shift" }, steps: [
+      { ru: "Перед началом одной фразой отметь состояние — как в Компасе состояния.", uk: "Перед початком однією фразою відміть стан — як у Компасі стану.", en: "Before starting, note your state in one line — like in the Compass check-in." },
+      { ru: "Проведи полный час чаепития, с выбором чая под это состояние и минимум 4 проливами, без телефона.", uk: "Проведи повну годину чаювання, з вибором чаю під цей стан і щонайменше 4 проливами, без телефону.", en: "Spend a full hour drinking, with tea chosen for that state and at least 4 infusions, no phone." },
+      { ru: "В конце — снова одной фразой отметь состояние и сравни с началом. Обычное чаепитие, растянутое на час с вниманием, само по себе способно его сдвинуть.", uk: "Наприкінці — знову однією фразою відміть стан і порівняй з початком. Звичайне чаювання, розтягнуте на годину з увагою, саме собою здатне його зрушити.", en: "At the end — note your state again in one line and compare it with the start. An ordinary tea session, stretched to an hour with attention, can shift it on its own." },
+    ]},
+  ]},
+  gongfu: { easy: [
+    { id: "gfe1", title: { ru: "Температура и посуда — основа", uk: "Температура і посуд — основа", en: "Temperature and vessel — the basics" }, steps: [
+      { ru: "Узнай (или вспомни) правильную температуру для сегодняшнего чая: зелёный и белый — 75-85°C, улуны — 85-95°C, чёрный и пуэр — 90-100°C.", uk: "Дізнайся (або згадай) правильну температуру для сьогоднішнього чаю: зелений і білий — 75-85°C, улуни — 85-95°C, чорний і пуер — 90-100°C.", en: "Find out (or recall) the right temperature for today's tea: green and white — 75–85°C, oolongs — 85–95°C, black and puerh — 90–100°C." },
+      { ru: "Перед завариванием ополосни гайвань, чайник или чашку кипятком — прогретая посуда держит температуру заварки стабильнее.", uk: "Перед завариванням обполосни гайвань, чайник або чашку окропом — прогрітий посуд тримає температуру заварки стабільніше.", en: "Before brewing, rinse the gaiwan, pot or cup with hot water — a warm vessel holds the brewing temperature more steadily." },
+      { ru: "Сделай «пробуждающий» пролив: залей чай водой на 2-3 секунды и сразу слей, не пей его — это раскрывает лист перед основным завариванием.", uk: "Зроби «пробуджувальний» пролив: залий чай водою на 2-3 секунди і одразу злий, не пий його — це розкриває лист перед основним завариванням.", en: "Do a 'waking' rinse: pour water over the leaves for 2–3 seconds and drain immediately, don't drink it — this opens the leaf before the real brewing starts." },
+    ]},
+    { id: "gfe2", title: { ru: "Пропорция чая и воды", uk: "Пропорція чаю і води", en: "Leaf-to-water ratio" }, steps: [
+      { ru: "Для гунфу-заваривания ориентируйся примерно на 5-7 грамм чая на 100-120 мл воды — заметно больше, чем в обычной чашке.", uk: "Для гунфу-заварювання орієнтуйся приблизно на 5-7 грамів чаю на 100-120 мл води — помітно більше, ніж у звичайній чашці.", en: "For gongfu brewing, aim for roughly 5–7 grams of leaf per 100–120 ml of water — noticeably more than a regular cup." },
+      { ru: "Если весов нет — заполни гайвань или чайничек сухим листом примерно на треть, для скрученных чаёв (улуны) — чуть меньше.", uk: "Якщо ваг немає — заповни гайвань або чайничок сухим листям приблизно на третину, для скручених чаїв (улуни) — трохи менше.", en: "No scale? Fill the gaiwan or pot about a third full with dry leaf; for tightly rolled teas (oolongs), a bit less." },
+      { ru: "Первый настоящий пролив держи коротким — 10-15 секунд, не дольше.", uk: "Перший справжній пролив тримай коротким — 10-15 секунд, не довше.", en: "Keep the first real infusion short — 10–15 seconds, no longer." },
+    ]},
+    { id: "gfe3", title: { ru: "Аромат пустой чашки", uk: "Аромат порожньої чашки", en: "The empty cup's aroma" }, steps: [
+      { ru: "После того как отпил(а) чашку до дна, поднеси её к носу и понюхай — не сам чай, а стенки чашки.", uk: "Після того як відпив(ла) чашку до дна, піднеси її до носа і понюхай — не сам чай, а стінки чашки.", en: "After finishing a cup, hold it up to your nose and smell — not the tea itself, the inside of the cup." },
+      { ru: "Сравни этот запах с ароматом, который был у самого чая, пока он заваривался.", uk: "Порівняй цей запах з ароматом, який був у самого чаю, поки він заварювався.", en: "Compare this smell with the aroma the tea had while it was brewing." },
+      { ru: "Сделай так с каждым проливом сегодня — аромат сухой чашки обычно меняется от пролива к проливу.", uk: "Зроби так з кожним проливом сьогодні — аромат сухої чашки зазвичай змінюється від проливу до проливу.", en: "Do this with every infusion today — the empty cup's scent usually shifts from one infusion to the next." },
+    ]},
+  ], medium: [
+    { id: "gfm1", title: { ru: "Лесенка времени пролива", uk: "Драбинка часу проливу", en: "The infusion-time ladder" }, steps: [
+      { ru: "Завари чай гунфу-стилем: первый пролив 10-15 секунд, каждый следующий — на 5-10 секунд дольше предыдущего.", uk: "Завари чай гунфу-стилем: перший пролив 10-15 секунд, кожен наступний — на 5-10 секунд довше за попередній.", en: "Brew gongfu-style: first infusion 10–15 seconds, each next one 5–10 seconds longer than the last." },
+      { ru: "Пройди так минимум 4-5 проливов, замечая, как меняется крепость и вкус, а не просто «доливай воды».", uk: "Пройди так щонайменше 4-5 проливів, помічаючи, як змінюється міцність і смак, а не просто «доливай воду».", en: "Go through at least 4–5 infusions this way, noticing how strength and taste shift, rather than just topping up water." },
+      { ru: "Если какой-то пролив вышел слишком крепким или пустым — в следующий раз скорректируй время на пару секунд.", uk: "Якщо якийсь пролив вийшов надто міцним або порожнім — наступного разу скоригуй час на пару секунд.", en: "If an infusion comes out too strong or too weak — adjust the time by a couple of seconds next time." },
+    ]},
+    { id: "gfm2", title: { ru: "Чтение разваренного листа", uk: "Читання розвареного листя", en: "Reading the spent leaf" }, steps: [
+      { ru: "После заваривания разверни один-два листа пальцами и рассмотри их — целый лист, кусочки, почки?", uk: "Після заварювання розгорни один-два листки пальцями і роздивись їх — цілий лист, шматочки, бруньки?", en: "After brewing, unfurl one or two leaves with your fingers and look — whole leaf, fragments, buds?" },
+      { ru: "Понюхай разваренный лист отдельно от настоя — запах сырого листа часто отличается от запаха в чашке.", uk: "Понюхай розварене листя окремо від настою — запах сирого листя часто відрізняється від запаху в чашці.", en: "Smell the wet leaf separately from the liquor — the raw leaf's scent is often different from what's in the cup." },
+      { ru: "Запиши для себя одной строкой, что заметил(а) — так со временем накопится собственное понимание разных чаёв.", uk: "Запиши для себе одним рядком, що помітив(ла) — так з часом накопичиться власне розуміння різних чаїв.", en: "Jot down one line of what you noticed — over time this builds your own sense of different teas." },
+    ]},
+  ], advanced: [
+    { id: "gfa1", title: { ru: "Полный цикл: от чая к чаю за неделю", uk: "Повний цикл: від чаю до чаю за тиждень", en: "A full cycle: tea to tea across a week" }, steps: [
+      { ru: "В течение дня завари 2-3 разных чая гунфу-стилем (например, зелёный и улун, или улун и пуэр) — подряд или в разное время.", uk: "Протягом дня завари 2-3 різних чаї гунфу-стилем (наприклад, зелений і улун, або улун і пуер) — поспіль або в різний час.", en: "During the day, brew 2–3 different teas gongfu-style (e.g. green and oolong, or oolong and puerh) — back to back or at different times." },
+      { ru: "Для каждого сознательно подбери свою температуру, пропорцию и время пролива — не переноси настройки одного чая на другой.", uk: "Для кожного свідомо підбери свою температуру, пропорцію і час проливу — не переноси налаштування одного чаю на інший.", en: "For each, deliberately set its own temperature, ratio and infusion time — don't carry one tea's settings over to another." },
+      { ru: "В конце дня сравни, какая техника где сработала лучше — это и есть начало собственного стиля заваривания.", uk: "Наприкінці дня порівняй, яка техніка де спрацювала краще — це і є початок власного стилю заварювання.", en: "At the end of the day, compare which technique worked best where — that's the start of your own brewing style." },
+    ]},
+    { id: "gfa2", title: { ru: "Завари для кого-то другого", uk: "Завари для когось іншого", en: "Brew for someone else" }, steps: [
+      { ru: "Завари чай гунфу-стилем не только для себя, а и угости кем-то ещё — партнёра, друга, коллегу.", uk: "Завари чай гунфу-стилем не тільки для себе, а й пригости когось іще — партнера, друга, колегу.", en: "Brew gongfu-style not just for yourself — share it with someone else, a partner, friend, or colleague." },
+      { ru: "Разлей поровну по кругу, а не одному много и другому мало — в этом суть гунфу-подачи.", uk: "Розлий порівну по колу, а не одному багато й іншому мало — у цьому суть гунфу-подачі.", en: "Pour evenly around, not a lot to one person and little to another — that's the essence of gongfu serving." },
+      { ru: "Спроси, что человек почувствовал в чае — часто именно взгляд со стороны замечает то, что сам уже не различаешь.", uk: "Запитай, що людина відчула в чаї — часто саме погляд збоку помічає те, що сам уже не розрізняєш.", en: "Ask what the other person tasted — an outside perspective often notices what you've stopped consciously registering." },
     ]},
   ]},
 };
@@ -4329,7 +4442,9 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
   const [winner, setWinner] = useState(null);
   const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
+  const [showChallenge, setShowChallenge] = useState(false);
   useEffect(() => { statEvent("meditation"); }, []);
+  if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} presetGroup="teabreath" />;
   const q = MEDITATION_QUESTIONS[current];
 
   const handleNext = () => {
@@ -4409,6 +4524,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.goChannel}</a>
           {onGoGuidance && <button onClick={onGoGuidance} style={S.ghostBtn}>🧘 {tx({ ru: "Наставления по медитации", uk: "Настанови з медитації", en: "Meditation guidance" })}</button>}
+          <button onClick={() => setShowChallenge(true)} style={S.ghostBtn}>🍵 {tx({ ru: "Начать челлендж «Чай и дыхание»", uk: "Почати челендж «Чай і дихання»", en: "Start the Tea & Breath challenge" })}</button>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4458,7 +4574,11 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
   const [winner, setWinner] = useState(null);
   const [sortedScores, setSortedScores] = useState(null);
   const [animating, setAnimating] = useState(false);
+  const [showChallenge, setShowChallenge] = useState(false);
+  const [showGongfuChallenge, setShowGongfuChallenge] = useState(false);
   useEffect(() => { statEvent("tea"); }, []);
+  if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} presetGroup="teabreath" />;
+  if (showGongfuChallenge) return <ChallengeScreen onBack={() => setShowGongfuChallenge(false)} presetGroup="gongfu" />;
   const q = TEA_QUESTIONS[current];
   const handleNext = () => {
     if (selectedIdx === null || animating) return;
@@ -4511,6 +4631,8 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           </div>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>{t.goChannel}</a>
+          <button onClick={() => setShowChallenge(true)} style={S.ghostBtn}>🍵 {tx({ ru: "Начать челлендж «Чай и дыхание»", uk: "Почати челендж «Чай і дихання»", en: "Start the Tea & Breath challenge" })}</button>
+          <button onClick={() => setShowGongfuChallenge(true)} style={S.ghostBtn}>🫖 {tx({ ru: "Научиться заваривать: челлендж «Гунфу чаепитие»", uk: "Навчитися заварювати: челендж «Гунфу чаювання»", en: "Learn to brew: the Gongfu tea challenge" })}</button>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4653,11 +4775,79 @@ const MEDITATION_GUIDANCE_STEPS = [
   { ru: "Ум будет уходить в мысли — это нормально и случится не раз. Как только заметил уход, без раздражения на себя мягко возвращай внимание обратно к дыханию. Само это возвращение и есть практика, а не помеха ей.", uk: "Розум буде йти в думки — це нормально і трапиться не раз. Щойно помітив відхід, без роздратування на себе м'яко повертай увагу назад до дихання. Саме це повернення і є практикою, а не завадою їй.", en: "The mind will wander into thoughts — that's normal and will happen more than once. The moment you notice it, gently bring attention back to the breath, without frustration. That returning is the practice itself, not a failure of it." },
   { ru: "Заверши: одна спокойная мысль о том, зачем ты сегодня это делал, и мягко открой глаза.", uk: "Заверши: одна спокійна думка про те, навіщо ти сьогодні це робив, і м'яко відкрий очі.", en: "Finish with one calm thought about why you did this today, and gently open your eyes." },
 ];
+// Календарная часть "совета дня" — день недели (0=вс..6=сб, как Date.getDay()) и время года.
+// Намеренно лёгкие, не директивные заметки — просто иначе расставленный акцент по дню/сезону.
+const MEDITATION_WEEKDAY_NOTE = {
+  0: { ru: "Воскресенье — хороший день для более длинной сессии, если есть время.", uk: "Неділя — гарний день для довшої сесії, якщо є час.", en: "Sunday — a good day for a longer session, if you have the time." },
+  1: { ru: "Понедельник — тело и ум ещё включаются. Не гонись за длиной сессии, важнее просто сесть.", uk: "Понеділок — тіло й розум ще вмикаються. Не жени за довжиною сесії, важливіше просто сісти.", en: "Monday — body and mind are still switching on. Don't chase session length, just sitting down matters more." },
+  2: { ru: "Вторник — обычно легче держать ровный фокус, чем в понедельник.", uk: "Вівторок — зазвичай легше тримати рівний фокус, ніж у понеділок.", en: "Tuesday — usually easier to hold a steady focus than Monday." },
+  3: { ru: "Середина недели — если чувствуешь усталость, сократи сессию, но не пропускай день.", uk: "Середина тижня — якщо відчуваєш втому, скороти сесію, але не пропускай день.", en: "Midweek — if you're tired, shorten the session, but don't skip the day." },
+  4: { ru: "Четверг — накопленная усталость недели уже ощутима, сегодня практика особенно кстати.", uk: "Четвер — накопичена втома тижня вже відчутна, сьогодні практика особливо доречна.", en: "Thursday — the week's fatigue is already noticeable; practice is especially useful today." },
+  5: { ru: "Пятница — ум уже в предвкушении выходных и может скакать сильнее обычного, это нормально.", uk: "П'ятниця — розум уже в передчутті вихідних і може скакати сильніше за звичайне, це нормально.", en: "Friday — the mind is already anticipating the weekend and may wander more than usual, that's normal." },
+  6: { ru: "Суббота — без будильника внутри дня легче найти спокойное время для сессии.", uk: "Субота — без будильника всередині дня легше знайти спокійний час для сесії.", en: "Saturday — with no alarm-clock structure, it's easier to find a calm moment for the session." },
+};
+const MEDITATION_SEASON_NOTE = {
+  winter: { ru: "Зима, мало света — если сложно проснуться для практики, лучше делай её вечером.", uk: "Зима, мало світла — якщо важко прокинутись для практики, краще роби її ввечері.", en: "Winter, little daylight — if mornings are hard, do the session in the evening instead." },
+  spring: { ru: "Весна — хорошее время добавить прогулочную практику к обычной сидячей сессии.", uk: "Весна — гарний час додати практику ходьби до звичної сидячої сесії.", en: "Spring — a good time to add a walking practice alongside the usual seated session." },
+  summer: { ru: "Лето, больше суеты и поездок — короткая практика утром лучше пропущенного дня.", uk: "Літо, більше метушні й поїздок — коротка практика вранці краще за пропущений день.", en: "Summer, more travel and noise — a short morning session beats a skipped day." },
+  autumn: { ru: "Осень — хорошее время закрепить практику в постоянное время дня, пока не начался учебный/рабочий разгон.", uk: "Осінь — гарний час закріпити практику в постійний час дня, поки не почався навчальний/робочий розгін.", en: "Autumn — a good time to lock the practice into a fixed time of day, before the work/school rush picks up." },
+};
+function getSeasonKey(month) { // month: 0-11
+  if (month === 11 || month === 0 || month === 1) return "winter";
+  if (month >= 2 && month <= 4) return "spring";
+  if (month >= 5 && month <= 7) return "summer";
+  return "autumn";
+}
+// Персональная часть — по данным гормонов/выгорания, если они уже есть.
+function useMeditationDayAdvice() {
+  const [state, setState] = useState({ loaded: false, personalKey: null, personalNote: null });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [hormoneHistRaw, burnoutHistRaw] = await Promise.all([
+          getHistory("hormones_history"),
+          getHistory("quiz_history"),
+        ]);
+        let personalKey = null, personalNote = null;
+        const burnoutAvg = calcQuizAverage(burnoutHistRaw, 3);
+        const burnoutPct = burnoutAvg ? Math.round(burnoutAvg.avgBurnout) : null;
+        if (burnoutPct !== null && burnoutPct >= 60) {
+          personalKey = "burnout";
+          personalNote = { ru: "По последним данным выгорание повышено — сегодня подойдёт более короткая и мягкая сессия, без нажима на себя.", uk: "За останніми даними вигорання підвищене — сьогодні підійде коротша і м'якша сесія, без тиску на себе.", en: "Recent data shows elevated burnout — today calls for a shorter, gentler session, no pushing yourself." };
+        } else if (hormoneHistRaw.length) {
+          const last = hormoneHistRaw[hormoneHistRaw.length - 1];
+          const finalScores = computeHormoneScores(last.main || {}, last.cross || {});
+          const entries = Object.entries(finalScores);
+          if (entries.length) {
+            const weakestKey = entries.reduce((min, e) => (e[1] < min[1] ? e : min), entries[0])[0];
+            const meta = HORMONE_META[weakestKey];
+            if (meta) {
+              personalKey = weakestKey;
+              const nameRu = meta.name?.ru || "", nameUk = meta.name?.uk || nameRu, nameEn = meta.name?.en || nameRu;
+              personalNote = { ru: `По «Гормональному коду» слабее всего сейчас ${nameRu} — сегодняшняя сессия работает и на это тоже.`, uk: `За «Гормональним кодом» найслабше зараз ${nameUk} — сьогоднішня сесія працює і на це також.`, en: `Your 'Hormone code' shows ${nameEn} as the weakest link right now — today's session works on that too.` };
+            }
+          }
+        }
+        if (!cancelled) setState({ loaded: true, personalKey, personalNote });
+      } catch {
+        if (!cancelled) setState({ loaded: true, personalKey: null, personalNote: null });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
 function MeditationGuidanceScreen({ onBack, onGoPractice }) {
   const { t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   const [showNotes, setShowNotes] = useState(false);
   const [showChallenge, setShowChallenge] = useState(false);
+  const now = new Date();
+  const weekdayNote = MEDITATION_WEEKDAY_NOTE[now.getDay()];
+  const seasonNote = MEDITATION_SEASON_NOTE[getSeasonKey(now.getMonth())];
+  const { loaded: dayAdviceLoaded, personalNote } = useMeditationDayAdvice();
   if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
   if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} presetGroup="meditationbreath" />;
   return (
@@ -4671,6 +4861,14 @@ function MeditationGuidanceScreen({ onBack, onGoPractice }) {
       <p style={{ margin: "0 0 20px", fontSize: "13px", color: c.inkSoft, lineHeight: 1.7, fontStyle: "italic" }}>
         {tx({ ru: "Если выбирать всего одну практику — самую простую и при этом самую действенную — это осознанное дыхание. Она не требует условий, подходит новичку и лежит в основе большинства техник из раздела «Моя практика».", uk: "Якщо обирати лише одну практику — найпростішу і водночас найдієвішу — це усвідомлене дихання. Вона не потребує умов, підходить новачку і лежить в основі більшості технік з розділу «Моя практика».", en: "If you were to choose just one practice — the simplest and also the most effective — it's mindful breathing. It needs no special conditions, suits beginners, and underlies most techniques in the 'My practice' section." })}
       </p>
+      <div style={{ margin:"0 0 20px", padding:"14px 16px", background:c.card, border:`1px dashed ${c.cardBorder}`, borderRadius:"12px" }}>
+        <p style={{ margin:"0 0 8px", fontSize:"10px", letterSpacing:"0.2em", color:c.accent }}>{tx({ ru: "СОВЕТ НА СЕГОДНЯ", uk: "ПОРАДА НА СЬОГОДНІ", en: "TODAY'S NOTE" })}</p>
+        <p style={{ margin:"0 0 6px", fontSize:"13px", color:c.inkMuted, lineHeight:1.7 }}>{tx(weekdayNote)}</p>
+        <p style={{ margin: dayAdviceLoaded && personalNote ? "0 0 6px" : 0, fontSize:"13px", color:c.inkMuted, lineHeight:1.7 }}>{tx(seasonNote)}</p>
+        {dayAdviceLoaded && personalNote && (
+          <p style={{ margin:0, fontSize:"13px", color:c.inkSoft, lineHeight:1.7, fontStyle:"italic" }}>{tx(personalNote)}</p>
+        )}
+      </div>
       <div style={S.stepsBlock}>
         <p style={S.stepsTitle}>{tx({ ru: "ОСОЗНАННОЕ ДЫХАНИЕ", uk: "УСВІДОМЛЕНЕ ДИХАННЯ", en: "MINDFUL BREATHING" })}</p>
         {MEDITATION_GUIDANCE_STEPS.map((step, i) => (
@@ -6127,6 +6325,7 @@ export default function App() {
     { id: "meditation", ...t.menu.meditation },
     { id: "meditationguidance", ...t.menu.meditationguidance },
     { id: "dailycheck", ...t.menu.dailycheck },
+    { id: "challenges", ...t.menu.challenges },
     { id: "mood", ...t.menu.mood },
     { id: "mypath", ...t.menu.mypath },
   ];
@@ -6139,6 +6338,7 @@ export default function App() {
   else if (screen === "meditation") body = <MeditationQuizScreen onBack={() => setScreen("home")} onGoGuidance={() => setScreen("meditationguidance")} />;
   else if (screen === "meditationguidance") body = <MeditationGuidanceScreen onBack={() => setScreen("home")} onGoPractice={() => setScreen("meditation")} />;
   else if (screen === "dailycheck") body = <DailyCheckScreen onBack={() => setScreen("home")} />;
+  else if (screen === "challenges") body = <ChallengeScreen onBack={() => setScreen("home")} />;
   else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   else if (screen === "mood") body = <MoodScreen onBack={() => setScreen("home")} />;
