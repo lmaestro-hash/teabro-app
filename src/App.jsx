@@ -8,7 +8,7 @@ const useLang = () => useContext(LangCtx);
 
 const THEMES = {
   dark: {
-    bg: "#0F0D0B", card: "rgba(255,255,255,0.03)", cardBorder: "#2A2520",
+    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(255,255,255,0.03)", cardBorder: "#2A2520",
     ink: "#E8E0D4", inkSoft: "#7A6E62", inkMuted: "#B0A090",
     accent: "#C8A97E", line: "#2A2520", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
     progressInactive: "#2A2520", optionBg: "rgba(255,255,255,0.02)",
@@ -17,7 +17,7 @@ const THEMES = {
   },
   light: {
     // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
-    bg: "#F1E9D3", card: "#FAF6E8", cardBorder: "rgba(44,40,31,0.18)",
+    bg: "#F1E9D3", bgRgb: "241,233,211", bgImage: "/bg-day.webp", bgPos: "40% 50%", bgVeil: "linear-gradient(rgba(241,233,212,.55), rgba(241,233,212,.82))", card: "#FAF6E8", cardBorder: "rgba(44,40,31,0.18)",
     ink: "#2A261F", inkSoft: "#5A5144", inkMuted: "#4A4338",
     accent: "#8B5E2F", line: "rgba(44,40,31,0.16)", primaryBtnBg: "#8B5E2F", primaryBtnText: "#FAF6E8",
     progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(44,40,31,0.04)",
@@ -303,7 +303,7 @@ function buildStyles(themeName) {
   const c = THEMES[themeName] || THEMES.dark;
   const isDark = themeName === "dark";
   return {
-    screen: { minHeight:"100vh", backgroundColor:c.bg, color:c.ink, fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box", transition:"background-color 0.2s,color 0.2s" },
+    screen: { minHeight:"100vh", backgroundColor:"transparent", color:c.ink, fontFamily:"'Georgia','Times New Roman',serif", padding:"24px 20px 40px", display:"flex", flexDirection:"column", boxSizing:"border-box", transition:"background-color 0.2s,color 0.2s" },
     screenHeader: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"4px" },
     backBtn: { background:"none", border:"none", color:c.inkSoft, fontSize:"14px", cursor:"pointer", padding:"0 0 20px 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
     backBtnBottom: { background:"none", border:"none", color:c.inkSoft, fontSize:"14px", cursor:"pointer", padding:"20px 0 0 0", alignSelf:"flex-start", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
@@ -321,7 +321,7 @@ function buildStyles(themeName) {
     menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
     menuCardArrow: { color:c.arrow, fontSize:"18px" },
     shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 0 4px", marginBottom:"4px", background:`linear-gradient(${c.bg} 70%, transparent)` },
+    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 0 4px", marginBottom:"4px", background:`linear-gradient(rgba(${c.bgRgb},0.88) 70%, rgba(${c.bgRgb},0))` },
     langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
     langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
     themeBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"14px", background:c.card, color:c.ink, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"4px 10px", cursor:"pointer", lineHeight:1.2 },
@@ -5563,33 +5563,44 @@ function AdminScreen({ onBack }) {
             </div>
           )}
 
-          {/* Общая статистика по всем тестам/боту — заменяет прежний блок распределения только по «Самообману» */}
-          {tests.length > 0 && (() => {
-            const totalCompletions = tests.reduce((sum, x) => sum + (x.value || 0), 0);
-            const topTest = tests.reduce((best, x) => ((x.value || 0) > (best?.value || 0) ? x : best), null);
-            const conversion = stats.totalOpens > 0 ? Math.round((totalCompletions / stats.totalOpens) * 100) : 0;
-            return (
-              <div style={card}>
-                <p style={sectionTitle}>{tx({ ru: 'ИТОГО ПО БОТУ', uk: 'ЗАГАЛОМ ПО БОТУ', en: 'BOT OVERVIEW' })}</p>
-                <div style={{ display: "flex", gap: "10px", marginBottom: topTest?.value > 0 ? "12px" : 0 }}>
-                  <div style={metricBig}>
-                    <p style={metricVal}>{totalCompletions}</p>
-                    <p style={metricLabel}>{tx({ ru: 'всего прохождений', uk: 'всього проходжень', en: 'total completions' })}</p>
-                  </div>
-                  <div style={metricBig}>
-                    <p style={metricVal}>{conversion}%</p>
-                    <p style={metricLabel}>{tx({ ru: 'от открытий', uk: 'від відкриттів', en: 'of opens' })}</p>
-                  </div>
+          {/* Самообман — среднее, если есть */}
+          {stats.selfHonestyHist?.count > 0 && (
+            <div style={card}>
+              <p style={sectionTitle}>{t.selfDeceptDist}</p>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "12px" }}>
+                <div style={metricBig}>
+                  <p style={metricVal}>{stats.selfHonestyHist.count}</p>
+                  <p style={metricLabel}>{t.results}</p>
                 </div>
-                {topTest?.value > 0 && (
-                  <div style={{ ...rowStyle, borderBottom: "none", paddingTop: 0 }}>
-                    <span style={rowLabel}>{tx({ ru: 'популярнее всего', uk: 'найпопулярніше', en: 'most popular' })}</span>
-                    <span style={rowValue}>{topTest.icon} {topTest.label}</span>
-                  </div>
-                )}
+                <div style={metricBig}>
+                  <p style={metricVal}>{stats.selfHonestyHist.average ?? "—"}</p>
+                  <p style={metricLabel}>{t.avgScore}</p>
+                </div>
               </div>
-            );
-          })()}
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "48px" }}>
+                {(stats.selfHonestyHist.buckets || []).map((b, i) => {
+                  const maxB = Math.max(1, ...stats.selfHonestyHist.buckets.map(x => x.count));
+                  const h = Math.max(4, Math.round((b.count / maxB) * 48));
+                  return (
+                    <div key={b.range} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                      <div style={{
+                        width: "100%",
+                        height: h,
+                        borderRadius: "3px 3px 0 0",
+                        background: c.accent,
+                        opacity: 0.35 + (b.count / maxB) * 0.55,
+                      }} title={`${b.range}: ${b.count}`} />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>0</span>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>50</span>
+                <span style={{ fontSize: "9px", color: c.inkSoft }}>99</span>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -6167,6 +6178,7 @@ export default function App() {
   const [lang, setLang] = useState(() => { try { const saved = localStorage.getItem("teabro-lang"); return (saved === "ru" || saved === "uk") ? saved : "ru"; } catch { return "ru"; } });
   S = buildStyles(theme);
   useEffect(() => { try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
+  useEffect(() => { try { document.body.style.backgroundColor = (THEMES[theme] || THEMES.dark).bg; } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem("teabro-lang", lang); } catch {} }, [lang]);
   const t = UI[lang] || UI.ru;
   const styles = S;
@@ -6374,7 +6386,8 @@ export default function App() {
 
   return (
     <LangCtx.Provider value={{ lang, theme, t, tx: (v) => tx(lang, v) }}>
-      {body}
+      <div aria-hidden="true" style={{ position:"fixed", top:0, right:0, bottom:0, left:0, zIndex:0, pointerEvents:"none", backgroundColor:(THEMES[theme] || THEMES.dark).bg, backgroundImage:`${(THEMES[theme] || THEMES.dark).bgVeil}, url(${(THEMES[theme] || THEMES.dark).bgImage})`, backgroundSize:"cover", backgroundPosition:`${(THEMES[theme] || THEMES.dark).bgPos}`, backgroundRepeat:"no-repeat", transition:"background-color 0.2s" }} />
+      <div style={{ position:"relative", zIndex:1 }}>{body}</div>
     </LangCtx.Provider>
   );
 }
