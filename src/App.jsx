@@ -6,22 +6,23 @@ import { useState, useEffect, useCallback, useRef, createContext, useContext } f
 const LangCtx = createContext({ lang: "ru", theme: "dark", t: (k) => k, tx: (o) => o });
 const useLang = () => useContext(LangCtx);
 
+const GLASS = { WebkitBackdropFilter:"blur(6px)", backdropFilter:"blur(6px)" };
 const THEMES = {
   dark: {
-    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.72)", cardBorder: "rgba(242,233,216,0.14)",
+    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.72)", plate: "rgba(35,45,51,0.55)", cardBorder: "rgba(242,233,216,0.14)",
     ink: "#E8E0D4", inkSoft: "#A89A8A", inkMuted: "#B8AA9A",
     accent: "#C8A97E", line: "rgba(242,233,216,0.14)", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
-    progressInactive: "rgba(242,233,216,0.16)", optionBg: "rgba(255,255,255,0.05)",
-    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(255,255,255,0.06)",
+    progressInactive: "rgba(242,233,216,0.16)", optionBg: "rgba(35,45,51,0.55)",
+    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(35,45,51,0.62)",
     trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#8A7C6C",
   },
   light: {
     // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
-    bg: "#F1E9D3", bgRgb: "241,233,211", bgImage: "/bg-day.webp", bgPos: "40% 50%", bgVeil: "linear-gradient(rgba(241,233,212,.55), rgba(241,233,212,.82))", card: "#FAF6E8", cardBorder: "rgba(44,40,31,0.18)",
+    bg: "#F1E9D3", bgRgb: "241,233,211", bgImage: "/bg-day.webp", bgPos: "40% 50%", bgVeil: "linear-gradient(rgba(241,233,212,.55), rgba(241,233,212,.82))", card: "rgba(250,246,232,0.82)", plate: "rgba(250,246,232,0.6)", cardBorder: "rgba(44,40,31,0.18)",
     ink: "#2A261F", inkSoft: "#5A5144", inkMuted: "#4A4338",
     accent: "#8B5E2F", line: "rgba(44,40,31,0.16)", primaryBtnBg: "#8B5E2F", primaryBtnText: "#FAF6E8",
-    progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(44,40,31,0.04)",
-    optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "#F7F0DC",
+    progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(250,246,232,0.62)",
+    optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "rgba(247,240,220,0.8)",
     trackBg: "rgba(44,40,31,0.10)", softBg: "#EDE4CC", arrow: "#6A6054",
   },
 };
@@ -320,9 +321,9 @@ function buildStyles(themeName) {
     menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
     menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
     menuCardArrow: { color:c.arrow, fontSize:"18px" },
-    shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+    shopBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
     controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 20px 16px", margin:"-24px -20px 0", WebkitBackdropFilter:"blur(8px)", backdropFilter:"blur(8px)", background:`rgba(${c.bgRgb},0.35)`, WebkitMaskImage:"linear-gradient(#000 55%, transparent)", maskImage:"linear-gradient(#000 55%, transparent)" },
-    langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
+    langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
     langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
     themeBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"14px", background:c.card, color:c.ink, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"4px 10px", cursor:"pointer", lineHeight:1.2 },
     quizProgress: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"12px" },
@@ -332,7 +333,7 @@ function buildStyles(themeName) {
     progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
     questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:c.ink, fontWeight:"normal" },
     optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
-    optionBtn: { background:c.optionBg, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
+    optionBtn: { ...GLASS, background:c.optionBg, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
     optionRadio: { color:c.accent, fontSize:"16px", lineHeight:1.4, flexShrink:0 },
     optionText: { fontSize:"14px", color: isDark?"#D0C8BC":c.ink, lineHeight:1.5, fontFamily:"'Georgia',serif" },
     resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
@@ -348,19 +349,19 @@ function buildStyles(themeName) {
     wisdomContainer: { flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 0", textAlign:"center" },
     teaIcon: { fontSize:"48px", marginBottom:"32px" },
     wisdomText: { fontSize:"20px", lineHeight:1.7, color:c.ink, fontStyle:"italic", marginBottom:"28px" },
-    wisdomLine: { width:"40px", height:"1px", backgroundColor: isDark?"#4A4036":c.line, marginBottom:"12px" },
-    wisdomHint: { fontSize:"12px", color: isDark?"#4A4036":c.inkSoft, letterSpacing:"0.1em", margin:0 },
+    wisdomLine: { width:"40px", height:"1px", backgroundColor: isDark?"#8A7C6C":c.line, marginBottom:"12px" },
+    wisdomHint: { fontSize:"12px", color: isDark?"#8A7C6C":c.inkSoft, letterSpacing:"0.1em", margin:0 },
     primaryBtn: { width:"100%", padding:"16px", backgroundColor:c.primaryBtnBg, color:c.primaryBtnText, border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
-    ghostBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
-    shareBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"18px", marginBottom:"12px", boxSizing:"border-box" },
-    statCard: { background:c.card, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", textAlign:"center" },
+    ghostBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
+    shareBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"18px", marginBottom:"12px", boxSizing:"border-box" },
+    statCard: { ...GLASS, background:c.card, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", textAlign:"center" },
     statNum: { margin:"0 0 4px", fontSize:"24px", color:c.accent, fontWeight:"normal" },
     statLabel: { margin:0, fontSize:"11px", color:c.inkSoft, letterSpacing:"0.05em" },
     sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
     sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:c.accent, margin:0 },
-    infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:`1px solid ${isDark?"#3A3028":c.line}`, background:"none", color: isDark?"#6A6058":c.inkSoft, fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
-    infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"#3A3028":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"11px", color: isDark?"#9A8E80":c.inkSoft, fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.25)", boxSizing:"border-box" },
-    metricBlock: { background:c.metricBg, border:`1px solid ${c.line}`, borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
+    infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:`1px solid ${isDark?"rgba(242,233,216,0.22)":c.line}`, background:"none", color: isDark?"#A89A8A":c.inkSoft, fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
+    infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.22)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"11px", color: isDark?"#9A8E80":c.inkSoft, fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.25)", boxSizing:"border-box" },
+    metricBlock: { ...GLASS, background:c.metricBg, border:`1px solid ${c.line}`, borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
     metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
     metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
     metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
@@ -371,7 +372,7 @@ function buildStyles(themeName) {
     metricFill: { height:"100%", borderRadius:"4px", position:"relative", transition:"width 1.3s cubic-bezier(.4,0,.2,1)" },
     metricFillDot: { position:"absolute", right:"-1px", top:"50%", transform:"translateY(-50%)", width:"16px", height:"16px", borderRadius:"50%", border:`2px solid ${c.bg}`, display:"block" },
     scaleLabels: { display:"flex", justifyContent:"space-between" },
-    scaleLabel: { fontSize:"10px", color: isDark?"#6A6058":c.inkSoft, letterSpacing:"0.04em", fontWeight: isDark?400:500 },
+    scaleLabel: { fontSize:"10px", color: isDark?"#A89A8A":c.inkSoft, letterSpacing:"0.04em", fontWeight: isDark?400:500 },
     scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
     metricQuote: { padding:"10px 13px", background: isDark?"rgba(200,169,126,0.05)":"rgba(176,132,84,0.08)", borderLeft:`2px solid ${isDark?"rgba(200,169,126,0.25)":"rgba(176,132,84,0.3)"}`, borderRadius:"0 6px 6px 0", marginTop:"13px" },
     metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#8A7E72":c.inkMuted, fontStyle:"italic", lineHeight:1.75 },
@@ -383,9 +384,9 @@ function buildStyles(themeName) {
     otherRow: { display:"flex", alignItems:"center", gap:"10px" },
     otherEmoji: { fontSize:"15px", width:"24px", textAlign:"center", flexShrink:0 },
     otherName: { fontSize:"13px", color:c.inkSoft, flex:1 },
-    otherPct: { fontSize:"13px", color: isDark?"#6A6058":c.inkSoft, flexShrink:0 },
-    stepsBlock: { background:c.card, border:`1px solid ${isDark?"#1E1B18":c.line}`, borderRadius:"12px", padding:"16px", marginTop:"12px" },
-    stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color: isDark?"#4A4036":c.inkSoft },
+    otherPct: { fontSize:"13px", color: isDark?"#A89A8A":c.inkSoft, flexShrink:0 },
+    stepsBlock: { ...GLASS, background:c.card, border:`1px solid ${isDark?"rgba(242,233,216,0.14)":c.line}`, borderRadius:"12px", padding:"16px", marginTop:"12px" },
+    stepsTitle: { margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.18em", color: isDark?"#8A7C6C":c.inkSoft },
   };
 }
 
@@ -1512,7 +1513,7 @@ function HormoneInfoBlock({ hormoneKey, color }) {
         <span>{tx({ ru: "Что это и как поднять", uk: "Що це і як підняти", en: "What it is and how to raise it" })}</span>
       </button>
       {open && (
-        <div style={{ padding: "10px 12px", background: "rgba(255,255,255,0.02)", border: `1px solid ${c.line}`, borderRadius: "10px", marginTop: "4px" }}>
+        <div style={{ padding: "10px 12px", background: c.plate, border: `1px solid ${c.line}`, borderRadius: "10px", marginTop: "4px" }}>
           <p style={{ margin: "0 0 8px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(info.role)}</p>
           <p style={{ margin: "0 0 8px", fontSize: "11px", color: c.inkSoft, lineHeight: 1.6 }}>
             <span style={{ color: color || c.accent }}>{tx({ ru: "Признаки дефицита: ", uk: "Ознаки дефіциту: ", en: "Signs of deficiency: " })}</span>
@@ -1684,11 +1685,11 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
         <HintPopup text={tx({ ru: "10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается.", uk: "10 питань, які уточнюють картину по семи системах — вони керують мотивацією, спокоєм, сном і фокусом. Відповідай першим, що відгукується.", en: "10 questions that clarify the picture across seven systems — they govern motivation, calm, sleep and focus. Answer with whatever resonates first." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
-      <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : "#2A2520", backgroundColor: selected === opt.score ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -2236,7 +2237,7 @@ function HintPopup({ text }) {
     <div style={{ position:"relative", marginBottom:"20px" }}>
       <button onClick={() => setOpen(o => !o)} style={S.hintBtn}>ℹ</button>
       {open && (
-        <div style={{ position:"absolute", right:0, top:"30px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"#2A2520":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"12px", color:c.inkMuted, lineHeight:1.6, zIndex:100 }}>
+        <div style={{ position:"absolute", right:0, top:"30px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.16)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"12px", color:c.inkMuted, lineHeight:1.6, zIndex:100 }}>
           {text}
           <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"8px", background:"none", border:"none", color:c.inkSoft, cursor:"pointer", fontSize:"11px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button>
         </div>
@@ -3617,7 +3618,7 @@ function DailyCheckScreen({ onBack }) {
               ? { ru: "Пройти тест сегодня", uk: "Пройти тест сьогодні", en: "Take today's check-in" }
               : { ru: "Пройти тест", uk: "Пройти тест", en: "Take the check-in" })}
           </button>
-          <button onClick={() => setShowChallenge(true)} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowChallenge(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🧭</span><span>{tx({ ru: "Челленджи", uk: "Челенджі", en: "Challenges" })}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
@@ -3676,7 +3677,7 @@ function DailyCheckScreen({ onBack }) {
               {tx({ ru: "Зачем: ", uk: "Навіщо: ", en: "Why: " })}{tx(CHALLENGE_GROUP_DESC[result.group] || {})}
             </p>
           </div>
-          <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "10px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+          <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "10px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
             <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
           </button>
           {result.groupRecentCount >= 3 && (
@@ -3741,11 +3742,11 @@ function DailyCheckScreen({ onBack }) {
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.label).toUpperCase()}</span><span style={S.quizCounter}>{current + 1} / {DAILYCHECK_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{DAILYCHECK_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.progressTrack}>{DAILYCHECK_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : "#2A2520", backgroundColor: selected === opt.score ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -3991,13 +3992,13 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
           <button onClick={markDay} style={{ ...S.primaryBtn, marginTop: "18px" }}>
             {tx({ ru: "Отметил(а) день", uk: "Відмітив(ла) день", en: "Mark day done" })}
           </button>
-          <button onClick={() => setShowLog(true)} style={{ width: "100%", padding: "12px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px" }}>
+          <button onClick={() => setShowLog(true)} style={{ width: "100%", padding: "12px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px" }}>
             {tx({ ru: `Пройденные дни (${doneCount})`, uk: `Пройдені дні (${doneCount})`, en: `Completed days (${doneCount})` })}
           </button>
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span>
           </button>
-          <button onClick={abandonChallenge} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkSoft, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "14px" }}>
+          <button onClick={abandonChallenge} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkSoft, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "14px" }}>
             {tx({ ru: "Остановить челлендж", uk: "Зупинити челендж", en: "Stop challenge" })}
           </button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
@@ -4138,7 +4139,7 @@ function WisdomScreen({ onBack, currentMood }) {
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <p style={{ color:"#7A6E62", fontStyle:"italic" }}>{t.brewing}</p>
+        <p style={{ color:"#A89A8A", fontStyle:"italic" }}>{t.brewing}</p>
       </div>
     </div>
   );
@@ -4153,13 +4154,13 @@ function WisdomScreen({ onBack, currentMood }) {
         <div style={S.teaIcon}>🍵</div>
         <div style={{ display:"flex", gap:"6px", marginBottom:"20px" }}>
           {wisdoms.map((_,i) => (
-            <div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", backgroundColor: i === index ? "#C8A97E" : i < index ? "#6B5A48" : "#2A2520", transition:"background-color 0.3s" }} />
+            <div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", backgroundColor: i === index ? "#C8A97E" : i < index ? "#6B5A48" : "rgba(242,233,216,0.16)", transition:"background-color 0.3s" }} />
           ))}
         </div>
         <p style={{ ...S.wisdomText, opacity: fading ? 0 : 1, transition:"opacity 0.4s ease" }}>{tx(wisdoms[index])}</p>
         <div style={S.wisdomLine} />
         <p style={S.wisdomHint}>@TeaBroLife</p>
-        <p style={{ fontSize:"12px", color:"#4A4036", marginTop:"16px" }}>Новые советы через {pad(h)}:{pad(m)}:{pad(sc)}</p>
+        <p style={{ fontSize:"12px", color:"#8A7C6C", marginTop:"16px" }}>Новые советы через {pad(h)}:{pad(m)}:{pad(sc)}</p>
       </div>
       <ShareButton text={`«${tx(wisdoms[index])}»\n\nTea Bro 🌱`} />
       {index + 1 < wisdoms.length && (
@@ -4273,7 +4274,7 @@ function QuizScreen({ onBack, onGoCompass }) {
               <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
             </button>
           )}
-          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "transparent", border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
           <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
@@ -4293,11 +4294,11 @@ function QuizScreen({ onBack, onGoCompass }) {
         <HintPopup text={tx({ ru: "25 вопросов — насколько ты далеко от себя и есть ли выгорание.", uk: "25 питань — наскільки ти далеко від себе і чи є вигорання.", en: "25 questions — how far you are from yourself and whether there's burnout." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {QUESTIONS_QUIZ.length}</span></div>
-      <div style={S.progressTrack}>{QUESTIONS_QUIZ.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.progressTrack}>{QUESTIONS_QUIZ.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, borderColor: selected===opt ? "#C8A97E" : "#2A2520", backgroundColor: selected===opt ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, ...(selected===opt ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
             <span style={S.optionRadio}>{selected===opt ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4413,11 +4414,11 @@ function SelfHonestyScreen({ onBack }) {
         <HintPopup text={tx({ ru: "14 утверждений — насколько ты видишь себя таким, какой ты есть, а не удобной версией.", uk: "14 тверджень — наскільки ти бачиш себе таким, який ти є, а не зручною версією.", en: "14 statements — how much you see yourself as you really are, not a convenient version." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {SELF_HONESTY_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {SH_SCALE.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, borderColor: selected===opt.v ? "#C8A97E" : "#2A2520", backgroundColor: selected===opt.v ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, ...(selected===opt.v ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
             <span style={S.optionRadio}>{selected===opt.v ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.label)}</span>
           </button>
@@ -4543,12 +4544,12 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
         <span style={S.quizCounter}>{current+1} / {MEDITATION_QUESTIONS.length}</span>
       </div>
       <div style={S.progressTrack}>
-        {MEDITATION_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#8B9EB0" : i === current ? "#B0C8D8" : "#2A2520" }} />)}
+        {MEDITATION_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#8B9EB0" : i === current ? "#B0C8D8" : "rgba(242,233,216,0.16)" }} />)}
       </div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, borderColor: selectedIdx===i ? "#8B9EB0" : "#2A2520", backgroundColor: selectedIdx===i ? "rgba(139,158,176,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#8B9EB0", backgroundColor: "rgba(139,158,176,0.08)" } : {}) }}>
             <span style={{ ...S.optionRadio, color:"#8B9EB0" }}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4646,11 +4647,11 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
         <HintPopup text={tx({ ru: "5 вопросов о твоем состоянии — подберем чай, который нужен именно сейчас.", uk: "5 питань про твій стан — підберемо чай, який потрібен саме зараз.", en: "5 questions about your state — we'll pick the tea you need right now." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {TEA_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "#2A2520" }} />)}</div>
+      <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, borderColor: selectedIdx===i ? "#C8A97E" : "#2A2520", backgroundColor: selectedIdx===i ? "rgba(200,169,126,0.08)" : "rgba(255,255,255,0.02)" }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
             <span style={S.optionRadio}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4944,8 +4945,8 @@ function QuietNotes({ onBack }) {
   if (!loaded) return (<div style={S.screen}><button onClick={onBack} style={S.backBtn}>{t.back}</button><div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:c.inkSoft, fontStyle:"italic" }}>{t.openingNotes}</p></div></div>);
   const streak = calcNotesStreak(entries);
   const visible = entries.filter(e => { if (tab === "letters") return e.sealed; if (e.sealed) return false; if (moodFilter && e.mood !== moodFilter) return false; if (search && !(e.fullText || e.text).toLowerCase().includes(search.toLowerCase())) return false; return true; });
-  const card = { background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", marginBottom:"12px" };
-  const gb = { padding:"10px 14px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", fontSize:"12px", cursor:"pointer", fontFamily:"'Georgia',serif" };
+  const card = { background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", marginBottom:"12px" };
+  const gb = { padding:"10px 14px", background:c.plate, color:c.inkSoft, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", fontSize:"12px", cursor:"pointer", fontFamily:"'Georgia',serif" };
   const gba = { ...gb, background:"rgba(200,169,126,0.12)", color:c.accent, border:"1px solid rgba(200,169,126,0.3)" };
   return (
     <div style={S.screen}>
@@ -4954,7 +4955,7 @@ function QuietNotes({ onBack }) {
       <p style={{ fontSize:"13px", color:c.inkSoft, margin:"0 0 16px" }}>{t.personalThoughts}</p>
       {streak > 1 && <p style={{ fontSize:"12px", color:c.accent, margin:"0 0 20px" }}>🌙 {tx({ ru: `${streak} дней подряд`, uk: `${streak} днів поспіль`, en: `${streak} days in a row` })}</p>}
       <div style={card}>
-        <textarea style={{ width:"100%", minHeight:"100px", background:"transparent", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder={tx({ ru: "О чём думаешь сегодня?", uk: "Про що думаєш сьогодні?", en: "What are you thinking about today?" })} value={text} onChange={e => setText(e.target.value)} />
+        <textarea style={{ width:"100%", minHeight:"100px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"14px", lineHeight:1.6, resize:"none", boxSizing:"border-box", outline:"none" }} placeholder={tx({ ru: "О чём думаешь сегодня?", uk: "Про що думаєш сьогодні?", en: "What are you thinking about today?" })} value={text} onChange={e => setText(e.target.value)} />
         <div style={{ display:"flex", gap:"8px", marginTop:"12px", flexWrap:"wrap" }}>
           {NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMood(mood === e.id ? null : e.id)} style={mood === e.id ? gba : gb}>{e.emoji} {tx(e.label)}</button>)}
         </div>
@@ -4968,8 +4969,8 @@ function QuietNotes({ onBack }) {
       {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:c.accent, fontSize:"13px", letterSpacing:"0.05em" }}>{t.sealed}</div></div>}
       {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>{t.saved}</div>}
       {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 {tx({ru:'вспомнить запись',uk:'згадати запис',en:'recall an entry'})}</button>}
-      {memory && <div style={{ background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>{tx({ru:'ИЗ ПРОШЛОГО',uk:'З МИНУЛОГО',en:'FROM THE PAST'})} · {getEntryDateLabel(memory.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tx({ ru: "🔍 поиск по записям", uk: "🔍 пошук по записах", en: "🔍 search entries" })} style={{ width:"100%", background:"rgba(255,255,255,0.03)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
+      {memory && <div style={{ background:c.plate, border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>{tx({ru:'ИЗ ПРОШЛОГО',uk:'З МИНУЛОГО',en:'FROM THE PAST'})} · {getEntryDateLabel(memory.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tx({ ru: "🔍 поиск по записям", uk: "🔍 пошук по записах", en: "🔍 search entries" })} style={{ width:"100%", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
       <div style={{ display:"flex", gap:"8px", marginBottom:"12px" }}>
         <button onClick={() => { setTab("all"); setMoodFilter(null); }} style={tab === "all" ? gba : gb}>{tx({ru:'записи',uk:'записи',en:'entries'})}</button>
         <button onClick={() => setTab("letters")} style={tab === "letters" ? gba : gb}>✉️ {tx({ru:'письма себе',uk:'листи собі',en:'letters to self'})}</button>
@@ -5073,7 +5074,7 @@ function MoodScreen({ onBack }) {
   const archetype = allStats ? getArchetype(allStats.counts, allStats.total) : null;
 
   const TabBtn = ({ id, label }) => (
-    <button onClick={() => setTab(id)} style={{ flex:1, padding:"8px 4px", background: tab===id ? "rgba(200,169,126,0.12)" : "transparent", border: tab===id ? "1px solid rgba(200,169,126,0.3)" : "1px solid #2A2520", borderRadius:"8px", color: tab===id ? "#C8A97E" : "#7A6E62", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" }}>
+    <button onClick={() => setTab(id)} style={{ flex:1, padding:"8px 4px", background: tab===id ? "rgba(200,169,126,0.12)" : "transparent", border: tab===id ? "1px solid rgba(200,169,126,0.3)" : "1px solid #2A2520", borderRadius:"8px", color: tab===id ? "#C8A97E" : "#A89A8A", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" }}>
       {label}
     </button>
   );
@@ -5099,7 +5100,7 @@ function MoodScreen({ onBack }) {
                 <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em?.label}</span>
                 <span style={{ fontSize:"12px", color:c.inkSoft }}>{pct}%</span>
               </div>
-              <div style={{ height:"3px", backgroundColor:"#2A2520", borderRadius:"2px", overflow:"hidden" }}>
+              <div style={{ height:"3px", backgroundColor:"rgba(242,233,216,0.16)", borderRadius:"2px", overflow:"hidden" }}>
                 <div style={{ height:"100%", width:`${pct}%`, backgroundColor:"#C8A97E", borderRadius:"2px", transition:"width 0.6s ease" }} />
               </div>
             </div>
@@ -5150,12 +5151,12 @@ function MoodScreen({ onBack }) {
           </div>
         </div>
       )}
-      <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+      <button onClick={() => setShowTrajectory(true)} style={{ width:"100%", padding:"14px", background:c.plate, border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
         <span>🧭</span><span>{t.myTrajectory}</span><span style={{ color:c.inkSoft, fontSize:"16px" }}>→</span>
       </button>
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>{t.whereLife}</p>
 
-      <button onClick={() => setShowNotes(true)} style={{ width:"100%", padding:"14px", background:"rgba(200,169,126,0.04)", border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+      <button onClick={() => setShowNotes(true)} style={{ width:"100%", padding:"14px", background:c.plate, border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"14px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"4px", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
         <span>🌙</span><span>{t.notebook}</span><span style={{ color:c.inkSoft, fontSize:"16px" }}>→</span>
       </button>
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>{t.placeForThoughts}</p>
@@ -5171,7 +5172,7 @@ function MoodScreen({ onBack }) {
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
             {EMOTIONS.map(e => (
-              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:"rgba(255,255,255,0.02)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
+              <button key={e.id} onClick={() => handleSelectEmotion(e)} style={{ background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"8px 2px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"5px", minWidth:0 }}>
                 <span style={{ fontSize:"19px" }}>{e.emoji}</span>
                 <span style={{ fontSize:"9px", color:c.inkSoft, textAlign:"center", wordBreak:"break-word", lineHeight:"1.25" }}>{emotionLabel(e.id, lang) || e.label}</span>
               </button>
@@ -5190,14 +5191,14 @@ function MoodScreen({ onBack }) {
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"6px", marginBottom:"16px" }}>
             {weekData.map((d,i) => (
               <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: d.data ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>{d.data ? d.data.emoji : ""}</div>
+                <div style={{ width:"36px", height:"36px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: d.data ? "rgba(200,169,126,0.08)" : c.plate, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px" }}>{d.data ? d.data.emoji : ""}</div>
                 <span style={{ fontSize:"10px", color:c.inkSoft }}>{d.day}</span>
               </div>
             ))}
           </div>
           <StatBlock data={weekData.map(d => d.data)} label="неделю" />
           {(() => { const ws = calcStats(weekData.map(d => d.data)); return ws ? (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+            <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.weekSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
@@ -5216,7 +5217,7 @@ function MoodScreen({ onBack }) {
               const date = new Date(); date.setDate(date.getDate() - daysAgo);
               return (
                 <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"3px" }}>
-                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:`1px solid ${c.cardBorder}`, background: d ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>{d ? d.emoji : ""}</div>
+                  <div style={{ width:"34px", height:"34px", borderRadius:"7px", border:`1px solid ${c.cardBorder}`, background: d ? "rgba(200,169,126,0.08)" : c.plate, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px" }}>{d ? d.emoji : ""}</div>
                   <span style={{ fontSize:"9px", color:c.inkSoft }}>{date.getDate()}</span>
                 </div>
               );
@@ -5224,7 +5225,7 @@ function MoodScreen({ onBack }) {
           </div>
           <StatBlock data={monthData} label="месяц" />
           {(() => { const ms = calcStats(monthData); return ms ? (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+            <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.monthSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
@@ -5254,7 +5255,7 @@ function MoodScreen({ onBack }) {
                 const mIdx = (new Date().getMonth() - 11 + mi + 12) % 12;
                 return (
                   <div key={mi} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
-                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: filled.length > 0 ? "rgba(200,169,126,0.08)" : "transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
+                    <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: filled.length > 0 ? "rgba(200,169,126,0.08)" : c.plate, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
                     <span style={{ fontSize:"9px", color:c.inkSoft }}>{months[mIdx]}</span>
                     <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}д</span>
                   </div>
@@ -5264,7 +5265,7 @@ function MoodScreen({ onBack }) {
           </div>
           <StatBlock data={allData} label="год" />
           {allStats && (
-            <div style={{ marginTop:"16px", padding:"14px", background:"rgba(200,169,126,0.04)", border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
+            <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.yearSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
@@ -5363,7 +5364,7 @@ function AdminScreen({ onBack }) {
   useEffect(() => { loadStats(false); }, []);
 
   const card = {
-    background: isDark ? "rgba(200,169,126,0.05)" : "rgba(176,132,84,0.06)",
+    background: c.card,
     border: `1px solid ${c.cardBorder}`,
     borderRadius: "14px",
     padding: "16px",
@@ -5381,7 +5382,7 @@ function AdminScreen({ onBack }) {
     minWidth: 0,
     textAlign: "center",
     padding: "14px 8px",
-    background: isDark ? "rgba(255,255,255,0.02)" : "rgba(58,53,43,0.03)",
+    background: c.plate,
     borderRadius: "12px",
     border: `1px solid ${c.cardBorder}`,
   };
