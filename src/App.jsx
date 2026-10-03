@@ -9,20 +9,20 @@ const useLang = () => useContext(LangCtx);
 const GLASS = { WebkitBackdropFilter:"blur(6px)", backdropFilter:"blur(6px)" };
 const THEMES = {
   dark: {
-    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.72)", plate: "rgba(35,45,51,0.55)", cardBorder: "rgba(242,233,216,0.14)",
+    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.55)", plate: "rgba(35,45,51,0.55)", cardBorder: "rgba(242,233,216,0.14)",
     ink: "#E8E0D4", inkSoft: "#A89A8A", inkMuted: "#B8AA9A",
     accent: "#C8A97E", line: "rgba(242,233,216,0.14)", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
     progressInactive: "rgba(242,233,216,0.16)", optionBg: "rgba(35,45,51,0.55)",
-    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(35,45,51,0.62)",
+    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(35,45,51,0.55)",
     trackBg: "rgba(232,238,242,0.13)", softBg: "rgba(22,30,35,0.84)", arrow: "#8A7C6C",
   },
   light: {
     // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
-    bg: "#F1E9D3", bgRgb: "241,233,211", bgImage: "/bg-day.webp", bgPos: "40% 50%", bgVeil: "linear-gradient(rgba(241,233,212,.55), rgba(241,233,212,.82))", card: "rgba(250,246,232,0.82)", plate: "rgba(250,246,232,0.6)", cardBorder: "rgba(44,40,31,0.18)",
+    bg: "#F1E9D3", bgRgb: "241,233,211", bgImage: "/bg-day.webp", bgPos: "40% 50%", bgVeil: "linear-gradient(rgba(241,233,212,.55), rgba(241,233,212,.82))", card: "rgba(250,246,232,0.6)", plate: "rgba(250,246,232,0.6)", cardBorder: "rgba(44,40,31,0.18)",
     ink: "#2A261F", inkSoft: "#5A5144", inkMuted: "#4A4338",
     accent: "#8B5E2F", line: "rgba(44,40,31,0.16)", primaryBtnBg: "#8B5E2F", primaryBtnText: "#FAF6E8",
-    progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(250,246,232,0.62)",
-    optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "rgba(247,240,220,0.8)",
+    progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(250,246,232,0.6)",
+    optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "rgba(250,246,232,0.6)",
     trackBg: "rgba(44,40,31,0.10)", softBg: "rgba(250,246,232,0.9)", arrow: "#6A6054",
   },
 };
