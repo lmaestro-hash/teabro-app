@@ -321,7 +321,7 @@ function buildStyles(themeName) {
     menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
     menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
     menuCardArrow: { color:c.arrow, fontSize:"18px" },
-    shopBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
+    shopBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"10px", boxSizing:"border-box" },
     controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 20px 16px", margin:"-24px -20px 0", WebkitBackdropFilter:"blur(8px)", backdropFilter:"blur(8px)", background:`rgba(${c.bgRgb},0.35)`, WebkitMaskImage:"linear-gradient(#000 55%, transparent)", maskImage:"linear-gradient(#000 55%, transparent)" },
     langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
     langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
@@ -352,7 +352,7 @@ function buildStyles(themeName) {
     wisdomLine: { width:"40px", height:"1px", backgroundColor: isDark?"#8A7C6C":c.line, marginBottom:"12px" },
     wisdomHint: { fontSize:"12px", color: isDark?"#8A7C6C":c.inkSoft, letterSpacing:"0.1em", margin:0 },
     primaryBtn: { width:"100%", padding:"16px", backgroundColor:c.primaryBtnBg, color:c.primaryBtnText, border:"none", borderRadius:"10px", fontSize:"14px", letterSpacing:"0.1em", cursor:"pointer", fontFamily:"'Georgia',serif", transition:"opacity 0.2s", marginBottom:"12px", boxSizing:"border-box" },
-    ghostBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif" },
+    ghostBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", marginBottom:"10px", boxSizing:"border-box" },
     shareBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.accent, border:`1px solid ${isDark?"rgba(200,169,126,0.3)":"rgba(176,132,84,0.35)"}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginTop:"18px", marginBottom:"12px", boxSizing:"border-box" },
     statCard: { ...GLASS, background:c.card, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", textAlign:"center" },
     statNum: { margin:"0 0 4px", fontSize:"24px", color:c.accent, fontWeight:"normal" },
@@ -4630,7 +4630,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
           />
           <div style={S.stepsBlock}>
             <p style={S.stepsTitle}>{t.howBrew}</p>
-            <p style={{ margin:0, fontSize:"13px", color:"#C8A97E", fontStyle:"italic", lineHeight:1.7 }}>🍵 {tx(result.note)}</p>
+            <p style={{ margin:0, fontSize:"13px", color:c.accent, fontStyle:"italic", lineHeight:1.7 }}>🍵 {tx(result.note)}</p>
           </div>
           <ShareButton text={shareMsg} />
           <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>{t.goChannel}</a>
