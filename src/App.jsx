@@ -14,7 +14,7 @@ const THEMES = {
     accent: "#C8A97E", line: "rgba(242,233,216,0.14)", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
     progressInactive: "rgba(242,233,216,0.16)", optionBg: "rgba(35,45,51,0.55)",
     optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(35,45,51,0.62)",
-    trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#8A7C6C",
+    trackBg: "rgba(232,238,242,0.13)", softBg: "rgba(22,30,35,0.84)", arrow: "#8A7C6C",
   },
   light: {
     // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
@@ -23,7 +23,7 @@ const THEMES = {
     accent: "#8B5E2F", line: "rgba(44,40,31,0.16)", primaryBtnBg: "#8B5E2F", primaryBtnText: "#FAF6E8",
     progressInactive: "rgba(44,40,31,0.18)", optionBg: "rgba(250,246,232,0.62)",
     optionSelectedBg: "rgba(139,94,47,0.14)", metricBg: "rgba(247,240,220,0.8)",
-    trackBg: "rgba(44,40,31,0.10)", softBg: "#EDE4CC", arrow: "#6A6054",
+    trackBg: "rgba(44,40,31,0.10)", softBg: "rgba(250,246,232,0.9)", arrow: "#6A6054",
   },
 };
 
@@ -359,9 +359,9 @@ function buildStyles(themeName) {
     statLabel: { margin:0, fontSize:"11px", color:c.inkSoft, letterSpacing:"0.05em" },
     sectionHead: { display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"10px", marginTop:"22px" },
     sectionTitle: { fontSize:"12px", letterSpacing:"0.2em", color:c.accent, margin:0 },
-    infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:`1px solid ${isDark?"rgba(242,233,216,0.22)":c.line}`, background:"none", color: isDark?"#A89A8A":c.inkSoft, fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
-    infoTooltip: { position:"absolute", right:0, top:"28px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.22)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"11px", color: isDark?"#9A8E80":c.inkSoft, fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.25)", boxSizing:"border-box" },
-    metricBlock: { ...GLASS, background:c.metricBg, border:`1px solid ${c.line}`, borderRadius:"14px", padding:"18px 16px", marginBottom:"4px", boxSizing:"border-box" },
+    infoBtn: { width:"22px", height:"22px", borderRadius:"50%", border:`1px solid ${isDark?"rgba(232,238,242,0.22)":c.line}`, background:c.plate, ...GLASS, color: isDark?"#C4CDD2":c.inkSoft, fontSize:"11px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Georgia',serif" },
+    infoTooltip: { ...GLASS, position:"absolute", right:0, top:"28px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.22)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"11px", color: isDark?"#9A8E80":c.inkSoft, fontStyle:"italic", lineHeight:1.7, zIndex:50, textAlign:"left", boxShadow:"0 8px 24px rgba(0,0,0,0.25)", boxSizing:"border-box" },
+    metricBlock: { ...GLASS, background:c.metricBg, border:`1px solid ${c.line}`, borderRadius:"14px", padding:"18px 16px", marginBottom:"12px", boxSizing:"border-box" },
     metricTop: { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:"16px", gap:"10px" },
     metricNumWrap: { display:"flex", alignItems:"flex-end", gap:"2px", lineHeight:1 },
     metricNum: { fontSize:"56px", lineHeight:1, letterSpacing:"-0.03em" },
@@ -374,8 +374,8 @@ function buildStyles(themeName) {
     scaleLabels: { display:"flex", justifyContent:"space-between" },
     scaleLabel: { fontSize:"10px", color: isDark?"#A89A8A":c.inkSoft, letterSpacing:"0.04em", fontWeight: isDark?400:500 },
     scaleLabelHi: { fontSize:"10px", letterSpacing:"0.04em" },
-    metricQuote: { padding:"10px 13px", background: isDark?"rgba(200,169,126,0.05)":"rgba(176,132,84,0.08)", borderLeft:`2px solid ${isDark?"rgba(200,169,126,0.25)":"rgba(176,132,84,0.3)"}`, borderRadius:"0 6px 6px 0", marginTop:"13px" },
-    metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#8A7E72":c.inkMuted, fontStyle:"italic", lineHeight:1.75 },
+    metricQuote: { padding:"10px 13px", background: isDark?"rgba(200,169,126,0.10)":"rgba(176,132,84,0.12)", borderLeft:`2px solid ${isDark?"rgba(200,169,126,0.25)":"rgba(176,132,84,0.3)"}`, borderRadius:"0 6px 6px 0", marginTop:"13px" },
+    metricQuoteText: { margin:0, fontSize:"12px", color: isDark?"#B8AA9A":c.inkMuted, fontStyle:"italic", lineHeight:1.75 },
     thermoWrap: { position:"relative", marginBottom:"3px" },
     thermoZones: { display:"flex", gap:"3px", height:"8px", borderRadius:"4px", overflow:"hidden" },
     thermoZone: { flex:1, borderRadius:"2px" },
@@ -1651,20 +1651,20 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
             </div>
           </div>
 
-          <button onClick={() => { setChallengePresetHormone(weakest.key); setShowChallenge(true); }} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => { setChallengePresetHormone(weakest.key); setShowChallenge(true); }} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
           </button>
           {onGoCompass && (
-            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
             </button>
           )}
           {onGoGuide && (
-            <button onClick={onGoGuide} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <button onClick={onGoGuide} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 7 системам", uk: "Все про гормони — гід по всіх 7 системах", en: "All about hormones — guide to all 7 systems" })}</span>
             </button>
           )}
-          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span>
           </button>
           <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
@@ -1689,7 +1689,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -2237,7 +2237,7 @@ function HintPopup({ text }) {
     <div style={{ position:"relative", marginBottom:"20px" }}>
       <button onClick={() => setOpen(o => !o)} style={S.hintBtn}>ℹ</button>
       {open && (
-        <div style={{ position:"absolute", right:0, top:"30px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.16)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"12px", color:c.inkMuted, lineHeight:1.6, zIndex:100 }}>
+        <div style={{ ...GLASS, position:"absolute", right:0, top:"30px", width:"220px", background:c.softBg, border:`1px solid ${isDark?"rgba(242,233,216,0.16)":c.line}`, borderRadius:"10px", padding:"12px", fontSize:"12px", color:c.inkMuted, lineHeight:1.6, zIndex:100 }}>
           {text}
           <button onClick={() => setOpen(false)} style={{ display:"block", marginTop:"8px", background:"none", border:"none", color:c.inkSoft, cursor:"pointer", fontSize:"11px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button>
         </div>
@@ -3621,7 +3621,7 @@ function DailyCheckScreen({ onBack }) {
           <button onClick={() => setShowChallenge(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🧭</span><span>{tx({ ru: "Челленджи", uk: "Челенджі", en: "Challenges" })}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
-          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
@@ -3685,7 +3685,7 @@ function DailyCheckScreen({ onBack }) {
               <p style={{ margin: "0 0 10px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.5 }}>
                 {tx({ ru: `Это направление повторяется у тебя уже ${result.groupRecentCount}-й раз подряд. Может, попробовать структурированный челлендж вместо разовых советов?`, uk: `Цей напрямок повторюється в тебе вже ${result.groupRecentCount}-й раз поспіль. Може, спробувати структурований челендж замість разових порад?`, en: `This direction has come up ${result.groupRecentCount} times in a row now. Want to try a structured challenge instead of one-off advice?` })}
               </p>
-              <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.08)", border: "1px solid rgba(200,169,126,0.3)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+              <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.2)", border: "1px solid rgba(200,169,126,0.3)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
                 🧭 {tx({ ru: "Посмотреть челленджи", uk: "Подивитись челенджі", en: "See challenges" })}
               </button>
             </div>
@@ -3728,7 +3728,7 @@ function DailyCheckScreen({ onBack }) {
           <p style={{ ...S.resultSubtitle, marginBottom: "18px" }}>
             {tx({ ru: "Хочешь коротко записать, что сейчас на душе?", uk: "Хочеш коротко записати, що зараз на душі?", en: "Want to jot down what's on your mind?" })}
           </p>
-          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
           <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "2px" }}>{t.back}</button>
@@ -3746,7 +3746,7 @@ function DailyCheckScreen({ onBack }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -3995,7 +3995,7 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
           <button onClick={() => setShowLog(true)} style={{ width: "100%", padding: "12px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px" }}>
             {tx({ ru: `Пройденные дни (${doneCount})`, uk: `Пройдені дні (${doneCount})`, en: `Completed days (${doneCount})` })}
           </button>
-          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "12px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "12px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span>
           </button>
           <button onClick={abandonChallenge} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkSoft, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "14px" }}>
@@ -4139,7 +4139,7 @@ function WisdomScreen({ onBack, currentMood }) {
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <p style={{ color:"#A89A8A", fontStyle:"italic" }}>{t.brewing}</p>
+        <p style={{ color:c.inkSoft, fontStyle:"italic" }}>{t.brewing}</p>
       </div>
     </div>
   );
@@ -4160,7 +4160,7 @@ function WisdomScreen({ onBack, currentMood }) {
         <p style={{ ...S.wisdomText, opacity: fading ? 0 : 1, transition:"opacity 0.4s ease" }}>{tx(wisdoms[index])}</p>
         <div style={S.wisdomLine} />
         <p style={S.wisdomHint}>@TeaBroLife</p>
-        <p style={{ fontSize:"12px", color:"#8A7C6C", marginTop:"16px" }}>Новые советы через {pad(h)}:{pad(m)}:{pad(sc)}</p>
+        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"16px" }}>Новые советы через {pad(h)}:{pad(m)}:{pad(sc)}</p>
       </div>
       <ShareButton text={`«${tx(wisdoms[index])}»\n\nTea Bro 🌱`} />
       {index + 1 < wisdoms.length && (
@@ -4270,7 +4270,7 @@ function QuizScreen({ onBack, onGoCompass }) {
           </div>
 
           {onGoCompass && (
-            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: "rgba(200,169,126,0.04)", border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <button onClick={onGoCompass} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <span>🧭</span><span>{tx({ ru: "Узнать своё состояние подробнее в Компасе состояния", uk: "Дізнатись свій стан детальніше в Компасі стану", en: "Learn more about your state in the State compass" })}</span>
             </button>
           )}
@@ -4298,7 +4298,7 @@ function QuizScreen({ onBack, onGoCompass }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, ...(selected===opt ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, ...(selected===opt ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
             <span style={S.optionRadio}>{selected===opt ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4418,7 +4418,7 @@ function SelfHonestyScreen({ onBack }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {SH_SCALE.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, ...(selected===opt.v ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, ...(selected===opt.v ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
             <span style={S.optionRadio}>{selected===opt.v ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.label)}</span>
           </button>
@@ -4549,7 +4549,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#8B9EB0", backgroundColor: "rgba(139,158,176,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#8B9EB0", backgroundColor: "rgba(139,158,176,0.22)" } : {}) }}>
             <span style={{ ...S.optionRadio, color:"#8B9EB0" }}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4651,7 +4651,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.08)" } : {}) }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
             <span style={S.optionRadio}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4947,7 +4947,7 @@ function QuietNotes({ onBack }) {
   const visible = entries.filter(e => { if (tab === "letters") return e.sealed; if (e.sealed) return false; if (moodFilter && e.mood !== moodFilter) return false; if (search && !(e.fullText || e.text).toLowerCase().includes(search.toLowerCase())) return false; return true; });
   const card = { background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", marginBottom:"12px" };
   const gb = { padding:"10px 14px", background:c.plate, color:c.inkSoft, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", fontSize:"12px", cursor:"pointer", fontFamily:"'Georgia',serif" };
-  const gba = { ...gb, background:"rgba(200,169,126,0.12)", color:c.accent, border:"1px solid rgba(200,169,126,0.3)" };
+  const gba = { ...gb, background:"rgba(200,169,126,0.24)", color:c.accent, border:"1px solid rgba(200,169,126,0.3)" };
   return (
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -4966,8 +4966,8 @@ function QuietNotes({ onBack }) {
         <button style={{ ...S.primaryBtn, marginTop:"12px" }} onClick={handleSave}>{tx(seal ? {ru:"ЗАПЕЧАТАТЬ",uk:"ЗАПЕЧАТАТИ",en:"SEAL"} : {ru:"СОХРАНИТЬ",uk:"ЗБЕРЕГТИ",en:"SAVE"})}</button>
         <p style={{ fontSize:"11px", color:c.inkSoft, textAlign:"center", marginTop:"10px", fontStyle:"italic" }}>{t.onlyYou}</p>
       </div>
-      {sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:c.accent, fontSize:"13px", letterSpacing:"0.05em" }}>{t.sealed}</div></div>}
-      {justSaved && !sealing && <div style={{ ...card, background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>{t.saved}</div>}
+      {sealing && <div style={{ ...card, background:c.card, border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", padding:"24px" }}><div style={{ fontSize:"28px", marginBottom:"6px" }}>✉️</div><div style={{ color:c.accent, fontSize:"13px", letterSpacing:"0.05em" }}>{t.sealed}</div></div>}
+      {justSaved && !sealing && <div style={{ ...card, background:c.card, border:"1px solid rgba(200,169,126,0.3)", textAlign:"center", color:c.accent, fontSize:"13px" }}>{t.saved}</div>}
       {!memory && entries.some(e => !e.sealed) && <button onClick={() => { const p = entries.filter(e => !e.sealed); setMemory(p[Math.floor(Math.random()*p.length)]); }} style={{ ...gb, width:"100%", marginBottom:"16px", boxSizing:"border-box", textAlign:"center" }}>🕯 {tx({ru:'вспомнить запись',uk:'згадати запис',en:'recall an entry'})}</button>}
       {memory && <div style={{ background:c.plate, border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", padding:"16px", marginBottom:"16px" }}><p style={{ fontSize:"11px", color:c.accent, margin:"0 0 8px" }}>{tx({ru:'ИЗ ПРОШЛОГО',uk:'З МИНУЛОГО',en:'FROM THE PAST'})} · {getEntryDateLabel(memory.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{memory.fullText || memory.text}</p><button onClick={() => setMemory(null)} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0, marginTop:"12px" }}>{tx({ru:'закрыть',uk:'закрити',en:'close'})}</button></div>}
       <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tx({ ru: "🔍 поиск по записям", uk: "🔍 пошук по записах", en: "🔍 search entries" })} style={{ width:"100%", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"10px 12px", color:c.ink, fontFamily:"'Georgia',serif", fontSize:"13px", outline:"none", boxSizing:"border-box", marginBottom:"12px" }} />
@@ -4977,7 +4977,7 @@ function QuietNotes({ onBack }) {
       </div>
       {tab === "all" && <div style={{ display:"flex", gap:"8px", marginBottom:"12px", flexWrap:"wrap" }}>{NOTE_EMOTIONS.map(e => <button key={e.id} onClick={() => setMoodFilter(moodFilter === e.id ? null : e.id)} style={moodFilter === e.id ? gba : gb}>{e.emoji} {tx(e.label)}</button>)}</div>}
       {visible.length === 0 && <p style={{ fontSize:"13px", color:c.inkSoft, textAlign:"center", padding:"20px 0" }}>{tab === "letters" ? tx({ru:'пока нет писем себе',uk:'поки немає листів собі',en:'no letters to yourself yet'}) : tx({ru:'пока ничего нет',uk:'поки нічого немає',en:'nothing here yet'})}</p>}
-      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : "1px solid #2A2520", paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:c.inkSoft, margin:"0 0 6px" }}>{getEntryDateLabel(e.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {tx(mi.label)}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:`1px solid ${c.cardBorder}`, borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? tx({ru:"откроется сегодня",uk:"відкриється сьогодні",en:"unlocks today"}) : getEntryDaysLeft(e.revealAt) === 1 ? tx({ru:"осталось 1 день",uk:"залишився 1 день",en:"1 day left"}) : tx({ru:`осталось ${getEntryDaysLeft(e.revealAt)} дн.`,uk:`залишилося ${getEntryDaysLeft(e.revealAt)} дн.`,en:`${getEntryDaysLeft(e.revealAt)} days left`})}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>{tx({ru:'удалить',uk:'видалити',en:'delete'})}</button></div></div>); })}
+      {visible.map(e => { const mi = NOTE_EMOTIONS.find(m => m.id === e.mood); const revealed = !e.sealed || (e.revealAt && new Date(e.revealAt) <= new Date()); const moodColors = { calm:"#6B8CAE", tired:"#8A8A9A", warm:"#C8A97E", anx:"#7A9E7E" }; const stripe = e.mood ? moodColors[e.mood] : null; return (<div key={e.id} style={{ ...card, borderLeft: stripe ? `3px solid ${stripe}` : `1px solid ${c.line}`, paddingLeft: stripe ? "13px" : "16px" }}><p style={{ fontSize:"11px", color:c.inkSoft, margin:"0 0 6px" }}>{getEntryDateLabel(e.date, lang)}</p><p style={{ fontSize:"14px", color:c.ink, lineHeight:1.6, margin:0 }}>{revealed ? (e.fullText || e.text) : e.text}</p>{mi && !e.sealed && <p style={{ fontSize:"11px", color: stripe || "#C8A97E", margin:"8px 0 0" }}>{mi.emoji} {tx(mi.label)}</p>}{e.sealed && !revealed && <span style={{ display:"inline-block", fontSize:"11px", color:"#8B6E4E", border:`1px solid ${c.cardBorder}`, borderRadius:"6px", padding:"2px 8px", marginTop:"8px" }}>{getEntryDaysLeft(e.revealAt) === 0 ? tx({ru:"откроется сегодня",uk:"відкриється сьогодні",en:"unlocks today"}) : getEntryDaysLeft(e.revealAt) === 1 ? tx({ru:"осталось 1 день",uk:"залишився 1 день",en:"1 day left"}) : tx({ru:`осталось ${getEntryDaysLeft(e.revealAt)} дн.`,uk:`залишилося ${getEntryDaysLeft(e.revealAt)} дн.`,en:`${getEntryDaysLeft(e.revealAt)} days left`})}</span>}<div style={{ display:"flex", justifyContent:"flex-end", marginTop:"8px" }}><button onClick={() => { if (e.sealed && !revealed) { const { uid } = getUidChat(); const p = new URLSearchParams({ action:"cancel_letter", uid, letterId:String(e.id) }); fetch(`${STATS_URL}?${p}`, { keepalive:true, cache:"no-store" }).catch(()=>{}); } persist(entries.filter(x => x.id !== e.id)); }} style={{ background:"none", border:"none", color:c.inkSoft, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", padding:0 }}>{tx({ru:'удалить',uk:'видалити',en:'delete'})}</button></div></div>); })}
       <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
@@ -5074,7 +5074,7 @@ function MoodScreen({ onBack }) {
   const archetype = allStats ? getArchetype(allStats.counts, allStats.total) : null;
 
   const TabBtn = ({ id, label }) => (
-    <button onClick={() => setTab(id)} style={{ flex:1, padding:"8px 4px", background: tab===id ? "rgba(200,169,126,0.12)" : "transparent", border: tab===id ? "1px solid rgba(200,169,126,0.3)" : "1px solid #2A2520", borderRadius:"8px", color: tab===id ? "#C8A97E" : "#A89A8A", fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" }}>
+    <button onClick={() => setTab(id)} style={{ flex:1, padding:"8px 4px", background: tab===id ? "rgba(200,169,126,0.22)" : c.plate, ...GLASS, border: tab===id ? "1px solid rgba(200,169,126,0.5)" : `1px solid ${c.line}`, borderRadius:"8px", color: tab===id ? (isDark ? "#E0C79C" : "#7A5528") : c.inkMuted, fontSize:"11px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" }}>
       {label}
     </button>
   );
@@ -5165,7 +5165,7 @@ function MoodScreen({ onBack }) {
           {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
         </p>
         {todayEmotion ? (
-          <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:"rgba(200,169,126,0.06)", border:"1px solid rgba(200,169,126,0.15)", borderRadius:"12px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px" }}>
             <span style={{ fontSize:"28px" }}>{todayEmotion.emoji}</span>
             <span style={{ fontSize:"16px", color:c.ink }}>{todayEmotion.label}</span>
           </div>
@@ -5519,7 +5519,7 @@ function AdminScreen({ onBack }) {
                     <span style={{ fontSize: "13px", color: c.ink }}>{test.icon} {test.label}</span>
                     <span style={{ fontSize: "12px", color: c.accent }}>{test.value}</span>
                   </div>
-                  <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "#1E1B18" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
+                  <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "rgba(232,238,242,0.13)" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
                     <div style={{
                       width: `${pct}%`,
                       height: "100%",
@@ -5548,7 +5548,7 @@ function AdminScreen({ onBack }) {
                       </span>
                       <span style={{ fontSize: "12px", color: c.accent }}>{e.count}</span>
                     </div>
-                    <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "#1E1B18" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
+                    <div style={{ height: "6px", borderRadius: "3px", background: isDark ? "rgba(232,238,242,0.13)" : "rgba(58,53,43,0.1)", overflow: "hidden" }}>
                       <div style={{
                         width: `${pct}%`,
                         height: "100%",
@@ -5620,11 +5620,11 @@ function AnonPopup() {
   return (
     <div style={{ marginTop:"20px", position:"relative", display:"flex", justifyContent:"center" }}>
       <button onClick={() => setOpen(o => !o)} style={{ background:"none", border:"none", color:c.inkSoft, cursor:"pointer", display:"flex", alignItems:"center", gap:"6px", fontFamily:"'Georgia',serif" }}>
-        <span style={{ width:"18px", height:"18px", border:"1px solid #3A3028", borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
+        <span style={{ width:"18px", height:"18px", border:`1px solid ${c.line}`, background:c.plate, color:c.inkMuted, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px" }}>ℹ</span>
         <span style={{ fontSize:"12px", color:c.inkSoft, letterSpacing:"0.05em" }}>{t.anonymity}</span>
       </button>
       {open && (
-        <div style={{ position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:c.softBg, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
+        <div style={{ ...GLASS, position:"absolute", bottom:"30px", left:"50%", transform:"translateX(-50%)", width:"240px", background:c.softBg, border:`1px solid ${c.cardBorder}`, borderRadius:"10px", padding:"14px", zIndex:100 }}>
           <p style={{ margin:"0 0 10px", fontSize:"11px", letterSpacing:"0.15em", color:c.accent }}>{t.aboutData}</p>
           <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, lineHeight:1.8, fontStyle:"italic" }}>
             {tx({ru:"Твой путь — только твой.",uk:"Твій шлях — тільки твій.",en:"Your path is yours alone."})}<br />
@@ -5957,7 +5957,7 @@ function MyPathScreen({ onBack }) {
             hiIndex={hormoneHiIndex}
             animKey={`hormone-${hormonePct}`}
           />
-          <div style={{ ...S.metricBlock, marginTop:"-6px", paddingTop:"16px" }}>
+          <div style={{ ...S.metricBlock, marginTop:"14px", paddingTop:"16px" }}>
             <p style={{ margin:"0 0 14px", fontSize:"10px", letterSpacing:"0.15em", color:c.inkSoft }}>{t.allSeven}</p>
             {HORMONE_QUESTIONS.map(({ key }) => {
               const avgScore = hormoneAvgByKey[key];
