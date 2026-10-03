@@ -333,7 +333,7 @@ function buildStyles(themeName) {
     progressDot: { flex:1, height:"2px", borderRadius:"1px", transition:"background-color 0.3s" },
     questionText: { fontSize:"20px", lineHeight:1.5, marginBottom:"28px", color:c.ink, fontWeight:"normal" },
     optionsList: { display:"flex", flexDirection:"column", gap:"10px", flex:1, marginBottom:"24px" },
-    optionBtn: { ...GLASS, background:c.optionBg, border:`1px solid ${c.line}`, borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
+    optionBtn: { ...GLASS, backgroundColor:c.optionBg, borderWidth:"1px", borderStyle:"solid", borderColor:c.line, borderRadius:"10px", padding:"14px", display:"flex", alignItems:"flex-start", gap:"12px", cursor:"pointer", textAlign:"left", transition:"border-color 0.2s,background-color 0.2s" },
     optionRadio: { color:c.accent, fontSize:"16px", lineHeight:1.4, flexShrink:0 },
     optionText: { fontSize:"14px", color: isDark?"#D0C8BC":c.ink, lineHeight:1.5, fontFamily:"'Georgia',serif" },
     resultContainer: { display:"flex", flexDirection:"column", alignItems:"center", paddingTop:"20px", textAlign:"center", flex:1 },
@@ -1685,11 +1685,11 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
         <HintPopup text={tx({ ru: "10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается.", uk: "10 питань, які уточнюють картину по семи системах — вони керують мотивацією, спокоєм, сном і фокусом. Відповідай першим, що відгукується.", en: "10 questions that clarify the picture across seven systems — they govern motivation, calm, sleep and focus. Answer with whatever resonates first." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
-      <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
+      <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : c.line, backgroundColor: selected === opt.score ? "rgba(200,169,126,0.22)" : c.optionBg }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -3742,11 +3742,11 @@ function DailyCheckScreen({ onBack }) {
     <div style={S.screen}>
       <button onClick={onBack} style={S.backBtn}>{t.back}</button>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.label).toUpperCase()}</span><span style={S.quizCounter}>{current + 1} / {DAILYCHECK_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{DAILYCHECK_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
+      <div style={S.progressTrack}>{DAILYCHECK_QUESTIONS.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition: "opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt, i) => (
-          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, ...(selected === opt.score ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.score)} style={{ ...S.optionBtn, borderColor: selected === opt.score ? "#C8A97E" : c.line, backgroundColor: selected === opt.score ? "rgba(200,169,126,0.22)" : c.optionBg }}>
             <span style={S.optionRadio}>{selected === opt.score ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4096,7 +4096,8 @@ function ChallengeScreen({ onBack, presetGroup, hormoneMode, presetHormone }) {
 // ЭКРАН: СОВЕТ ДНЯ
 // ─────────────────────────────────────────────
 function WisdomScreen({ onBack, currentMood }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [wisdoms, setWisdoms] = useState([]);
   const [index, setIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -4294,11 +4295,11 @@ function QuizScreen({ onBack, onGoCompass }) {
         <HintPopup text={tx({ ru: "25 вопросов — насколько ты далеко от себя и есть ли выгорание.", uk: "25 питань — наскільки ти далеко від себе і чи є вигорання.", en: "25 questions — how far you are from yourself and whether there's burnout." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {QUESTIONS_QUIZ.length}</span></div>
-      <div style={S.progressTrack}>{QUESTIONS_QUIZ.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
+      <div style={S.progressTrack}>{QUESTIONS_QUIZ.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, ...(selected===opt ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt)} style={{ ...S.optionBtn, borderColor: selected===opt ? "#C8A97E" : c.line, backgroundColor: selected===opt ? "rgba(200,169,126,0.22)" : c.optionBg }}>
             <span style={S.optionRadio}>{selected===opt ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4414,11 +4415,11 @@ function SelfHonestyScreen({ onBack }) {
         <HintPopup text={tx({ ru: "14 утверждений — насколько ты видишь себя таким, какой ты есть, а не удобной версией.", uk: "14 тверджень — наскільки ти бачиш себе таким, який ти є, а не зручною версією.", en: "14 statements — how much you see yourself as you really are, not a convenient version." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {SELF_HONESTY_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
+      <div style={S.progressTrack}>{SELF_HONESTY_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {SH_SCALE.map((opt,i) => (
-          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, ...(selected===opt.v ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelected(opt.v)} style={{ ...S.optionBtn, borderColor: selected===opt.v ? "#C8A97E" : c.line, backgroundColor: selected===opt.v ? "rgba(200,169,126,0.22)" : c.optionBg }}>
             <span style={S.optionRadio}>{selected===opt.v ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.label)}</span>
           </button>
@@ -4544,12 +4545,12 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
         <span style={S.quizCounter}>{current+1} / {MEDITATION_QUESTIONS.length}</span>
       </div>
       <div style={S.progressTrack}>
-        {MEDITATION_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#8B9EB0" : i === current ? "#B0C8D8" : "rgba(242,233,216,0.16)" }} />)}
+        {MEDITATION_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#8B9EB0" : i === current ? "#B0C8D8" : c.progressInactive }} />)}
       </div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#8B9EB0", backgroundColor: "rgba(139,158,176,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, borderColor: selectedIdx===i ? "#8B9EB0" : c.line, backgroundColor: selectedIdx===i ? "rgba(139,158,176,0.22)" : c.optionBg }}>
             <span style={{ ...S.optionRadio, color:"#8B9EB0" }}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -4567,7 +4568,8 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
 // ЭКРАН: ТЕСТ ЧАЯ
 // ─────────────────────────────────────────────
 function TeaQuizScreen({ onBack, onTeaResult }) {
-  const { lang, t, tx } = useLang();
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
   const [current, setCurrent] = useState(0);
   const [teaScores, setTeaScores] = useState({ shu:0, sheng:0, bai:0, dahong:0, tguan:0, gaba:0 });
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -4647,11 +4649,11 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
         <HintPopup text={tx({ ru: "5 вопросов о твоем состоянии — подберем чай, который нужен именно сейчас.", uk: "5 питань про твій стан — підберемо чай, який потрібен саме зараз.", en: "5 questions about your state — we'll pick the tea you need right now." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current+1} / {TEA_QUESTIONS.length}</span></div>
-      <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : "rgba(242,233,216,0.16)" }} />)}</div>
+      <div style={S.progressTrack}>{TEA_QUESTIONS.map((_,i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
       <p style={{ ...S.questionText, opacity: animating ? 0 : 1, transition:"opacity 0.3s" }}>{tx(q.text)}</p>
       <div style={S.optionsList}>
         {q.options.map((opt,i) => (
-          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, ...(selectedIdx===i ? { borderColor: "#C8A97E", backgroundColor: "rgba(200,169,126,0.22)" } : {}) }}>
+          <button key={i} onClick={() => setSelectedIdx(i)} style={{ ...S.optionBtn, borderColor: selectedIdx===i ? "#C8A97E" : c.line, backgroundColor: selectedIdx===i ? "rgba(200,169,126,0.22)" : c.optionBg }}>
             <span style={S.optionRadio}>{selectedIdx===i ? "◉" : "○"}</span>
             <span style={S.optionText}>{tx(opt.text)}</span>
           </button>
@@ -5284,7 +5286,7 @@ function MoodScreen({ onBack }) {
 // ЭКРАН: ЧАЙНАЯ ЛАВКА
 // ─────────────────────────────────────────────
 function ShopScreen({ onBack }) {
-  const { theme } = useLang();
+  const { t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
   return (
     <div style={S.screen}>
