@@ -8,12 +8,12 @@ const useLang = () => useContext(LangCtx);
 
 const THEMES = {
   dark: {
-    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(255,255,255,0.03)", cardBorder: "#2A2520",
-    ink: "#E8E0D4", inkSoft: "#7A6E62", inkMuted: "#B0A090",
-    accent: "#C8A97E", line: "#2A2520", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
-    progressInactive: "#2A2520", optionBg: "rgba(255,255,255,0.02)",
-    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(255,255,255,0.022)",
-    trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#4A4036",
+    bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.72)", cardBorder: "rgba(242,233,216,0.14)",
+    ink: "#E8E0D4", inkSoft: "#A89A8A", inkMuted: "#B8AA9A",
+    accent: "#C8A97E", line: "rgba(242,233,216,0.14)", primaryBtnBg: "#C8A97E", primaryBtnText: "#0F0D0B",
+    progressInactive: "rgba(242,233,216,0.16)", optionBg: "rgba(255,255,255,0.05)",
+    optionSelectedBg: "rgba(200,169,126,0.08)", metricBg: "rgba(255,255,255,0.06)",
+    trackBg: "#1E1B18", softBg: "#1A1713", arrow: "#8A7C6C",
   },
   light: {
     // Контраст как на тёмной: тёмный текст на креме, вторичный не «выцветает»
@@ -314,14 +314,14 @@ function buildStyles(themeName) {
     homeSubtitle: { fontSize:"13px", color:c.inkSoft, letterSpacing:"0.15em", margin:0 },
     homeIntro: { textAlign:"center", fontSize:"15px", color:c.inkMuted, fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
     menuList: { display:"flex", flexDirection:"column", gap:"12px" },
-    menuCard: { background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:c.ink, transition:"border-color 0.2s" },
+    menuCard: { background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:c.ink, transition:"border-color 0.2s", WebkitBackdropFilter:"blur(6px)", backdropFilter:"blur(6px)" },
     menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:c.accent },
     menuCardContent: { flex:1 },
     menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
     menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
     menuCardArrow: { color:c.arrow, fontSize:"18px" },
     shopBtn: { width:"100%", padding:"14px", backgroundColor:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em" },
-    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 0 4px", marginBottom:"4px", background:`linear-gradient(rgba(${c.bgRgb},0.88) 70%, rgba(${c.bgRgb},0))` },
+    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 20px 16px", margin:"-24px -20px 0", WebkitBackdropFilter:"blur(8px)", backdropFilter:"blur(8px)", background:`rgba(${c.bgRgb},0.35)`, WebkitMaskImage:"linear-gradient(#000 55%, transparent)", maskImage:"linear-gradient(#000 55%, transparent)" },
     langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:"transparent", color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
     langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
     themeBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"14px", background:c.card, color:c.ink, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"4px 10px", cursor:"pointer", lineHeight:1.2 },
