@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback, useRef, createContext, useContext } f
 const LangCtx = createContext({ lang: "ru", theme: "dark", t: (k) => k, tx: (o) => o });
 const useLang = () => useContext(LangCtx);
 
-const GLASS = { WebkitBackdropFilter:"blur(6px)", backdropFilter:"blur(6px)" };
+const GLASS = {};
 const THEMES = {
   dark: {
     bg: "#0F0D0B", bgRgb: "15,13,11", bgImage: "/bg-dusk.webp", bgPos: "50% 50%", bgVeil: "linear-gradient(rgba(14,19,23,.52), rgba(14,19,23,.8))", card: "rgba(35,45,51,0.55)", plate: "rgba(35,45,51,0.55)", cardBorder: "rgba(242,233,216,0.14)",
@@ -315,14 +315,14 @@ function buildStyles(themeName) {
     homeSubtitle: { fontSize:"13px", color:c.inkSoft, letterSpacing:"0.15em", margin:0 },
     homeIntro: { textAlign:"center", fontSize:"15px", color:c.inkMuted, fontStyle:"italic", margin:"28px 0 36px", lineHeight:1.6 },
     menuList: { display:"flex", flexDirection:"column", gap:"12px" },
-    menuCard: { background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:c.ink, transition:"border-color 0.2s", WebkitBackdropFilter:"blur(6px)", backdropFilter:"blur(6px)" },
+    menuCard: { background:c.card, border:`1px solid ${c.cardBorder}`, borderRadius:"12px", padding:"16px", display:"flex", alignItems:"center", gap:"14px", cursor:"pointer", textAlign:"left", color:c.ink, transition:"border-color 0.2s" },
     menuCardIcon: { fontSize:"18px", width:"32px", textAlign:"center", color:c.accent },
     menuCardContent: { flex:1 },
     menuCardTitle: { margin:"0 0 4px", fontSize:"15px", fontWeight:"normal", letterSpacing:"0.02em", whiteSpace:"normal", lineHeight:1.4 },
     menuCardDesc: { margin:0, fontSize:"12px", color:c.inkSoft, letterSpacing:"0.03em" },
     menuCardArrow: { color:c.arrow, fontSize:"18px" },
     shopBtn: { ...GLASS, width:"100%", padding:"14px", backgroundColor:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"10px", fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", letterSpacing:"0.05em", marginBottom:"10px", boxSizing:"border-box" },
-    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 20px 16px", margin:"-24px -20px 0", WebkitBackdropFilter:"blur(8px)", backdropFilter:"blur(8px)", background:`rgba(${c.bgRgb},0.35)`, WebkitMaskImage:"linear-gradient(#000 55%, transparent)", maskImage:"linear-gradient(#000 55%, transparent)" },
+    controls: { position:"sticky", top:0, zIndex:20, display:"flex", justifyContent:"flex-end", gap:"6px", padding:"8px 20px 16px", margin:"-24px -20px 0", background:`rgba(${c.bgRgb},0.55)`, WebkitMaskImage:"linear-gradient(#000 55%, transparent)", maskImage:"linear-gradient(#000 55%, transparent)" },
     langBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.plate, color:c.inkSoft, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer" },
     langBtnActive: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"12px", background:c.accent, color: isDark?"#0F0D0B":"#FAF5E7", border:`1px solid ${c.accent}`, borderRadius:"4px", padding:"5px 9px", cursor:"pointer", fontWeight:700 },
     themeBtn: { fontFamily:"ui-monospace,Menlo,Consolas,monospace", fontSize:"14px", background:c.card, color:c.ink, border:`1px solid ${c.line}`, borderRadius:"4px", padding:"4px 10px", cursor:"pointer", lineHeight:1.2 },
@@ -390,6 +390,12 @@ function buildStyles(themeName) {
   };
 }
 
+try {
+  const _t = localStorage.getItem("teabro-theme") || "dark";
+  document.documentElement.style.backgroundColor = (THEMES[_t] || THEMES.dark).bg;
+  document.body.style.backgroundColor = (THEMES[_t] || THEMES.dark).bg;
+  ["/bg-dusk.webp", "/bg-day.webp"].forEach(u => { const im = new Image(); im.src = u; });
+} catch {}
 let S = buildStyles((() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } })());
 
 // ─────────────────────────────────────────────
