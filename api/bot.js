@@ -5,6 +5,9 @@ export default async function handler(req, res) {
   const ADMIN_ID = 5175467398;
   const APP_URL = "https://teabro-app.vercel.app";
   const STATS_URL = "https://teabro-app.vercel.app/api/stats";
+  const BOT_LINK = "https://t.me/TeaBroLifeBot/TeaBro";
+  const SHARE_TEXT = "Привет! Нашёл классного бота: короткие тесты и дневник состояний, помогает спокойно разобраться в себе. Подумал о тебе, глянь 🌕";
+  const SHARE_URL = `https://t.me/share/url?url=${encodeURIComponent(BOT_LINK)}&text=${encodeURIComponent(SHARE_TEXT)}`;
 
   const body = req.body;
   const message = body?.message;
@@ -50,14 +53,15 @@ export default async function handler(req, res) {
     const text = message.text || "";
     const user = message.from;
 
-    if (text === "/start") {
+    if (/^\/start(@\w+)?(\s|$)/.test(text)) {
       await sendMessage(chat_id,
         `Привет, ${user.first_name || "друг"} 🌕\n\n<i>Не о чае. О возвращении к себе.</i>\n\nНажми кнопку ниже — войди в своё пространство.`,
         {
           reply_markup: {
-            inline_keyboard: [[
-              { text: "Открыть Tea Bro 🌕", web_app: { url: APP_URL } }
-            ]]
+            inline_keyboard: [
+              [{ text: "Открыть Tea Bro 🌕", web_app: { url: APP_URL } }],
+              [{ text: "Поделиться с другом ↗", url: SHARE_URL }]
+            ]
           }
         }
       );
