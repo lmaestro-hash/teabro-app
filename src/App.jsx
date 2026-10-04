@@ -5383,7 +5383,7 @@ function AdminScreen({ onBack }) {
     flex: 1,
     minWidth: 0,
     textAlign: "center",
-    padding: "14px 8px",
+    padding: "14px 6px",
     background: c.plate,
     borderRadius: "12px",
     border: `1px solid ${c.cardBorder}`,
@@ -5397,12 +5397,11 @@ function AdminScreen({ onBack }) {
   };
   const metricLabel = {
     margin: 0,
-    fontSize: "10px",
+    fontSize: "9.5px",
     color: c.inkSoft,
-    letterSpacing: "0.08em",
+    letterSpacing: "0.02em",
     lineHeight: 1.3,
-    overflowWrap: "normal",
-    wordBreak: "keep-all",
+    overflowWrap: "anywhere",
     hyphens: "none",
   };
   const rowStyle = {
@@ -5566,44 +5565,33 @@ function AdminScreen({ onBack }) {
             </div>
           )}
 
-          {/* Самообман — среднее, если есть */}
-          {stats.selfHonestyHist?.count > 0 && (
-            <div style={card}>
-              <p style={sectionTitle}>{t.selfDeceptDist}</p>
-              <div style={{ display: "flex", gap: "10px", marginBottom: "12px" }}>
-                <div style={metricBig}>
-                  <p style={metricVal}>{stats.selfHonestyHist.count}</p>
-                  <p style={metricLabel}>{t.results}</p>
+          {/* Общая статистика по всем тестам/боту — заменяет прежний блок распределения только по «Самообману» */}
+          {tests.length > 0 && (() => {
+            const totalCompletions = tests.reduce((sum, x) => sum + (x.value || 0), 0);
+            const topTest = tests.reduce((best, x) => ((x.value || 0) > (best?.value || 0) ? x : best), null);
+            const conversion = stats.totalOpens > 0 ? Math.round((totalCompletions / stats.totalOpens) * 100) : 0;
+            return (
+              <div style={card}>
+                <p style={sectionTitle}>{tx({ ru: 'ИТОГО ПО БОТУ', uk: 'ЗАГАЛОМ ПО БОТУ', en: 'BOT OVERVIEW' })}</p>
+                <div style={{ display: "flex", gap: "10px", marginBottom: topTest?.value > 0 ? "12px" : 0 }}>
+                  <div style={metricBig}>
+                    <p style={metricVal}>{totalCompletions}</p>
+                    <p style={metricLabel}>{tx({ ru: 'всего прохождений', uk: 'всього проходжень', en: 'total completions' })}</p>
+                  </div>
+                  <div style={metricBig}>
+                    <p style={metricVal}>{conversion}%</p>
+                    <p style={metricLabel}>{tx({ ru: 'от открытий', uk: 'від відкриттів', en: 'of opens' })}</p>
+                  </div>
                 </div>
-                <div style={metricBig}>
-                  <p style={metricVal}>{stats.selfHonestyHist.average ?? "—"}</p>
-                  <p style={metricLabel}>{t.avgScore}</p>
-                </div>
+                {topTest?.value > 0 && (
+                  <div style={{ ...rowStyle, borderBottom: "none", paddingTop: 0 }}>
+                    <span style={rowLabel}>{tx({ ru: 'популярнее всего', uk: 'найпопулярніше', en: 'most popular' })}</span>
+                    <span style={rowValue}>{topTest.icon} {topTest.label}</span>
+                  </div>
+                )}
               </div>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "48px" }}>
-                {(stats.selfHonestyHist.buckets || []).map((b, i) => {
-                  const maxB = Math.max(1, ...stats.selfHonestyHist.buckets.map(x => x.count));
-                  const h = Math.max(4, Math.round((b.count / maxB) * 48));
-                  return (
-                    <div key={b.range} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                      <div style={{
-                        width: "100%",
-                        height: h,
-                        borderRadius: "3px 3px 0 0",
-                        background: c.accent,
-                        opacity: 0.35 + (b.count / maxB) * 0.55,
-                      }} title={`${b.range}: ${b.count}`} />
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
-                <span style={{ fontSize: "9px", color: c.inkSoft }}>0</span>
-                <span style={{ fontSize: "9px", color: c.inkSoft }}>50</span>
-                <span style={{ fontSize: "9px", color: c.inkSoft }}>99</span>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </>
       )}
 
