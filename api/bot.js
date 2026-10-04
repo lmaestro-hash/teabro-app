@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const APP_URL = "https://teabro-app.vercel.app";
   const STATS_URL = "https://teabro-app.vercel.app/api/stats";
   const BOT_LINK = "https://t.me/TeaBroLifeBot/TeaBro";
-  const SHARE_TEXT = "Привет! Нашёл классного бота: короткие тесты и дневник состояний, помогает спокойно разобраться в себе. Подумал о тебе, глянь 🌕";
+  const SHARE_TEXT = "Привет! Есть классный бот: короткие тесты и дневник состояний, помогает спокойно разобраться в себе. Думаю, тебе зайдёт, глянь 🌕";
   const SHARE_URL = `https://t.me/share/url?url=${encodeURIComponent(BOT_LINK)}&text=${encodeURIComponent(SHARE_TEXT)}`;
 
   const body = req.body;
