@@ -678,6 +678,13 @@ const EMOTION_I18N = {
   disappointed: { label: { ru:"Разочарование", uk:"Розчарування", en:"Disappointment" }, desc: { ru:"Ждал одно — получил другое", uk:"Чекав одне — отримав інше", en:"Expected one thing, got another" } },
   boredom: { label: { ru:"Скука", uk:"Нудьга", en:"Boredom" }, desc: { ru:"Ничего не увлекает", uk:"Нічого не захоплює", en:"Nothing engages" } },
 };
+function plDays(n, lang) {
+  const a = Math.abs(n), m10 = a % 10, m100 = a % 100;
+  if (lang === "en") return a === 1 ? "day" : "days";
+  const one = m10 === 1 && m100 !== 11, few = m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14);
+  if (lang === "uk") return one ? "день" : few ? "дні" : "днів";
+  return one ? "день" : few ? "дня" : "дней";
+}
 function emotionLabel(id, lang) { return tx(lang, EMOTION_I18N[id]?.label) || id; }
 function emotionDesc(id, lang) { return tx(lang, EMOTION_I18N[id]?.desc) || ""; }
 
@@ -2347,6 +2354,7 @@ function MetricBlock({ value, rightName, rightSub, fillFrom, fillTo, scaleLabels
 // ТЕРМОМЕТР ВЫГОРАНИЯ — 4 зоны + маркер
 // ─────────────────────────────────────────────
 function BurnoutThermo({ value, rightName, rightSub, quote, animKey }) {
+  const { tx } = useLang();
   const [animVal, setAnimVal] = useState(0);
   const [animLeft, setAnimLeft] = useState(0);
   useEffect(() => {
@@ -2366,7 +2374,7 @@ function BurnoutThermo({ value, rightName, rightSub, quote, animKey }) {
   }, [value, animKey]);
 
   const hiIndex = value <= 25 ? 0 : value <= 50 ? 1 : value <= 75 ? 2 : 3;
-  const labels = ["НЕТ", "НАЧАЛО", "СРЕДНЕЕ", "ГЛУБОКОЕ"];
+  const labels = [tx({ru:"НЕТ",uk:"НЕМАЄ",en:"NONE"}), tx({ru:"НАЧАЛО",uk:"ПОЧАТОК",en:"EARLY"}), tx({ru:"СРЕДНЕЕ",uk:"СЕРЕДНЄ",en:"MODERATE"}), tx({ru:"ГЛУБОКОЕ",uk:"ГЛИБОКЕ",en:"DEEP"})];
 
   return (
     <div style={S.metricBlock}>
@@ -3649,7 +3657,7 @@ function DailyCheckScreen({ onBack }) {
             <MetricBlock
               value={result.avgPct}
               rightName={weakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(weakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
-              rightSub={`${tx({ru:"среднее по",uk:"середнє за",en:"average of"})} ${result.avgCount} ${tx({ ru: result.avgCount === 1 ? "отметке" : "отметкам", uk: result.avgCount === 1 ? "відмітці" : "відміткам", en: result.avgCount === 1 ? "check-in" : "check-ins" })}`}
+              rightSub={`${tx({ru:"среднее по",uk:"середнє за",en:"average of"})} ${result.avgCount} ${tx({ ru: result.avgCount === 1 ? "отметке" : "отметкам", uk: result.avgCount === 1 ? "відміткою" : "відмітками", en: result.avgCount === 1 ? "check-in" : "check-ins" })}`}
               fillFrom="#241D14"
               fillTo="#C8A97E"
               scaleLabels={dcScaleLabels}
@@ -5105,7 +5113,7 @@ function MoodScreen({ onBack }) {
           return (
             <div key={id} style={{ marginBottom:"8px" }}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"3px" }}>
-                <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em?.label}</span>
+                <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em ? emotionLabel(em.id, lang) : ""}</span>
                 <span style={{ fontSize:"12px", color:c.inkSoft }}>{pct}%</span>
               </div>
               <div style={{ height:"3px", backgroundColor:"rgba(242,233,216,0.16)", borderRadius:"2px", overflow:"hidden" }}>
@@ -5145,7 +5153,7 @@ function MoodScreen({ onBack }) {
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
         <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{tx(title.name)}</p>
         <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
-        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>{tx({ ru: "до", uk: "до", en: "until" })} «{tx(nextTitle.name)}» — {nextTitle.days - streak} {plDays(nextTitle.days - streak, lang)}</p>}
         <div><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
       <div style={S.wisdomLine} />
@@ -5210,7 +5218,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.weekSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
-              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
@@ -5237,7 +5245,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.monthSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
-              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
@@ -5277,7 +5285,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.yearSummary}</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
-              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
+              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
           )}
@@ -5848,15 +5856,15 @@ function MyPathScreen({ onBack }) {
     const isLight = lightHiIds.includes(topId) || lightLoIds.includes(topId);
     moodHiIndex = lightHiIds.includes(topId) ? 3 : (lightLoIds.includes(topId) ? 2 : 0);
     if (isLight) {
-      moodVerdict = "Становишься мягче к себе. Светлые состояния — твой фон последнее время.";
+      moodVerdict = tx({ ru: "Становишься мягче к себе. Светлые состояния — твой фон последнее время.", uk: "Ти ставишся до себе м’якше. Світлі стани — твій фон останнім часом.", en: "You are getting gentler with yourself. Lighter states have been your background lately." });
     } else {
-      moodVerdict = "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.";
+      moodVerdict = tx({ ru: "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.", uk: "Зараз непросто — важкі стани трапляються частіше за світлі. Бережи себе.", en: "Things are hard right now — heavy states show up more often than light ones. Be gentle with yourself." });
     }
   }
   const moodScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"НЕЙТРАЛЬНО",uk:"НЕЙТРАЛЬНО",en:"NEUTRAL"}), tx({ru:"ПОКОЙ",uk:"СПОКІЙ",en:"CALM"}), tx({ru:"СВЕТЛО",uk:"СВІТЛО",en:"LIGHT"})];
   const otherMoods = moodSorted.slice(1, 4).map(([id, count]) => {
     const em = EMOTIONS.find(e => e.id === id);
-    return { emoji: em?.emoji || "•", name: em?.label || id, pct: `${Math.round((count/moodTotal)*100)}%` };
+    return { emoji: em?.emoji || "•", name: emotionLabel(id, lang), pct: `${Math.round((count/moodTotal)*100)}%` };
   });
 
   return (
@@ -5869,9 +5877,9 @@ function MyPathScreen({ onBack }) {
         <div style={{ fontSize:"52px", marginBottom:"12px" }}>{title.emoji}</div>
         <p style={{ margin:"0 0 4px", fontSize:"24px", color:c.accent, letterSpacing:"0.06em" }}>{tx(title.name)}</p>
         <p style={{ margin:"0 0 6px", fontSize:"12px", color:c.inkSoft, letterSpacing:"0.14em" }}>
-          {streak} {streak===1?"день":streak<5?"дня":"дней"} практики
+          {streak} {plDays(streak, lang)} {tx({ ru: "практики", uk: "практики", en: "of practice" })}
         </p>
-        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
+        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>{tx({ ru: "до", uk: "до", en: "until" })} «{tx(nextTitle.name)}» — {nextTitle.days - streak} {plDays(nextTitle.days - streak, lang)}</p>}
       </div>
       <div style={{ width:"36px", height:"1px", background:c.line, margin:"0 auto 8px" }} />
 
@@ -5944,7 +5952,7 @@ function MyPathScreen({ onBack }) {
           <MetricBlock
             value={hormonePct}
             rightName={hormoneWeakest ? `${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(hormoneWeakest.name)}` : t.hormoneCode}
-            rightSub={`среднее по ${hormoneLast3.length === 1 ? "последнему прохождению" : `последним ${hormoneLast3.length} прохождениям`}`}
+            rightSub={hormoneLast3.length === 1 ? tx({ ru: "среднее по последнему прохождению", uk: "середнє за останнім проходженням", en: "average of the last run" }) : tx({ ru: `среднее по последним ${hormoneLast3.length} прохождениям`, uk: `середнє за останніми ${hormoneLast3.length} проходженнями`, en: `average of the last ${hormoneLast3.length} runs` })}
             fillFrom="#241D14"
             fillTo={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
             dotColor={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
@@ -5987,7 +5995,7 @@ function MyPathScreen({ onBack }) {
             <MetricBlock
               value={dcAvgPct}
               rightName={dcWeakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(dcWeakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
-              rightSub={`${tx({ ru: "среднее по", uk: "середнє за", en: "average of" })} ${dcLast3.length} ${tx({ ru: dcLast3.length === 1 ? "отметке" : "отметкам", uk: dcLast3.length === 1 ? "відмітці" : "відміткам", en: dcLast3.length === 1 ? "check-in" : "check-ins" })}`}
+              rightSub={`${tx({ ru: "среднее по", uk: "середнє за", en: "average of" })} ${dcLast3.length} ${tx({ ru: dcLast3.length === 1 ? "отметке" : "отметкам", uk: dcLast3.length === 1 ? "відміткою" : "відмітками", en: dcLast3.length === 1 ? "check-in" : "check-ins" })}`}
               fillFrom="#241D14"
               fillTo="#C8A97E"
               scaleLabels={dcScaleLabels}
