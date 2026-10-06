@@ -5097,13 +5097,13 @@ function MoodScreen({ onBack }) {
 
   function StatBlock({ data, label }) {
     const stats = calcStats(data);
-    if (!stats) return <p style={{ color:c.inkSoft, fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>Пока нет данных за {label}.</p>;
+    if (!stats) return <p style={{ color:c.inkSoft, fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>{(() => { const lb = { "неделю":{uk:"тиждень",en:"the week"}, "месяц":{uk:"місяць",en:"the month"}, "год":{uk:"рік",en:"the year"} }[label] || {}; return tx({ ru: `Пока нет данных за ${label}.`, uk: `Поки немає даних за ${lb.uk || label}.`, en: `No data for ${lb.en || label} yet.` }); })()}</p>;
     const sorted = Object.entries(stats.counts).sort((a,b) => b[1]-a[1]).filter(([,v]) => v > 0);
     const daysInPeriod = data.length;
     return (
       <div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"16px" }}>
-          <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>из {daysInPeriod} дней</p></div>
+          <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>{tx({ ru: "из", uk: "з", en: "of" })} {daysInPeriod} {plDays(daysInPeriod, lang)}</p></div>
           <div style={S.statCard}><p style={S.statNum}>{stats.avgScore}</p><p style={S.statLabel}>{t.avgScore}</p></div>
         </div>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"10px" }}>{tx({ru:'СОСТОЯНИЯ',uk:'СТАНОВИ',en:'STATES'})}</p>
@@ -5152,7 +5152,7 @@ function MoodScreen({ onBack }) {
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
         <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{tx(title.name)}</p>
-        <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
+        <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {plDays(streak, lang)} {tx({ ru: "подряд", uk: "поспіль", en: "in a row" })}</p>
         {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>{tx({ ru: "до", uk: "до", en: "until" })} «{tx(nextTitle.name)}» — {nextTitle.days - streak} {plDays(nextTitle.days - streak, lang)}</p>}
         <div><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
@@ -5178,12 +5178,12 @@ function MoodScreen({ onBack }) {
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>{t.placeForThoughts}</p>
       <div style={{ margin:"16px 0" }}>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>
-          {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
+          {todayEmotion ? tx({ ru: "СЕГОДНЯ ТЫ ОТМЕТИЛ", uk: "ТВОЯ ВІДМІТКА СЬОГОДНІ", en: "TODAY'S CHECK-IN" }) : tx({ ru: "КАК ТЫ СЕЙЧАС?", uk: "ЯК ТИ ЗАРАЗ?", en: "HOW ARE YOU NOW?" })}
         </p>
         {todayEmotion ? (
           <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px" }}>
             <span style={{ fontSize:"28px" }}>{todayEmotion.emoji}</span>
-            <span style={{ fontSize:"16px", color:c.ink }}>{todayEmotion.label}</span>
+            <span style={{ fontSize:"16px", color:c.ink }}>{emotionLabel(todayEmotion.id, lang)}</span>
           </div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
@@ -5216,8 +5216,8 @@ function MoodScreen({ onBack }) {
           {(() => { const ws = calcStats(weekData.map(d => d.data)); return ws ? (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.weekSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${ws.total} из 7 дней`, uk: `Відмічено ${ws.total} з 7 днів`, en: `Checked in ${ws.total} of 7 days` })}</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {ws.avgScore}/10</p>
               {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
@@ -5243,8 +5243,8 @@ function MoodScreen({ onBack }) {
           {(() => { const ms = calcStats(monthData); return ms ? (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.monthSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${ms.total} из 30 дней`, uk: `Відмічено ${ms.total} з 30 днів`, en: `Checked in ${ms.total} of 30 days` })}</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {ms.avgScore}/10</p>
               {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
@@ -5256,7 +5256,7 @@ function MoodScreen({ onBack }) {
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>{t.yearMap}</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"6px", marginBottom:"16px" }}>
             {(() => {
-              const months = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"];
+              const months = tx({ ru: ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"], uk: ["Січ","Лют","Бер","Кві","Тра","Чер","Лип","Серп","Вер","Жов","Лис","Гру"], en: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] });
               return Array.from({ length:12 }, (_,mi) => {
                 const monthEntries = allData.filter((_,di) => {
                   const d = new Date(); d.setDate(d.getDate() - (364 - di));
@@ -5273,7 +5273,7 @@ function MoodScreen({ onBack }) {
                   <div key={mi} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
                     <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: filled.length > 0 ? "rgba(200,169,126,0.08)" : c.plate, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
                     <span style={{ fontSize:"9px", color:c.inkSoft }}>{months[mIdx]}</span>
-                    <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}д</span>
+                    <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}{tx({ ru: "д", uk: "д", en: "d" })}</span>
                   </div>
                 );
               });
@@ -5283,8 +5283,8 @@ function MoodScreen({ onBack }) {
           {allStats && (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.yearSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${allStats.total} из 365 дней`, uk: `Відмічено ${allStats.total} з 365 днів`, en: `Checked in ${allStats.total} of 365 days` })}</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {allStats.avgScore}/10</p>
               {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
               <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
@@ -5315,7 +5315,7 @@ function ShopScreen({ onBack }) {
         <p style={{ fontSize:"14px", color:c.inkSoft, fontStyle:"italic", marginTop:"16px", lineHeight:1.8, textAlign:"center" }}>
           Скоро здесь появятся чаи,<br />{tx({ru:'которые мы выбираем сами.',uk:'які ми обираємо самі.',en:'that we choose ourselves.'})}<br />{t.noExtra}
         </p>
-        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
+        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>{tx({ ru: "— скоро —", uk: "— скоро —", en: "— soon —" })}</p>
       </div>
       <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.followChannel}</a>
       <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
@@ -6137,7 +6137,7 @@ function MyPathScreen({ onBack }) {
       {hasMood ? (
         <MetricBlock
           value={moodPct}
-          rightName={`${topMood.emoji} ${topMood.label}`}
+          rightName={`${topMood.emoji} ${emotionLabel(topMood.id, lang)}`}
           rightSub={t.dominantState}
           fillFrom="#1A2A1A"
           fillTo="#5A8A5A"
