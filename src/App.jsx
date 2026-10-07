@@ -41,7 +41,7 @@ const UI = {
     burnoutLevel: "УРОВЕНЬ ВЫГОРАНИЯ",
     selfDeception: "СКЛОННОСТЬ К САМООБМАНУ",
     hormoneCode: "ГОРМОНАЛЬНЫЙ КОД",
-    allSeven: "ВСЕ СЕМЬ СИСТЕМ",
+    allSeven: "ВСЕ ДЕВЯТЬ СИСТЕМ",
     truthScale: "МАСШТАБ ПРАВДЫ",
     testsAndPractices: "ТЕСТЫ И ПРАКТИКИ",
     favoriteTea: "ЛЮБИМЫЙ ЧАЙ",
@@ -104,8 +104,8 @@ const UI = {
     menu: {
       quiz: { title: "Честный разговор с собой", desc: "Самооценка · выгорание · 25 вопросов" },
       selfhonesty: { title: "Склонность к самообману", desc: "Тест на самообман · 14 вопросов" },
-      hormones: { title: "Гормональный код", desc: "7 систем · 10 вопросов" },
-      hormoneguide: { title: "Всё о гормонах", desc: "Гид: как привести 7 систем в порядок" },
+      hormones: { title: "Гормональный код", desc: "9 систем · 12 вопросов" },
+      hormoneguide: { title: "Всё о гормонах", desc: "Гид: как привести 9 систем в порядок" },
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
       meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
@@ -128,7 +128,7 @@ const UI = {
     burnoutLevel: "РІВЕНЬ ВИГОРАННЯ",
     selfDeception: "СХИЛЬНІСТЬ ДО САМООБМАНУ",
     hormoneCode: "ГОРМОНАЛЬНИЙ КОД",
-    allSeven: "УСІ СІМ СИСТЕМ",
+    allSeven: "УСІ ДЕВ'ЯТЬ СИСТЕМ",
     truthScale: "МАСШТАБ ПРАВДИ",
     testsAndPractices: "ТЕСТИ І ПРАКТИКИ",
     favoriteTea: "УЛЮБЛЕНИЙ ЧАЙ",
@@ -191,8 +191,8 @@ const UI = {
     menu: {
       quiz: { title: "Чесна розмова з собою", desc: "Самооцінка · вигорання · 25 питань" },
       selfhonesty: { title: "Схильність до самообману", desc: "Тест на самообман · 14 питань" },
-      hormones: { title: "Гормональний код", desc: "7 систем · 10 питань" },
-      hormoneguide: { title: "Все про гормони", desc: "Гід: як привести 7 систем до ладу" },
+      hormones: { title: "Гормональний код", desc: "9 систем · 12 питань" },
+      hormoneguide: { title: "Все про гормони", desc: "Гід: як привести 9 систем до ладу" },
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
       meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
@@ -215,7 +215,7 @@ const UI = {
     burnoutLevel: "BURNOUT LEVEL",
     selfDeception: "TENDENCY TO SELF-DECEPTION",
     hormoneCode: "HORMONAL CODE",
-    allSeven: "ALL SEVEN SYSTEMS",
+    allSeven: "ALL NINE SYSTEMS",
     truthScale: "SCALE OF TRUTH",
     testsAndPractices: "TESTS & PRACTICES",
     favoriteTea: "FAVORITE TEA",
@@ -278,8 +278,8 @@ const UI = {
     menu: {
       quiz: { title: "Honest talk with yourself", desc: "Self-assessment · burnout · 25 questions" },
       selfhonesty: { title: "Tendency to self-deception", desc: "Self-deception test · 14 questions" },
-      hormones: { title: "Hormonal code", desc: "7 systems · 10 questions" },
-      hormoneguide: { title: "All about hormones", desc: "Guide: bringing 7 systems into balance" },
+      hormones: { title: "Hormonal code", desc: "9 systems · 12 questions" },
+      hormoneguide: { title: "All about hormones", desc: "Guide: bringing 9 systems into balance" },
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
       meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
@@ -678,13 +678,6 @@ const EMOTION_I18N = {
   disappointed: { label: { ru:"Разочарование", uk:"Розчарування", en:"Disappointment" }, desc: { ru:"Ждал одно — получил другое", uk:"Чекав одне — отримав інше", en:"Expected one thing, got another" } },
   boredom: { label: { ru:"Скука", uk:"Нудьга", en:"Boredom" }, desc: { ru:"Ничего не увлекает", uk:"Нічого не захоплює", en:"Nothing engages" } },
 };
-function plDays(n, lang) {
-  const a = Math.abs(n), m10 = a % 10, m100 = a % 100;
-  if (lang === "en") return a === 1 ? "day" : "days";
-  const one = m10 === 1 && m100 !== 11, few = m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14);
-  if (lang === "uk") return one ? "день" : few ? "дні" : "днів";
-  return one ? "день" : few ? "дня" : "дней";
-}
 function emotionLabel(id, lang) { return tx(lang, EMOTION_I18N[id]?.label) || id; }
 function emotionDesc(id, lang) { return tx(lang, EMOTION_I18N[id]?.desc) || ""; }
 
@@ -1184,7 +1177,7 @@ const SELF_HONESTY_ADVICE = {
 
 
 // ─────────────────────────────────────────────
-// ТЕСТ: ГОРМОНАЛЬНЫЙ КОД (7 систем · 7 вопросов)
+// ТЕСТ: ГОРМОНАЛЬНЫЙ КОД (9 систем · 9 основных вопросов + 3 уточняющих)
 // ─────────────────────────────────────────────
 const HORMONE_META = {
   dopamine:      { name: { ru: "Дофамин", uk: "Дофамін", en: "Dopamine" },       short: { ru: "мотивация и драйв", uk: "мотивація і драйв", en: "motivation and drive" },     color: "#C89B5C" },
@@ -1194,6 +1187,8 @@ const HORMONE_META = {
   gaba:          { name: { ru: "ГАМК", uk: "ГАМК", en: "GABA" },          short: { ru: "сон и торможение", uk: "сон і гальмування", en: "sleep and inhibition" },      color: "#7B9EB0" },
   testosterone:  { name: { ru: "Тестостерон", uk: "Тестостерон", en: "Testosterone" },   short: { ru: "воля и напор", uk: "воля і напір", en: "will and drive" },          color: "#8B4A4A" },
   acetylcholine: { name: { ru: "Ацетилхолин", uk: "Ацетилхолін", en: "Acetylcholine" },   short: { ru: "фокус и ясность", uk: "фокус і ясність", en: "focus and clarity" },       color: "#7A9E7E" },
+  somatotropin:  { name: { ru: "Соматотропин", uk: "Соматотропін", en: "Growth hormone" }, short: { ru: "восстановление и ремонт", uk: "відновлення і ремонт", en: "repair and recovery" },   color: "#8FA3E8" },
+  estrogen:      { name: { ru: "Эстроген", uk: "Естроген", en: "Estrogen" },               short: { ru: "баланс настроения и тонус", uk: "баланс настрою і тонус", en: "mood balance and tone" }, color: "#E0907A" },
 };
 
 const HORMONE_QUESTIONS = [
@@ -1246,6 +1241,20 @@ const HORMONE_QUESTIONS = [
     { text: { ru: "Обычно мысли ясные, могу погрузиться в работу", uk: "Зазвичай думки ясні, можу зануритися в роботу", en: "Usually clear thoughts; I can dive into work" }, score: 4 },
     { text: { ru: "Ум острый, легко фокусируюсь и запоминаю", uk: "Розум гострий, легко фокусуюся і запам'ятовую", en: "Mind is sharp; I focus and remember easily" }, score: 5 },
   ]},
+  { key: "somatotropin", category: { ru: "СОМАТОТРОПИН", uk: "СОМАТОТРОПІН", en: "GROWTH HORMONE" }, text: { ru: "Как восстанавливается ваше тело — после нагрузки, ночного сна, мелких ранок и простуд?", uk: "Як відновлюється ваше тіло — після навантаження, нічного сну, дрібних ранок і застуд?", en: "How does your body recover — after exertion, a night's sleep, small cuts and colds?" }, options: [
+    { text: { ru: "Очень медленно: после нагрузки разбит(а) по несколько дней, ранки заживают долго, просыпаюсь без сил", uk: "Дуже повільно: після навантаження розбитий(а) кілька днів, ранки гояться довго, прокидаюся без сил", en: "Very slowly: wrecked for days after exertion, small cuts heal slowly, I wake up drained" }, score: 1 },
+    { text: { ru: "Медленно: усталость тянется, мышцы и тело долго «отходят»", uk: "Повільно: втома тягнеться, м'язи й тіло довго «відходять»", en: "Slowly: fatigue lingers; muscles and body take long to come back" }, score: 2 },
+    { text: { ru: "По-разному: иногда свежий(ая), иногда вялый(ая) без ясной причины", uk: "По-різному: іноді свіжий(а), іноді млявий(а) без ясної причини", en: "It varies: sometimes fresh, sometimes sluggish for no clear reason" }, score: 3 },
+    { text: { ru: "Обычно хорошо: после нагрузки прихожу в себя за день, сон освежает", uk: "Зазвичай добре: після навантаження приходжу до себе за день, сон освіжає", en: "Usually well: I'm back to normal within a day; sleep refreshes me" }, score: 4 },
+    { text: { ru: "Быстро и полностью: просыпаюсь бодрым(ой), тело упругое, всё заживает и восстанавливается легко", uk: "Швидко й повністю: прокидаюся бадьорим(ою), тіло пружне, усе гоїться й відновлюється легко", en: "Quickly and fully: I wake up fresh, the body feels firm, everything heals and recovers easily" }, score: 5 },
+  ]},
+  { key: "estrogen", category: { ru: "ЭСТРОГЕН", uk: "ЕСТРОГЕН", en: "ESTROGEN" }, text: { ru: "Насколько ровно держатся настроение и самочувствие — в течение недели и месяца?", uk: "Наскільки рівно тримаються настрій і самопочуття — протягом тижня й місяця?", en: "How steady are your mood and well-being over a week and over a month?" }, options: [
+    { text: { ru: "Сильные качели: настроение и самочувствие скачут без явной причины, отёки, сухость кожи, чувствую себя «не в своей коже»", uk: "Сильні гойдалки: настрій і самопочуття стрибають без явної причини, набряки, сухість шкіри, почуваюся «не у своїй шкірі»", en: "Strong swings: mood and well-being jump without a clear reason, puffiness, dry skin, I feel 'not in my own skin'" }, score: 1 },
+    { text: { ru: "Заметные перепады: раздражительность, слёзы или упадок, тело то тяжёлое, то зажатое", uk: "Помітні перепади: дратівливість, сльози або занепад, тіло то важке, то затиснуте", en: "Noticeable swings: irritability, tears or low spells, the body feels heavy one day and tight the next" }, score: 2 },
+    { text: { ru: "Бывают перепады, но в целом справляюсь", uk: "Бувають перепади, але загалом справляюся", en: "There are swings, but overall I cope" }, score: 3 },
+    { text: { ru: "В основном ровно, колебания редкие и мягкие", uk: "Здебільшого рівно, коливання рідкісні й м'які", en: "Mostly steady; swings are rare and mild" }, score: 4 },
+    { text: { ru: "Стабильно: настроение ровное, кожа и тонус в порядке, чувствую себя в гармонии с телом", uk: "Стабільно: настрій рівний, шкіра й тонус у порядку, почуваюся в гармонії з тілом", en: "Steady: mood is even, skin and tone are fine, I feel in harmony with my body" }, score: 5 },
+  ]},
 ];
 
 
@@ -1278,9 +1287,9 @@ const HORMONE_CROSS_QUESTIONS = [
 
 // Какая часть каждого доп. вопроса примешивается к каждой системе
 const HORMONE_CROSS_AFFECTS = {
-  energy:    { dopamine: 0.35, cortisol: 0.35, acetylcholine: 0.3 },
+  energy:    { dopamine: 0.35, cortisol: 0.35, acetylcholine: 0.3, somatotropin: 0.25 },
   selfworth: { serotonin: 0.5, oxytocin: 0.5 },
-  recovery:  { gaba: 0.35, testosterone: 0.3, cortisol: 0.35 },
+  recovery:  { gaba: 0.35, testosterone: 0.3, cortisol: 0.35, somatotropin: 0.35, estrogen: 0.2 },
 };
 
 // Взвешенный итог по системе: своя прямая оценка + доля смежных доп. вопросов.
@@ -1352,6 +1361,20 @@ const HORMONE_LEVEL_TEXTS = {
     { ru: "Средний уровень — ясность бывает, но не всегда по заказу.", uk: "Середній рівень — ясність буває, але не завжди на замовлення.", en: "Average level — clarity comes, but not always on demand." },
     { ru: "Мысли обычно ясные, можешь погрузиться в работу.", uk: "Думки зазвичай ясні, можеш зануритися в роботу.", en: "Thoughts are usually clear; you can dive into work." },
     { ru: "Ум острый, фокус держится легко — это сильная сторона.", uk: "Розум гострий, фокус тримається легко — це сильна сторона.", en: "Mind is sharp; focus holds easily — a strong side." },
+  ],
+  somatotropin: [
+    { ru: "Тело работает на износ: ночь не успевает его починить, и усталость копится быстрее, чем уходит.", uk: "Тіло працює на знос: ніч не встигає його полагодити, і втома накопичується швидше, ніж іде.", en: "The body is running on wear: the night doesn't manage to repair it, and fatigue piles up faster than it leaves." },
+    { ru: "Восстановление идёт медленно — после нагрузки и недосыпа тело долго возвращается в строй.", uk: "Відновлення йде повільно — після навантаження й недосипу тіло довго повертається в стрій.", en: "Recovery is slow — after exertion and short sleep the body takes long to get back in shape." },
+    { ru: "Восстановление нестабильное: хорошие дни чередуются с вялыми, и многое зависит от того, как спал(а).", uk: "Відновлення нестабільне: добрі дні чергуються з млявими, і багато що залежить від того, як спав(ла).", en: "Recovery is uneven: good days alternate with sluggish ones, and a lot depends on how you slept." },
+    { ru: "Тело в целом восстанавливается вовремя — сон освежает, нагрузка не выбивает надолго.", uk: "Тіло загалом відновлюється вчасно — сон освіжає, навантаження не вибиває надовго.", en: "The body mostly recovers on time — sleep refreshes you and exertion doesn't knock you out for long." },
+    { ru: "Ночной ремонт работает как надо: просыпаешься упругим(ой), а нагрузка идёт на пользу, а не в минус.", uk: "Нічний ремонт працює як треба: прокидаєшся пружним(ою), а навантаження йде на користь, а не в мінус.", en: "Night-time repair works as it should: you wake up firm, and exertion builds you up instead of wearing you down." },
+  ],
+  estrogen: [
+    { ru: "Фон сильно качает: настроение и тело реагируют на всё острее обычного. Это состояние, а не характер, и ему можно помочь.", uk: "Фон сильно гойдає: настрій і тіло реагують на все гостріше, ніж зазвичай. Це стан, а не характер, і йому можна допомогти.", en: "The background swings hard: mood and body react more sharply than usual. It's a state, not a character trait, and it can be helped." },
+    { ru: "Перепады заметны и выматывают — внутренний баланс держится с усилием.", uk: "Перепади помітні й виснажують — внутрішній баланс тримається з зусиллям.", en: "Swings are noticeable and tiring — inner balance takes effort to hold." },
+    { ru: "Баланс держится, но иногда сбивается — особенно когда мало сна или много стресса.", uk: "Баланс тримається, але іноді збивається — особливо коли мало сну або багато стресу.", en: "Balance holds but sometimes slips — especially with too little sleep or too much stress." },
+    { ru: "Фон в основном ровный — настроение и тело предсказуемы, колебания не выбивают из колеи.", uk: "Фон здебільшого рівний — настрій і тіло передбачувані, коливання не вибивають із колії.", en: "The background is mostly even — mood and body are predictable, and swings don't throw you off." },
+    { ru: "Внутренний баланс устойчив: настроение, кожа и тонус работают заодно — хороший знак для всей системы.", uk: "Внутрішній баланс стійкий: настрій, шкіра й тонус працюють заодно — добрий знак для всієї системи.", en: "Inner balance is steady: mood, skin and tone work together — a good sign for the whole system." },
   ],
 };
 
@@ -1426,6 +1449,27 @@ const HORMONE_ADVICE = {
       { ru: "Одна медитативная пауза в середине дня возвращает ясность лучше, чем ещё одна чашка кофе.", uk: "Одна медитативна пауза в середині дня повертає ясність краще, ніж ще одна чашка кави.", en: "One meditative pause mid-day returns clarity better than another cup of coffee." },
     ],
     duration: { ru: "Эффект заметен за несколько дней", uk: "Ефект помітний за кілька днів", en: "Effect is noticeable in a few days" },
+  },
+  somatotropin: {
+    label: { ru: "Дай телу настоящую ночь для ремонта", uk: "Дай тілу справжню ніч для ремонту", en: "Give the body a real night for repair" },
+    steps: [
+      { ru: "Ложись в одно и то же время и держи 7–9 часов — основной выброс гормона роста приходится на первые часы глубокого сна.", uk: "Лягай в один і той самий час і тримай 7–9 годин — основний викид гормону росту припадає на перші години глибокого сну.", en: "Go to bed at the same time and keep 7–9 hours — most growth hormone is released in the first hours of deep sleep." },
+      { ru: "Не ешь тяжёлое и сладкое прямо перед сном: скачок сахара и инсулина приглушает ночной выброс.", uk: "Не їж важке й солодке прямо перед сном: стрибок цукру та інсуліну приглушує нічний викид.", en: "Avoid heavy food and sweets right before bed: a spike in sugar and insulin dampens the night-time release." },
+      { ru: "Добавь 2–3 силовые или интервальные тренировки в неделю — нагрузка сама запускает восстановление. Без фанатизма: перетрен тянет вниз.", uk: "Додай 2–3 силові або інтервальні тренування на тиждень — навантаження саме запускає відновлення. Без фанатизму: перетрен тягне вниз.", en: "Add 2–3 strength or interval sessions a week — exertion itself triggers repair. No fanaticism: overtraining pulls it down." },
+      { ru: "Держи в рационе достаточно белка и не живи на перекусах: паузы между приёмами пищи тоже поддерживают эту систему.", uk: "Тримай у раціоні достатньо білка й не живи на перекусах: паузи між прийомами їжі теж підтримують цю систему.", en: "Get enough protein and don't live on snacks: pauses between meals also support this system." },
+    ],
+    duration: { ru: "1–2 недели регулярного сна · эффект накопительный", uk: "1–2 тижні регулярного сну · ефект накопичувальний", en: "1–2 weeks of regular sleep · cumulative effect" },
+  },
+  estrogen: {
+    label: { ru: "Поддерживай баланс, а не «разгоняй» гормоны", uk: "Підтримуй баланс, а не «розганяй» гормони", en: "Support balance, don't try to 'boost' hormones" },
+    steps: [
+      { ru: "Держи ритм сна и еды: резкие скачки режима и пропуски еды раскачивают фон сильнее всего.", uk: "Тримай ритм сну й їжі: різкі стрибки режиму та пропуски їжі розгойдують фон найсильніше.", en: "Keep a steady rhythm of sleep and meals: abrupt routine changes and skipped meals shake the background the most." },
+      { ru: "Добавь клетчатку и овощи (в том числе капустные) — кишечник участвует в обмене эстрогена.", uk: "Додай клітковину й овочі (зокрема капустяні) — кишечник бере участь в обміні естрогену.", en: "Add fibre and vegetables (including cruciferous ones) — the gut takes part in estrogen metabolism." },
+      { ru: "Умеренная регулярная нагрузка — ходьба, йога, силовые — выравнивает настроение; изнуряющие тренировки и жёсткие диеты действуют наоборот.", uk: "Помірне регулярне навантаження — ходьба, йога, силові — вирівнює настрій; виснажливі тренування й жорсткі дієти діють навпаки.", en: "Moderate regular exercise — walking, yoga, strength work — evens out mood; exhausting workouts and strict diets do the opposite." },
+      { ru: "Снизь алкоголь и фоновый стресс — печень и кортизол напрямую влияют на то, как организм обменивает гормоны.", uk: "Зменш алкоголь і фоновий стрес — печінка й кортизол напряму впливають на те, як організм обмінює гормони.", en: "Cut alcohol and background stress — the liver and cortisol directly affect how the body handles hormones." },
+      { ru: "Если перепады сильные или внезапно изменились — это повод обсудить с врачом (гинеколог, эндокринолог), а не лечиться самостоятельно.", uk: "Якщо перепади сильні або раптом змінилися — це привід обговорити з лікарем (гінеколог, ендокринолог), а не лікуватися самостійно.", en: "If the swings are strong or have suddenly changed — talk to a doctor (gynecologist, endocrinologist) rather than self-treating." },
+    ],
+    duration: { ru: "2–4 недели наблюдения · без добавок и резких решений", uk: "2–4 тижні спостереження · без добавок і різких рішень", en: "2–4 weeks of observation · no supplements or abrupt decisions" },
   },
 };
 
@@ -1507,6 +1551,30 @@ const HORMONE_INFO = {
       { ru: "Холин в питании: яйца, печень, жирная рыба", uk: "Холін у харчуванні: яйця, печінка, жирна риба", en: "Dietary choline: eggs, liver, fatty fish" },
       { ru: "Умственная нагрузка + регулярная физическая активность", uk: "Розумове навантаження + регулярна фізична активність", en: "Mental effort + regular physical activity" },
       { ru: "Качественный сон", uk: "Якісний сон", en: "Quality sleep" },
+    ],
+  },
+  somatotropin: {
+    role: { ru: "Гормон роста. У взрослых он отвечает не за рост, а за ремонт: восстановление тканей, состав тела (мышцы и жир), крепость костей, состояние кожи. Больше всего вырабатывается в первые часы глубокого сна и после интенсивной нагрузки.", uk: "Гормон росту. У дорослих він відповідає не за ріст, а за ремонт: відновлення тканин, склад тіла (м'язи й жир), міцність кісток, стан шкіри. Найбільше виробляється в перші години глибокого сну і після інтенсивного навантаження.", en: "Growth hormone. In adults it is less about growth and more about repair: tissue recovery, body composition (muscle and fat), bone strength and skin condition. Most of it is released in the first hours of deep sleep and after intense exercise." },
+    signs: { ru: "Долгое восстановление после нагрузки, недосып ощущается особенно тяжело, жир на талии при потере мышц, тусклая кожа, медленное заживление, ощущение, что тело сдаёт быстрее, чем голова.", uk: "Довге відновлення після навантаження, недосип відчувається особливо важко, жир на талії при втраті м'язів, тьмяна шкіра, повільне загоєння, відчуття, що тіло здає швидше, ніж голова.", en: "Slow recovery after exertion, short sleep feels especially heavy, fat around the waist with muscle loss, dull skin, slow healing, a sense that the body is giving out faster than the mind." },
+    raise: [
+      { ru: "Глубокий сон 7–9 часов в одно и то же время, в тёмной прохладной комнате", uk: "Глибокий сон 7–9 годин в один і той самий час, у темній прохолодній кімнаті", en: "Deep sleep, 7–9 hours at the same time, in a dark, cool room" },
+      { ru: "Силовые и интервальные тренировки 2–4 раза в неделю с полноценным отдыхом между ними", uk: "Силові та інтервальні тренування 2–4 рази на тиждень із повноцінним відпочинком між ними", en: "Strength and interval training 2–4 times a week with proper rest between sessions" },
+      { ru: "Достаточно белка в рационе; не есть сладкое и тяжёлую еду прямо перед сном", uk: "Достатньо білка в раціоні; не їсти солодке й важку їжу прямо перед сном", en: "Enough protein in the diet; no sweets or heavy meals right before bed" },
+      { ru: "Паузы между приёмами пищи вместо постоянных перекусов", uk: "Паузи між прийомами їжі замість постійних перекусів", en: "Pauses between meals instead of constant snacking" },
+      { ru: "Меньше хронического стресса и алкоголя — оба приглушают ночной выброс", uk: "Менше хронічного стресу й алкоголю — обидва приглушують нічний викид", en: "Less chronic stress and alcohol — both dampen the night-time release" },
+      { ru: "⚠ Препараты гормона роста и «омолаживающие» пептиды — только по назначению врача: самолечение опасно", uk: "⚠ Препарати гормону росту й «омолоджувальні» пептиди — лише за призначенням лікаря: самолікування небезпечне", en: "⚠ Growth hormone drugs and 'anti-aging' peptides — only as prescribed by a doctor: self-treatment is dangerous" },
+    ],
+  },
+  estrogen: {
+    role: { ru: "Группа половых гормонов — главных у женщин, но важных и мужчинам. Влияет на настроение (вместе с серотонином), кожу и волосы, плотность костей, память, тонус сосудов и либидо. Важен именно баланс: и нехватка, и избыток дают перепады.", uk: "Група статевих гормонів — головних у жінок, але важливих і чоловікам. Впливає на настрій (разом із серотоніном), шкіру й волосся, щільність кісток, пам'ять, тонус судин і лібідо. Важливий саме баланс: і нестача, і надлишок дають перепади.", en: "A group of sex hormones — the main ones in women, but important for men too. It affects mood (together with serotonin), skin and hair, bone density, memory, vascular tone and libido. What matters is balance: both too little and too much cause swings." },
+    signs: { ru: "Перепады настроения, раздражительность или слёзы, отёки, сухость кожи, приливы жара и ночная потливость, нерегулярный цикл, снижение либидо, туман в голове.", uk: "Перепади настрою, дратівливість або сльози, набряки, сухість шкіри, припливи жару й нічна пітливість, нерегулярний цикл, зниження лібідо, туман у голові.", en: "Mood swings, irritability or tearfulness, puffiness, dry skin, hot flashes and night sweats, an irregular cycle, lower libido, brain fog." },
+    raise: [
+      { ru: "Регулярный сон и режим питания — без долгих пропусков еды", uk: "Регулярний сон і режим харчування — без довгих пропусків їжі", en: "Regular sleep and meal timing — no long gaps between meals" },
+      { ru: "Клетчатка и овощи (особенно капустные), льняное семя — поддерживают обмен эстрогена в кишечнике", uk: "Клітковина й овочі (особливо капустяні), лляне насіння — підтримують обмін естрогену в кишечнику", en: "Fibre and vegetables (especially cruciferous), flaxseed — support estrogen metabolism in the gut" },
+      { ru: "Полезные жиры: рыба, орехи, оливковое масло — гормоны строятся из жиров", uk: "Корисні жири: риба, горіхи, оливкова олія — гормони будуються з жирів", en: "Healthy fats: fish, nuts, olive oil — hormones are built from fats" },
+      { ru: "Умеренные тренировки; избегай изнурения и жёстких диет", uk: "Помірні тренування; уникай виснаження й жорстких дієт", en: "Moderate exercise; avoid exhaustion and crash diets" },
+      { ru: "Меньше алкоголя и хронического стресса", uk: "Менше алкоголю й хронічного стресу", en: "Less alcohol and chronic stress" },
+      { ru: "⚠ Гормональные препараты и добавки с фитоэстрогенами — только после анализов и по назначению врача", uk: "⚠ Гормональні препарати й добавки з фітоестрогенами — лише після аналізів і за призначенням лікаря", en: "⚠ Hormonal drugs and phytoestrogen supplements — only after lab tests and as prescribed by a doctor" },
     ],
   },
 };
@@ -1609,7 +1677,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     const advice = HORMONE_ADVICE[weakest.key];
     let summary;
     if (weak.length === 0) {
-      summary = tx({ ru: "Критичных просадок нет — все семь систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі сім систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all seven systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
+      summary = tx({ ru: "Критичных просадок нет — все девять систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі дев'ять систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all nine systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
     } else if (weak.length <= 2) {
       const linkWord = tx({ ru: weak.length === 1 ? "одно звено" : "пара звеньев", uk: weak.length === 1 ? "одна ланка" : "пара ланок", en: weak.length === 1 ? "one link" : "a couple of links" });
       const names = weak.map(r => tx(r.meta.name)).join(tx({ ru: " и ", uk: " і ", en: " and " }));
@@ -1625,7 +1693,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
         <div style={S.resultContainer}>
           <div style={S.sectionHead}>
             <p style={S.sectionTitle}>{t.hormoneCode}</p>
-            <InfoButton text={tx({ ru: "«Семь систем, которые управляют мотивацией, спокойствием, сном и фокусом — по твоим ответам, не по анализам.»", uk: "«Сім систем, які керують мотивацією, спокоєм, сном і фокусом — за твоїми відповідями, не за аналізами.»", en: "«Seven systems that drive motivation, calm, sleep and focus — from your answers, not lab tests.»" })} />
+            <InfoButton text={tx({ ru: "«Девять систем, которые управляют мотивацией, спокойствием, сном, восстановлением и балансом — по твоим ответам, не по анализам.»", uk: "«Дев'ять систем, які керують мотивацією, спокоєм, сном, відновленням і балансом — за твоїми відповідями, не за аналізами.»", en: "«Nine systems that drive motivation, calm, sleep, recovery and balance — from your answers, not lab tests.»" })} />
           </div>
           <p style={{ margin: "0 0 18px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>«{summary}»</p>
 
@@ -1674,7 +1742,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
           )}
           {onGoGuide && (
             <button onClick={onGoGuide} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 7 системам", uk: "Все про гормони — гід по всіх 7 системах", en: "All about hormones — guide to all 7 systems" })}</span>
+              <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 9 системам", uk: "Все про гормони — гід по всіх 9 системах", en: "All about hormones — guide to all 9 systems" })}</span>
             </button>
           )}
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
@@ -1695,7 +1763,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text={tx({ ru: "10 вопросов, которые уточняют картину по семи системам — они управляют мотивацией, спокойствием, сном и фокусом. Отвечай первым, что откликается.", uk: "10 питань, які уточнюють картину по семи системах — вони керують мотивацією, спокоєм, сном і фокусом. Відповідай першим, що відгукується.", en: "10 questions that clarify the picture across seven systems — they govern motivation, calm, sleep and focus. Answer with whatever resonates first." })} />
+        <HintPopup text={tx({ ru: "12 вопросов, которые уточняют картину по девяти системам — они управляют мотивацией, спокойствием, сном, восстановлением и балансом. Отвечай первым, что откликается.", uk: "12 питань, які уточнюють картину по дев'яти системах — вони керують мотивацією, спокоєм, сном, відновленням і балансом. Відповідай першим, що відгукується.", en: "12 questions that clarify the picture across nine systems — they govern motivation, calm, sleep, recovery and balance. Answer with whatever resonates first." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
       <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
@@ -1732,7 +1800,7 @@ function HormoneGuideScreen({ onBack, onGoTest }) {
         <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "normal", color: c.ink, letterSpacing: "0.04em" }}>{tx({ ru: "Всё о гормонах", uk: "Все про гормони", en: "All about your hormones" })}</h2>
       </div>
       <p style={{ margin: "0 0 20px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>
-        {tx({ ru: "Семь систем ниже управляют мотивацией, спокойствием, сном, близостью и фокусом. Они не работают по отдельности — просевший сон почти всегда тянет вниз и мотивацию, и настроение. Поэтому для продуктивной и приятной жизни важнее не «взвинтить» одну систему, а убрать то, что тянет вниз сразу несколько: обычно это сон, хронический стресс и постоянная стимуляция экранами.", uk: "Сім систем нижче керують мотивацією, спокоєм, сном, близькістю і фокусом. Вони не працюють окремо — просілий сон майже завжди тягне вниз і мотивацію, і настрій. Тому для продуктивного і приємного життя важливіше не «розкрутити» одну систему, а прибрати те, що тягне вниз одразу кілька: зазвичай це сон, хронічний стрес і постійна стимуляція екранами.", en: "The seven systems below drive motivation, calm, sleep, closeness and focus. They don't work in isolation — poor sleep almost always drags down motivation and mood too. So for a productive, pleasant life it matters more to remove what's dragging several systems down at once — usually sleep, chronic stress, and constant screen stimulation — than to try to max out any single one." })}
+        {tx({ ru: "Девять систем ниже управляют мотивацией, спокойствием, сном, близостью, фокусом, восстановлением и балансом. Они не работают по отдельности — просевший сон почти всегда тянет вниз и мотивацию, и настроение. Поэтому для продуктивной и приятной жизни важнее не «взвинтить» одну систему, а убрать то, что тянет вниз сразу несколько: обычно это сон, хронический стресс и постоянная стимуляция экранами.", uk: "Дев'ять систем нижче керують мотивацією, спокоєм, сном, близькістю, фокусом, відновленням і балансом. Вони не працюють окремо — просілий сон майже завжди тягне вниз і мотивацію, і настрій. Тому для продуктивного і приємного життя важливіше не «розкрутити» одну систему, а прибрати те, що тягне вниз одразу кілька: зазвичай це сон, хронічний стрес і постійна стимуляція екранами.", en: "The nine systems below drive motivation, calm, sleep, closeness, focus, recovery and balance. They don't work in isolation — poor sleep almost always drags down motivation and mood too. So for a productive, pleasant life it matters more to remove what's dragging several systems down at once — usually sleep, chronic stress, and constant screen stimulation — than to try to max out any single one." })}
       </p>
       {keys.map(k => {
         const meta = HORMONE_META[k];
@@ -2354,7 +2422,6 @@ function MetricBlock({ value, rightName, rightSub, fillFrom, fillTo, scaleLabels
 // ТЕРМОМЕТР ВЫГОРАНИЯ — 4 зоны + маркер
 // ─────────────────────────────────────────────
 function BurnoutThermo({ value, rightName, rightSub, quote, animKey }) {
-  const { tx } = useLang();
   const [animVal, setAnimVal] = useState(0);
   const [animLeft, setAnimLeft] = useState(0);
   useEffect(() => {
@@ -2374,7 +2441,7 @@ function BurnoutThermo({ value, rightName, rightSub, quote, animKey }) {
   }, [value, animKey]);
 
   const hiIndex = value <= 25 ? 0 : value <= 50 ? 1 : value <= 75 ? 2 : 3;
-  const labels = [tx({ru:"НЕТ",uk:"НЕМАЄ",en:"NONE"}), tx({ru:"НАЧАЛО",uk:"ПОЧАТОК",en:"EARLY"}), tx({ru:"СРЕДНЕЕ",uk:"СЕРЕДНЄ",en:"MODERATE"}), tx({ru:"ГЛУБОКОЕ",uk:"ГЛИБОКЕ",en:"DEEP"})];
+  const labels = ["НЕТ", "НАЧАЛО", "СРЕДНЕЕ", "ГЛУБОКОЕ"];
 
   return (
     <div style={S.metricBlock}>
@@ -3194,6 +3261,7 @@ function buildChallengeDays(group, lengthDays) {
 const HORMONE_TO_DAILYCHECK_GROUP = {
   cortisol: "anxiety", dopamine: "lowEnergy", serotonin: "recovery",
   gaba: "anxiety", oxytocin: "anxiety", testosterone: "focus", acetylcholine: "focus",
+  somatotropin: "recovery", estrogen: "recovery",
 };
 // Прямое соответствие показателя своей группе — для случая, когда пограничный чек-ин
 // решаем по накопленной за всё время личной истории, а не по гормонам.
@@ -3657,7 +3725,7 @@ function DailyCheckScreen({ onBack }) {
             <MetricBlock
               value={result.avgPct}
               rightName={weakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(weakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
-              rightSub={`${tx({ru:"среднее по",uk:"середнє за",en:"average of"})} ${result.avgCount} ${tx({ ru: result.avgCount === 1 ? "отметке" : "отметкам", uk: result.avgCount === 1 ? "відміткою" : "відмітками", en: result.avgCount === 1 ? "check-in" : "check-ins" })}`}
+              rightSub={`${tx({ru:"среднее по",uk:"середнє за",en:"average of"})} ${result.avgCount} ${tx({ ru: result.avgCount === 1 ? "отметке" : "отметкам", uk: result.avgCount === 1 ? "відмітці" : "відміткам", en: result.avgCount === 1 ? "check-in" : "check-ins" })}`}
               fillFrom="#241D14"
               fillTo="#C8A97E"
               scaleLabels={dcScaleLabels}
@@ -5097,13 +5165,13 @@ function MoodScreen({ onBack }) {
 
   function StatBlock({ data, label }) {
     const stats = calcStats(data);
-    if (!stats) return <p style={{ color:c.inkSoft, fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>{(() => { const lb = { "неделю":{uk:"тиждень",en:"the week"}, "месяц":{uk:"місяць",en:"the month"}, "год":{uk:"рік",en:"the year"} }[label] || {}; return tx({ ru: `Пока нет данных за ${label}.`, uk: `Поки немає даних за ${lb.uk || label}.`, en: `No data for ${lb.en || label} yet.` }); })()}</p>;
+    if (!stats) return <p style={{ color:c.inkSoft, fontStyle:"italic", fontSize:"13px", textAlign:"center", marginTop:"20px" }}>Пока нет данных за {label}.</p>;
     const sorted = Object.entries(stats.counts).sort((a,b) => b[1]-a[1]).filter(([,v]) => v > 0);
     const daysInPeriod = data.length;
     return (
       <div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"16px" }}>
-          <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>{tx({ ru: "из", uk: "з", en: "of" })} {daysInPeriod} {plDays(daysInPeriod, lang)}</p></div>
+          <div style={S.statCard}><p style={S.statNum}>{stats.total}</p><p style={S.statLabel}>из {daysInPeriod} дней</p></div>
           <div style={S.statCard}><p style={S.statNum}>{stats.avgScore}</p><p style={S.statLabel}>{t.avgScore}</p></div>
         </div>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"10px" }}>{tx({ru:'СОСТОЯНИЯ',uk:'СТАНОВИ',en:'STATES'})}</p>
@@ -5113,7 +5181,7 @@ function MoodScreen({ onBack }) {
           return (
             <div key={id} style={{ marginBottom:"8px" }}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"3px" }}>
-                <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em ? emotionLabel(em.id, lang) : ""}</span>
+                <span style={{ fontSize:"13px", color:c.ink }}>{em?.emoji} {em?.label}</span>
                 <span style={{ fontSize:"12px", color:c.inkSoft }}>{pct}%</span>
               </div>
               <div style={{ height:"3px", backgroundColor:"rgba(242,233,216,0.16)", borderRadius:"2px", overflow:"hidden" }}>
@@ -5152,8 +5220,8 @@ function MoodScreen({ onBack }) {
       <div style={{ textAlign:"center", marginBottom:"20px" }}>
         <div style={{ fontSize:"32px", marginBottom:"8px" }}>{title.emoji}</div>
         <p style={{ margin:0, fontSize:"18px", color:c.accent, letterSpacing:"0.05em" }}>{tx(title.name)}</p>
-        <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {plDays(streak, lang)} {tx({ ru: "подряд", uk: "поспіль", en: "in a row" })}</p>
-        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>{tx({ ru: "до", uk: "до", en: "until" })} «{tx(nextTitle.name)}» — {nextTitle.days - streak} {plDays(nextTitle.days - streak, lang)}</p>}
+        <p style={{ margin:"4px 0 0", fontSize:"12px", color:c.inkSoft }}>{streak} {streak===1?"день":streak<5?"дня":"дней"} подряд</p>
+        {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
         <div><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
       <div style={S.wisdomLine} />
@@ -5178,12 +5246,12 @@ function MoodScreen({ onBack }) {
       <p style={{ margin:"0 0 16px", fontSize:"11px", color:c.inkSoft, textAlign:"center", letterSpacing:"0.05em" }}>{t.placeForThoughts}</p>
       <div style={{ margin:"16px 0" }}>
         <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>
-          {todayEmotion ? tx({ ru: "СЕГОДНЯ ТЫ ОТМЕТИЛ", uk: "ТВОЯ ВІДМІТКА СЬОГОДНІ", en: "TODAY'S CHECK-IN" }) : tx({ ru: "КАК ТЫ СЕЙЧАС?", uk: "ЯК ТИ ЗАРАЗ?", en: "HOW ARE YOU NOW?" })}
+          {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
         </p>
         {todayEmotion ? (
           <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px" }}>
             <span style={{ fontSize:"28px" }}>{todayEmotion.emoji}</span>
-            <span style={{ fontSize:"16px", color:c.ink }}>{emotionLabel(todayEmotion.id, lang)}</span>
+            <span style={{ fontSize:"16px", color:c.ink }}>{todayEmotion.label}</span>
           </div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
@@ -5216,9 +5284,9 @@ function MoodScreen({ onBack }) {
           {(() => { const ws = calcStats(weekData.map(d => d.data)); return ws ? (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.weekSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${ws.total} из 7 дней`, uk: `Відмічено ${ws.total} з 7 днів`, en: `Checked in ${ws.total} of 7 days` })}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {ws.avgScore}/10</p>
-              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
+              {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
@@ -5243,9 +5311,9 @@ function MoodScreen({ onBack }) {
           {(() => { const ms = calcStats(monthData); return ms ? (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.monthSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${ms.total} из 30 дней`, uk: `Відмічено ${ms.total} з 30 днів`, en: `Checked in ${ms.total} of 30 days` })}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {ms.avgScore}/10</p>
-              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
+              {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
@@ -5256,7 +5324,7 @@ function MoodScreen({ onBack }) {
           <p style={{ fontSize:"11px", letterSpacing:"0.15em", color:c.accent, marginBottom:"12px" }}>{t.yearMap}</p>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"6px", marginBottom:"16px" }}>
             {(() => {
-              const months = tx({ ru: ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"], uk: ["Січ","Лют","Бер","Кві","Тра","Чер","Лип","Серп","Вер","Жов","Лис","Гру"], en: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] });
+              const months = ["Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек"];
               return Array.from({ length:12 }, (_,mi) => {
                 const monthEntries = allData.filter((_,di) => {
                   const d = new Date(); d.setDate(d.getDate() - (364 - di));
@@ -5273,7 +5341,7 @@ function MoodScreen({ onBack }) {
                   <div key={mi} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
                     <div style={{ width:"42px", height:"42px", borderRadius:"8px", border:`1px solid ${c.cardBorder}`, background: filled.length > 0 ? "rgba(200,169,126,0.08)" : c.plate, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px" }}>{topEmoji}</div>
                     <span style={{ fontSize:"9px", color:c.inkSoft }}>{months[mIdx]}</span>
-                    <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}{tx({ ru: "д", uk: "д", en: "d" })}</span>
+                    <span style={{ fontSize:"8px", color:c.inkSoft }}>{filled.length}д</span>
                   </div>
                 );
               });
@@ -5283,9 +5351,9 @@ function MoodScreen({ onBack }) {
           {allStats && (
             <div style={{ marginTop:"16px", padding:"14px", background:c.plate, border:`1px solid ${c.cardBorder}`, borderRadius:"10px" }}>
               <p style={{ margin:"0 0 8px", fontSize:"13px", color:c.accent }}>{t.yearSummary}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: `Отмечался ${allStats.total} из 365 дней`, uk: `Відмічено ${allStats.total} з 365 днів`, en: `Checked in ${allStats.total} of 365 days` })}</p>
-              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>{tx({ ru: "Средний балл", uk: "Середній бал", en: "Average score" })}: {allStats.avgScore}/10</p>
-              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>{tx({ ru: "Чаще всего:", uk: "Найчастіше:", en: "Most often:" })} {topEm?.emoji} {topEm ? emotionLabel(topEm.id, lang) : ""}</p>; })()}
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
+              <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
+              {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
               <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
           )}
@@ -5315,7 +5383,7 @@ function ShopScreen({ onBack }) {
         <p style={{ fontSize:"14px", color:c.inkSoft, fontStyle:"italic", marginTop:"16px", lineHeight:1.8, textAlign:"center" }}>
           Скоро здесь появятся чаи,<br />{tx({ru:'которые мы выбираем сами.',uk:'які ми обираємо самі.',en:'that we choose ourselves.'})}<br />{t.noExtra}
         </p>
-        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>{tx({ ru: "— скоро —", uk: "— скоро —", en: "— soon —" })}</p>
+        <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
       </div>
       <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.followChannel}</a>
       <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
@@ -5856,15 +5924,15 @@ function MyPathScreen({ onBack }) {
     const isLight = lightHiIds.includes(topId) || lightLoIds.includes(topId);
     moodHiIndex = lightHiIds.includes(topId) ? 3 : (lightLoIds.includes(topId) ? 2 : 0);
     if (isLight) {
-      moodVerdict = tx({ ru: "Становишься мягче к себе. Светлые состояния — твой фон последнее время.", uk: "Ти ставишся до себе м’якше. Світлі стани — твій фон останнім часом.", en: "You are getting gentler with yourself. Lighter states have been your background lately." });
+      moodVerdict = "Становишься мягче к себе. Светлые состояния — твой фон последнее время.";
     } else {
-      moodVerdict = tx({ ru: "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.", uk: "Зараз непросто — важкі стани трапляються частіше за світлі. Бережи себе.", en: "Things are hard right now — heavy states show up more often than light ones. Be gentle with yourself." });
+      moodVerdict = "Сейчас непросто — тяжёлые состояния чаще светлых. Будь к себе бережнее.";
     }
   }
   const moodScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"НЕЙТРАЛЬНО",uk:"НЕЙТРАЛЬНО",en:"NEUTRAL"}), tx({ru:"ПОКОЙ",uk:"СПОКІЙ",en:"CALM"}), tx({ru:"СВЕТЛО",uk:"СВІТЛО",en:"LIGHT"})];
   const otherMoods = moodSorted.slice(1, 4).map(([id, count]) => {
     const em = EMOTIONS.find(e => e.id === id);
-    return { emoji: em?.emoji || "•", name: emotionLabel(id, lang), pct: `${Math.round((count/moodTotal)*100)}%` };
+    return { emoji: em?.emoji || "•", name: em?.label || id, pct: `${Math.round((count/moodTotal)*100)}%` };
   });
 
   return (
@@ -5877,9 +5945,9 @@ function MyPathScreen({ onBack }) {
         <div style={{ fontSize:"52px", marginBottom:"12px" }}>{title.emoji}</div>
         <p style={{ margin:"0 0 4px", fontSize:"24px", color:c.accent, letterSpacing:"0.06em" }}>{tx(title.name)}</p>
         <p style={{ margin:"0 0 6px", fontSize:"12px", color:c.inkSoft, letterSpacing:"0.14em" }}>
-          {streak} {plDays(streak, lang)} {tx({ ru: "практики", uk: "практики", en: "of practice" })}
+          {streak} {streak===1?"день":streak<5?"дня":"дней"} практики
         </p>
-        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>{tx({ ru: "до", uk: "до", en: "until" })} «{tx(nextTitle.name)}» — {nextTitle.days - streak} {plDays(nextTitle.days - streak, lang)}</p>}
+        {nextTitle && <p style={{ margin:0, fontSize:"11px", color:c.inkSoft, fontStyle:"italic" }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
       </div>
       <div style={{ width:"36px", height:"1px", background:c.line, margin:"0 auto 8px" }} />
 
@@ -5945,14 +6013,14 @@ function MyPathScreen({ onBack }) {
       {/* ГОРМОНАЛЬНЫЙ КОД */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>{t.hormoneCode}</p>
-        <InfoButton text={tx({ ru: "«Средний результат по семи системам за последние прохождения теста. Слабое звено — система, которая просела сильнее остальных.»", uk: "«Середній результат по семи системах за останні проходження тесту. Слабка ланка — система, яка просіла найсильніше.»", en: "«Average of the seven systems over recent runs. Weakest link — the system that dipped most.»" })} />
+        <InfoButton text={tx({ ru: "«Средний результат по девяти системам за последние прохождения теста. Слабое звено — система, которая просела сильнее остальных.»", uk: "«Середній результат по дев'яти системах за останні проходження тесту. Слабка ланка — система, яка просіла найсильніше.»", en: "«Average of the nine systems over recent runs. Weakest link — the system that dipped most.»" })} />
       </div>
       {hasHormone ? (
         <>
           <MetricBlock
             value={hormonePct}
             rightName={hormoneWeakest ? `${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(hormoneWeakest.name)}` : t.hormoneCode}
-            rightSub={hormoneLast3.length === 1 ? tx({ ru: "среднее по последнему прохождению", uk: "середнє за останнім проходженням", en: "average of the last run" }) : tx({ ru: `среднее по последним ${hormoneLast3.length} прохождениям`, uk: `середнє за останніми ${hormoneLast3.length} проходженнями`, en: `average of the last ${hormoneLast3.length} runs` })}
+            rightSub={`среднее по ${hormoneLast3.length === 1 ? "последнему прохождению" : `последним ${hormoneLast3.length} прохождениям`}`}
             fillFrom="#241D14"
             fillTo={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
             dotColor={hormoneWeakest ? hormoneWeakest.color : "#C8A97E"}
@@ -5970,7 +6038,7 @@ function MyPathScreen({ onBack }) {
               const pct = Math.round((avgScore - 1) / 4 * 100);
               return (
                 <div key={key} style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
-                  <span style={{ fontSize:"12px", color:c.inkMuted, width:"98px", flexShrink:0 }}>{tx(meta.name)}</span>
+                  <span style={{ fontSize:"12px", color:c.inkMuted, width:"110px", flexShrink:0 }}>{tx(meta.name)}</span>
                   <div style={{ flex:1, height:"4px", background:c.trackBg, borderRadius:"2px", overflow:"hidden" }}>
                     <div style={{ width:`${pct}%`, height:"100%", background:meta.color, borderRadius:"2px" }} />
                   </div>
@@ -5981,7 +6049,7 @@ function MyPathScreen({ onBack }) {
           </div>
         </>
       ) : (
-        <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по семи системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по семи системах.", en: "Take the Hormonal code test — and a seven-system breakdown will appear here." })} />
+        <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по девяти системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по дев'яти системах.", en: "Take the Hormonal code test — and a nine-system breakdown will appear here." })} />
       )}
 
       {/* КОМПАС СОСТОЯНИЯ */}
@@ -5995,7 +6063,7 @@ function MyPathScreen({ onBack }) {
             <MetricBlock
               value={dcAvgPct}
               rightName={dcWeakestQ ? `${tx({ru:"Слабее всего",uk:"Найслабше",en:"Weakest"})}: ${tx(dcWeakestQ.label)}` : tx({ru:"Компас состояния",uk:"Компас стану",en:"State compass"})}
-              rightSub={`${tx({ ru: "среднее по", uk: "середнє за", en: "average of" })} ${dcLast3.length} ${tx({ ru: dcLast3.length === 1 ? "отметке" : "отметкам", uk: dcLast3.length === 1 ? "відміткою" : "відмітками", en: dcLast3.length === 1 ? "check-in" : "check-ins" })}`}
+              rightSub={`${tx({ ru: "среднее по", uk: "середнє за", en: "average of" })} ${dcLast3.length} ${tx({ ru: dcLast3.length === 1 ? "отметке" : "отметкам", uk: dcLast3.length === 1 ? "відмітці" : "відміткам", en: dcLast3.length === 1 ? "check-in" : "check-ins" })}`}
               fillFrom="#241D14"
               fillTo="#C8A97E"
               scaleLabels={dcScaleLabels}
@@ -6137,7 +6205,7 @@ function MyPathScreen({ onBack }) {
       {hasMood ? (
         <MetricBlock
           value={moodPct}
-          rightName={`${topMood.emoji} ${emotionLabel(topMood.id, lang)}`}
+          rightName={`${topMood.emoji} ${topMood.label}`}
           rightSub={t.dominantState}
           fillFrom="#1A2A1A"
           fillTo="#5A8A5A"
