@@ -34,6 +34,10 @@ function isAuthorizedAdmin(req, params) {
 const COUNTERS_KEY = "counters";
 const USERS_SET_KEY = "users";
 const EMOTION_COUNTERS_KEY = "emotionCounts";
+// Переходы по внешним кнопкам приложения (канал / сайт / пак стикеров).
+// Счётчики — атомарный HINCRBY, уникальные люди — SET по uid (SADD идемпотентен).
+// Telegram не сообщает, добавил ли человек пак, поэтому "stickers" = переходы на пак.
+const CLICK_KINDS = ["channel", "site", "stickers"];
 // Обезличенная гистограмма итоговых баллов теста "Склонность к самообману".
 // Не привязана к uid — только распределение по бакетам 0-9/10-19/.../90-100,
 // плюс sum/count для среднего. Нужно, чтобы позже пересчитать границы
@@ -128,7 +132,7 @@ export default async function handler(req, res) {
     // ── Действия только на чтение ──
     if (action === "get") {
       const todayKey = getTodayKey();
-      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters, selfHonestyHistRaw] = await Promise.all([
+      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters, selfHonestyHistRaw, ...clickUniques] = await Promise.all([
         kv.hgetall(COUNTERS_KEY),
         kv.hgetall(`day:${todayKey}`),
         kv.scard(USERS_SET_KEY),
@@ -136,7 +140,16 @@ export default async function handler(req, res) {
         getAllUids(),
         kv.hgetall(EMOTION_COUNTERS_KEY),
         kv.hgetall(SELF_HONESTY_HIST_KEY),
+        ...CLICK_KINDS.map(k => kv.scard(`clickers:${k}`)),
       ]);
+      const clicks = {};
+      CLICK_KINDS.forEach((k, i) => {
+        clicks[k] = {
+          total: Number(counters?.[`clicks_${k}`]) || 0,
+          today: Number(todayStats?.[`clicks_${k}`]) || 0,
+          unique: Number(clickUniques[i]) || 0,
+        };
+      });
       const shCount = Number(selfHonestyHistRaw?.count) || 0;
       const shSum = Number(selfHonestyHistRaw?.sum) || 0;
       const selfHonestyHist = {
@@ -169,6 +182,7 @@ export default async function handler(req, res) {
         todayUnique: todayUniqueCount || 0,
         emotionCounts,
         selfHonestyHist,
+        clicks,
       });
     }
 
@@ -306,6 +320,15 @@ export default async function handler(req, res) {
       if (emotion && VALID_EMOTION_IDS.includes(String(emotion))) {
         await kv.hincrby(EMOTION_COUNTERS_KEY, String(emotion), 1);
       }
+      return res.status(200).json({ ok: true });
+    }
+
+    if (typeof action === "string" && action.startsWith("click_")) {
+      const kind = action.slice(6);
+      if (!CLICK_KINDS.includes(kind)) return res.status(400).json({ error: "Unknown click kind" });
+      const ops = [incrCounter(`clicks_${kind}`), incrToday(`clicks_${kind}`)];
+      if (uid) ops.push(kv.sadd(`clickers:${kind}`, String(uid)));
+      await Promise.all(ops);
       return res.status(200).json({ ok: true });
     }
 

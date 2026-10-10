@@ -536,6 +536,13 @@ function getUidChat() {
   return { uid, chatId };
 }
 
+// Счётчик переходов: kind = "channel" | "site" | "stickers". Сервер считает
+// всего / за сегодня / уникальных людей (по uid). sendBeacon переживает уход
+// из приложения по ссылке.
+function trackClick(kind) {
+  try { statEvent("click_" + kind, getUidChat().uid); } catch {}
+}
+
 // ─────────────────────────────────────────────
 // 100 СОВЕТОВ ДНЯ
 // ─────────────────────────────────────────────
@@ -1751,7 +1758,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
           <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
 
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration: "none", display: "block", textAlign: "center", marginTop: "18px" }}>{t.goChannel}</a>
+          <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration: "none", display: "block", textAlign: "center", marginTop: "18px" }}>{t.goChannel}</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setFinished(false); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4374,7 +4381,7 @@ function QuizScreen({ onBack, onGoCompass }) {
           <p style={{ margin: "14px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx(RESPONSIBILITY_DISCLAIMER)}</p>
 
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>{t.goChannel}</a>
+          <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>{t.goChannel}</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setScores([]); setBurnouts([]); setFinished(false); setShowAdvice(false); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4493,7 +4500,7 @@ function SelfHonestyScreen({ onBack }) {
           </div>
 
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>{t.goChannel}</a>
+          <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"18px" }}>{t.goChannel}</a>
           <button onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setFinished(false); }} style={S.ghostBtn}>{t.again}</button>
           <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
         </div>
@@ -4617,7 +4624,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
             style={{ ...S.shareBtn, display:"block", textAlign:"center", textDecoration:"none", borderColor:"rgba(123,158,176,0.3)", color:"#7B9EB0", marginTop:"18px" }}
           >{t.findYoutube}</a>
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.goChannel}</a>
+          <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.goChannel}</a>
           {onGoGuidance && <button onClick={onGoGuidance} style={S.ghostBtn}>🧘 {tx({ ru: "Наставления по медитации", uk: "Настанови з медитації", en: "Meditation guidance" })}</button>}
           <button onClick={() => setShowChallenge(true)} style={S.ghostBtn}>🍵 {tx({ ru: "Начать челлендж «Чай и дыхание»", uk: "Почати челендж «Чай і дихання»", en: "Start the Tea & Breath challenge" })}</button>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setScores({ shamatha:0, vipassana:0, metta:0, tummo:0, nidra:0, tonglen:0, b478:0, box:0, coherent:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>{t.again}</button>
@@ -4726,7 +4733,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
             <p style={{ margin:0, fontSize:"13px", color:c.accent, fontStyle:"italic", lineHeight:1.7 }}>🍵 {tx(result.note)}</p>
           </div>
           <ShareButton text={shareMsg} />
-          <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>{t.goChannel}</a>
+          <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center", marginTop:"6px" }}>{t.goChannel}</a>
           <button onClick={() => setShowChallenge(true)} style={S.ghostBtn}>🍵 {tx({ ru: "Начать челлендж «Чай и дыхание»", uk: "Почати челендж «Чай і дихання»", en: "Start the Tea & Breath challenge" })}</button>
           <button onClick={() => setShowGongfuChallenge(true)} style={S.ghostBtn}>🫖 {tx({ ru: "Научиться заваривать: челлендж «Гунфу чаепитие»", uk: "Навчитися заварювати: челендж «Гунфу чаювання»", en: "Learn to brew: the Gongfu tea challenge" })}</button>
           <button onClick={() => { setCurrent(0); setSelectedIdx(null); setTeaScores({ shu:0,sheng:0,bai:0,dahong:0,tguan:0,gaba:0 }); setFinished(false); setWinner(null); setSortedScores(null); }} style={S.ghostBtn}>{t.again}</button>
@@ -5396,7 +5403,7 @@ function ShopScreen({ onBack }) {
         </p>
         <p style={{ fontSize:"12px", color:c.inkSoft, marginTop:"24px", letterSpacing:"0.15em" }}>— скоро —</p>
       </div>
-      <a href="https://t.me/TeaBroLife" style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.followChannel}</a>
+      <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...S.primaryBtn, textDecoration:"none", display:"block", textAlign:"center" }}>{t.followChannel}</a>
       <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
     </div>
   );
@@ -5448,6 +5455,7 @@ function AdminScreen({ onBack }) {
         topEmotions,
         maxEmotion,
         selfHonestyHist: serverStats.selfHonestyHist || null,
+        clicks: serverStats.clicks || {},
       });
     } catch (e) {
       setStats({ error: true });
@@ -5599,6 +5607,29 @@ function AdminScreen({ onBack }) {
                 )}
               </span>
             </div>
+          </div>
+
+          {/* ПЕРЕХОДЫ — клики по внешним кнопкам */}
+          <div style={card}>
+            <p style={sectionTitle}>{tx({ru:'ПЕРЕХОДЫ',uk:'ПЕРЕХОДИ',en:'CLICKS'})}</p>
+            {[
+              { key: "channel", icon: "🌕", label: tx({ru:'В канал',uk:'У канал',en:'To channel'}) },
+              { key: "site", icon: "📜", label: tx({ru:'На сайт (библиотека)',uk:'На сайт (бібліотека)',en:'To site (library)'}) },
+              { key: "stickers", icon: "🎴", label: tx({ru:'Стикеры',uk:'Стікери',en:'Stickers'}) },
+            ].map((row, i, arr) => {
+              const d = (stats.clicks && stats.clicks[row.key]) || {};
+              return (
+                <div key={row.key} style={{ ...rowStyle, borderBottom: i === arr.length - 1 ? "none" : rowStyle.borderBottom }}>
+                  <span style={rowLabel}>{row.icon} {row.label}</span>
+                  <span style={rowValue}>
+                    {d.total ?? 0}
+                    <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
+                      {d.unique ?? 0} {tx({ru:'чел.',uk:'осіб',en:'ppl'})} · {tx({ru:'сегодня',uk:'сьогодні',en:'today'})} {d.today ?? 0}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           {/* ТЕСТЫ — строки, как «Топ эмоций» */}
@@ -6456,12 +6487,12 @@ export default function App() {
         ))}
       </div>
       <div style={{ marginTop:"16px", display:"flex", gap:"12px" }}>
-        <a href="https://t.me/TeaBroLife" style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.diary}</a>
-        <a href="https://teabro-site.vercel.app/index.html" style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.library}</a>
+        <a href="https://t.me/TeaBroLife" onClick={() => trackClick("channel")} style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.diary}</a>
+        <a href="https://teabro-site.vercel.app/index.html" onClick={() => trackClick("site")} style={{ ...styles.shopBtn, textDecoration:"none", display:"block", textAlign:"center", boxSizing:"border-box", flex:1 }}>{t.library}</a>
       </div>
       <div style={{ marginTop:"12px" }}>
         <button
-          onClick={() => { openLink("https://t.me/addstickers/p41d646c58853cf12_by_spru"); }}
+          onClick={() => { trackClick("stickers"); openLink("https://t.me/addstickers/p41d646c58853cf12_by_spru"); }}
           style={{ ...styles.shopBtn, fontSize:"13px", display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", padding:"7px 14px" }}
         >
           <StickerLogo />
