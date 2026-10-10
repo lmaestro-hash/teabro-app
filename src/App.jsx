@@ -5633,7 +5633,7 @@ function AdminScreen({ onBack }) {
             <p style={sectionTitle}>{tx({ru:'ПЕРЕХОДЫ',uk:'ПЕРЕХОДИ',en:'CLICKS'})}</p>
             {[
               { key: "channel", icon: "🌕", label: tx({ru:'В канал',uk:'У канал',en:'To channel'}) },
-              { key: "site", icon: "📜", label: tx({ru:'На сайт (библиотека)',uk:'На сайт (бібліотека)',en:'To site (library)'}) },
+              { key: "site", icon: "📜", label: tx({ru:'На сайт',uk:'На сайт',en:'To site'}) },
               { key: "stickers", icon: "🎴", label: tx({ru:'Стикеры',uk:'Стікери',en:'Stickers'}) },
             ].map((row, i, arr) => {
               const d = (stats.clicks && stats.clicks[row.key]) || {};
@@ -5649,34 +5649,6 @@ function AdminScreen({ onBack }) {
                 </div>
               );
             })}
-          </div>
-
-          {/* ИСТОЧНИКИ — откуда приходят новые люди (по метке в ссылке) */}
-          <div style={card}>
-            <p style={sectionTitle}>{tx({ru:'ИСТОЧНИКИ НОВЫХ ЛЮДЕЙ',uk:'ДЖЕРЕЛА НОВИХ ЛЮДЕЙ',en:'NEW USER SOURCES'})}</p>
-            {(() => {
-              const srcLabel = (n) => n === "direct" ? tx({ru:'Напрямую / без метки',uk:'Напряму / без мітки',en:'Direct / no tag'})
-                : n === "share" ? tx({ru:'Поделились людьми',uk:'Поділилися людьми',en:'Shared by users'})
-                : n === "other" ? tx({ru:'Прочие метки',uk:'Інші мітки',en:'Other tags'}) : n;
-              const list = (stats.sources || []).slice(0, 10);
-              if (!list.length) return (
-                <p style={{ fontSize: "12px", color: c.inkSoft, margin: 0 }}>{tx({ru:'Данные начнут копиться после обновления.',uk:'Дані почнуть накопичуватись після оновлення.',en:'Data will start accumulating after the update.'})}</p>
-              );
-              return list.map((row, i) => (
-                <div key={row.name} style={{ ...rowStyle, borderBottom: i === list.length - 1 ? "none" : rowStyle.borderBottom }}>
-                  <span style={rowLabel}>{srcLabel(row.name)}</span>
-                  <span style={rowValue}>
-                    {row.newUsers}
-                    <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
-                      {tx({ru:'новых',uk:'нових',en:'new'})} · {row.opens} {tx({ru:'открытий',uk:'відкриттів',en:'opens'})}
-                    </span>
-                  </span>
-                </div>
-              ));
-            })()}
-            <p style={{ fontSize: "11px", color: c.inkSoft, margin: "10px 0 0", lineHeight: 1.4 }}>
-              {tx({ru:'Метка: t.me/TeaBroLifeBot/TeaBro?startapp=ИМЯ (латиница, цифры, _ и -). «Новых» считается с момента обновления.',uk:'Мітка: t.me/TeaBroLifeBot/TeaBro?startapp=ІМ’Я (латиниця, цифри, _ та -). «Нових» рахується з моменту оновлення.',en:'Tag: t.me/TeaBroLifeBot/TeaBro?startapp=NAME (latin, digits, _ and -). “New” counts since the update.'})}
-            </p>
           </div>
 
           {/* ВОЗВРАЩАЕМОСТЬ — только для людей, впервые пришедших после обновления */}
