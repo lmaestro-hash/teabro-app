@@ -536,6 +536,23 @@ function getUidChat() {
   return { uid, chatId };
 }
 
+// Источник входа: метка из ссылки t.me/TeaBroLifeBot/TeaBro?startapp=ИМЯ.
+// Telegram отдаёт её как start_param (в initDataUnsafe или внутри tgWebAppData
+// в URL-хеше). Нет метки — "direct". Только a-z, 0-9, _ и -, до 24 символов.
+function getStartSource() {
+  let raw = null;
+  try { raw = window.Telegram?.WebApp?.initDataUnsafe?.start_param || null; } catch {}
+  if (!raw) {
+    try {
+      const hp = new URLSearchParams(window.location.hash.slice(1));
+      raw = hp.get("tgWebAppStartParam");
+      if (!raw) { const d = hp.get("tgWebAppData"); if (d) raw = new URLSearchParams(d).get("start_param"); }
+    } catch {}
+  }
+  const clean = String(raw || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 24);
+  return clean || "direct";
+}
+
 // Счётчик переходов: kind = "channel" | "site" | "stickers". Сервер считает
 // всего / за сегодня / уникальных людей (по uid). sendBeacon переживает уход
 // из приложения по ссылке.
@@ -1692,7 +1709,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     } else {
       summary = tx({ ru: "Просело сразу несколько систем, и они тянут друг друга вниз. Это не характер и не лень — это состояние, которое восстанавливается, но само не выправится.", uk: "Просіло одразу кілька систем, і вони тягнуть одна одну вниз. Це не характер і не лінь — це стан, який відновлюється, але сам не вирівняється.", en: "Several systems have dropped at once and are pulling each other down. This isn't a character trait or laziness — it's a state that can recover, but won't fix itself." });
     }
-    const shareMsg = `Гормональный код 🧬\n${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(weakest.meta.name)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Гормональный код 🧬\n${tx({ru:"Слабое звено",uk:"Слабка ланка",en:"Weak link"})}: ${tx(weakest.meta.name)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
 
     return (
       <div style={S.screen}>
@@ -2302,7 +2319,7 @@ function getDateKey(date) {
 
 function shareText(text) {
   const encoded = encodeURIComponent(text);
-  const url = `https://t.me/share/url?url=t.me/TeaBroLifeBot/TeaBro&text=${encoded}`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent("https://t.me/TeaBroLifeBot/TeaBro?startapp=share")}&text=${encoded}`;
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(url);
   } else {
@@ -3731,7 +3748,7 @@ function DailyCheckScreen({ onBack }) {
   }
 
   if (step === "advice" && result) {
-    const shareMsg = `Компас состояния 🧭\n${tx(DAILYCHECK_GROUP_LABEL[result.group])}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Компас состояния 🧭\n${tx(DAILYCHECK_GROUP_LABEL[result.group])}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
     const dcScaleLabels = [tx({ru:"ТЯЖЕЛО",uk:"ВАЖКО",en:"HEAVY"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"РОВНО",uk:"РІВНО",en:"STEADY"}), tx({ru:"НА ПОДЪЁМЕ",uk:"НА ПІДЙОМІ",en:"ON THE RISE"})];
     const dcHiIndex = result.avgPct <= 25 ? 0 : result.avgPct <= 50 ? 1 : result.avgPct <= 75 ? 2 : 3;
     const weakestQ = DAILYCHECK_QUESTIONS.find(q => q.key === result.avgWeakestKey);
@@ -4324,7 +4341,7 @@ function QuizScreen({ onBack, onGoCompass }) {
     const advice = BURNOUT_ADVICE[adviceKey];
     const quizScaleLabels = ["ДАЛЕКО", "НА ПОЛПУТИ", "ПОЧТИ", "ЗДЕСЬ"];
     const quizHiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
-    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nВыгорание: ${tx(burnoutLevel.label)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nВыгорание: ${tx(burnoutLevel.label)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -4465,7 +4482,7 @@ function SelfHonestyScreen({ onBack }) {
     const hiIndex = pct <= 25 ? 0 : pct <= 50 ? 1 : pct <= 75 ? 2 : 3;
     const adviceKey = pct <= 25 ? "low" : pct <= 50 ? "mild" : pct <= 75 ? "medium" : "high";
     const advice = SELF_HONESTY_ADVICE[adviceKey];
-    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `${result.emoji} ${tx(result.title)}\n«${tx(result.subtitle)}»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -4584,7 +4601,7 @@ function MeditationQuizScreen({ onBack, onGoGuidance }) {
       name: tx(MEDITATION_RESULTS[key].name),
       pct: `${i+2}-е место`,
     }));
-    const shareMsg = `Моя практика — ${tx(r.name)} · ${tx(r.tag)}\n\n«${tx(r.why).slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Моя практика — ${tx(r.name)} · ${tx(r.tag)}\n\n«${tx(r.why).slice(0,90)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -4712,7 +4729,7 @@ function TeaQuizScreen({ onBack, onTeaResult }) {
       name: tx(TEA_RESULTS[key].name),
       pct: `${i+2}-е место`,
     }));
-    const shareMsg = `Мой чай сегодня — ${tx(result.name)} ✦\n${tx(result.tag)}\n\n«${tx(result.text).slice(0,80)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+    const shareMsg = `Мой чай сегодня — ${tx(result.name)} ✦\n${tx(result.tag)}\n\n«${tx(result.text).slice(0,80)}...»\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
     return (
       <div style={S.screen}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
@@ -5171,7 +5188,7 @@ function MoodScreen({ onBack }) {
 
   const title = getCurrentTitle(streak);
   const nextTitle = TITLES.find(t => t.days > streak);
-  const shareTitle = `${title.emoji} ${tx({ru:"Мой титул",uk:"Мій титул",en:"My title"})} — «${tx(title.name)}»\n${tx(title.desc)}\n${streak} ${tx({ru:"дней практики",uk:"днів практики",en:"days of practice"})}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`;
+  const shareTitle = `${title.emoji} ${tx({ru:"Мой титул",uk:"Мій титул",en:"My title"})} — «${tx(title.name)}»\n${tx(title.desc)}\n${streak} ${tx({ru:"дней практики",uk:"днів практики",en:"days of practice"})}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`;
   const allStats = calcStats(allData);
   const archetype = allStats ? getArchetype(allStats.counts, allStats.total) : null;
 
@@ -5249,7 +5266,7 @@ function MoodScreen({ onBack }) {
           <p style={{ margin:"0 0 4px", fontSize:"15px", color:c.accent }}>{tx(archetype.name)}</p>
           <p style={{ margin:0, fontSize:"12px", color:c.inkSoft, fontStyle:"italic", lineHeight:1.6 }}>{tx(archetype.desc)}</p>
           <div>
-            <ShareButton text={`${archetype.emoji} ${tx({ru:"Мой архетип",uk:"Мій архетип",en:"My archetype"})} — «${tx(archetype.name)}»\n${tx(archetype.desc)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться архетипом ↗", uk: "Поділитися архетипом ↗", en: "Share archetype ↗" })} />
+            <ShareButton text={`${archetype.emoji} ${tx({ru:"Мой архетип",uk:"Мій архетип",en:"My archetype"})} — «${tx(archetype.name)}»\n${tx(archetype.desc)}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`} label={tx({ ru: "Поделиться архетипом ↗", uk: "Поділитися архетипом ↗", en: "Share archetype ↗" })} />
           </div>
         </div>
       )}
@@ -5305,7 +5322,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ws.total} из 7 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ws.avgScore}/10</p>
               {ws.total > 0 && (() => { const top = Object.entries(ws.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
+              <div><ShareButton text={`📊 Моя неделя в Tea Bro\n\nОтмечался ${ws.total} из 7 дней\nСредний балл: ${ws.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -5332,7 +5349,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {ms.total} из 30 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {ms.avgScore}/10</p>
               {ms.total > 0 && (() => { const top = Object.entries(ms.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
+              <div><ShareButton text={`📊 Мой месяц в Tea Bro\n\nОтмечался ${ms.total} из 30 дней\nСредний балл: ${ms.avgScore}/10\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`} label={tx({ ru: "Поделиться итогом ↗", uk: "Поділитися підсумком ↗", en: "Share summary ↗" })} /></div>
             </div>
           ) : null; })()}
         </div>
@@ -5372,7 +5389,7 @@ function MoodScreen({ onBack }) {
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Отмечался {allStats.total} из 365 дней</p>
               <p style={{ margin:"0 0 4px", fontSize:"13px", color:c.ink }}>Средний балл: {allStats.avgScore}/10</p>
               {allStats.total > 0 && (() => { const top = Object.entries(allStats.counts).sort((a,b) => b[1]-a[1])[0]; const topEm = EMOTIONS.find(e => e.id === top[0]); return <p style={{ margin:0, fontSize:"13px", color:c.ink }}>Чаще всего: {topEm?.emoji} {topEm?.label}</p>; })()}
-              <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
+              <div><ShareButton text={`📊 Мой год в Tea Bro\n\nОтмечался ${allStats.total} дней\nСредний балл: ${allStats.avgScore}/10\n${archetype ? `${tx({ru:"Архетип",uk:"Архетип",en:"Archetype"})}: ${archetype.emoji} ${tx(archetype.name)}` : ""}\n\nTea Bro 🌱 t.me/TeaBroLifeBot/TeaBro?startapp=share`} label={tx({ ru: "Поделиться отчетом ↗", uk: "Поділитися звітом ↗", en: "Share report ↗" })} /></div>
             </div>
           )}
         </div>
@@ -5456,6 +5473,8 @@ function AdminScreen({ onBack }) {
         maxEmotion,
         selfHonestyHist: serverStats.selfHonestyHist || null,
         clicks: serverStats.clicks || {},
+        sources: Array.isArray(serverStats.sources) ? serverStats.sources : [],
+        retention: serverStats.retention || null,
       });
     } catch (e) {
       setStats({ error: true });
@@ -5624,12 +5643,66 @@ function AdminScreen({ onBack }) {
                   <span style={rowValue}>
                     {d.total ?? 0}
                     <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
-                      {d.unique ?? 0} {tx({ru:'чел.',uk:'осіб',en:'ppl'})} · {tx({ru:'сегодня',uk:'сьогодні',en:'today'})} {d.today ?? 0}
+                      {d.unique ?? 0} {tx({ru:'чел.',uk:'осіб',en:'ppl'})}{stats.uniqueTotal > 0 ? ` (${Math.min(100, Math.round(((d.unique ?? 0) / stats.uniqueTotal) * 100))}%)` : ""} · {tx({ru:'сегодня',uk:'сьогодні',en:'today'})} {d.today ?? 0}
                     </span>
                   </span>
                 </div>
               );
             })}
+          </div>
+
+          {/* ИСТОЧНИКИ — откуда приходят новые люди (по метке в ссылке) */}
+          <div style={card}>
+            <p style={sectionTitle}>{tx({ru:'ИСТОЧНИКИ НОВЫХ ЛЮДЕЙ',uk:'ДЖЕРЕЛА НОВИХ ЛЮДЕЙ',en:'NEW USER SOURCES'})}</p>
+            {(() => {
+              const srcLabel = (n) => n === "direct" ? tx({ru:'Напрямую / без метки',uk:'Напряму / без мітки',en:'Direct / no tag'})
+                : n === "share" ? tx({ru:'Поделились людьми',uk:'Поділилися людьми',en:'Shared by users'})
+                : n === "other" ? tx({ru:'Прочие метки',uk:'Інші мітки',en:'Other tags'}) : n;
+              const list = (stats.sources || []).slice(0, 10);
+              if (!list.length) return (
+                <p style={{ fontSize: "12px", color: c.inkSoft, margin: 0 }}>{tx({ru:'Данные начнут копиться после обновления.',uk:'Дані почнуть накопичуватись після оновлення.',en:'Data will start accumulating after the update.'})}</p>
+              );
+              return list.map((row, i) => (
+                <div key={row.name} style={{ ...rowStyle, borderBottom: i === list.length - 1 ? "none" : rowStyle.borderBottom }}>
+                  <span style={rowLabel}>{srcLabel(row.name)}</span>
+                  <span style={rowValue}>
+                    {row.newUsers}
+                    <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
+                      {tx({ru:'новых',uk:'нових',en:'new'})} · {row.opens} {tx({ru:'открытий',uk:'відкриттів',en:'opens'})}
+                    </span>
+                  </span>
+                </div>
+              ));
+            })()}
+            <p style={{ fontSize: "11px", color: c.inkSoft, margin: "10px 0 0", lineHeight: 1.4 }}>
+              {tx({ru:'Метка: t.me/TeaBroLifeBot/TeaBro?startapp=ИМЯ (латиница, цифры, _ и -). «Новых» считается с момента обновления.',uk:'Мітка: t.me/TeaBroLifeBot/TeaBro?startapp=ІМ’Я (латиниця, цифри, _ та -). «Нових» рахується з моменту оновлення.',en:'Tag: t.me/TeaBroLifeBot/TeaBro?startapp=NAME (latin, digits, _ and -). “New” counts since the update.'})}
+            </p>
+          </div>
+
+          {/* ВОЗВРАЩАЕМОСТЬ — только для людей, впервые пришедших после обновления */}
+          <div style={card}>
+            <p style={sectionTitle}>{tx({ru:'ВОЗВРАЩАЕМОСТЬ',uk:'ПОВЕРНЕННЯ',en:'RETENTION'})}</p>
+            {(() => {
+              const r = stats.retention || { cohort: 0, d1: { eligible: 0, returned: 0 }, d7: { eligible: 0, returned: 0 } };
+              const pct = (x) => x.eligible > 0 ? `${Math.round((x.returned / x.eligible) * 100)}%` : "—";
+              return (
+                <>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <div style={metricBig}>
+                      <p style={metricVal}>{pct(r.d1)}</p>
+                      <p style={metricLabel}>{tx({ru:'на 2-й день',uk:'на 2-й день',en:'next day'})} · {r.d1.returned}/{r.d1.eligible}</p>
+                    </div>
+                    <div style={metricBig}>
+                      <p style={metricVal}>{pct(r.d7)}</p>
+                      <p style={metricLabel}>{tx({ru:'за 7 дней',uk:'за 7 днів',en:'within 7 days'})} · {r.d7.returned}/{r.d7.eligible}</p>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: "11px", color: c.inkSoft, margin: "10px 0 0", lineHeight: 1.4 }}>
+                    {tx({ru:`Считаются только новые люди с даты обновления (сейчас ${r.cohort}). Первая цифра созреет через 2 дня, вторая через 8.`,uk:`Рахуються лише нові люди з дати оновлення (зараз ${r.cohort}). Перша цифра дозріє за 2 дні, друга за 8.`,en:`Counts only new users since the update (now ${r.cohort}). First figure matures in 2 days, second in 8.`})}
+                  </p>
+                </>
+              );
+            })()}
           </div>
 
           {/* ТЕСТЫ — строки, как «Топ эмоций» */}
@@ -6336,9 +6409,10 @@ export default function App() {
       }
 
       // Событие открытия с chat_id
+      const srcParam = `&source=${encodeURIComponent(getStartSource())}`;
       const openUrl = chatId
-        ? `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}&chatId=${encodeURIComponent(chatId)}`
-        : `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}`;
+        ? `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}&chatId=${encodeURIComponent(chatId)}${srcParam}`
+        : `${STATS_URL}?action=open&uid=${encodeURIComponent(uid)}${srcParam}`;
       loadQueuedFetch(openUrl);
 
       // ── Snapshot для пушей (фоново, не блокирует UI) ──

@@ -38,6 +38,53 @@ const EMOTION_COUNTERS_KEY = "emotionCounts";
 // Счётчики — атомарный HINCRBY, уникальные люди — SET по uid (SADD идемпотентен).
 // Telegram не сообщает, добавил ли человек пак, поэтому "stickers" = переходы на пак.
 const CLICK_KINDS = ["channel", "site", "stickers"];
+
+// Источники входа и возвращаемость.
+// SOURCES_OPENS_KEY — открытия по метке (из ссылки ?startapp=ИМЯ), SOURCES_NEW_KEY —
+// сколько НОВЫХ людей впервые пришло с этой меткой (first-touch).
+const SOURCES_OPENS_KEY = "sources:opens";
+const SOURCES_NEW_KEY = "sources:new";
+const MAX_SOURCES = 40;
+
+// Метка: только a-z 0-9 _ -, до 24 символов. Нет метки — "direct".
+function cleanSource(raw) {
+  const s = String(raw || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 24);
+  return s || "direct";
+}
+
+// Защита от раздувания: новых меток принимаем не больше MAX_SOURCES, остальные → "other".
+async function pickSourceKey(src) {
+  if (src === "direct" || src === "share" || src === "other") return src;
+  if (Number(await kv.hexists(SOURCES_OPENS_KEY, src)) === 1) return src;
+  const n = Number(await kv.hlen(SOURCES_OPENS_KEY)) || 0;
+  return n >= MAX_SOURCES ? "other" : src;
+}
+
+// Календарный день по Киеву (YYYY-MM-DD) — чтобы "следующий день" совпадал с днём пользователя.
+function kyivDay(ts) {
+  try { return new Date(ts).toLocaleDateString("sv-SE", { timeZone: "Europe/Kyiv" }); }
+  catch { return new Date(ts).toISOString().slice(0, 10); }
+}
+function dayDiff(a, b) {
+  return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000);
+}
+
+// Возвращаемость считается только для людей с firstSeen (впервые пришли после обновления).
+// d1: был активен ровно на следующий календарный день; d7: был активен хотя бы в один из дней 1..7.
+// В выборку человек попадает, только когда окно уже закрылось (возраст >= 2 / >= 8 дней).
+function computeRetention(records, today) {
+  const out = { cohort: 0, d1: { eligible: 0, returned: 0 }, d7: { eligible: 0, returned: 0 } };
+  for (const u of records) {
+    if (!u || !u.firstSeen) continue;
+    out.cohort++;
+    const first = kyivDay(u.firstSeen);
+    const age = dayDiff(first, today);
+    const offs = (Array.isArray(u.days) ? u.days : []).map(d => dayDiff(first, d));
+    if (age >= 2) { out.d1.eligible++; if (offs.includes(1)) out.d1.returned++; }
+    if (age >= 8) { out.d7.eligible++; if (offs.some(k => k >= 1 && k <= 7)) out.d7.returned++; }
+  }
+  return out;
+}
 // Обезличенная гистограмма итоговых баллов теста "Склонность к самообману".
 // Не привязана к uid — только распределение по бакетам 0-9/10-19/.../90-100,
 // плюс sum/count для среднего. Нужно, чтобы позже пересчитать границы
@@ -56,6 +103,9 @@ function defaultUser() {
     pauseUntil: null,
     snapshots: [],
     letters: [],
+    firstSeen: null,
+    firstSource: null,
+    days: [],
   };
 }
 
@@ -70,6 +120,9 @@ async function getUser(uid) {
     pauseUntil: raw.pauseUntil ?? null,
     snapshots: Array.isArray(raw.snapshots) ? raw.snapshots : [],
     letters: Array.isArray(raw.letters) ? raw.letters : [],
+    firstSeen: raw.firstSeen ?? null,
+    firstSource: raw.firstSource ?? null,
+    days: Array.isArray(raw.days) ? raw.days : [],
   };
 }
 
@@ -132,7 +185,7 @@ export default async function handler(req, res) {
     // ── Действия только на чтение ──
     if (action === "get") {
       const todayKey = getTodayKey();
-      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters, selfHonestyHistRaw, ...clickUniques] = await Promise.all([
+      const [counters, todayStats, uniqueTotal, todayUniqueCount, uids, emotionCounters, selfHonestyHistRaw, srcOpensRaw, srcNewRaw, ...clickUniques] = await Promise.all([
         kv.hgetall(COUNTERS_KEY),
         kv.hgetall(`day:${todayKey}`),
         kv.scard(USERS_SET_KEY),
@@ -140,6 +193,8 @@ export default async function handler(req, res) {
         getAllUids(),
         kv.hgetall(EMOTION_COUNTERS_KEY),
         kv.hgetall(SELF_HONESTY_HIST_KEY),
+        kv.hgetall(SOURCES_OPENS_KEY),
+        kv.hgetall(SOURCES_NEW_KEY),
         ...CLICK_KINDS.map(k => kv.scard(`clickers:${k}`)),
       ]);
       const clicks = {};
@@ -163,10 +218,16 @@ export default async function handler(req, res) {
       const emotionCounts = {};
       VALID_EMOTION_IDS.forEach(id => { emotionCounts[id] = Number(emotionCounters?.[id]) || 0; });
       let usersWithChatId = 0;
+      let records = [];
       if (uids.length) {
-        const records = await kv.mget(...uids.map(u => `user:${u}`));
+        records = await kv.mget(...uids.map(u => `user:${u}`));
         usersWithChatId = records.filter(u => u && u.chatId).length;
       }
+      const retention = computeRetention(records, kyivDay(Date.now()));
+      const srcNames = new Set([...Object.keys(srcOpensRaw || {}), ...Object.keys(srcNewRaw || {})]);
+      const sources = [...srcNames]
+        .map(name => ({ name, newUsers: Number(srcNewRaw?.[name]) || 0, opens: Number(srcOpensRaw?.[name]) || 0 }))
+        .sort((a, b) => b.newUsers - a.newUsers || b.opens - a.opens);
       return res.status(200).json({
         totalOpens: Number(counters?.totalOpens) || 0,
         totalQuiz: Number(counters?.totalQuiz) || 0,
@@ -183,6 +244,8 @@ export default async function handler(req, res) {
         emotionCounts,
         selfHonestyHist,
         clicks,
+        sources,
+        retention,
       });
     }
 
@@ -196,15 +259,34 @@ export default async function handler(req, res) {
 
     // ── Действия с записью ──
     if (action === "open") {
+      const srcKey = await pickSourceKey(cleanSource(params.source));
+      let isNewUser = false;
       if (uid) {
+        // Новый = записи о человеке ещё не было. Люди, пришедшие до этого обновления,
+        // остаются без firstSeen и в возвращаемость/источники-first-touch не попадают.
+        const existed = Number(await kv.sismember(USERS_SET_KEY, String(uid))) === 1;
         const user = await getUser(uid);
-        user.lastSeen = Date.now();
+        const now = Date.now();
+        user.lastSeen = now;
         if (chatId) user.chatId = String(chatId);
+        if (!existed && !user.firstSeen) {
+          user.firstSeen = now;
+          user.firstSource = srcKey;
+          isNewUser = true;
+        }
+        if (user.firstSeen) {
+          // Для возвращаемости нужны только дни 0..7 от первого входа — список не растёт.
+          const first = kyivDay(user.firstSeen);
+          const today = kyivDay(now);
+          if (dayDiff(first, today) <= 7 && !user.days.includes(today)) user.days.push(today);
+        }
         await saveUser(uid, user);
         await addTodayUnique(uid);
       }
       await incrCounter("totalOpens");
       await incrToday("opens");
+      await kv.hincrby(SOURCES_OPENS_KEY, srcKey, 1);
+      if (isNewUser) await kv.hincrby(SOURCES_NEW_KEY, srcKey, 1);
       const usersCount = (await getAllUids()).length;
       return res.status(200).json({ ok: true, debug: { uid, chatId, usersCount } });
     }
