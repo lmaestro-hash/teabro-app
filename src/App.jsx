@@ -112,6 +112,7 @@ const UI = {
       dailycheck: { title: "Компас состояния", desc: "Точно узнай, что сейчас не так, и что с этим делать · 10 вопросов" },
       challenges: { title: "Челленджи", desc: "10, 20 или 30 дней практики под своё состояние" },
       mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
+      glimmers: { title: "Глимер дня", desc: "Заметить маленький момент спокойствия" },
       mypath: { title: "Мой профиль", desc: "Мои результаты и прогресс" },
     },
   },
@@ -199,6 +200,7 @@ const UI = {
       dailycheck: { title: "Компас стану", desc: "Точно дізнайся, що зараз не так, і що з цим робити · 10 питань" },
       challenges: { title: "Челенджі", desc: "10, 20 або 30 днів практики під свій стан" },
       mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
+      glimmers: { title: "Глимер дня", desc: "Помітити маленький момент спокою" },
       mypath: { title: "Мій профіль", desc: "Мої результати та прогрес" },
     },
   },
@@ -286,6 +288,7 @@ const UI = {
       dailycheck: { title: "State compass", desc: "Find out exactly what's off, and what to do about it · 10 questions" },
       challenges: { title: "Challenges", desc: "10, 20 or 30 days of practice matched to your state" },
       mood: { title: "My day today", desc: "Mark how you feel" },
+      glimmers: { title: "Glimmer of the day", desc: "Notice one small moment of calm" },
       mypath: { title: "My profile", desc: "My results and progress" },
     },
   },
@@ -3535,6 +3538,7 @@ function DailyCheckScreen({ onBack }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showChallenge, setShowChallenge] = useState(false);
   const [challengePresetGroup, setChallengePresetGroup] = useState(null);
+  const [showGlimmer, setShowGlimmer] = useState(false);
 
   useEffect(() => {
     getHistory("dailycheck_history").then(setIntroHist).catch(() => setIntroHist([]));
@@ -3543,6 +3547,7 @@ function DailyCheckScreen({ onBack }) {
   const startTest = () => { statEvent("dailycheck"); setStep("questions"); };
 
   if (showNotes) return <QuietNotes onBack={() => setShowNotes(false)} />;
+  if (showGlimmer) return <GlimmerScreen onBack={() => setShowGlimmer(false)} initialTab={showGlimmer === "box" ? "box" : "today"} />;
   if (showChallenge) return <ChallengeScreen onBack={() => setShowChallenge(false)} presetGroup={challengePresetGroup} />;
 
   const q = DAILYCHECK_QUESTIONS[current];
@@ -3797,6 +3802,11 @@ function DailyCheckScreen({ onBack }) {
           <button onClick={() => { setChallengePresetGroup(result.group); setShowChallenge(true); }} style={{ width: "100%", padding: "10px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "12px", color: c.inkMuted, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
             <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
           </button>
+          {result.avgPct <= 50 && (
+            <button onClick={() => setShowGlimmer("box")} style={{ width: "100%", padding: "10px", background: c.plate, ...GLASS, border: `1px solid ${c.line}`, borderRadius: "10px", color: c.accent, fontSize: "13px", cursor: "pointer", fontFamily: "'Georgia',serif", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <span>🫶</span><span>{tx({ ru: "Вспомнить, что помогало (глимеры)", uk: "Згадати, що допомагало (глимери)", en: "Recall what helped (glimmers)" })}</span>
+            </button>
+          )}
           {result.groupRecentCount >= 3 && (
             <div style={{ ...S.metricBlock, width: "100%", marginTop: "12px", boxSizing: "border-box", border: "1px solid rgba(200,169,126,0.35)" }}>
               <p style={{ margin: "0 0 10px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.5 }}>
@@ -3847,6 +3857,12 @@ function DailyCheckScreen({ onBack }) {
           </p>
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🌙</span><span>{t.notebook}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
+          </button>
+          <p style={{ ...S.resultSubtitle, margin: "6px 0 12px" }}>
+            {tx({ ru: "А что сегодня дало тебе хоть секунду спокойствия?", uk: "А що сьогодні дало тобі бодай секунду спокою?", en: "And what gave you even a second of calm today?" })}
+          </p>
+          <button onClick={() => setShowGlimmer(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginBottom: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <span>✨</span><span>{tx({ ru: "Глимер дня", uk: "Глимер дня", en: "Glimmer of the day" })}</span><span style={{ color: c.inkSoft, fontSize: "16px" }}>→</span>
           </button>
           <button onClick={onBack} style={{ ...S.primaryBtn, marginTop: "2px" }}>{t.back}</button>
         </div>
@@ -5103,6 +5119,694 @@ function QuietNotes({ onBack }) {
 }
 
 // ─────────────────────────────────────────────
+// ЭКРАН: ЗАЧЕМ ЭТО ВСЁ (концепция «Мой день сегодня» + «Глимер дня»)
+// Общая страница; открывается из обоих разделов. focus = "mood" | "glimmer"
+// определяет, какой раздел показать первым. Без обещаний лечебного эффекта:
+// опираемся на скромные данные и прямо говорим об ограничениях.
+// ─────────────────────────────────────────────
+const CONCEPT_SECTIONS = {
+  idea: {
+    title: { ru: "ИДЕЯ В ОДНОЙ ФРАЗЕ", uk: "ІДЕЯ ОДНИМ РЕЧЕННЯМ", en: "THE IDEA IN ONE LINE" },
+    paras: [{
+      ru: "Чтобы себе помогать, сначала нужно себя заметить. «Мой день» помогает назвать, что со мной сейчас. «Глимер дня» помогает заметить, что мне помогает. Вместе это превращается в твоё личное пособие по себе: без оценок, без диагнозов, без давления.",
+      uk: "Щоб собі допомагати, спершу треба себе помітити. «Мій день» допомагає назвати, що зі мною зараз. «Глимер дня» допомагає помітити, що мені допомагає. Разом це стає твоїм особистим посібником із себе: без оцінок, без діагнозів, без тиску.",
+      en: "To help yourself, you first have to notice yourself. “My day” helps you name what's going on right now. “Glimmer of the day” helps you notice what helps. Together they become your personal guide to yourself: no scores, no diagnoses, no pressure.",
+    }],
+  },
+  mood: {
+    title: { ru: "МОЙ ДЕНЬ СЕГОДНЯ: ЗАЧЕМ НАЗЫВАТЬ СОСТОЯНИЕ", uk: "МІЙ ДЕНЬ СЬОГОДНІ: НАВІЩО НАЗИВАТИ СТАН", en: "MY DAY TODAY: WHY NAME HOW YOU FEEL" },
+    paras: [
+      {
+        ru: "Один выбор из 16 эмоций, примерно 5 секунд. Когда чувство получает точное слово, оно часто становится тише. Это называют называнием эмоций, и в исследованиях оно обычно смягчает реакцию, хотя у разных людей по-разному. Чем точнее слово («усталость», а не просто «плохо»), тем легче понять, что делать дальше.",
+        uk: "Один вибір із 16 емоцій, приблизно 5 секунд. Коли почуття отримує точне слово, воно часто стає тихішим. Це називають називанням емоцій, і в дослідженнях воно зазвичай пом'якшує реакцію, хоча в різних людей по-різному. Чим точніше слово («втома», а не просто «погано»), тим легше зрозуміти, що робити далі.",
+        en: "One choice out of 16 emotions, about 5 seconds. When a feeling gets an exact word, it often gets quieter. This is called affect labeling, and in studies it usually softens the reaction, though it varies from person to person. The more precise the word (“exhausted” rather than just “bad”), the easier it is to see what to do next.",
+      },
+      {
+        ru: "Со временем карта недели, месяца и года показывает твои ритмы: когда тебе легче, когда тяжелее. За регулярность даются титулы, а по отметкам определяется архетип. Это игровое зеркало, а не оценка тебя.",
+        uk: "З часом карта тижня, місяця і року показує твої ритми: коли тобі легше, коли важче. За регулярність дають титули, а за відмітками визначається архетип. Це ігрове дзеркало, а не оцінка тебе.",
+        en: "Over time the week, month and year maps show your rhythms: when it's easier, when it's harder. Regularity earns titles, and your entries shape an archetype. It's a playful mirror, not a verdict on you.",
+      },
+    ],
+  },
+  glimmer: {
+    title: { ru: "ГЛИМЕР ДНЯ: ЗАЧЕМ ЗАМЕЧАТЬ ХОРОШЕЕ", uk: "ГЛИМЕР ДНЯ: НАВІЩО ПОМІЧАТИ ДОБРЕ", en: "GLIMMER OF THE DAY: WHY NOTICE THE GOOD" },
+    paras: [
+      {
+        ru: "Глимер — маленький момент, когда внутри становится чуть спокойнее или теплее: запах чая, луч света, тёплая кружка в руках. Мозг по умолчанию сильнее цепляется за плохое (это называют негативным смещением), а хорошее проскакивает незамеченным. Намеренно замечать приятное — простая тренировка внимания. У таких практик в исследованиях обычно небольшой или умеренный эффект на самочувствие.",
+        uk: "Глимер — маленький момент, коли всередині стає трохи спокійніше або тепліше: запах чаю, промінь світла, тепла кружка в руках. Мозок за замовчуванням сильніше чіпляється за погане (це називають негативним зміщенням), а добре проскакує непоміченим. Навмисно помічати приємне — просте тренування уваги. У таких практик у дослідженнях зазвичай невеликий або помірний ефект на самопочуття.",
+        en: "A glimmer is a small moment when something inside feels a little calmer or warmer: the smell of tea, a ray of light, a warm mug in your hands. By default the brain clings harder to the bad (called negativity bias), and the good slips by unnoticed. Deliberately noticing pleasant things is a simple attention exercise. In studies such practices usually show a small to moderate effect on wellbeing.",
+      },
+      {
+        ru: "Слово «глимер» пришло из поливагальной теории (Деб Дана). Часть учёных эту теорию критикует, поэтому мы не обещаем «перенастройку нервной системы». Для нас это практика внимания и честный эксперимент над собой.",
+        uk: "Слово «глимер» прийшло з полівагальної теорії (Деб Дана). Частина вчених цю теорію критикує, тому ми не обіцяємо «перенастроювання нервової системи». Для нас це практика уваги і чесний експеримент над собою.",
+        en: "The word “glimmer” comes from polyvagal theory (Deb Dana). Some scientists criticize that theory, so we don't promise to “rewire your nervous system”. For us this is an attention practice and an honest experiment on yourself.",
+      },
+    ],
+  },
+  together: {
+    title: { ru: "КАК ЭТО РАБОТАЕТ ВМЕСТЕ", uk: "ЯК ЦЕ ПРАЦЮЄ РАЗОМ", en: "HOW IT WORKS TOGETHER" },
+    paras: [{ ru: "Заметил → назвал → вспомнил → повторил.", uk: "Помітив → назвав → згадав → повторив.", en: "Notice → name → recall → repeat." }],
+    items: [
+      { ru: "«Мой день»: назвать состояние.", uk: "«Мій день»: назвати стан.", en: "“My day”: name how you feel." },
+      { ru: "«Глимер дня»: записать, что дало секунду спокойствия и насколько это помогло.", uk: "«Глимер дня»: записати, що дало секунду спокою і наскільки це допомогло.", en: "“Glimmer of the day”: log what gave you a second of calm and how much it helped." },
+      { ru: "Неделя глимеров: после 7 отмеченных дней (не обязательно подряд) приложение собирает самые тёплые моменты и то, что помогало чаще всего.", uk: "Тиждень глимерів: після 7 відмічених днів (не обов'язково підряд) застосунок збирає найтепліші моменти і те, що допомагало найчастіше.", en: "Glimmer week: after 7 marked days (not necessarily in a row) the app collects your warmest moments and what helped most often." },
+      { ru: "Копилка: твоё личное пособие. В тяжёлый день открой её и повтори то, что уже помогало тебе.", uk: "Скарбничка: твій особистий посібник. У важкий день відкрий її і повтори те, що вже допомагало тобі.", en: "The Jar: your personal guide. On a hard day open it and repeat what has already helped you." },
+      { ru: "Компас состояния даёт замер, а «Связь с Компасом» сравнивает дни с глимерами и без них. Это наблюдение, а не доказательство причины.", uk: "Компас стану дає замір, а «Зв'язок із Компасом» порівнює дні з глимерами та без них. Це спостереження, а не доказ причини.", en: "The state Compass gives a measurement, and “Link with the Compass” compares days with and without glimmers. It's an observation, not proof of cause." },
+    ],
+  },
+  benefits: {
+    title: { ru: "ЧТО ЭТО ДАЁТ", uk: "ЩО ЦЕ ДАЄ", en: "WHAT YOU GET" },
+    items: [
+      { ru: "Лучше понимаешь себя: видишь, что на тебя действует.", uk: "Краще розумієш себе: бачиш, що на тебе діє.", en: "You understand yourself better: you see what affects you." },
+      { ru: "Видишь повторы: что помогает чаще, в какое время суток, какие эмоции возвращаются.", uk: "Бачиш повтори: що допомагає частіше, в яку пору доби, які емоції повертаються.", en: "You see patterns: what helps more often, at what time of day, which emotions keep returning." },
+      { ru: "В тяжёлый момент не нужно вспоминать с нуля: твои собственные ответы лежат под рукой.", uk: "У важкий момент не треба згадувати з нуля: твої власні відповіді лежать під рукою.", en: "In a hard moment you don't start from zero: your own answers are at hand." },
+      { ru: "Это занимает меньше минуты. В «Глимере дня» нет серий и оценок.", uk: "Це займає менше хвилини. У «Глимері дня» немає серій і оцінок.", en: "It takes under a minute. “Glimmer of the day” has no streaks and no scores." },
+    ],
+  },
+  limits: {
+    title: { ru: "ЧЕГО ЭТО НЕ ДЕЛАЕТ", uk: "ЧОГО ЦЕ НЕ РОБИТЬ", en: "WHAT IT DOES NOT DO" },
+    paras: [{
+      ru: "Это не лечение и не диагностика, и результат не гарантирован. Если тяжело долго, пропали сон, аппетит или интерес к жизни, поговори с близким человеком или специалистом. Приложение помогает наблюдать за собой, но не заменяет помощь.",
+      uk: "Це не лікування і не діагностика, і результат не гарантований. Якщо важко довго, зникли сон, апетит або інтерес до життя, поговори з близькою людиною або фахівцем. Застосунок допомагає спостерігати за собою, але не замінює допомогу.",
+      en: "This is not treatment or diagnosis, and results are not guaranteed. If things are hard for a long time, or sleep, appetite or interest in life are gone, talk to someone close or a professional. The app helps you observe yourself; it doesn't replace help.",
+    }],
+  },
+  minute: {
+    title: { ru: "КАК ПОЛЬЗОВАТЬСЯ ЗА МИНУТУ", uk: "ЯК КОРИСТУВАТИСЯ ЗА ХВИЛИНУ", en: "HOW TO USE IT IN A MINUTE" },
+    items: [
+      { ru: "Утром или вечером: отметь состояние одним словом (5 секунд).", uk: "Вранці або ввечері: відміть стан одним словом (5 секунд).", en: "Morning or evening: mark how you feel in one word (5 seconds)." },
+      { ru: "Поймал приятный момент: запиши глимер (10–20 секунд). До 5 в день достаточно.", uk: "Упіймав приємний момент: запиши глимер (10–20 секунд). До 5 на день достатньо.", en: "Caught a pleasant moment: log a glimmer (10–20 seconds). Up to 5 a day is plenty." },
+      { ru: "Трудный момент: нажми «Вспомнить, что помогало» и повтори одно простое действие.", uk: "Важкий момент: натисни «Згадати, що допомагало» і повтори одну просту дію.", en: "Hard moment: tap “Recall what helped” and repeat one simple action." },
+      { ru: "Раз в неделю загляни в итог: что помогало.", uk: "Раз на тиждень зазирни в підсумок: що допомагало.", en: "Once a week look at the summary: what helped." },
+    ],
+    paras: [{ ru: "Не нужно каждый день и не нужно идеально. Лучше мало, но по-настоящему.", uk: "Не треба щодня і не треба ідеально. Краще мало, але по-справжньому.", en: "Not every day, not perfectly. Better a little, but for real." }],
+  },
+  science: {
+    title: { ru: "НА ЧТО ЭТО ОПИРАЕТСЯ (ДЛЯ ЛЮБОПЫТНЫХ)", uk: "НА ЩО ЦЕ ОПИРАЄТЬСЯ (ДЛЯ ЦІКАВИХ)", en: "WHAT IT RESTS ON (FOR THE CURIOUS)" },
+    items: [
+      { ru: "Называние эмоций: фМРТ-исследование Либермана и коллег (2007) показало, что подпись эмоции словом снижает активность миндалевидного тела.", uk: "Називання емоцій: фМРТ-дослідження Лібермана та колег (2007) показало, що підпис емоції словом знижує активність мигдалеподібного тіла.", en: "Affect labeling: an fMRI study by Lieberman and colleagues (2007) found that putting a word to an emotion reduces amygdala activity." },
+      { ru: "Эмоциональная гранулярность: умение различать эмоции точнее связывают с лучшей саморегуляцией (работы Лизы Фельдман Барретт).", uk: "Емоційна гранулярність: вміння розрізняти емоції точніше пов'язують із кращою саморегуляцією (роботи Лізи Фельдман Барретт).", en: "Emotional granularity: telling emotions apart more precisely is linked to better self-regulation (work of Lisa Feldman Barrett)." },
+      { ru: "Негативное смещение и практики внимания к приятному (savoring, благодарность): в метаанализах чаще небольшой или умеренный эффект.", uk: "Негативне зміщення і практики уваги до приємного (savoring, вдячність): у метааналізах частіше невеликий або помірний ефект.", en: "Negativity bias and practices of attending to the pleasant (savoring, gratitude): meta-analyses mostly report small to moderate effects." },
+    ],
+    paras: [{ ru: "Везде эффекты скромные и зависят от человека. Мы относимся к этому как к полезной привычке, а не к методу лечения.", uk: "Скрізь ефекти скромні й залежать від людини. Ми ставимось до цього як до корисної звички, а не до методу лікування.", en: "Effects are modest everywhere and depend on the person. We treat this as a useful habit, not a treatment method." }],
+  },
+  data: {
+    title: { ru: "ТВОИ ДАННЫЕ", uk: "ТВОЇ ДАНІ", en: "YOUR DATA" },
+    paras: [{
+      ru: "Тексты твоих записей хранятся в твоём Telegram и на наш сервер не отправляются. Мы видим только общие счётчики: сколько раз открывали экран, сколько человек им пользуется, какие эмоции выбирают в целом.",
+      uk: "Тексти твоїх записів зберігаються у твоєму Telegram і на наш сервер не надсилаються. Ми бачимо лише загальні лічильники: скільки разів відкривали екран, скільки людей ним користується, які емоції обирають загалом.",
+      en: "The text of your entries is stored in your Telegram and is not sent to our server. We only see overall counters: how many times the screen was opened, how many people use it, which emotions people choose overall.",
+    }],
+  },
+};
+function ConceptScreen({ onBack, focus }) {
+  const { t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const C = CONCEPT_SECTIONS;
+  const order = focus === "glimmer"
+    ? ["idea", "glimmer", "mood", "together", "benefits", "limits", "minute", "science", "data"]
+    : ["idea", "mood", "glimmer", "together", "benefits", "limits", "minute", "science", "data"];
+  const card = { background: c.card, ...GLASS, border: `1px solid ${c.cardBorder}`, borderRadius: "12px", padding: "16px", marginBottom: "12px" };
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <p style={{ fontSize: "20px", fontWeight: "normal", margin: "0 0 4px" }}>{tx({ ru: "Зачем это всё", uk: "Навіщо це все", en: "Why all this" })}</p>
+      <p style={{ fontSize: "13px", color: c.inkSoft, margin: "0 0 16px", lineHeight: 1.6 }}>{tx({ ru: "Идея «Мой день сегодня» и «Глимер дня»: что мы делаем и ради чего.", uk: "Ідея «Мій день сьогодні» і «Глимер дня»: що ми робимо і заради чого.", en: "The idea behind “My day today” and “Glimmer of the day”: what we do and why." })}</p>
+      {order.map(id => {
+        const sec = C[id];
+        return (
+          <div key={id} style={card}>
+            <p style={{ fontSize: "11px", letterSpacing: "0.15em", color: c.accent, margin: "0 0 10px" }}>{tx(sec.title)}</p>
+            {(sec.paras || []).map((p, i) => <p key={"p" + i} style={{ fontSize: "14px", color: c.ink, lineHeight: 1.7, margin: "0 0 10px" }}>{tx(p)}</p>)}
+            {(sec.items || []).map((it, i) => (
+              <p key={"i" + i} style={{ fontSize: "14px", color: c.ink, lineHeight: 1.6, margin: "0 0 8px", paddingLeft: "14px", textIndent: "-14px" }}>• {tx(it)}</p>
+            ))}
+          </div>
+        );
+      })}
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
+    </div>
+  );
+}
+function ConceptLink({ onClick, c, tx }) {
+  return (
+    <div style={{ textAlign: "center", margin: "0 0 14px" }}>
+      <button onClick={onClick} style={{ background: "none", border: `1px dashed ${c.cardBorder}`, borderRadius: "999px", padding: "6px 14px", color: c.accent, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>
+        ⓘ {tx({ ru: "Зачем это нужно", uk: "Навіщо це потрібно", en: "Why this matters" })}
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ЭКРАН: ГЛИМЕР ДНЯ
+// Глимер — микро-момент, когда внутри становится чуть спокойнее/теплее.
+// Хранение (как у «Мой день сегодня» — по ключу на день, навсегда):
+//   glimmers_<дата>   — записи дня (до 5), маленькое значение (лимит CloudStorage 4096)
+//   glimmer_cycle     — начало текущего 7-дневного цикла (ms)
+//   gdigest_<n>       — итог n-й собранной недели; gdigest_count — сколько их
+// После 7 ОТМЕЧЕННЫХ дней (не обязательно подряд) собирается итог недели:
+// самые тёплые моменты + что помогало чаще всего. Это «пособие», к которому
+// можно вернуться, когда нужно вспомнить, что помогает.
+// ─────────────────────────────────────────────
+const GLIMMER_TAGS = [
+  { id: "tea", emoji: "☕", label: { ru: "чай", uk: "чай", en: "tea" } },
+  { id: "light", emoji: "☀️", label: { ru: "свет и тепло", uk: "світло і тепло", en: "light & warmth" } },
+  { id: "nature", emoji: "🌿", label: { ru: "природа", uk: "природа", en: "nature" } },
+  { id: "sound", emoji: "🔊", label: { ru: "звук", uk: "звук", en: "sound" } },
+  { id: "scent", emoji: "👃", label: { ru: "запах", uk: "запах", en: "scent" } },
+  { id: "person", emoji: "🤝", label: { ru: "человек", uk: "людина", en: "a person" } },
+  { id: "body", emoji: "♥️", label: { ru: "сердце", uk: "серце", en: "heart" } }, // id "body" оставлен, чтобы старые записи не потерялись
+  { id: "animals", emoji: "🐾", label: { ru: "животные", uk: "тварини", en: "animals" } },
+  { id: "water", emoji: "💧", label: { ru: "вода", uk: "вода", en: "water" } },
+  { id: "fire", emoji: "🔥", label: { ru: "огонь", uk: "вогонь", en: "fire" } },
+  { id: "taste", emoji: "🍯", label: { ru: "вкус", uk: "смак", en: "taste" } },
+  { id: "music", emoji: "🎵", label: { ru: "музыка", uk: "музика", en: "music" } },
+  { id: "silence", emoji: "🤫", label: { ru: "тишина", uk: "тиша", en: "silence" } },
+  { id: "laugh", emoji: "😄", label: { ru: "смех", uk: "сміх", en: "laughter" } },
+  { id: "walk", emoji: "🚶", label: { ru: "прогулка", uk: "прогулянка", en: "a walk" } },
+  { id: "craft", emoji: "🎨", label: { ru: "творчество", uk: "творчість", en: "making" } },
+];
+const GLIMMER_STRENGTH = [
+  { v: 1, emoji: "🙂", label: { ru: "чуть", uk: "трохи", en: "a little" } },
+  { v: 2, emoji: "😌", label: { ru: "заметно", uk: "помітно", en: "noticeably" } },
+  { v: 3, emoji: "🌟", label: { ru: "сильно", uk: "сильно", en: "a lot" } },
+];
+const GLIMMER_TOD = {
+  morning: { ru: "утром", uk: "вранці", en: "in the morning" },
+  day: { ru: "днём", uk: "вдень", en: "during the day" },
+  evening: { ru: "вечером", uk: "ввечері", en: "in the evening" },
+  night: { ru: "ночью", uk: "вночі", en: "at night" },
+};
+const GLIMMER_TRY = {
+  tea: { ru: "Завари чашку и первые три глотка сделай медленно, вдыхая аромат.", uk: "Завари чашку і перші три ковтки зроби повільно, вдихаючи аромат.", en: "Brew a cup and take the first three sips slowly, breathing in the aroma." },
+  light: { ru: "Подойди к окну или выйди на улицу и постой минуту, подставив лицо свету.", uk: "Підійди до вікна або вийди надвір і постій хвилину, підставивши обличчя світлу.", en: "Step to a window or outside and stand for a minute, face to the light." },
+  nature: { ru: "Выйди на минуту к растениям, воде или деревьям и просто посмотри.", uk: "Вийди на хвилину до рослин, води чи дерев і просто подивись.", en: "Spend a minute near plants, water or trees and just look." },
+  sound: { ru: "Включи звук, который тебя успокаивает, или минуту послушай тишину.", uk: "Увімкни звук, який тебе заспокоює, або хвилину послухай тишу.", en: "Play a sound that calms you, or listen to the quiet for a minute." },
+  scent: { ru: "Вдохни то, что приятно пахнет: чай, мёд, дерево, хвою.", uk: "Вдихни те, що приємно пахне: чай, мед, дерево, хвою.", en: "Breathe in something that smells good: tea, honey, wood, pine." },
+  person: { ru: "Напиши или позвони тому, рядом с кем тебе спокойно.", uk: "Напиши або зателефонуй тому, поруч із ким тобі спокійно.", en: "Message or call someone you feel calm around." },
+  body: { ru: "Положи руку на грудь и сделай три медленных вдоха.", uk: "Поклади руку на груди і зроби три повільних вдихи.", en: "Put a hand on your chest and take three slow breaths." },
+  animals: { ru: "Побудь минуту рядом с животным: погладь, понаблюдай, просто посиди рядом.", uk: "Побудь хвилину поруч із твариною: погладь, понаглядай, просто посидь поруч.", en: "Spend a minute near an animal: pet it, watch it, or just sit beside it." },
+  water: { ru: "Подержи руки под тёплой водой или посмотри на воду. Минуты хватит.", uk: "Потримай руки під теплою водою або подивись на воду. Хвилини вистачить.", en: "Hold your hands under warm water or just watch water. A minute is enough." },
+  fire: { ru: "Зажги свечу и посмотри на пламя минуту, не делая ничего больше.", uk: "Запали свічку і подивись на полум'я хвилину, не роблячи більше нічого.", en: "Light a candle and watch the flame for a minute, doing nothing else." },
+  taste: { ru: "Возьми что-то вкусное и съешь первый кусочек медленно, без телефона.", uk: "Візьми щось смачне і з'їж перший шматочок повільно, без телефону.", en: "Take something tasty and eat the first bite slowly, phone away." },
+  music: { ru: "Включи одну песню, которая тебя греет, и просто дослушай её до конца.", uk: "Увімкни одну пісню, яка тебе гріє, і просто дослухай її до кінця.", en: "Put on one song that warms you and listen to it all the way through." },
+  silence: { ru: "Отложи всё и посиди минуту в тишине, без звука и экрана.", uk: "Відклади все і посидь хвилину в тиші, без звуку і екрана.", en: "Put everything down and sit for a minute in quiet, no sound, no screen." },
+  laugh: { ru: "Вспомни или найди то, что тебя рассмешило, и дай себе улыбнуться.", uk: "Згадай або знайди те, що тебе розсмішило, і дай собі усміхнутися.", en: "Recall or find something that made you laugh and let yourself smile." },
+  walk: { ru: "Выйди на пять минут пройтись, без цели и без телефона в руках.", uk: "Вийди на п'ять хвилин пройтися, без мети і без телефону в руках.", en: "Step out for a five-minute walk, no goal, no phone in hand." },
+  craft: { ru: "Займись руками пять минут: слепи, нарисуй, перебери, почини, что-то небольшое.", uk: "Займись руками п'ять хвилин: ліпи, малюй, перебери, полагодь щось невелике.", en: "Use your hands for five minutes: shape, draw, sort, or fix something small." },
+};
+// Свои теги пользователя (до 5 активных). Хранятся в ключе glimmer_tags; «убранный» тег
+// не удаляется, а прячется (hidden), чтобы старые записи не теряли подпись.
+let GLIMMER_CUSTOM = [];
+const GLIMMER_CUSTOM_MAX = 5;
+function glimmerTag(id) { return GLIMMER_TAGS.find(g => g.id === id) || GLIMMER_CUSTOM.find(g => g.id === id) || null; }
+async function loadGlimmerCustomTags() {
+  try {
+    const raw = await CS.get("glimmer_tags");
+    const a = raw ? JSON.parse(raw) : [];
+    GLIMMER_CUSTOM = Array.isArray(a) ? a.filter(x => x && x.id && x.label) : [];
+  } catch { GLIMMER_CUSTOM = []; }
+  return GLIMMER_CUSTOM;
+}
+const GLIMMER_DAY_CAP = 5;
+const GLIMMER_NOTE_MAX = 140;
+const GLIMMER_CYCLE_DAYS = 7;
+const GLIMMER_LOOKBACK = 90;
+function glimmerKey(date) { return "glimmers_" + getDateKey(date); }
+function parseGlimmerList(raw) {
+  try { const a = raw ? JSON.parse(raw) : []; return Array.isArray(a) ? a : []; } catch { return []; }
+}
+// последние n дней, индекс 0 = сегодня; один батч-запрос (см. CS.getMultiple)
+async function loadGlimmerDays(n) {
+  const dates = [];
+  for (let i = 0; i < n; i++) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d); }
+  const keys = dates.map(glimmerKey);
+  let map = {};
+  try { map = (await CS.getMultiple(keys)) || {}; } catch { map = {}; }
+  return dates.map((d, i) => ({ date: d, items: parseGlimmerList(map[keys[i]]) }));
+}
+function glimmerFlat(days) {
+  const out = [];
+  (days || []).forEach(d => d.items.forEach(it => out.push({ date: d.date, it })));
+  return out;
+}
+// профиль: простая сводка без весов
+function glimmerStats(days) {
+  const counts = {};
+  let total = 0;
+  (days || []).forEach(d => d.items.forEach(it => {
+    total++;
+    (it.t || []).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+  }));
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 2)
+    .map(([id]) => glimmerTag(id)).filter(Boolean);
+  return { total, top };
+}
+// что помогало: вес записи = её сила (1–3), без оценки считается за 1
+function glimmerTopTags(days, k) {
+  const w = {};
+  glimmerFlat(days).forEach(({ it }) => { const wt = it.s || 1; (it.t || []).forEach(id => { w[id] = (w[id] || 0) + wt; }); });
+  return Object.entries(w).sort((a, b) => b[1] - a[1]).slice(0, k).map(([id, v]) => ({ id, v }));
+}
+function glimmerTod(ts) {
+  const h = new Date(ts).getHours();
+  return h >= 5 && h < 11 ? "morning" : h >= 11 && h < 17 ? "day" : h >= 17 && h < 23 ? "evening" : "night";
+}
+// время суток называем только если оно реально повторяется (≥2 записей)
+function glimmerTopTod(days) {
+  const cnt = {};
+  glimmerFlat(days).forEach(({ it }) => { if (!it.id) return; const k = glimmerTod(it.id); cnt[k] = (cnt[k] || 0) + 1; });
+  const e = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
+  return e.length && e[0][1] >= 2 ? e[0][0] : null;
+}
+// самые тёплые: сначала с высокой силой, потом с заметкой, потом свежие
+function glimmerBestMoments(days, k) {
+  return glimmerFlat(days)
+    .filter(({ it }) => it.n || it.s || (it.t || []).length)
+    .map(x => ({ ...x, score: (x.it.s || 0) * 10 + (x.it.n ? 3 : 0) + ((x.it.t || []).length ? 1 : 0) }))
+    .sort((a, b) => b.score - a.score || (b.it.id || 0) - (a.it.id || 0))
+    .slice(0, k);
+}
+// Связь с Компасом: среднее «внутреннее спокойствие» в дни с глимерами и без них.
+// Это совпадение по дням, а не причина; считаем только по отметкам внутри окна дней.
+function glimmerCompassLink(hist, days) {
+  const gmap = {};
+  (days || []).forEach(d => { gmap[getDateKey(d.date)] = d.items.length > 0; });
+  const withG = [], without = [];
+  (hist || []).forEach(h => {
+    const v = h && h.indicators ? h.indicators.calm : null;
+    if (typeof v !== "number" || !h.ts) return;
+    const k = getDateKey(new Date(h.ts));
+    if (!(k in gmap)) return;
+    const pct = Math.round(((v - 1) / 4) * 100);
+    (gmap[k] ? withG : without).push(pct);
+  });
+  const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null;
+  return { n: withG.length + without.length, nWith: withG.length, nWithout: without.length, avgWith: avg(withG), avgWithout: avg(without) };
+}
+function glimmerMarkedDays(days, fromMs) {
+  return (days || []).filter(d => d.items.length > 0 && d.date.getTime() >= (fromMs || 0)).length;
+}
+
+function GlimmerMomentRow({ date, it, lang, tx, c }) {
+  const tags = (it.t || []).map(id => glimmerTag(id)).filter(Boolean);
+  const st = GLIMMER_STRENGTH.find(x => x.v === it.s);
+  return (
+    <div style={{ padding: "10px 0", borderTop: `1px solid ${c.line}` }}>
+      <p style={{ fontSize: "11px", color: c.inkSoft, margin: "0 0 4px" }}>{getEntryDateLabel(date, lang)}{st ? ` · ${st.emoji} ${tx(st.label)}` : ""}</p>
+      {tags.length > 0 && <p style={{ fontSize: "13px", color: c.accent, margin: "0 0 4px" }}>{tags.map(g => `${g.emoji} ${tx(g.label)}`).join("  ")}</p>}
+      {it.n && <p style={{ fontSize: "14px", color: c.ink, lineHeight: 1.6, margin: 0 }}>{it.n}</p>}
+    </div>
+  );
+}
+function GlimmerTagBars({ days, c, tx }) {
+  const w = {}; let total = 0;
+  glimmerFlat(days).forEach(({ it }) => { const wt = it.s || 1; (it.t || []).forEach(id => { w[id] = (w[id] || 0) + wt; total += wt; }); });
+  const rows = Object.entries(w).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  if (!rows.length) return null;
+  return (
+    <div style={{ marginBottom: "14px" }}>
+      {rows.map(([id, v]) => {
+        const g = glimmerTag(id); if (!g) return null;
+        const pct = Math.round((v / total) * 100);
+        return (
+          <div key={id} style={{ marginBottom: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+              <span style={{ fontSize: "13px", color: c.ink }}>{g.emoji} {tx(g.label)}</span>
+              <span style={{ fontSize: "12px", color: c.inkSoft }}>{pct}%</span>
+            </div>
+            <div style={{ height: "3px", backgroundColor: "rgba(242,233,216,0.16)", borderRadius: "2px", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${pct}%`, backgroundColor: "#C8A97E", borderRadius: "2px", transition: "width 0.6s ease" }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+function GlimmerPeriodBlock({ days, c, tx, lang, momentsMax }) {
+  const flat = glimmerFlat(days);
+  if (!flat.length) return <p style={{ color: c.inkSoft, fontStyle: "italic", fontSize: "13px", textAlign: "center", marginTop: "20px" }}>{tx({ ru: "Пока нет глимеров за этот период.", uk: "Поки немає глимерів за цей період.", en: "No glimmers for this period yet." })}</p>;
+  const marked = days.filter(d => d.items.length > 0).length;
+  const tod = glimmerTopTod(days);
+  const best = glimmerBestMoments(days, momentsMax);
+  const sec = { fontSize: "11px", letterSpacing: "0.15em", color: c.accent, margin: "0 0 10px" };
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
+        <div style={S.statCard}><p style={S.statNum}>{marked}</p><p style={S.statLabel}>{tx({ ru: `дней из ${days.length}`, uk: `днів із ${days.length}`, en: `of ${days.length} days` })}</p></div>
+        <div style={S.statCard}><p style={S.statNum}>{flat.length}</p><p style={S.statLabel}>{tx({ ru: "глимеров", uk: "глимерів", en: "glimmers" })}</p></div>
+      </div>
+      <p style={sec}>{tx({ ru: "ЧТО ПОМОГАЛО", uk: "ЩО ДОПОМАГАЛО", en: "WHAT HELPED" })}</p>
+      <GlimmerTagBars days={days} c={c} tx={tx} />
+      {tod && <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", margin: "0 0 16px" }}>{tx({ ru: `Чаще всего это случалось ${GLIMMER_TOD[tod].ru}.`, uk: `Найчастіше це траплялося ${GLIMMER_TOD[tod].uk}.`, en: `Most often this happened ${GLIMMER_TOD[tod].en}.` })}</p>}
+      {best.length > 0 && <p style={sec}>{tx({ ru: "САМЫЕ ТЁПЛЫЕ МОМЕНТЫ", uk: "НАЙТЕПЛІШІ МОМЕНТИ", en: "WARMEST MOMENTS" })}</p>}
+      {best.map(({ date, it }) => <GlimmerMomentRow key={it.id} date={date} it={it} lang={lang} tx={tx} c={c} />)}
+    </div>
+  );
+}
+function GlimmerDigestCard({ d, lang, tx, c, card, fresh }) {
+  const tags = (d.top || []).map(([id]) => glimmerTag(id)).filter(Boolean);
+  return (
+    <div style={{ ...card, border: fresh ? "1px solid rgba(200,169,126,0.45)" : card.border }}>
+      <p style={{ fontSize: "11px", letterSpacing: "0.15em", color: c.accent, margin: "0 0 6px" }}>
+        {fresh ? tx({ ru: "✨ НЕДЕЛЯ ГЛИМЕРОВ СОБРАНА", uk: "✨ ТИЖДЕНЬ ГЛИМЕРІВ ЗІБРАНО", en: "✨ GLIMMER WEEK COMPLETE" }) : tx({ ru: `НЕДЕЛЯ ${d.n}`, uk: `ТИЖДЕНЬ ${d.n}`, en: `WEEK ${d.n}` })}
+      </p>
+      <p style={{ fontSize: "12px", color: c.inkSoft, margin: "0 0 10px" }}>
+        {getEntryDateLabel(d.a, lang)} — {getEntryDateLabel(d.b, lang)} · {tx({ ru: `дней: ${d.k}, глимеров: ${d.total}`, uk: `днів: ${d.k}, глимерів: ${d.total}`, en: `days: ${d.k}, glimmers: ${d.total}` })}
+      </p>
+      {tags.length > 0 && <p style={{ fontSize: "13px", color: c.ink, margin: "0 0 6px", lineHeight: 1.5 }}>{tx({ ru: "Чаще всего помогало: ", uk: "Найчастіше допомагало: ", en: "Helped most often: " })}{tags.map(g => `${g.emoji} ${tx(g.label)}`).join(", ")}</p>}
+      {d.tod && GLIMMER_TOD[d.tod] && <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", margin: "0 0 6px" }}>{tx({ ru: `Обычно это случалось ${GLIMMER_TOD[d.tod].ru}.`, uk: `Зазвичай це траплялося ${GLIMMER_TOD[d.tod].uk}.`, en: `It usually happened ${GLIMMER_TOD[d.tod].en}.` })}</p>}
+      {(d.m || []).length > 0 && <p style={{ fontSize: "11px", letterSpacing: "0.15em", color: c.accent, margin: "12px 0 0" }}>{tx({ ru: "САМЫЕ ТЁПЛЫЕ МОМЕНТЫ", uk: "НАЙТЕПЛІШІ МОМЕНТИ", en: "WARMEST MOMENTS" })}</p>}
+      {(d.m || []).map((m, i) => <GlimmerMomentRow key={i} date={m.d} it={m} lang={lang} tx={tx} c={c} />)}
+      {fresh && <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.6, margin: "12px 0 0" }}>{tx({ ru: "Это твоё пособие: возвращайся в «Копилку», когда нужно вспомнить, что тебе помогает. Это наблюдение за собой, а не вывод и не гарантия.", uk: "Це твій посібник: повертайся до «Скарбнички», коли треба згадати, що тобі допомагає. Це спостереження за собою, а не висновок і не гарантія.", en: "This is your own guide: come back to the Jar whenever you need to remember what helps. It's an observation about yourself, not a conclusion or a guarantee." })}</p>}
+    </div>
+  );
+}
+
+function GlimmerScreen({ onBack, initialTab }) {
+  const { lang, t, tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  const [days, setDays] = useState(null); // null = грузится; индекс 0 = сегодня, всего GLIMMER_LOOKBACK дней
+  const [cycleStart, setCycleStart] = useState(0);
+  const [digests, setDigests] = useState([]);
+  const [digestCount, setDigestCount] = useState(0);
+  const [newDigest, setNewDigest] = useState(null);
+  const [tab, setTab] = useState(initialTab || "today");
+  const [showConcept, setShowConcept] = useState(false);
+  const [customTags, setCustomTags] = useState([]);
+  const [compassHist, setCompassHist] = useState([]);
+  const [addingTag, setAddingTag] = useState(false);
+  const [newTagLabel, setNewTagLabel] = useState("");
+  const [newTagEmoji, setNewTagEmoji] = useState("");
+  const [manageTags, setManageTags] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [strength, setStrength] = useState(0);
+  const [text, setText] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    trackClick("glimmer"); // админка: открытия экрана
+    (async () => {
+      const [ds, cyc, cnt, cust, hist] = await Promise.all([loadGlimmerDays(GLIMMER_LOOKBACK), CS.get("glimmer_cycle"), CS.get("gdigest_count"), loadGlimmerCustomTags(), getHistory("dailycheck_history")]);
+      const count = parseInt(cnt || "0") || 0;
+      let list = [];
+      if (count > 0) {
+        const keys = [];
+        for (let n = count; n >= 1 && n > count - 12; n--) keys.push("gdigest_" + n);
+        let map = {};
+        try { map = (await CS.getMultiple(keys)) || {}; } catch { map = {}; }
+        list = keys.map(k => { try { return map[k] ? JSON.parse(map[k]) : null; } catch { return null; } }).filter(Boolean);
+      }
+      if (!alive) return;
+      setCustomTags(cust);
+      setCompassHist(Array.isArray(hist) ? hist : []);
+      setCycleStart(parseInt(cyc || "0") || 0);
+      setDigestCount(count);
+      setDigests(list);
+      setDays(ds);
+    })().catch(() => { if (alive) setDays([]); });
+    return () => { alive = false; };
+  }, []);
+
+  if (days === null) return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ color: c.inkSoft, fontStyle: "italic" }}>{tx({ ru: "Загружаю…", uk: "Завантажую…", en: "Loading…" })}</p>
+      </div>
+    </div>
+  );
+
+  if (showConcept) return <ConceptScreen onBack={() => setShowConcept(false)} focus="glimmer" />;
+
+  const todayItems = days[0] ? days[0].items : [];
+  const full = todayItems.length >= GLIMMER_DAY_CAP;
+  const canSave = !saving && !full && (tags.length > 0 || text.trim().length > 0);
+  const hasAny = glimmerFlat(days).length > 0;
+  const dotsFilled = Math.min(glimmerMarkedDays(days, cycleStart), GLIMMER_CYCLE_DAYS);
+  const card = { background: c.card, ...GLASS, border: `1px solid ${c.cardBorder}`, borderRadius: "12px", padding: "16px", marginBottom: "12px" };
+  const gb = { padding: "10px 14px", background: c.plate, color: c.inkSoft, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif" };
+  const gba = { ...gb, background: "rgba(200,169,126,0.24)", color: c.accent, border: "1px solid rgba(200,169,126,0.3)" };
+  const sec = { fontSize: "11px", letterSpacing: "0.15em", color: c.accent, margin: "0 0 10px" };
+  // ячейка как в «Мой день сегодня»: смайл сверху, подпись снизу, одинаковая высота
+  const cell = (key, emoji, label, selected, onClick, dashed) => (
+    <button key={key} onClick={onClick} style={{ background: selected ? "rgba(200,169,126,0.24)" : c.plate, border: selected ? "1px solid rgba(200,169,126,0.35)" : `1px ${dashed ? "dashed" : "solid"} ${c.cardBorder}`, borderRadius: "10px", padding: "9px 2px 7px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: "5px", minWidth: 0, minHeight: "62px", fontFamily: "'Georgia',serif" }}>
+      <span style={{ fontSize: "20px", lineHeight: 1 }}>{emoji}</span>
+      <span style={{ fontSize: "10px", color: selected ? c.accent : c.inkSoft, textAlign: "center", wordBreak: "break-word", lineHeight: 1.25 }}>{label}</span>
+    </button>
+  );
+  const tabBtn = (id, label) => (
+    <button key={id} onClick={() => setTab(id)} style={{ flex: 1, padding: "8px 4px", background: tab === id ? "rgba(200,169,126,0.22)" : c.plate, ...GLASS, border: tab === id ? "1px solid rgba(200,169,126,0.5)" : `1px solid ${c.line}`, borderRadius: "8px", color: tab === id ? c.accent : c.inkSoft, fontSize: "12px", cursor: "pointer", fontFamily: "'Georgia',serif" }}>{label}</button>
+  );
+
+  async function buildDigest(nextDays) {
+    const range = nextDays.filter(d => d.date.getTime() >= cycleStart && d.items.length > 0); // от новых к старым
+    if (!range.length) return;
+    const flat = glimmerFlat(range);
+    const best = glimmerBestMoments(range, 5).map(({ date, it }) => {
+      const m = { d: date.toISOString(), t: it.t || [] };
+      if (it.n) m.n = it.n;
+      if (it.s) m.s = it.s;
+      return m;
+    });
+    const n = digestCount + 1;
+    const dg = { n, a: range[range.length - 1].date.toISOString(), b: range[0].date.toISOString(), k: range.length, total: flat.length, top: glimmerTopTags(range, 3).map(x => [x.id, x.v]), tod: glimmerTopTod(range), m: best };
+    try {
+      await CS.set("gdigest_" + n, JSON.stringify(dg));
+      await CS.set("gdigest_count", String(n));
+      const ns = new Date(); ns.setDate(ns.getDate() + 1); ns.setHours(0, 0, 0, 0);
+      await CS.set("glimmer_cycle", String(ns.getTime()));
+      setCycleStart(ns.getTime());
+    } catch {}
+    trackClick("glimmerweek"); // админка: собрана неделя
+    setDigestCount(n);
+    setDigests(prev => [dg, ...prev]);
+    setNewDigest(dg);
+  }
+  async function handleSave() {
+    if (!canSave) return;
+    setSaving(true);
+    const entry = { id: Date.now(), t: tags, n: text.trim().slice(0, GLIMMER_NOTE_MAX) };
+    if (strength) entry.s = strength;
+    const nextItems = [entry, ...todayItems].slice(0, GLIMMER_DAY_CAP);
+    const nextDays = days.map((d, i) => i === 0 ? { ...d, items: nextItems } : d);
+    setDays(nextDays);
+    try { await CS.set(glimmerKey(new Date()), JSON.stringify(nextItems)); } catch {}
+    setTags([]); setText(""); setStrength(0);
+    if (glimmerMarkedDays(nextDays, cycleStart) >= GLIMMER_CYCLE_DAYS) await buildDigest(nextDays);
+    setSaving(false);
+    setJustSaved(true); setTimeout(() => setJustSaved(false), 2200);
+  }
+  const visibleCustom = customTags.filter(x => !x.hidden);
+  const pickerTags = [...GLIMMER_TAGS, ...visibleCustom];
+  async function saveCustomTags(list) {
+    GLIMMER_CUSTOM = list;
+    setCustomTags(list);
+    try { await CS.set("glimmer_tags", JSON.stringify(list)); } catch {}
+  }
+  async function handleAddTag() {
+    const label = newTagLabel.trim().slice(0, 16);
+    if (!label || visibleCustom.length >= GLIMMER_CUSTOM_MAX) return;
+    const emoji = Array.from(newTagEmoji.trim()).slice(0, 2).join("") || "✦";
+    const tag = { id: "c" + Date.now().toString(36), emoji, label };
+    await saveCustomTags([...customTags, tag]);
+    setTags(prev => [...prev, tag.id]);
+    setNewTagLabel(""); setNewTagEmoji(""); setAddingTag(false); setManageTags(false);
+  }
+  async function handleHideTag(id) {
+    const next = customTags.map(x => x.id === id ? { ...x, hidden: true } : x);
+    await saveCustomTags(next);
+    setTags(prev => prev.filter(x => x !== id));
+    if (!next.some(x => !x.hidden)) setManageTags(false); // своих тегов не осталось, режим «убрать» выключаем
+  }
+  async function handleDelete(id) {
+    const next = todayItems.filter(x => x.id !== id);
+    setDays(prev => prev.map((d, i) => i === 0 ? { ...d, items: next } : d));
+    try { await CS.set(glimmerKey(new Date()), JSON.stringify(next)); } catch {}
+  }
+
+  const best90 = glimmerBestMoments(days, 5);
+  const top90 = glimmerTopTags(days, 3);
+  const tod90 = glimmerTopTod(days);
+  const tryTag = (top90.find(x => GLIMMER_TRY[x.id]) || {}).id || null;
+  const link = glimmerCompassLink(compassHist, days);
+  const linkReady = link.n >= 10 && link.nWith >= 3 && link.nWithout >= 3;
+  const linkDiff = linkReady ? link.avgWith - link.avgWithout : 0;
+
+  return (
+    <div style={S.screen}>
+      <button onClick={onBack} style={S.backBtn}>{t.back}</button>
+      <p style={{ fontSize: "20px", fontWeight: "normal", margin: "0 0 4px" }}>{tx({ ru: "Глимер дня", uk: "Глимер дня", en: "Glimmer of the day" })}</p>
+      <p style={{ fontSize: "13px", color: c.inkSoft, margin: "0 0 14px", lineHeight: 1.6 }}>
+        {tx({
+          ru: "Глимер — маленький момент, когда внутри становится чуть спокойнее или теплее. Не нужно искать большое: достаточно заметить. Это практика внимания и честный эксперимент, а не лечение.",
+          uk: "Глимер — маленький момент, коли всередині стає трохи спокійніше або тепліше. Не треба шукати велике: достатньо помітити. Це практика уваги і чесний експеримент, а не лікування.",
+          en: "A glimmer is a small moment when something inside feels a little calmer or warmer. No need to look for something big: just notice it. This is an attention practice and an honest experiment, not a treatment.",
+        })}
+      </p>
+      <ConceptLink onClick={() => setShowConcept(true)} c={c} tx={tx} />
+      <div style={{ display: "flex", gap: "6px", marginBottom: "16px" }}>
+        {tabBtn("today", tx({ ru: "Сегодня", uk: "Сьогодні", en: "Today" }))}
+        {tabBtn("week", tx({ ru: "Неделя", uk: "Тиждень", en: "Week" }))}
+        {tabBtn("month", tx({ ru: "Месяц", uk: "Місяць", en: "Month" }))}
+        {tabBtn("box", tx({ ru: "Копилка", uk: "Скарбничка", en: "Jar" }))}
+      </div>
+
+      {tab === "today" && (
+        <div>
+          <div style={{ marginBottom: "14px" }}>
+            <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+              {Array.from({ length: GLIMMER_CYCLE_DAYS }).map((_, i) => (
+                <div key={i} style={{ flex: 1, height: "5px", borderRadius: "3px", backgroundColor: i < dotsFilled ? "#C8A97E" : c.progressInactive }} />
+              ))}
+            </div>
+            <p style={{ fontSize: "12px", color: c.accent, margin: 0 }}>
+              {tx({ ru: `Отмечено дней: ${dotsFilled} из ${GLIMMER_CYCLE_DAYS}`, uk: `Відмічено днів: ${dotsFilled} з ${GLIMMER_CYCLE_DAYS}`, en: `Days marked: ${dotsFilled} of ${GLIMMER_CYCLE_DAYS}` })}
+              <span style={{ color: c.inkSoft }}>{tx({ ru: " · не обязательно подряд", uk: " · не обов'язково підряд", en: " · not necessarily in a row" })}</span>
+            </p>
+          </div>
+          {hasAny && (
+            <button onClick={() => setTab("box")} style={{ ...gb, width: "100%", boxSizing: "border-box", textAlign: "center", marginBottom: "14px" }}>
+              🫶 {tx({ ru: "Мне сейчас непросто — вспомнить, что помогало", uk: "Мені зараз непросто — згадати, що допомагало", en: "I'm struggling now — recall what helped" })}
+            </button>
+          )}
+          <div style={card}>
+            <p style={{ fontSize: "14px", color: c.ink, margin: "0 0 12px", lineHeight: 1.5 }}>
+              {tx({ ru: "Что сегодня дало тебе хоть секунду спокойствия?", uk: "Що сьогодні дало тобі бодай секунду спокою?", en: "What gave you even a second of calm today?" })}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "6px" }}>
+              {pickerTags.map(g => {
+                const isCustom = customTags.some(x => x.id === g.id);
+                const hideMode = manageTags && isCustom;
+                return cell(g.id, g.emoji, tx(g.label) + (hideMode ? " ✕" : ""), !hideMode && tags.includes(g.id),
+                  () => hideMode ? handleHideTag(g.id) : setTags(tags.includes(g.id) ? tags.filter(x => x !== g.id) : [...tags, g.id]), hideMode);
+              })}
+              {visibleCustom.length < GLIMMER_CUSTOM_MAX && cell("add", "＋", tx({ ru: "своё", uk: "своє", en: "own" }), false, () => setAddingTag(!addingTag), true)}
+            </div>
+            {addingTag && (
+              <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                <input value={newTagEmoji} onChange={e => setNewTagEmoji(e.target.value)} placeholder="✦" aria-label="emoji" style={{ width: "46px", background: c.plate, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", padding: "10px 6px", color: c.ink, fontSize: "16px", textAlign: "center", outline: "none", boxSizing: "border-box" }} />
+                <input value={newTagLabel} maxLength={16} onChange={e => setNewTagLabel(e.target.value)} placeholder={tx({ ru: "Например: пчёлы", uk: "Наприклад: бджоли", en: "e.g. bees" })} style={{ flex: 1, minWidth: 0, background: c.plate, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", padding: "10px 12px", color: c.ink, fontFamily: "'Georgia',serif", fontSize: "13px", outline: "none", boxSizing: "border-box" }} />
+                <button onClick={handleAddTag} disabled={!newTagLabel.trim()} style={{ ...gba, opacity: newTagLabel.trim() ? 1 : 0.4 }}>{tx({ ru: "Добавить", uk: "Додати", en: "Add" })}</button>
+              </div>
+            )}
+            {visibleCustom.length > 0 && (
+              <button onClick={() => setManageTags(!manageTags)} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0, marginTop: "10px" }}>
+                {manageTags ? tx({ ru: "готово", uk: "готово", en: "done" }) : tx({ ru: "убрать свои теги", uk: "прибрати свої теги", en: "remove own tags" })}
+              </button>
+            )}
+            <p style={{ fontSize: "12px", color: c.inkSoft, margin: "14px 0 8px" }}>{tx({ ru: "Насколько это помогло? (необязательно)", uk: "Наскільки це допомогло? (необов'язково)", en: "How much did it help? (optional)" })}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "6px" }}>
+              {GLIMMER_STRENGTH.map(x => cell("s" + x.v, x.emoji, tx(x.label), strength === x.v, () => setStrength(strength === x.v ? 0 : x.v), false))}
+            </div>
+            <textarea
+              style={{ width: "100%", minHeight: "70px", background: c.plate, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", padding: "12px", color: c.ink, fontFamily: "'Georgia',serif", fontSize: "14px", lineHeight: 1.6, resize: "none", boxSizing: "border-box", outline: "none", marginTop: "12px" }}
+              placeholder={tx({ ru: "Одной строкой, если хочется (необязательно)", uk: "Одним рядком, якщо хочеться (необов'язково)", en: "One line if you like (optional)" })}
+              value={text}
+              maxLength={GLIMMER_NOTE_MAX}
+              onChange={e => setText(e.target.value)}
+            />
+            <button style={{ ...S.primaryBtn, marginTop: "12px", opacity: canSave ? 1 : 0.3 }} disabled={!canSave} onClick={handleSave}>
+              {tx({ ru: "ЗАПИСАТЬ", uk: "ЗАПИСАТИ", en: "SAVE" })}
+            </button>
+            {full && <p style={{ fontSize: "11px", color: c.inkSoft, textAlign: "center", marginTop: "10px", fontStyle: "italic" }}>{tx({ ru: "На сегодня достаточно. Завтра заметишь новые.", uk: "На сьогодні досить. Завтра помітиш нові.", en: "That's enough for today. You'll notice new ones tomorrow." })}</p>}
+            <p style={{ fontSize: "11px", color: c.inkSoft, textAlign: "center", marginTop: "10px", fontStyle: "italic" }}>{t.onlyYou}</p>
+          </div>
+          {justSaved && <div style={{ ...card, textAlign: "center", color: c.accent, fontSize: "13px", border: "1px solid rgba(200,169,126,0.3)" }}>{tx({ ru: "✨ Заметил(а). Этого достаточно.", uk: "✨ Помітив(ла). Цього досить.", en: "✨ Noticed. That's enough." })}</div>}
+          {newDigest && <GlimmerDigestCard d={newDigest} lang={lang} tx={tx} c={c} card={card} fresh />}
+          {todayItems.length > 0 && <p style={sec}>{tx({ ru: "СЕГОДНЯ", uk: "СЬОГОДНІ", en: "TODAY" })}</p>}
+          {todayItems.map(it => (
+            <div key={it.id} style={card}>
+              <GlimmerMomentRowInline it={it} tx={tx} c={c} />
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
+                <button onClick={() => handleDelete(it.id)} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0 }}>{tx({ ru: "удалить", uk: "видалити", en: "delete" })}</button>
+              </div>
+            </div>
+          ))}
+          {todayItems.length === 0 && <p style={{ fontSize: "13px", color: c.inkSoft, textAlign: "center", padding: "12px 0" }}>{tx({ ru: "Пока ничего нет. Первый глимер может быть совсем маленьким.", uk: "Поки нічого немає. Перший глимер може бути зовсім маленьким.", en: "Nothing yet. The first glimmer can be tiny." })}</p>}
+        </div>
+      )}
+
+      {tab === "week" && <GlimmerPeriodBlock days={days.slice(0, 7)} c={c} tx={tx} lang={lang} momentsMax={5} />}
+      {tab === "month" && <GlimmerPeriodBlock days={days.slice(0, 30)} c={c} tx={tx} lang={lang} momentsMax={8} />}
+
+      {tab === "box" && (
+        <div>
+          <div style={card}>
+            <p style={sec}>{tx({ ru: "ТВОЁ ПОСОБИЕ: ЧТО ПОМОГАЕТ", uk: "ТВІЙ ПОСІБНИК: ЩО ДОПОМАГАЄ", en: "YOUR GUIDE: WHAT HELPS" })}</p>
+            {!hasAny ? (
+              <p style={{ fontSize: "13px", color: c.inkSoft, lineHeight: 1.6, margin: 0 }}>{tx({ ru: "Здесь появится то, что тебя успокаивает, когда ты отметишь первые глимеры.", uk: "Тут з'явиться те, що тебе заспокоює, коли ти відмітиш перші глимери.", en: "What calms you will appear here once you log your first glimmers." })}</p>
+            ) : (
+              <div>
+                {top90.length > 0 && <p style={{ fontSize: "14px", color: c.ink, margin: "0 0 8px", lineHeight: 1.6 }}>{tx({ ru: "Чаще всего тебе помогало: ", uk: "Найчастіше тобі допомагало: ", en: "What helped you most often: " })}{top90.map(x => glimmerTag(x.id)).filter(Boolean).map(g => `${g.emoji} ${tx(g.label)}`).join(", ")}</p>}
+                {tod90 && <p style={{ fontSize: "12px", color: c.inkSoft, fontStyle: "italic", margin: "0 0 8px" }}>{tx({ ru: `Чаще всего это случалось ${GLIMMER_TOD[tod90].ru}.`, uk: `Найчастіше це траплялося ${GLIMMER_TOD[tod90].uk}.`, en: `Most often this happened ${GLIMMER_TOD[tod90].en}.` })}</p>}
+                {tryTag && GLIMMER_TRY[tryTag] && (
+                  <div style={{ padding: "10px 13px", background: "rgba(200,169,126,0.10)", borderLeft: "2px solid rgba(200,169,126,0.3)", borderRadius: "0 6px 6px 0", margin: "10px 0 12px" }}>
+                    <p style={{ fontSize: "12px", color: c.inkSoft, margin: "0 0 4px" }}>{tx({ ru: "Если сейчас непросто, самое простое повторить то, что помогало:", uk: "Якщо зараз непросто, найпростіше повторити те, що допомагало:", en: "If things are hard right now, the simplest thing is to repeat what helped:" })}</p>
+                    <p style={{ fontSize: "14px", color: c.ink, margin: 0, lineHeight: 1.6 }}>{tx(GLIMMER_TRY[tryTag])}</p>
+                  </div>
+                )}
+                {best90.length > 0 && <p style={{ ...sec, marginTop: "6px" }}>{tx({ ru: "САМЫЕ ТЁПЛЫЕ МОМЕНТЫ (90 ДНЕЙ)", uk: "НАЙТЕПЛІШІ МОМЕНТИ (90 ДНІВ)", en: "WARMEST MOMENTS (90 DAYS)" })}</p>}
+                {best90.map(({ date, it }) => <GlimmerMomentRow key={it.id} date={date} it={it} lang={lang} tx={tx} c={c} />)}
+                <p style={{ fontSize: "11px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.6, margin: "12px 0 0" }}>{tx({ ru: "Это наблюдение за собой, а не гарантия. Если совсем тяжело, это повод поговорить с близким человеком или специалистом.", uk: "Це спостереження за собою, а не гарантія. Якщо зовсім важко, це привід поговорити з близькою людиною або фахівцем.", en: "This is an observation about yourself, not a guarantee. If it's really hard, that's a good reason to talk to someone close or a professional." })}</p>
+              </div>
+            )}
+          </div>
+          <div style={card}>
+            <p style={sec}>{tx({ ru: "СВЯЗЬ С КОМПАСОМ", uk: "ЗВ'ЯЗОК ІЗ КОМПАСОМ", en: "LINK WITH THE COMPASS" })}</p>
+            {!linkReady ? (
+              <p style={{ fontSize: "13px", color: c.inkSoft, lineHeight: 1.6, margin: 0 }}>
+                {tx({
+                  ru: `Сравнение появится, когда наберётся хотя бы 10 отметок Компаса, и по 3+ в дни с глимерами и без них. Сейчас отметок: ${link.n} (с глимерами: ${link.nWith}, без: ${link.nWithout}).`,
+                  uk: `Порівняння з'явиться, коли набереться хоча б 10 відміток Компаса, і по 3+ у дні з глимерами та без них. Зараз відміток: ${link.n} (з глимерами: ${link.nWith}, без: ${link.nWithout}).`,
+                  en: `A comparison appears once you have at least 10 Compass check-ins, 3+ on days with glimmers and 3+ without. Now: ${link.n} (with glimmers: ${link.nWith}, without: ${link.nWithout}).`,
+                })}
+              </p>
+            ) : (
+              <div>
+                <p style={{ fontSize: "14px", color: c.ink, lineHeight: 1.6, margin: "0 0 8px" }}>
+                  {tx({
+                    ru: `«Внутреннее спокойствие» в Компасе: ${link.avgWith}% в дни с глимерами и ${link.avgWithout}% в дни без них${Math.abs(linkDiff) < 5 ? " — почти без разницы." : linkDiff > 0 ? ` — выше на ${linkDiff} п.п.` : ` — ниже на ${Math.abs(linkDiff)} п.п.`}`,
+                    uk: `«Внутрішній спокій» у Компасі: ${link.avgWith}% у дні з глимерами і ${link.avgWithout}% у дні без них${Math.abs(linkDiff) < 5 ? " — майже без різниці." : linkDiff > 0 ? ` — вище на ${linkDiff} в.п.` : ` — нижче на ${Math.abs(linkDiff)} в.п.`}`,
+                    en: `"Inner calm" in the Compass: ${link.avgWith}% on days with glimmers and ${link.avgWithout}% on days without${Math.abs(linkDiff) < 5 ? " — almost no difference." : linkDiff > 0 ? ` — ${linkDiff} points higher.` : ` — ${Math.abs(linkDiff)} points lower.`}`,
+                  })}
+                </p>
+                <p style={{ fontSize: "11px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.6, margin: 0 }}>
+                  {tx({
+                    ru: `Это совпадение по дням, а не доказательство причины: выборка маленькая (${link.n} отметок), глимер мог случиться и после проверки.`,
+                    uk: `Це збіг за днями, а не доказ причини: вибірка мала (${link.n} відміток), глимер міг трапитись і після перевірки.`,
+                    en: `This is a coincidence by day, not proof of cause: the sample is small (${link.n} check-ins), and a glimmer may have happened after the check.`,
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+          <p style={{ ...sec, marginTop: "18px" }}>{tx({ ru: "СОБРАННЫЕ НЕДЕЛИ", uk: "ЗІБРАНІ ТИЖНІ", en: "COMPLETED WEEKS" })}</p>
+          {digests.length === 0 && <p style={{ fontSize: "13px", color: c.inkSoft, lineHeight: 1.6 }}>{tx({ ru: `Итог недели соберётся сам, когда отметишь ${GLIMMER_CYCLE_DAYS} дней с глимерами.`, uk: `Підсумок тижня збереться сам, коли відмітиш ${GLIMMER_CYCLE_DAYS} днів із глимерами.`, en: `A weekly summary is saved automatically once you've marked ${GLIMMER_CYCLE_DAYS} days with glimmers.` })}</p>}
+          {digests.map(d => <GlimmerDigestCard key={d.n} d={d} lang={lang} tx={tx} c={c} card={card} fresh={false} />)}
+        </div>
+      )}
+      <button onClick={onBack} style={S.backBtnBottom}>{t.back}</button>
+    </div>
+  );
+}
+// запись «сегодня» внутри карточки (без даты и верхней линии)
+function GlimmerMomentRowInline({ it, tx, c }) {
+  const tags = (it.t || []).map(id => glimmerTag(id)).filter(Boolean);
+  const st = GLIMMER_STRENGTH.find(x => x.v === it.s);
+  return (
+    <div>
+      {(tags.length > 0 || st) && <p style={{ fontSize: "13px", color: c.accent, margin: "0 0 6px" }}>{tags.map(g => `${g.emoji} ${tx(g.label)}`).join("  ")}{st ? `${tags.length ? " · " : ""}${st.emoji} ${tx(st.label)}` : ""}</p>}
+      {it.n && <p style={{ fontSize: "14px", color: c.ink, lineHeight: 1.6, margin: 0 }}>{it.n}</p>}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // ЭКРАН: МОЁ СОСТОЯНИЕ
 // ─────────────────────────────────────────────
 function MoodScreen({ onBack }) {
@@ -5118,6 +5822,8 @@ function MoodScreen({ onBack }) {
   const [tab, setTab] = useState("today");
   const [showTrajectory, setShowTrajectory] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showGlimmer, setShowGlimmer] = useState(false);
+  const [showConcept, setShowConcept] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -5246,6 +5952,10 @@ function MoodScreen({ onBack }) {
     <QuietNotes onBack={() => setShowNotes(false)} />
   );
 
+  if (showGlimmer) return <GlimmerScreen onBack={() => setShowGlimmer(false)} initialTab="box" />;
+
+  if (showConcept) return <ConceptScreen onBack={() => setShowConcept(false)} focus="mood" />;
+
   return (
     <div style={S.screen}>
       <div style={S.screenHeader}>
@@ -5259,6 +5969,7 @@ function MoodScreen({ onBack }) {
         {nextTitle && <p style={{ margin:"4px 0 0", fontSize:"11px", color:c.inkSoft }}>до «{tx(nextTitle.name)}» — {nextTitle.days - streak} {nextTitle.days-streak===1?"день":"дней"}</p>}
         <div><ShareButton text={shareTitle} label={tx({ ru: "Поделиться титулом ↗", uk: "Поділитися титулом ↗", en: "Share title ↗" })} /></div>
       </div>
+      <ConceptLink onClick={() => setShowConcept(true)} c={c} tx={tx} />
       <div style={S.wisdomLine} />
       {archetype && (
         <div style={{ ...S.teaNoteBox, margin:"16px 0", textAlign:"center" }}>
@@ -5284,10 +5995,17 @@ function MoodScreen({ onBack }) {
           {todayEmotion ? "СЕГОДНЯ ТЫ ОТМЕТИЛ" : "КАК ТЫ СЕЙЧАС?"}
         </p>
         {todayEmotion ? (
+          <>
           <div style={{ display:"flex", alignItems:"center", gap:"12px", padding:"14px", background:c.card, ...GLASS, border:`1px solid ${c.cardBorder}`, borderRadius:"12px" }}>
             <span style={{ fontSize:"28px" }}>{todayEmotion.emoji}</span>
             <span style={{ fontSize:"16px", color:c.ink }}>{todayEmotion.label}</span>
           </div>
+          {typeof todayEmotion.score === "number" && todayEmotion.score <= 4 && (
+            <button onClick={() => setShowGlimmer(true)} style={{ width:"100%", padding:"12px", marginTop:"10px", background:c.plate, ...GLASS, border:"1px solid rgba(200,169,126,0.2)", borderRadius:"12px", color:c.accent, fontSize:"13px", cursor:"pointer", fontFamily:"'Georgia',serif", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+              <span>🫶</span><span>{tx({ ru: "Вспомнить, что помогало (глимеры)", uk: "Згадати, що допомагало (глимери)", en: "Recall what helped (glimmers)" })}</span>
+            </button>
+          )}
+          </>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(4, minmax(0, 1fr))", gap:"6px" }}>
             {EMOTIONS.map(e => (
@@ -5651,6 +6369,28 @@ function AdminScreen({ onBack }) {
             })}
           </div>
 
+          {/* ГЛИМЕРЫ — открытия экрана и собранные недели (счётчики click_glimmer / click_glimmerweek) */}
+          <div style={card}>
+            <p style={sectionTitle}>{tx({ru:'ГЛИМЕРЫ',uk:'ГЛИМЕРИ',en:'GLIMMERS'})}</p>
+            {[
+              { key: "glimmer", icon: "✨", label: tx({ru:'Открытий экрана',uk:'Відкриттів екрана',en:'Screen opens'}) },
+              { key: "glimmerweek", icon: "🗓", label: tx({ru:'Собрано недель',uk:'Зібрано тижнів',en:'Weeks completed'}) },
+            ].map((row, i, arr) => {
+              const d = (stats.clicks && stats.clicks[row.key]) || {};
+              return (
+                <div key={row.key} style={{ ...rowStyle, borderBottom: i === arr.length - 1 ? "none" : rowStyle.borderBottom }}>
+                  <span style={rowLabel}>{row.icon} {row.label}</span>
+                  <span style={rowValue}>
+                    {d.total ?? 0}
+                    <span style={{ color: c.inkSoft, fontSize: "11px", marginLeft: "6px" }}>
+                      {d.unique ?? 0} {tx({ru:'чел.',uk:'осіб',en:'ppl'})}{stats.uniqueTotal > 0 ? ` (${Math.min(100, Math.round(((d.unique ?? 0) / stats.uniqueTotal) * 100))}%)` : ""} · {tx({ru:'сегодня',uk:'сьогодні',en:'today'})} {d.today ?? 0}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
           {/* ВОЗВРАЩАЕМОСТЬ — только для людей, впервые пришедших после обновления */}
           <div style={card}>
             <p style={sectionTitle}>{tx({ru:'ВОЗВРАЩАЕМОСТЬ',uk:'ПОВЕРНЕННЯ',en:'RETENTION'})}</p>
@@ -5815,6 +6555,8 @@ function MyPathScreen({ onBack }) {
   const [dailyCheckHist, setDailyCheckHist] = useState([]);
   const [moodCounts, setMoodCounts] = useState(null);
   const [moodTotal, setMoodTotal] = useState(0);
+  const [glimmerDays, setGlimmerDays] = useState([]);
+  const [glimmerWeeks, setGlimmerWeeks] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -5827,6 +6569,9 @@ function MyPathScreen({ onBack }) {
       setTeaHist(await getHistory("tea_history"));
       setMedHist(await getHistory("meditation_history"));
       setDailyCheckHist(await getHistory("dailycheck_history"));
+      await loadGlimmerCustomTags();
+      setGlimmerDays(await loadGlimmerDays(7));
+      setGlimmerWeeks(parseInt((await CS.get("gdigest_count")) || "0") || 0);
 
       // настроение за последние 90 дней — один батч-запрос вместо 90
       // последовательных CS.get() (см. CS.getMultiple выше)
@@ -6284,6 +7029,25 @@ function MyPathScreen({ onBack }) {
         ))}
       </div>
 
+      {/* ГЛИМЕРЫ */}
+      {(() => {
+        const gs = glimmerStats(glimmerDays);
+        const weeksTxt = glimmerWeeks > 0 ? tx({ ru: ` Собрано недель: ${glimmerWeeks}.`, uk: ` Зібрано тижнів: ${glimmerWeeks}.`, en: ` Weeks completed: ${glimmerWeeks}.` }) : "";
+        return (
+          <div style={{ width: "100%", marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+              <span style={{ fontSize: "12px", color: c.inkMuted }}>{tx({ ru: "Глимеры", uk: "Глимери", en: "Glimmers" })} · 7 {tx({ ru: "дней", uk: "днів", en: "days" })}</span>
+              <span style={{ fontSize: "12px", color: c.accent, fontWeight: 600 }}>{gs.total > 0 ? gs.total : "—"}</span>
+            </div>
+            <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>
+              {(gs.total > 0
+                ? tx({ ru: `Моменты, которые дали тебе спокойствие.${gs.top.length ? " Чаще всего: " + gs.top.map(g => g.emoji + " " + g.label.ru).join(", ") + "." : ""}`, uk: `Моменти, що дали тобі спокій.${gs.top.length ? " Найчастіше: " + gs.top.map(g => g.emoji + " " + g.label.uk).join(", ") + "." : ""}`, en: `Moments that gave you calm.${gs.top.length ? " Most often: " + gs.top.map(g => g.emoji + " " + g.label.en).join(", ") + "." : ""}` })
+                : tx({ ru: "Отмечай «Глимер дня» — и здесь появится то, что тебя успокаивает.", uk: "Відмічай «Глимер дня» — і тут з'явиться те, що тебе заспокоює.", en: "Log a 'Glimmer of the day' — and what calms you will appear here." })) + weeksTxt}
+            </p>
+          </div>
+        );
+      })()}
+
       {/* КУДА ДВИЖЕШЬСЯ */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>{t.whereYouGo90}</p>
@@ -6489,6 +7253,7 @@ export default function App() {
     { id: "dailycheck", ...t.menu.dailycheck },
     { id: "challenges", ...t.menu.challenges },
     { id: "mood", ...t.menu.mood },
+    { id: "glimmers", ...t.menu.glimmers },
     { id: "mypath", ...t.menu.mypath },
   ];
 
@@ -6504,6 +7269,7 @@ export default function App() {
   else if (screen === "wisdom") body = <WisdomScreen onBack={() => setScreen("home")} currentMood={currentMood} />;
   else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   else if (screen === "mood") body = <MoodScreen onBack={() => setScreen("home")} />;
+  else if (screen === "glimmers") body = <GlimmerScreen onBack={() => setScreen("home")} />;
   else if (screen === "mypath") body = <MyPathScreen onBack={() => setScreen("home")} />;
   else if (screen === "shop") body = <ShopScreen onBack={() => setScreen("home")} />;
   else if (screen === "admin") body = <AdminScreen onBack={() => setScreen("home")} />;
