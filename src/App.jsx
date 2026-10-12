@@ -2368,6 +2368,16 @@ function HintPopup({ text }) {
 // ─────────────────────────────────────────────
 // ИНФО-КНОПКА (ⓘ) С ТУЛТИПОМ — для метрик
 // ─────────────────────────────────────────────
+// В приложении нигде не сбрасывалась прокрутка при смене экрана, поэтому новый экран
+// открывался с тем же смещением, что и предыдущий (профиль «не сначала»).
+function scrollTopNow() {
+  try {
+    window.scrollTo(0, 0);
+    const el = document.scrollingElement || document.documentElement;
+    if (el) el.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  } catch {}
+}
 function InfoButton({ text }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -5222,6 +5232,7 @@ const CONCEPT_SECTIONS = {
 function ConceptScreen({ onBack, focus }) {
   const { t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
+  useEffect(() => { scrollTopNow(); }, []);
   const C = CONCEPT_SECTIONS;
   const order = focus === "glimmer"
     ? ["idea", "glimmer", "mood", "together", "benefits", "limits", "minute", "science", "data"]
@@ -5531,6 +5542,7 @@ function GlimmerScreen({ onBack, initialTab }) {
     })().catch(() => { if (alive) setDays([]); });
     return () => { alive = false; };
   }, []);
+  useEffect(() => { scrollTopNow(); }, []);
 
   if (days === null) return (
     <div style={S.screen}>
@@ -6557,6 +6569,7 @@ function MyPathScreen({ onBack }) {
   const [moodTotal, setMoodTotal] = useState(0);
   const [glimmerDays, setGlimmerDays] = useState([]);
   const [glimmerWeeks, setGlimmerWeeks] = useState(0);
+  const [showGlimmer, setShowGlimmer] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -6608,6 +6621,14 @@ function MyPathScreen({ onBack }) {
       </div>
     );
   }
+
+  if (showGlimmer) return (
+    <GlimmerScreen onBack={() => {
+      setShowGlimmer(false);
+      loadGlimmerDays(7).then(setGlimmerDays).catch(() => {});
+      CS.get("gdigest_count").then(v => setGlimmerWeeks(parseInt(v || "0") || 0)).catch(() => {});
+    }} />
+  );
 
   const title = getCurrentTitle(streak);
   const nextTitle = TITLES.find(t => t.days > streak);
@@ -6955,6 +6976,33 @@ function MyPathScreen({ onBack }) {
         <EmptyMetric text={tx({ ru: "Пройди «Компас состояния» — и здесь появится твой последний результат.", uk: "Пройди «Компас стану» — і тут з'явиться твій останній результат.", en: "Take the State compass — and your latest result will appear here." })} />
       )}
 
+      {/* ГЛИМЕРЫ */}
+      <div style={S.sectionHead}>
+        <p style={S.sectionTitle}>{tx({ru:"ГЛИМЕРЫ",uk:"ГЛИМЕРИ",en:"GLIMMERS"})}</p>
+        <InfoButton text={tx({ ru: "«Маленькие моменты спокойствия, которые ты отмечал(а), и то, что помогало чаще всего. Нажми, чтобы открыть.»", uk: "«Маленькі моменти спокою, які ти відмічав(ла), і те, що допомагало найчастіше. Натисни, щоб відкрити.»", en: "«The small moments of calm you've logged and what helped most often. Tap to open.»" })} />
+      </div>
+      {(() => {
+        const gs = glimmerStats(glimmerDays);
+        const topTxt = gs.top.length ? gs.top.map(g => `${g.emoji} ${tx(g.label)}`).join(", ") : "";
+        return (
+          <button onClick={() => setShowGlimmer(true)} style={{ ...S.metricBlock, width: "100%", boxSizing: "border-box", textAlign: "left", cursor: "pointer", fontFamily: "'Georgia',serif", color: c.ink }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px" }}>
+              <span style={{ fontSize: "40px", color: c.accent, lineHeight: 1 }}>{gs.total > 0 ? gs.total : "—"}</span>
+              <span style={{ fontSize: "13px", color: c.inkSoft, textAlign: "right" }}>
+                {tx({ ru: "глимеров за 7 дней", uk: "глимерів за 7 днів", en: "glimmers in 7 days" })}
+                {glimmerWeeks > 0 ? ` · ${tx({ ru: "недель", uk: "тижнів", en: "weeks" })}: ${glimmerWeeks}` : ""}
+              </span>
+            </div>
+            <p style={{ margin: "12px 0 0", fontSize: "12px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>
+              {gs.total > 0
+                ? tx({ ru: `Чаще всего помогало: ${topTxt}`, uk: `Найчастіше допомагало: ${topTxt}`, en: `Helped most often: ${topTxt}` })
+                : tx({ ru: "Отмечай «Глимер дня» — и здесь появится то, что тебя успокаивает.", uk: "Відмічай «Глимер дня» — і тут з'явиться те, що тебе заспокоює.", en: "Log a “Glimmer of the day” and what calms you will appear here." })}
+            </p>
+            <p style={{ margin: "10px 0 0", fontSize: "12px", color: c.accent }}>{tx({ ru: "Открыть →", uk: "Відкрити →", en: "Open →" })}</p>
+          </button>
+        );
+      })()}
+
       {/* ЛЮБИМЫЙ ЧАЙ */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>{t.favoriteTea}</p>
@@ -7029,25 +7077,6 @@ function MyPathScreen({ onBack }) {
         ))}
       </div>
 
-      {/* ГЛИМЕРЫ */}
-      {(() => {
-        const gs = glimmerStats(glimmerDays);
-        const weeksTxt = glimmerWeeks > 0 ? tx({ ru: ` Собрано недель: ${glimmerWeeks}.`, uk: ` Зібрано тижнів: ${glimmerWeeks}.`, en: ` Weeks completed: ${glimmerWeeks}.` }) : "";
-        return (
-          <div style={{ width: "100%", marginBottom: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <span style={{ fontSize: "12px", color: c.inkMuted }}>{tx({ ru: "Глимеры", uk: "Глимери", en: "Glimmers" })} · 7 {tx({ ru: "дней", uk: "днів", en: "days" })}</span>
-              <span style={{ fontSize: "12px", color: c.accent, fontWeight: 600 }}>{gs.total > 0 ? gs.total : "—"}</span>
-            </div>
-            <p style={{ margin: 0, fontSize: "11px", color: c.inkSoft, fontStyle: "italic", lineHeight: 1.5 }}>
-              {(gs.total > 0
-                ? tx({ ru: `Моменты, которые дали тебе спокойствие.${gs.top.length ? " Чаще всего: " + gs.top.map(g => g.emoji + " " + g.label.ru).join(", ") + "." : ""}`, uk: `Моменти, що дали тобі спокій.${gs.top.length ? " Найчастіше: " + gs.top.map(g => g.emoji + " " + g.label.uk).join(", ") + "." : ""}`, en: `Moments that gave you calm.${gs.top.length ? " Most often: " + gs.top.map(g => g.emoji + " " + g.label.en).join(", ") + "." : ""}` })
-                : tx({ ru: "Отмечай «Глимер дня» — и здесь появится то, что тебя успокаивает.", uk: "Відмічай «Глимер дня» — і тут з'явиться те, що тебе заспокоює.", en: "Log a 'Glimmer of the day' — and what calms you will appear here." })) + weeksTxt}
-            </p>
-          </div>
-        );
-      })()}
-
       {/* КУДА ДВИЖЕШЬСЯ */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>{t.whereYouGo90}</p>
@@ -7102,6 +7131,7 @@ export default function App() {
   const [lang, setLang] = useState(() => { try { const saved = localStorage.getItem("teabro-lang"); return (saved === "ru" || saved === "uk") ? saved : "ru"; } catch { return "ru"; } });
   S = buildStyles(theme);
   useEffect(() => { try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
+  useEffect(() => { scrollTopNow(); }, [screen]);
   useEffect(() => { try { document.body.style.backgroundColor = (THEMES[theme] || THEMES.dark).bg; } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem("teabro-lang", lang); } catch {} }, [lang]);
   const t = UI[lang] || UI.ru;
