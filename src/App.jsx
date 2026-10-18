@@ -5512,6 +5512,9 @@ function GlimmerScreen({ onBack, initialTab }) {
   const [newTagLabel, setNewTagLabel] = useState("");
   const [newTagEmoji, setNewTagEmoji] = useState("");
   const [manageTags, setManageTags] = useState(false);
+  const [editTagId, setEditTagId] = useState(null); // тег, который сейчас правим (режим «убрать свои теги»)
+  const [editEmoji, setEditEmoji] = useState("");
+  const [editLabel, setEditLabel] = useState("");
   const [tags, setTags] = useState([]);
   const [strength, setStrength] = useState(0);
   const [text, setText] = useState("");
@@ -5629,10 +5632,24 @@ function GlimmerScreen({ onBack, initialTab }) {
     setTags(prev => [...prev, tag.id]);
     setNewTagLabel(""); setNewTagEmoji(""); setAddingTag(false); setManageTags(false);
   }
+  function handleStartEdit(id) {
+    const tg = customTags.find(x => x.id === id);
+    if (!tg) return;
+    setEditTagId(id); setEditEmoji(tg.emoji === "✦" ? "" : (tg.emoji || "")); setEditLabel(tg.label || "");
+  }
+  async function handleSaveEdit() {
+    const label = editLabel.trim().slice(0, 16);
+    if (!editTagId || !label) return;
+    const emoji = Array.from(editEmoji.trim()).slice(0, 2).join("") || "✦";
+    // id не меняется, поэтому старые записи и статистика остаются привязаны к тегу
+    await saveCustomTags(customTags.map(x => x.id === editTagId ? { ...x, emoji, label } : x));
+    setEditTagId(null);
+  }
   async function handleHideTag(id) {
     const next = customTags.map(x => x.id === id ? { ...x, hidden: true } : x);
     await saveCustomTags(next);
     setTags(prev => prev.filter(x => x !== id));
+    setEditTagId(null);
     if (!next.some(x => !x.hidden)) setManageTags(false); // своих тегов не осталось, режим «убрать» выключаем
   }
   async function handleDelete(id) {
@@ -5694,8 +5711,8 @@ function GlimmerScreen({ onBack, initialTab }) {
               {pickerTags.map(g => {
                 const isCustom = customTags.some(x => x.id === g.id);
                 const hideMode = manageTags && isCustom;
-                return cell(g.id, g.emoji, tx(g.label) + (hideMode ? " ✕" : ""), !hideMode && tags.includes(g.id),
-                  () => hideMode ? handleHideTag(g.id) : setTags(tags.includes(g.id) ? tags.filter(x => x !== g.id) : [...tags, g.id]), hideMode);
+                return cell(g.id, g.emoji, tx(g.label) + (hideMode ? " ✎" : ""), !hideMode && tags.includes(g.id),
+                  () => hideMode ? handleStartEdit(g.id) : setTags(tags.includes(g.id) ? tags.filter(x => x !== g.id) : [...tags, g.id]), hideMode);
               })}
               {visibleCustom.length < GLIMMER_CUSTOM_MAX && cell("add", "＋", tx({ ru: "своё", uk: "своє", en: "own" }), false, () => setAddingTag(!addingTag), true)}
             </div>
@@ -5706,9 +5723,22 @@ function GlimmerScreen({ onBack, initialTab }) {
                 <button onClick={handleAddTag} disabled={!newTagLabel.trim()} style={{ ...gba, opacity: newTagLabel.trim() ? 1 : 0.4 }}>{tx({ ru: "Добавить", uk: "Додати", en: "Add" })}</button>
               </div>
             )}
+            {manageTags && editTagId && (
+              <div style={{ marginTop: "10px" }}>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input value={editEmoji} onChange={e => setEditEmoji(e.target.value)} placeholder="✦" aria-label="emoji" style={{ width: "46px", background: c.plate, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", padding: "10px 6px", color: c.ink, fontSize: "16px", textAlign: "center", outline: "none", boxSizing: "border-box" }} />
+                  <input value={editLabel} maxLength={16} onChange={e => setEditLabel(e.target.value)} style={{ flex: 1, minWidth: 0, background: c.plate, border: `1px solid ${c.cardBorder}`, borderRadius: "10px", padding: "10px 12px", color: c.ink, fontFamily: "'Georgia',serif", fontSize: "13px", outline: "none", boxSizing: "border-box" }} />
+                  <button onClick={handleSaveEdit} disabled={!editLabel.trim()} style={{ ...gba, opacity: editLabel.trim() ? 1 : 0.4 }}>{tx({ ru: "Сохранить", uk: "Зберегти", en: "Save" })}</button>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px" }}>
+                  <button onClick={() => setEditTagId(null)} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0 }}>{tx({ ru: "отмена", uk: "скасувати", en: "cancel" })}</button>
+                  <button onClick={() => handleHideTag(editTagId)} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0 }}>{tx({ ru: "убрать тег", uk: "прибрати тег", en: "remove tag" })}</button>
+                </div>
+              </div>
+            )}
             {visibleCustom.length > 0 && (
-              <button onClick={() => setManageTags(!manageTags)} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0, marginTop: "10px" }}>
-                {manageTags ? tx({ ru: "готово", uk: "готово", en: "done" }) : tx({ ru: "убрать свои теги", uk: "прибрати свої теги", en: "remove own tags" })}
+              <button onClick={() => { setManageTags(!manageTags); setEditTagId(null); }} style={{ background: "none", border: "none", color: c.inkSoft, fontSize: "11px", cursor: "pointer", fontFamily: "'Georgia',serif", padding: 0, marginTop: "10px" }}>
+                {manageTags ? tx({ ru: "готово", uk: "готово", en: "done" }) : tx({ ru: "изменить свои теги", uk: "змінити свої теги", en: "edit own tags" })}
               </button>
             )}
             <p style={{ fontSize: "12px", color: c.inkSoft, margin: "14px 0 8px" }}>{tx({ ru: "Насколько это помогло? (необязательно)", uk: "Наскільки це допомогло? (необов'язково)", en: "How much did it help? (optional)" })}</p>
