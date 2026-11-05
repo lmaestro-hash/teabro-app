@@ -5330,7 +5330,7 @@ const GLIMMER_TRY = {
 // Свои теги пользователя (до 5 активных). Хранятся в ключе glimmer_tags; «убранный» тег
 // не удаляется, а прячется (hidden), чтобы старые записи не теряли подпись.
 let GLIMMER_CUSTOM = [];
-const GLIMMER_CUSTOM_MAX = 5;
+const GLIMMER_CUSTOM_MAX = 50;
 function glimmerTag(id) { return GLIMMER_TAGS.find(g => g.id === id) || GLIMMER_CUSTOM.find(g => g.id === id) || null; }
 async function loadGlimmerCustomTags() {
   try {
@@ -5623,9 +5623,11 @@ function GlimmerScreen({ onBack, initialTab }) {
     setCustomTags(list);
     try { await CS.set("glimmer_tags", JSON.stringify(list)); } catch {}
   }
+  // CloudStorage: до 4096 символов на ключ, весь список тегов (включая скрытые) лежит в одном ключе
+  const tagsStorageFull = JSON.stringify(customTags).length > 3700;
   async function handleAddTag() {
     const label = newTagLabel.trim().slice(0, 16);
-    if (!label || visibleCustom.length >= GLIMMER_CUSTOM_MAX) return;
+    if (!label || visibleCustom.length >= GLIMMER_CUSTOM_MAX || tagsStorageFull) return;
     const emoji = Array.from(newTagEmoji.trim()).slice(0, 2).join("") || "✦";
     const tag = { id: "c" + Date.now().toString(36), emoji, label };
     await saveCustomTags([...customTags, tag]);
@@ -5714,7 +5716,7 @@ function GlimmerScreen({ onBack, initialTab }) {
                 return cell(g.id, g.emoji, tx(g.label) + (hideMode ? " ✎" : ""), !hideMode && tags.includes(g.id),
                   () => hideMode ? handleStartEdit(g.id) : setTags(tags.includes(g.id) ? tags.filter(x => x !== g.id) : [...tags, g.id]), hideMode);
               })}
-              {visibleCustom.length < GLIMMER_CUSTOM_MAX && cell("add", "＋", tx({ ru: "своё", uk: "своє", en: "own" }), false, () => setAddingTag(!addingTag), true)}
+              {visibleCustom.length < GLIMMER_CUSTOM_MAX && !tagsStorageFull && cell("add", "＋", tx({ ru: "своё", uk: "своє", en: "own" }), false, () => setAddingTag(!addingTag), true)}
             </div>
             {addingTag && (
               <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
