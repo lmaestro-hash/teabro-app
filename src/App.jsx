@@ -104,8 +104,8 @@ const UI = {
     menu: {
       quiz: { title: "Честный разговор с собой", desc: "Самооценка · выгорание · 25 вопросов" },
       selfhonesty: { title: "Склонность к самообману", desc: "Тест на самообман · 14 вопросов" },
-      hormones: { title: "Гормональный код", desc: "9 систем · 12 вопросов" },
-      hormoneguide: { title: "Всё о гормонах", desc: "Гид: как привести 9 систем в порядок" },
+      hormones: { title: "Гормональный код", desc: "10 систем · 13 вопросов" },
+      hormoneguide: { title: "Всё о гормонах", desc: "Гид: как привести 10 систем в порядок" },
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
       meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
@@ -192,8 +192,8 @@ const UI = {
     menu: {
       quiz: { title: "Чесна розмова з собою", desc: "Самооцінка · вигорання · 25 питань" },
       selfhonesty: { title: "Схильність до самообману", desc: "Тест на самообман · 14 питань" },
-      hormones: { title: "Гормональний код", desc: "9 систем · 12 питань" },
-      hormoneguide: { title: "Все про гормони", desc: "Гід: як привести 9 систем до ладу" },
+      hormones: { title: "Гормональний код", desc: "10 систем · 13 питань" },
+      hormoneguide: { title: "Все про гормони", desc: "Гід: як привести 10 систем до ладу" },
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
       meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
@@ -280,8 +280,8 @@ const UI = {
     menu: {
       quiz: { title: "Honest talk with yourself", desc: "Self-assessment · burnout · 25 questions" },
       selfhonesty: { title: "Tendency to self-deception", desc: "Self-deception test · 14 questions" },
-      hormones: { title: "Hormonal code", desc: "9 systems · 12 questions" },
-      hormoneguide: { title: "All about hormones", desc: "Guide: bringing 9 systems into balance" },
+      hormones: { title: "Hormonal code", desc: "10 systems · 13 questions" },
+      hormoneguide: { title: "All about hormones", desc: "Guide: bringing 10 systems into balance" },
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
       meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
@@ -1204,7 +1204,7 @@ const SELF_HONESTY_ADVICE = {
 
 
 // ─────────────────────────────────────────────
-// ТЕСТ: ГОРМОНАЛЬНЫЙ КОД (9 систем · 9 основных вопросов + 3 уточняющих)
+// ТЕСТ: ГОРМОНАЛЬНЫЙ КОД (10 систем · 10 основных вопросов + 3 уточняющих)
 // ─────────────────────────────────────────────
 const HORMONE_META = {
   dopamine:      { name: { ru: "Дофамин", uk: "Дофамін", en: "Dopamine" },       short: { ru: "мотивация и драйв", uk: "мотивація і драйв", en: "motivation and drive" },     color: "#C89B5C" },
@@ -1216,6 +1216,7 @@ const HORMONE_META = {
   acetylcholine: { name: { ru: "Ацетилхолин", uk: "Ацетилхолін", en: "Acetylcholine" },   short: { ru: "фокус и ясность", uk: "фокус і ясність", en: "focus and clarity" },       color: "#7A9E7E" },
   somatotropin:  { name: { ru: "Соматотропин", uk: "Соматотропін", en: "Growth hormone" }, short: { ru: "восстановление и ремонт", uk: "відновлення і ремонт", en: "repair and recovery" },   color: "#8FA3E8" },
   estrogen:      { name: { ru: "Эстроген", uk: "Естроген", en: "Estrogen" },               short: { ru: "баланс настроения и тонус", uk: "баланс настрою і тонус", en: "mood balance and tone" }, color: "#E0907A" },
+  prolactin:     { name: { ru: "Пролактин", uk: "Пролактин", en: "Prolactin" }, short: { ru: "насыщение и покой", uk: "насичення і спокій", en: "satiety and calm" }, color: "#B59AC9" },
 };
 
 const HORMONE_QUESTIONS = [
@@ -1282,6 +1283,13 @@ const HORMONE_QUESTIONS = [
     { text: { ru: "В основном ровно, колебания редкие и мягкие", uk: "Здебільшого рівно, коливання рідкісні й м'які", en: "Mostly steady; swings are rare and mild" }, score: 4 },
     { text: { ru: "Стабильно: настроение ровное, кожа и тонус в порядке, чувствую себя в гармонии с телом", uk: "Стабільно: настрій рівний, шкіра й тонус у порядку, почуваюся в гармонії з тілом", en: "Steady: mood is even, skin and tone are fine, I feel in harmony with my body" }, score: 5 },
   ]},
+  { key: "prolactin", category: { ru: "ПРОЛАКТИН", uk: "ПРОЛАКТИН", en: "PROLACTIN" }, text: { ru: "Как у вас с желанием и телесным откликом — тягой к близости, вкусом к жизни — в обычные, не самые стрессовые дни?", uk: "Як у вас із бажанням і тілесним відгуком — тягою до близькості, смаком до життя — у звичайні, не найстресовіші дні?", en: "How are your desire and bodily response — pull toward closeness, appetite for life — on ordinary, not-too-stressful days?" }, options: [
+    { text: { ru: "Почти заморозка: влечения нет, чувства приглушены, внутри тяжесть и безразличие, и так тянется давно", uk: "Майже заморозка: потягу немає, почуття приглушені, всередині важкість і байдужість, і так триває давно", en: "Nearly frozen: no desire, feelings muted, heaviness and indifference inside, and it has lasted a long time" }, score: 1 },
+    { text: { ru: "Желание и отклик заметно снижены, чувствую себя «плоско», к вечеру вялость (если есть цикл — он может сбиваться)", uk: "Бажання й відгук помітно знижені, почуваюся «плоско», надвечір млявість (якщо є цикл — він може збиватися)", en: "Desire and responsiveness clearly reduced, I feel 'flat', sluggish by evening (if you have a cycle, it may be irregular)" }, score: 2 },
+    { text: { ru: "По-разному: бывают периоды охлаждения и вялости без ясной причины, потом возвращается", uk: "По-різному: бувають періоди охолодження й млявості без ясної причини, потім повертається", en: "It varies: periods of coolness and sluggishness for no clear reason, then it comes back" }, score: 3 },
+    { text: { ru: "В основном нормально: желание и эмоции откликаются, просадки редкие — после стресса или недосыпа", uk: "Здебільшого нормально: бажання й емоції відгукуються, просідання рідкісні — після стресу або недосипу", en: "Mostly fine: desire and emotions respond, dips are rare — after stress or lack of sleep" }, score: 4 },
+    { text: { ru: "Устойчиво хорошо: желание, эмоциональный отклик и тонус на месте, чувствую себя живым(ой) и в контакте с телом", uk: "Стабільно добре: бажання, емоційний відгук і тонус на місці, почуваюся живим(ою) і в контакті з тілом", en: "Consistently good: desire, emotional response and tone are there; I feel alive and in touch with my body" }, score: 5 },
+  ]},
 ];
 
 
@@ -1314,9 +1322,9 @@ const HORMONE_CROSS_QUESTIONS = [
 
 // Какая часть каждого доп. вопроса примешивается к каждой системе
 const HORMONE_CROSS_AFFECTS = {
-  energy:    { dopamine: 0.35, cortisol: 0.35, acetylcholine: 0.3, somatotropin: 0.25 },
+  energy:    { dopamine: 0.35, cortisol: 0.35, acetylcholine: 0.3, somatotropin: 0.25, prolactin: 0.2 },
   selfworth: { serotonin: 0.5, oxytocin: 0.5 },
-  recovery:  { gaba: 0.35, testosterone: 0.3, cortisol: 0.35, somatotropin: 0.35, estrogen: 0.2 },
+  recovery:  { gaba: 0.35, testosterone: 0.3, cortisol: 0.35, somatotropin: 0.35, estrogen: 0.2, prolactin: 0.2 },
 };
 
 // Взвешенный итог по системе: своя прямая оценка + доля смежных доп. вопросов.
@@ -1402,6 +1410,13 @@ const HORMONE_LEVEL_TEXTS = {
     { ru: "Баланс держится, но иногда сбивается — особенно когда мало сна или много стресса.", uk: "Баланс тримається, але іноді збивається — особливо коли мало сну або багато стресу.", en: "Balance holds but sometimes slips — especially with too little sleep or too much stress." },
     { ru: "Фон в основном ровный — настроение и тело предсказуемы, колебания не выбивают из колеи.", uk: "Фон здебільшого рівний — настрій і тіло передбачувані, коливання не вибивають із колії.", en: "The background is mostly even — mood and body are predictable, and swings don't throw you off." },
     { ru: "Внутренний баланс устойчив: настроение, кожа и тонус работают заодно — хороший знак для всей системы.", uk: "Внутрішній баланс стійкий: настрій, шкіра й тонус працюють заодно — добрий знак для всієї системи.", en: "Inner balance is steady: mood, skin and tone work together — a good sign for the whole system." },
+  ],
+  prolactin: [
+    { ru: "Желания и чувства будто заморожены: влечение, вкус к жизни и телесный отклик приглушены. Один из возможных фонов — сбой пролактина, который тормозит дофамин. Это повод не терпеть, а разобраться с причиной вместе с врачом.", uk: "Бажання й почуття ніби заморожені: потяг, смак до життя й тілесний відгук приглушені. Один із можливих фонів — збій пролактину, який гальмує дофамін. Це привід не терпіти, а розібратися з причиною разом із лікарем.", en: "Desires and feelings seem frozen: drive, appetite for life and bodily response are muted. One possible background is a prolactin imbalance, which holds dopamine down. It's a reason not to endure it but to find the cause with a doctor." },
+    { ru: "Желание и отклик заметно снижены, к вечеру тяжесть. Пролактин и дофамин работают как качели: когда один растёт, второй проседает — поэтому тянет в вялость и безразличие.", uk: "Бажання й відгук помітно знижені, надвечір важкість. Пролактин і дофамін працюють як гойдалка: коли один росте, другий просідає — тому тягне в млявість і байдужість.", en: "Desire and responsiveness are clearly reduced, with heaviness by evening. Prolactin and dopamine work like a seesaw: when one rises the other drops, which pulls toward sluggishness and indifference." },
+    { ru: "Фон неровный: периоды охлаждения и вялости приходят и уходят — чаще после стресса, недосыпа или переутомления.", uk: "Фон нерівний: періоди охолодження й млявості приходять і минають — частіше після стресу, недосипу чи перевтоми.", en: "The background is uneven: periods of coolness and sluggishness come and go — more often after stress, poor sleep or overwork." },
+    { ru: "В основном всё на месте: желание и эмоции откликаются, просадки редкие и понятно связаны со стрессом или недосыпом.", uk: "Здебільшого все на місці: бажання й емоції відгукуються, просідання рідкісні й зрозуміло пов'язані зі стресом чи недосипом.", en: "Mostly everything is in place: desire and emotions respond, and dips are rare and clearly tied to stress or poor sleep." },
+    { ru: "Здоровый баланс: желание, отклик и тонус на месте — пролактин не придавливает дофамин, а покой после близости и еды ощущается как насыщение, а не как пустота.", uk: "Здоровий баланс: бажання, відгук і тонус на місці — пролактин не придавлює дофамін, а спокій після близькості й їжі відчувається як насичення, а не як порожнеча.", en: "Healthy balance: desire, responsiveness and tone are in place — prolactin isn't pressing dopamine down, and the calm after closeness and food feels like satiety, not emptiness." },
   ],
 };
 
@@ -1497,6 +1512,17 @@ const HORMONE_ADVICE = {
       { ru: "Если перепады сильные или внезапно изменились — это повод обсудить с врачом (гинеколог, эндокринолог), а не лечиться самостоятельно.", uk: "Якщо перепади сильні або раптом змінилися — це привід обговорити з лікарем (гінеколог, ендокринолог), а не лікуватися самостійно.", en: "If the swings are strong or have suddenly changed — talk to a doctor (gynecologist, endocrinologist) rather than self-treating." },
     ],
     duration: { ru: "2–4 недели наблюдения · без добавок и резких решений", uk: "2–4 тижні спостереження · без добавок і різких рішень", en: "2–4 weeks of observation · no supplements or abrupt decisions" },
+  },
+  prolactin: {
+    label: { ru: "Сними хронический стресс и верни сну ритм", uk: "Зніми хронічний стрес і поверни сну ритм", en: "Ease chronic stress and give sleep a rhythm" },
+    steps: [
+      { ru: "Держи постоянное время отбоя и подъёма: пролактин естественно растёт во сне, и сбитый ритм ломает его суточную кривую.", uk: "Тримай постійний час відбою й підйому: пролактин природно росте під час сну, і збитий ритм ламає його добову криву.", en: "Keep a fixed bedtime and wake time: prolactin naturally rises during sleep, and a broken rhythm disrupts its daily curve." },
+      { ru: "Убери «тихий» хронический стресс: по 10 минут тишины или медленного дыхания дважды в день — стресс один из самых частых поводов для подъёма пролактина.", uk: "Прибери «тихий» хронічний стрес: по 10 хвилин тиші або повільного дихання двічі на день — стрес один із найчастіших приводів для підйому пролактину.", en: "Remove the 'quiet' chronic stress: 10 minutes of silence or slow breathing twice a day — stress is one of the most common triggers for raised prolactin." },
+      { ru: "Не перегружай тело: ходьба и умеренные силовые помогают, а изнуряющие тренировки без восстановления только добавляют стресса.", uk: "Не перевантажуй тіло: ходьба й помірні силові допомагають, а виснажливі тренування без відновлення лише додають стресу.", en: "Don't overload the body: walking and moderate strength work help, while exhausting training without recovery only adds stress." },
+      { ru: "Меньше алкоголя и «быстрого дофамина» (ленты, сладкое): дофамин — главный тормоз пролактина, и ему нужен настоящий интерес, а не суррогат.", uk: "Менше алкоголю й «швидкого дофаміну» (стрічки, солодке): дофамін — головне гальмо пролактину, і йому потрібен справжній інтерес, а не сурогат.", en: "Less alcohol and 'fast dopamine' (feeds, sweets): dopamine is prolactin's main brake, and it needs real interest, not a substitute." },
+      { ru: "Если желание и самочувствие снижены больше месяца — обсуди с эндокринологом анализ на пролактин и щитовидку. Лекарства, которые принимаешь, не отменяй сам(а): некоторые влияют на пролактин, но решать должен врач.", uk: "Якщо бажання й самопочуття знижені понад місяць — обговори з ендокринологом аналіз на пролактин і щитоподібну залозу. Ліки, які приймаєш, не скасовуй сам(а): деякі впливають на пролактин, але вирішувати має лікар.", en: "If desire and well-being stay low for over a month, discuss a prolactin and thyroid test with an endocrinologist. Don't stop any medication on your own: some affect prolactin, but that decision belongs to your doctor." },
+    ],
+    duration: { ru: "2–4 недели ритма и тишины · анализы — только вместе с врачом", uk: "2–4 тижні ритму й тиші · аналізи — лише разом із лікарем", en: "2–4 weeks of rhythm and calm · tests only together with a doctor" },
   },
 };
 
@@ -1604,6 +1630,23 @@ const HORMONE_INFO = {
       { ru: "⚠ Гормональные препараты и добавки с фитоэстрогенами — только после анализов и по назначению врача", uk: "⚠ Гормональні препарати й добавки з фітоестрогенами — лише після аналізів і за призначенням лікаря", en: "⚠ Hormonal drugs and phytoestrogen supplements — only after lab tests and as prescribed by a doctor" },
     ],
   },
+  prolactin: {
+    role: { ru: "Гормон гипофиза. Связан с ощущением насыщения и покоя после близости и еды, с лактацией, сном и стресс-ответом. Дофамин его тормозит — они как качели: когда пролактин хронически высок, дофамин, влечение и мотивация проседают. Важен баланс: на практике чаще встречается избыток (стресс, недосып, щитовидка, некоторые лекарства), нехватка — редко.", uk: "Гормон гіпофіза. Пов'язаний із відчуттям насичення й спокою після близькості та їжі, з лактацією, сном і стрес-відповіддю. Дофамін його гальмує — вони як гойдалка: коли пролактин хронічно високий, дофамін, потяг і мотивація просідають. Важливий баланс: на практиці частіше трапляється надлишок (стрес, недосип, щитоподібна залоза, деякі ліки), нестача — рідко.", en: "A pituitary hormone linked to the feeling of satiety and calm after closeness and food, to lactation, sleep and the stress response. Dopamine holds it back — they work like a seesaw: when prolactin stays high, dopamine, desire and motivation drop. Balance matters: in practice excess is more common (stress, poor sleep, thyroid issues, some medications), deficiency is rare." },
+    signs: { ru: "Сниженное влечение и эмоциональная «плоскость», вялость и тяжесть, раздражительность, сбои цикла, у некоторых — выделения из груди вне кормления, головные боли. Часть этих признаков требует врача, а не самопомощи.", uk: "Знижений потяг і емоційна «пласкість», млявість і важкість, дратівливість, збої циклу, у деяких — виділення з грудей поза годуванням, головний біль. Частина цих ознак потребує лікаря, а не самодопомоги.", en: "Reduced desire and emotional 'flatness', sluggishness and heaviness, irritability, cycle irregularities, in some people discharge from the breasts outside nursing, headaches. Some of these signs need a doctor, not self-help." },
+    labels: {
+      toggle: { ru: "Что это и как выровнять", uk: "Що це і як вирівняти", en: "What it is and how to balance it" },
+      signs: { ru: "Признаки сбоя: ", uk: "Ознаки збою: ", en: "Signs of imbalance: " },
+      raise: { ru: "КАК ВЫРОВНЯТЬ ЕСТЕСТВЕННО", uk: "ЯК ВИРІВНЯТИ ПРИРОДНО", en: "HOW TO BALANCE IT NATURALLY" },
+    },
+    raise: [
+      { ru: "Ровный сон: постоянные время отбоя и подъёма, без экранов перед сном", uk: "Рівний сон: постійний час відбою й підйому, без екранів перед сном", en: "Steady sleep: fixed bedtime and wake time, no screens before bed" },
+      { ru: "Хронический стресс — главный раздражитель: дыхание, прогулки, паузы без телефона", uk: "Хронічний стрес — головний подразник: дихання, прогулянки, паузи без телефона", en: "Chronic stress is the main trigger: breathing, walks, pauses without your phone" },
+      { ru: "Умеренные тренировки — ходьба, силовые; без изнурения", uk: "Помірні тренування — ходьба, силові; без виснаження", en: "Moderate exercise — walking, strength; no exhaustion" },
+      { ru: "Меньше алкоголя и сверхстимуляции дофамина (ленты, сладкое)", uk: "Менше алкоголю й надстимуляції дофаміну (стрічки, солодке)", en: "Less alcohol and dopamine overstimulation (feeds, sweets)" },
+      { ru: "Достаточно цинка и витамина B6 из еды: семечки, орехи, бобовые, рыба", uk: "Достатньо цинку й вітаміну B6 з їжі: насіння, горіхи, бобові, риба", en: "Enough zinc and vitamin B6 from food: seeds, nuts, legumes, fish" },
+      { ru: "⚠ Выделения из груди вне кормления, сильные головные боли, нарушения зрения, долгое отсутствие цикла или влечения — к врачу (эндокринолог). Добавки «на удачу» не пей, лекарства сам(а) не отменяй", uk: "⚠ Виділення з грудей поза годуванням, сильний головний біль, порушення зору, тривала відсутність циклу чи потягу — до лікаря (ендокринолог). Добавки «на вдачу» не пий, ліки сам(а) не скасовуй", en: "⚠ Discharge from the breasts outside nursing, strong headaches, vision changes, a long absence of cycle or desire — see a doctor (endocrinologist). Don't take supplements 'just in case' and don't stop medication on your own" },
+    ],
+  },
 };
 
 const RESPONSIBILITY_DISCLAIMER = { ru: "Это ориентиры на основе общих научных данных и практик, а не медицинская консультация и не диагноз. Перед серьёзными изменениями — особенно добавками — сдай анализы и посоветуйся со специалистом. Решения о своём здоровье и их результат — на тебе.", uk: "Це орієнтири на основі загальних наукових даних і практик, а не медична консультація і не діагноз. Перед серйозними змінами — особливо добавками — здай аналізи і порадься з фахівцем. Рішення про своє здоров'я і їх результат — на тобі.", en: "These are pointers based on general research and practice — not medical advice or a diagnosis. Before any serious change, especially supplements, get tested and consult a specialist. Decisions about your health, and their outcome, are yours." };
@@ -1618,16 +1661,16 @@ function HormoneInfoBlock({ hormoneKey, color }) {
     <div style={{ marginTop: "6px" }}>
       <button onClick={() => setOpen(o => !o)} style={{ background: "none", border: "none", color: color || c.accent, fontSize: "12px", cursor: "pointer", padding: "4px 0", fontFamily: "'Georgia',serif", display: "flex", alignItems: "center", gap: "5px" }}>
         <span>{open ? "▾" : "▸"}</span>
-        <span>{tx({ ru: "Что это и как поднять", uk: "Що це і як підняти", en: "What it is and how to raise it" })}</span>
+        <span>{tx(info.labels?.toggle || { ru: "Что это и как поднять", uk: "Що це і як підняти", en: "What it is and how to raise it" })}</span>
       </button>
       {open && (
         <div style={{ padding: "10px 12px", background: c.plate, border: `1px solid ${c.line}`, borderRadius: "10px", marginTop: "4px" }}>
           <p style={{ margin: "0 0 8px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>{tx(info.role)}</p>
           <p style={{ margin: "0 0 8px", fontSize: "11px", color: c.inkSoft, lineHeight: 1.6 }}>
-            <span style={{ color: color || c.accent }}>{tx({ ru: "Признаки дефицита: ", uk: "Ознаки дефіциту: ", en: "Signs of deficiency: " })}</span>
+            <span style={{ color: color || c.accent }}>{tx(info.labels?.signs || { ru: "Признаки дефицита: ", uk: "Ознаки дефіциту: ", en: "Signs of deficiency: " })}</span>
             {tx(info.signs)}
           </p>
-          <p style={{ margin: "0 0 6px", fontSize: "11px", letterSpacing: "0.08em", color: c.inkSoft }}>{tx({ ru: "КАК ПОДНЯТЬ ЕСТЕСТВЕННО", uk: "ЯК ПІДНЯТИ ПРИРОДНО", en: "HOW TO RAISE IT NATURALLY" })}</p>
+          <p style={{ margin: "0 0 6px", fontSize: "11px", letterSpacing: "0.08em", color: c.inkSoft }}>{tx(info.labels?.raise || { ru: "КАК ПОДНЯТЬ ЕСТЕСТВЕННО", uk: "ЯК ПІДНЯТИ ПРИРОДНО", en: "HOW TO RAISE IT NATURALLY" })}</p>
           {info.raise.map((item, i) => (
             <p key={i} style={{ margin: "0 0 4px", fontSize: "12px", color: c.inkMuted, lineHeight: 1.6 }}>· {tx(item)}</p>
           ))}
@@ -1704,7 +1747,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     const advice = HORMONE_ADVICE[weakest.key];
     let summary;
     if (weak.length === 0) {
-      summary = tx({ ru: "Критичных просадок нет — все девять систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі дев'ять систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all nine systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
+      summary = tx({ ru: "Критичных просадок нет — все десять систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі десять систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all ten systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
     } else if (weak.length <= 2) {
       const linkWord = tx({ ru: weak.length === 1 ? "одно звено" : "пара звеньев", uk: weak.length === 1 ? "одна ланка" : "пара ланок", en: weak.length === 1 ? "one link" : "a couple of links" });
       const names = weak.map(r => tx(r.meta.name)).join(tx({ ru: " и ", uk: " і ", en: " and " }));
@@ -1720,7 +1763,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
         <div style={S.resultContainer}>
           <div style={S.sectionHead}>
             <p style={S.sectionTitle}>{t.hormoneCode}</p>
-            <InfoButton text={tx({ ru: "«Девять систем, которые управляют мотивацией, спокойствием, сном, восстановлением и балансом — по твоим ответам, не по анализам.»", uk: "«Дев'ять систем, які керують мотивацією, спокоєм, сном, відновленням і балансом — за твоїми відповідями, не за аналізами.»", en: "«Nine systems that drive motivation, calm, sleep, recovery and balance — from your answers, not lab tests.»" })} />
+            <InfoButton text={tx({ ru: "«Десять систем, которые управляют мотивацией, спокойствием, сном, восстановлением и балансом — по твоим ответам, не по анализам.»", uk: "«Десять систем, які керують мотивацією, спокоєм, сном, відновленням і балансом — за твоїми відповідями, не за аналізами.»", en: "«Ten systems that drive motivation, calm, sleep, recovery and balance — from your answers, not lab tests.»" })} />
           </div>
           <p style={{ margin: "0 0 18px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>«{summary}»</p>
 
@@ -1769,7 +1812,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
           )}
           {onGoGuide && (
             <button onClick={onGoGuide} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 9 системам", uk: "Все про гормони — гід по всіх 9 системах", en: "All about hormones — guide to all 9 systems" })}</span>
+              <span>🧬</span><span>{tx({ ru: "Всё о гормонах — гид по всем 10 системам", uk: "Все про гормони — гід по всіх 10 системах", en: "All about hormones — guide to all 10 systems" })}</span>
             </button>
           )}
           <button onClick={() => setShowNotes(true)} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
@@ -1790,7 +1833,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     <div style={S.screen}>
       <div style={S.screenHeader}>
         <button onClick={onBack} style={S.backBtn}>{t.back}</button>
-        <HintPopup text={tx({ ru: "12 вопросов, которые уточняют картину по девяти системам — они управляют мотивацией, спокойствием, сном, восстановлением и балансом. Отвечай первым, что откликается.", uk: "12 питань, які уточнюють картину по дев'яти системах — вони керують мотивацією, спокоєм, сном, відновленням і балансом. Відповідай першим, що відгукується.", en: "12 questions that clarify the picture across nine systems — they govern motivation, calm, sleep, recovery and balance. Answer with whatever resonates first." })} />
+        <HintPopup text={tx({ ru: "13 вопросов, которые уточняют картину по десяти системам — они управляют мотивацией, спокойствием, сном, восстановлением и балансом. Отвечай первым, что откликается.", uk: "13 питань, які уточнюють картину по десяти системах — вони керують мотивацією, спокоєм, сном, відновленням і балансом. Відповідай першим, що відгукується.", en: "13 questions that clarify the picture across ten systems — they govern motivation, calm, sleep, recovery and balance. Answer with whatever resonates first." })} />
       </div>
       <div style={S.quizProgress}><span style={S.quizCategory}>{tx(q.category)}</span><span style={S.quizCounter}>{current + 1} / {ALL_Q.length}</span></div>
       <div style={S.progressTrack}>{ALL_Q.map((_, i) => <div key={i} style={{ ...S.progressDot, backgroundColor: i < current ? "#C8A97E" : i === current ? "#E8C99E" : c.progressInactive }} />)}</div>
@@ -1827,7 +1870,7 @@ function HormoneGuideScreen({ onBack, onGoTest }) {
         <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "normal", color: c.ink, letterSpacing: "0.04em" }}>{tx({ ru: "Всё о гормонах", uk: "Все про гормони", en: "All about your hormones" })}</h2>
       </div>
       <p style={{ margin: "0 0 20px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7, fontStyle: "italic" }}>
-        {tx({ ru: "Девять систем ниже управляют мотивацией, спокойствием, сном, близостью, фокусом, восстановлением и балансом. Они не работают по отдельности — просевший сон почти всегда тянет вниз и мотивацию, и настроение. Поэтому для продуктивной и приятной жизни важнее не «взвинтить» одну систему, а убрать то, что тянет вниз сразу несколько: обычно это сон, хронический стресс и постоянная стимуляция экранами.", uk: "Дев'ять систем нижче керують мотивацією, спокоєм, сном, близькістю, фокусом, відновленням і балансом. Вони не працюють окремо — просілий сон майже завжди тягне вниз і мотивацію, і настрій. Тому для продуктивного і приємного життя важливіше не «розкрутити» одну систему, а прибрати те, що тягне вниз одразу кілька: зазвичай це сон, хронічний стрес і постійна стимуляція екранами.", en: "The nine systems below drive motivation, calm, sleep, closeness, focus, recovery and balance. They don't work in isolation — poor sleep almost always drags down motivation and mood too. So for a productive, pleasant life it matters more to remove what's dragging several systems down at once — usually sleep, chronic stress, and constant screen stimulation — than to try to max out any single one." })}
+        {tx({ ru: "Десять систем ниже управляют мотивацией, спокойствием, сном, близостью, фокусом, восстановлением и балансом. Они не работают по отдельности — просевший сон почти всегда тянет вниз и мотивацию, и настроение. Поэтому для продуктивной и приятной жизни важнее не «взвинтить» одну систему, а убрать то, что тянет вниз сразу несколько: обычно это сон, хронический стресс и постоянная стимуляция экранами.", uk: "Десять систем нижче керують мотивацією, спокоєм, сном, близькістю, фокусом, відновленням і балансом. Вони не працюють окремо — просілий сон майже завжди тягне вниз і мотивацію, і настрій. Тому для продуктивного і приємного життя важливіше не «розкрутити» одну систему, а прибрати те, що тягне вниз одразу кілька: зазвичай це сон, хронічний стрес і постійна стимуляція екранами.", en: "The ten systems below drive motivation, calm, sleep, closeness, focus, recovery and balance. They don't work in isolation — poor sleep almost always drags down motivation and mood too. So for a productive, pleasant life it matters more to remove what's dragging several systems down at once — usually sleep, chronic stress, and constant screen stimulation — than to try to max out any single one." })}
       </p>
       {keys.map(k => {
         const meta = HORMONE_META[k];
@@ -3309,7 +3352,7 @@ function buildChallengeDays(group, lengthDays) {
 const HORMONE_TO_DAILYCHECK_GROUP = {
   cortisol: "anxiety", dopamine: "lowEnergy", serotonin: "recovery",
   gaba: "anxiety", oxytocin: "anxiety", testosterone: "focus", acetylcholine: "focus",
-  somatotropin: "recovery", estrogen: "recovery",
+  somatotropin: "recovery", estrogen: "recovery", prolactin: "recovery",
 };
 // Прямое соответствие показателя своей группе — для случая, когда пограничный чек-ин
 // решаем по накопленной за всё время личной истории, а не по гормонам.
@@ -6898,7 +6941,7 @@ function MyPathScreen({ onBack }) {
       {/* ГОРМОНАЛЬНЫЙ КОД */}
       <div style={S.sectionHead}>
         <p style={S.sectionTitle}>{t.hormoneCode}</p>
-        <InfoButton text={tx({ ru: "«Средний результат по девяти системам за последние прохождения теста. Слабое звено — система, которая просела сильнее остальных.»", uk: "«Середній результат по дев'яти системах за останні проходження тесту. Слабка ланка — система, яка просіла найсильніше.»", en: "«Average of the nine systems over recent runs. Weakest link — the system that dipped most.»" })} />
+        <InfoButton text={tx({ ru: "«Средний результат по десяти системам за последние прохождения теста. Слабое звено — система, которая просела сильнее остальных.»", uk: "«Середній результат по десяти системах за останні проходження тесту. Слабка ланка — система, яка просіла найсильніше.»", en: "«Average of the ten systems over recent runs. Weakest link — the system that dipped most.»" })} />
       </div>
       {hasHormone ? (
         <>
@@ -6934,7 +6977,7 @@ function MyPathScreen({ onBack }) {
           </div>
         </>
       ) : (
-        <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по девяти системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по дев'яти системах.", en: "Take the Hormonal code test — and a nine-system breakdown will appear here." })} />
+        <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по десяти системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по десяти системах.", en: "Take the Hormonal code test — and a ten-system breakdown will appear here." })} />
       )}
 
       {/* КОМПАС СОСТОЯНИЯ */}
