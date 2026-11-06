@@ -1680,6 +1680,183 @@ function HormoneInfoBlock({ hormoneKey, color }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// ОБЩИЙ ВЕРДИКТ ПО ГОРМОНАЛЬНОМУ КОДУ
+// Правила связей между системами: что тянет что и с чего начинать.
+// Считается локально, без API. scores: { ключ: балл 1..5 }, выше = лучше.
+// ─────────────────────────────────────────────
+const VERDICT_LOW = 37.5;
+const VERDICT_HIGH = 62.5;
+
+const VERDICT_CHAINS = [
+  { id: "stress", root: () => "cortisol",
+    test: v => v.low("cortisol") && v.countLow(["gaba", "serotonin", "testosterone", "dopamine", "somatotropin", "estrogen", "prolactin"]) >= 2,
+    headline: { ru: "Стресс-цепочка", uk: "Стрес-ланцюжок", en: "Stress chain" },
+    text: { ru: "Стресс просел первым, и он тянет за собой соседей: сон, настроение, мотивацию, восстановление. Лечить каждое звено отдельно бесполезно — сначала снимай фоновую нагрузку и возвращай режим.", uk: "Стрес просів першим, і він тягне за собою сусідів: сон, настрій, мотивацію, відновлення. Лікувати кожну ланку окремо марно — спершу знімай фонове навантаження й поверни режим.", en: "Stress dropped first and it drags its neighbours down: sleep, mood, motivation, recovery. Treating each link separately is pointless — first lower the background load and restore your routine." } },
+  { id: "sleep", root: () => "gaba",
+    test: v => v.low("gaba") && v.countLow(["somatotropin", "dopamine", "cortisol", "testosterone"]) >= 1,
+    headline: { ru: "Сон тянет остальное", uk: "Сон тягне решту", en: "Sleep drags the rest" },
+    text: { ru: "Сон — самый чувствительный узел: гормон роста выделяется в глубокой фазе, а дофамин, тестостерон и стрессоустойчивость без нормального сна не восстанавливаются. Пока сон не выровнялся, остальное будет проседать.", uk: "Сон — найчутливіший вузол: гормон росту виділяється в глибокій фазі, а дофамін, тестостерон і стійкість до стресу без нормального сну не відновлюються. Поки сон не вирівнявся, решта буде просідати.", en: "Sleep is the most sensitive hub: growth hormone is released in deep sleep, and dopamine, testosterone and stress resilience don't recover without it. Until sleep evens out, the rest will keep slipping." } },
+  { id: "repair", root: () => "somatotropin",
+    test: v => v.low("testosterone") && v.low("somatotropin"),
+    headline: { ru: "Ремонт и воля", uk: "Ремонт і воля", en: "Repair and drive" },
+    text: { ru: "Воля, напор и восстановление тканей держатся на одних опорах: сон, белок, силовая нагрузка, отсутствие хронического стресса. Это больше про режим тела, чем про характер.", uk: "Воля, напір і відновлення тканин тримаються на одних опорах: сон, білок, силове навантаження, відсутність хронічного стресу. Це більше про режим тіла, ніж про характер.", en: "Drive, push and tissue repair rest on the same supports: sleep, protein, strength training, no chronic stress. It's more about the body's routine than about character." } },
+  { id: "seesaw", root: () => "dopamine",
+    test: v => v.low("dopamine") && v.low("prolactin"),
+    headline: { ru: "Дофаминовые качели", uk: "Дофамінові гойдалки", en: "Dopamine seesaw" },
+    text: { ru: "Дофамин тормозит пролактин, поэтому когда интерес и мотивация просели, пролактин легко добавляет вялость и охлаждение. Лечится общим подъёмом дофамина: небольшие цели, движение, настоящий интерес вместо быстрых стимулов.", uk: "Дофамін гальмує пролактин, тому коли інтерес і мотивація просіли, пролактин легко додає млявість і охолодження. Лікується загальним підйомом дофаміну: невеликі цілі, рух, справжній інтерес замість швидких стимулів.", en: "Dopamine holds prolactin back, so when interest and motivation drop, prolactin easily adds sluggishness and coolness. It's fixed by lifting dopamine overall: small goals, movement, real interest instead of fast stimuli." } },
+  { id: "focus", root: () => "dopamine",
+    test: v => v.low("dopamine") && v.low("acetylcholine"),
+    headline: { ru: "Рассыпанное внимание", uk: "Розсипана увага", en: "Scattered attention" },
+    text: { ru: "Мотивация и ясность тянут друг друга: без интереса внимание рассыпается, без ясности трудно начать. Помогают короткие задачи по 10–15 минут и меньше многозадачности.", uk: "Мотивація і ясність тягнуть одна одну: без інтересу увага розсипається, без ясності важко почати. Допомагають короткі завдання по 10–15 хвилин і менше багатозадачності.", en: "Motivation and clarity pull each other: without interest attention scatters, without clarity it's hard to start. Short 10–15 minute tasks and less multitasking help." } },
+  { id: "support", root: () => "serotonin",
+    test: v => v.low("serotonin") && v.low("oxytocin"),
+    headline: { ru: "Опора внутри и рядом", uk: "Опора всередині й поруч", en: "Support within and around" },
+    text: { ru: "Самооценка и близость усиливают друг друга: без опоры внутри тянешься к людям меньше, а без людей опора внутри не растёт. Начни с малого: один тёплый контакт в день и одно честное признание себе.", uk: "Самооцінка й близькість підсилюють одна одну: без опори всередині тягнешся до людей менше, а без людей опора всередині не росте. Почни з малого: один теплий контакт на день і одне чесне визнання собі.", en: "Self-worth and closeness reinforce each other: without inner support you reach out less, and without people inner support doesn't grow. Start small: one warm contact a day and one honest acknowledgement to yourself." } },
+  { id: "mood", root: v => v.lowestLow(["cortisol", "gaba"]) || "cortisol",
+    test: v => v.low("estrogen") && (v.low("cortisol") || v.low("gaba")),
+    headline: { ru: "Фон качает", uk: "Фон гойдає", en: "Unsteady background" },
+    text: { ru: "Перепады настроения и самочувствия часто усиливаются от стресса, рваного сна и пропусков еды. Сначала ритм, потом выводы.", uk: "Перепади настрою й самопочуття часто посилюються від стресу, рваного сну й пропусків їжі. Спершу ритм, потім висновки.", en: "Swings in mood and well-being often intensify with stress, broken sleep and skipped meals. Rhythm first, conclusions later." } },
+];
+
+const VERDICT_EXHAUSTION = {
+  headline: { ru: "Общее истощение", uk: "Загальне виснаження", en: "General depletion" },
+  text: { ru: "Просело сразу много систем — это похоже на истощение ресурса, а не на несколько отдельных проблем. Чинить нужно общий фундамент: сон, режим, меньше нагрузки. Новых целей пока не добавляй.", uk: "Просіло одразу багато систем — це схоже на виснаження ресурсу, а не на кілька окремих проблем. Лагодити треба спільний фундамент: сон, режим, менше навантаження. Нових цілей поки не додавай.", en: "Many systems dropped at once — it looks like a depleted reserve rather than several separate problems. Fix the shared foundation: sleep, routine, less load. Don't add new goals for now." },
+};
+const VERDICT_BALANCE = {
+  headline: { ru: "Баланс и ресурс", uk: "Баланс і ресурс", en: "Balance and reserve" },
+  text: { ru: "Критичных просадок нет. Задача — удержать то, что работает, и не «прокачивать» системы без причины.", uk: "Критичних просідань немає. Завдання — втримати те, що працює, і не «прокачувати» системи без причини.", en: "No critical drops. The task is to keep what works and not 'boost' systems for no reason." },
+};
+const VERDICT_ISOLATED = {
+  headline: { ru: "Точечная просадка", uk: "Точкова просадка", en: "A single dip" },
+  text: { ru: "Просели одно-два звена, а соседи держатся — это точечная история, её можно вытягивать мягко и отдельно.", uk: "Просіли одна-дві ланки, а сусіди тримаються — це точкова історія, її можна витягувати м'яко й окремо.", en: "One or two links dropped while their neighbours hold — a local issue that can be pulled up gently and separately." },
+};
+
+function buildHormoneVerdict(scores) {
+  if (!scores) return null;
+  const keys = Object.keys(HORMONE_META).filter(k => typeof scores[k] === "number" && !isNaN(scores[k]));
+  if (keys.length < 3) return null;
+  const pct = k => (scores[k] - 1) / 4 * 100;
+  const v = {
+    low: k => typeof scores[k] === "number" && pct(k) <= VERDICT_LOW,
+    countLow: arr => arr.filter(k => v.low(k)).length,
+    lowestLow: arr => arr.filter(k => v.low(k)).sort((a, b) => scores[a] - scores[b])[0] || null,
+  };
+  const lowKeys = keys.filter(k => v.low(k)).sort((a, b) => scores[a] - scores[b]);
+  const highKeys = keys.filter(k => pct(k) >= VERDICT_HIGH).sort((a, b) => scores[b] - scores[a]);
+  const midKeys = keys.filter(k => !v.low(k) && pct(k) < VERDICT_HIGH);
+  const avgPct = keys.reduce((sum, k) => sum + pct(k), 0) / keys.length;
+  const exhausted = lowKeys.length >= 6 || avgPct <= 30;
+  const chains = VERDICT_CHAINS.filter(ch => ch.test(v));
+
+  let headline, lead;
+  if (exhausted) { headline = VERDICT_EXHAUSTION.headline; lead = VERDICT_EXHAUSTION.text; }
+  else if (chains.length) { headline = chains[0].headline; lead = chains[0].text; }
+  else if (!lowKeys.length) { headline = VERDICT_BALANCE.headline; lead = VERDICT_BALANCE.text; }
+  else { headline = VERDICT_ISOLATED.headline; lead = VERDICT_ISOLATED.text; }
+  const moreChains = exhausted ? chains.slice(0, 2) : chains.slice(1, 3);
+
+  // с чего начинать: фундамент (сон и стресс), если он просел и тянет остальное; иначе корень цепочки; иначе самое слабое звено
+  const foundationLow = v.lowestLow(["gaba", "cortisol"]);
+  let rootKey;
+  if (lowKeys.length) {
+    if ((exhausted || chains.some(ch => ch.id === "stress" || ch.id === "sleep")) && foundationLow) rootKey = foundationLow;
+    else if (chains.length) rootKey = chains[0].root(v);
+    else rootKey = lowKeys[0];
+  } else {
+    rootKey = [...keys].sort((a, b) => scores[a] - scores[b])[0];
+  }
+  const secondKey = lowKeys.find(k => k !== rootKey) || null;
+  const foundationOk = keys.includes("gaba") && keys.includes("cortisol") && !v.low("gaba") && !v.low("cortisol") && lowKeys.length >= 2;
+  const doctor = exhausted || (typeof scores.prolactin === "number" && pct("prolactin") <= 25);
+  const pctMap = {};
+  keys.forEach(k => { pctMap[k] = Math.round(pct(k)); });
+
+  return { headline, lead, moreChains, lowKeys, midKeys, highKeys, rootKey, secondKey, maintain: lowKeys.length === 0, allStrong: lowKeys.length === 0 && pct(rootKey) >= VERDICT_HIGH, foundationOk, doctor, pct: pctMap };
+}
+
+function HormoneVerdictCard({ verdict, showSteps, burnoutPct, dailyWeak }) {
+  const { tx, theme } = useLang();
+  const c = THEMES[theme] || THEMES.dark;
+  if (!verdict) return null;
+  const meta = k => HORMONE_META[k];
+  const full = k => `${tx(meta(k).name)} — ${tx(meta(k).short)}`;
+  const chip = k => (
+    <span key={k} style={{ display: "inline-block", margin: "0 6px 6px 0", padding: "4px 10px", borderRadius: "999px", border: `1px solid ${meta(k).color}`, color: meta(k).color, fontSize: "11.5px" }}>
+      {tx(meta(k).name)} · {verdict.pct[k]}%
+    </span>
+  );
+  const group = (label, arr) => arr.length ? (
+    <div style={{ marginBottom: "6px" }}>
+      <p style={{ margin: "0 0 6px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>{label}</p>
+      <div>{arr.map(chip)}</div>
+    </div>
+  ) : null;
+  const para = { margin: "0 0 10px", fontSize: "13px", color: c.inkMuted, lineHeight: 1.7 };
+  const advice = HORMONE_ADVICE[verdict.rootKey];
+  const secondAdvice = verdict.secondKey ? HORMONE_ADVICE[verdict.secondKey] : null;
+
+  const extra = [];
+  if (typeof burnoutPct === "number") {
+    if (burnoutPct >= 60) extra.push(tx({ ru: `Опросник выгорания тоже показывает высокий уровень (${burnoutPct}%) — это подтверждает: сначала отдых и разгрузка, потом оптимизация.`, uk: `Опитувальник вигорання теж показує високий рівень (${burnoutPct}%) — це підтверджує: спершу відпочинок і розвантаження, потім оптимізація.`, en: `The burnout questionnaire also shows a high level (${burnoutPct}%) — that confirms it: rest and unloading first, optimisation later.` }));
+    else if (burnoutPct <= 30 && verdict.lowKeys.length >= 3) extra.push(tx({ ru: `Выгорание по опроснику низкое (${burnoutPct}%) — значит просадки скорее про режим тела (сон, еда, движение), чем про психологическую усталость.`, uk: `Вигорання за опитувальником низьке (${burnoutPct}%) — отже, просідання скоріше про режим тіла (сон, їжа, рух), ніж про психологічну втому.`, en: `Burnout in the questionnaire is low (${burnoutPct}%) — so the dips are more about the body's routine (sleep, food, movement) than psychological fatigue.` }));
+  }
+  if (dailyWeak) extra.push(tx({ ru: "В Компасе состояния чаще всего слабее: ", uk: "У Компасі стану частіше слабше: ", en: "In the State compass the weaker one is most often: " }) + tx(dailyWeak) + ".");
+
+  return (
+    <div style={S.stepsBlock}>
+      <p style={S.stepsTitle}>{tx({ ru: "ОБЩИЙ ВЕРДИКТ", uk: "ЗАГАЛЬНИЙ ВИСНОВОК", en: "OVERALL VERDICT" })}</p>
+      <p style={{ margin: "0 0 8px", fontSize: "16px", color: c.accent }}>{tx({ ru: "Картина", uk: "Картина", en: "Pattern" })}: {tx(verdict.headline)}</p>
+      <p style={{ ...para, fontStyle: "italic" }}>{tx(verdict.lead)}</p>
+
+      {group(tx({ ru: "ПРОСЕЛО", uk: "ПРОСІЛО", en: "LOW" }), verdict.lowKeys)}
+      {group(tx({ ru: "В НОРМЕ", uk: "В НОРМІ", en: "OK" }), verdict.midKeys)}
+      {group(tx({ ru: "ОПОРА", uk: "ОПОРА", en: "STRONG" }), verdict.highKeys)}
+
+      {verdict.moreChains.length > 0 && (
+        <div style={{ marginTop: "10px" }}>
+          <p style={{ margin: "0 0 6px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>{tx({ ru: "КАК ЭТО СВЯЗАНО", uk: "ЯК ЦЕ ПОВ'ЯЗАНО", en: "HOW IT CONNECTS" })}</p>
+          {verdict.moreChains.map(ch => (
+            <p key={ch.id} style={para}><span style={{ color: c.accent }}>{tx(ch.headline)}. </span>{tx(ch.text)}</p>
+          ))}
+        </div>
+      )}
+      {verdict.foundationOk && (
+        <p style={para}>{tx({ ru: "Сон и стресс держатся — значит причина просадок не в перегрузе. Смотри на питание, движение, интерес и общение.", uk: "Сон і стрес тримаються — отже, причина просідань не в перевантаженні. Дивись на харчування, рух, інтерес і спілкування.", en: "Sleep and stress are holding — so the dips aren't caused by overload. Look at food, movement, interest and company." })}</p>
+      )}
+      {extra.map((line, i) => <p key={i} style={para}>{line}</p>)}
+
+      <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${c.line}` }}>
+        <p style={{ margin: "0 0 10px", fontSize: "10px", letterSpacing: "0.15em", color: c.inkSoft }}>{tx({ ru: "ЧТО ДЕЛАТЬ ПО ПОРЯДКУ", uk: "ЩО РОБИТИ ПО ПОРЯДКУ", en: "WHAT TO DO, IN ORDER" })}</p>
+        {verdict.allStrong ? (
+          <p style={para}>{tx({ ru: "Все системы в ресурсе. Держи ритм сна, движение и паузы — и не чини то, что не сломано.", uk: "Усі системи в ресурсі. Тримай ритм сну, рух і паузи — і не лагодь те, що не зламано.", en: "All systems are well-resourced. Keep your sleep rhythm, movement and pauses — and don't fix what isn't broken." })}</p>
+        ) : verdict.maintain ? (
+          <p style={para}><span style={{ color: meta(verdict.rootKey).color }}>{tx({ ru: "Следи за: ", uk: "Стеж за: ", en: "Keep an eye on: " })}</span>{full(verdict.rootKey)} {tx({ ru: "— самое низкое звено, но оно в рабочей зоне. Держи ритм сна, движение и паузы, остальное не трогай.", uk: "— найнижча ланка, але вона в робочій зоні. Тримай ритм сну, рух і паузи, решту не чіпай.", en: "— the lowest link, but still in the working zone. Keep your sleep rhythm, movement and pauses; leave the rest alone." })}</p>
+        ) : (
+          <>
+            <p style={para}><span style={{ color: meta(verdict.rootKey).color }}>1. {tx({ ru: "Сначала: ", uk: "Спершу: ", en: "First: " })}</span>{full(verdict.rootKey)}{advice ? ` — ${tx(advice.label)}` : ""}.{!showSteps ? tx({ ru: " Шаги — ниже.", uk: " Кроки — нижче.", en: " Steps are below." }) : ""}</p>
+            {showSteps && advice && advice.steps.slice(0, 2).map((st, i) => (
+              <p key={i} style={{ ...para, margin: "0 0 8px 14px", fontSize: "12.5px" }}>· {tx(st)}</p>
+            ))}
+            {verdict.secondKey && (
+              <p style={para}><span style={{ color: meta(verdict.secondKey).color }}>2. {tx({ ru: "Потом: ", uk: "Потім: ", en: "Then: " })}</span>{full(verdict.secondKey)}{secondAdvice ? ` — ${tx(secondAdvice.label)}` : ""}.</p>
+            )}
+          </>
+        )}
+        {verdict.highKeys.length > 0 && !verdict.maintain && (
+          <p style={para}><span style={{ color: c.accent }}>{tx({ ru: "Не трогай пока: ", uk: "Поки не чіпай: ", en: "Leave alone for now: " })}</span>{verdict.highKeys.slice(0, 4).map(k => tx(meta(k).name)).join(", ")}{verdict.highKeys.length > 4 ? "…" : ""} {tx({ ru: "— они в порядке, «прокачка» им не нужна.", uk: "— вони в порядку, «прокачка» їм не потрібна.", en: "— they're fine, no need to 'boost' them." })}</p>
+        )}
+        <p style={para}><span style={{ color: c.accent }}>{tx({ ru: "Проверь себя: ", uk: "Перевір себе: ", en: "Check yourself: " })}</span>{tx({ ru: "через 2–3 недели пройди тест снова и смотри на среднее по трём прохождениям, а не на один день.", uk: "через 2–3 тижні пройди тест знову й дивись на середнє за трьома проходженнями, а не на один день.", en: "retake the test in 2–3 weeks and look at the average of three runs, not a single day." })}</p>
+      </div>
+
+      {verdict.doctor && (
+        <p style={{ ...para, marginTop: "6px" }}>{tx({ ru: "⚠ Если такое состояние держится больше месяца — особенно с постоянной усталостью, потерей желания или сбоями цикла — обсуди с врачом (терапевт, эндокринолог) анализы.", uk: "⚠ Якщо такий стан триває понад місяць — особливо з постійною втомою, втратою бажання чи збоями циклу — обговори з лікарем (терапевт, ендокринолог) аналізи.", en: "⚠ If this state lasts more than a month — especially with constant fatigue, loss of desire or cycle irregularities — discuss lab tests with a doctor (GP, endocrinologist)." })}</p>
+      )}
+      <p style={{ margin: "4px 0 0", fontSize: "10.5px", color: c.inkSoft, lineHeight: 1.6, fontStyle: "italic" }}>{tx({ ru: "Это ориентир по самооценке, а не диагноз.", uk: "Це орієнтир за самооцінкою, а не діагноз.", en: "This is a self-assessment guide, not a diagnosis." })}</p>
+    </div>
+  );
+}
+
 function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
   const { lang, t, tx, theme } = useLang();
   const c = THEMES[theme] || THEMES.dark;
@@ -1744,7 +1921,10 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
     });
     const weak = results.filter(r => r.pct <= 37.5);
     const weakest = results.reduce((min, r) => (r.pct < min.pct ? r : min), results[0]);
-    const advice = HORMONE_ADVICE[weakest.key];
+    const verdict = buildHormoneVerdict(finalScores);
+    const actionKey = (verdict && verdict.rootKey) || weakest.key;
+    const actionMeta = HORMONE_META[actionKey];
+    const advice = HORMONE_ADVICE[actionKey];
     let summary;
     if (weak.length === 0) {
       summary = tx({ ru: "Критичных просадок нет — все десять систем держатся в рабочей зоне. Задача не в том, чтобы что-то чинить, а в том, чтобы удержать это состояние.", uk: "Критичних просідань немає — всі десять систем тримаються в робочій зоні. Завдання не в тому, щоб щось лагодити, а в тому, щоб утримати цей стан.", en: "No critical drops — all ten systems are holding in the working zone. The task isn't to fix something, it's to hold this state." });
@@ -1789,11 +1969,13 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
             </div>
           ))}
 
+          <HormoneVerdictCard verdict={verdict} showSteps={false} />
+
           <div style={S.stepsBlock}>
-            <p style={S.stepsTitle}>{tx({ru:"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС",uk:"ЩО РОБИТИ ПРЯМО ЗАРАЗ",en:"WHAT TO DO RIGHT NOW"})} — {tx(weakest.meta.name).toUpperCase()}</p>
+            <p style={S.stepsTitle}>{tx({ru:"ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС",uk:"ЩО РОБИТИ ПРЯМО ЗАРАЗ",en:"WHAT TO DO RIGHT NOW"})} — {tx(actionMeta.name).toUpperCase()}</p>
             {advice.steps.map((step, i) => (
               <div key={i} style={{ display: "flex", gap: "10px", marginBottom: i < advice.steps.length - 1 ? "12px" : "0" }}>
-                <span style={{ fontSize: "11px", color: weakest.meta.color, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
+                <span style={{ fontSize: "11px", color: actionMeta.color, flexShrink: 0, marginTop: "2px", minWidth: "16px" }}>{i + 1}.</span>
                 <p style={{ margin: 0, fontSize: "13px", color: c.inkMuted, lineHeight: 1.7 }}>{tx(step)}</p>
               </div>
             ))}
@@ -1802,7 +1984,7 @@ function HormoneScreen({ onBack, onGoCompass, onGoGuide }) {
             </div>
           </div>
 
-          <button onClick={() => { setChallengePresetHormone(weakest.key); setShowChallenge(true); }} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <button onClick={() => { setChallengePresetHormone(actionKey); setShowChallenge(true); }} style={{ width: "100%", padding: "14px", background: c.plate, ...GLASS, border: "1px solid rgba(200,169,126,0.2)", borderRadius: "12px", color: c.accent, fontSize: "14px", cursor: "pointer", fontFamily: "'Georgia',serif", letterSpacing: "0.05em", marginTop: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
             <span>🧭</span><span>{tx({ ru: "Пройти челлендж по этому направлению", uk: "Пройти челендж за цим напрямком", en: "Try a challenge for this direction" })}</span>
           </button>
           {onGoCompass && (
@@ -6757,6 +6939,7 @@ function MyPathScreen({ onBack }) {
     const min = entries.reduce((m, e) => (e[1] < m[1] ? e : m), entries[0]);
     hormoneWeakest = HORMONE_META[min[0]];
   }
+  const hormoneVerdict = hasHormone ? buildHormoneVerdict(hormoneAvgByKey) : null;
   const hormoneScaleLabels = [tx({ru:"ПРОСЕЛО",uk:"ПРОСІЛО",en:"LOW"}), tx({ru:"СРЕДНЕ",uk:"СЕРЕДНЬО",en:"MID"}), tx({ru:"СТАБИЛЬНО",uk:"СТАБІЛЬНО",en:"STABLE"}), tx({ru:"В РЕСУРСЕ",uk:"В РЕСУРСІ",en:"RESOURCE"})];
   const hormoneHiIndex = hormonePct <= 25 ? 0 : hormonePct <= 50 ? 1 : hormonePct <= 75 ? 2 : 3;
 
@@ -6975,6 +7158,7 @@ function MyPathScreen({ onBack }) {
               );
             })}
           </div>
+          <HormoneVerdictCard verdict={hormoneVerdict} showSteps burnoutPct={hasQuiz ? burnoutPct : null} dailyWeak={dcWeakestQ ? dcWeakestQ.label : null} />
         </>
       ) : (
         <EmptyMetric text={tx({ ru: "Пройди тест «Гормональный код» — и здесь появится разбор по десяти системам.", uk: "Пройди тест «Гормональний код» — і тут з'явиться розбір по десяти системах.", en: "Take the Hormonal code test — and a ten-system breakdown will appear here." })} />
