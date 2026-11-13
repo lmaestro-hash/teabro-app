@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from "react";
 
 // ─────────────────────────────────────────────
 // THEME + i18n · 3 языка в 1 · логика score/burnout не меняется
@@ -109,6 +109,7 @@ const UI = {
       teaquiz: { title: "Найти свой чай", desc: "Под внутреннее состояние · 5 вопросов" },
       meditation: { title: "Моя практика", desc: "Подбор под внутреннее состояние · 20 вопросов" },
       meditationguidance: { title: "Наставления по медитации", desc: "Одна простая и самая действенная практика" },
+      practice: { title: "Дневник практик", desc: "Бег, качалка, йога, медитация · состояние до и после, заметки" },
       dailycheck: { title: "Компас состояния", desc: "Точно узнай, что сейчас не так, и что с этим делать · 10 вопросов" },
       challenges: { title: "Челленджи", desc: "10, 20 или 30 дней практики под своё состояние" },
       mood: { title: "Мой день сегодня", desc: "Отметить своё состояние" },
@@ -197,6 +198,7 @@ const UI = {
       teaquiz: { title: "Знайти свій чай", desc: "Під внутрішній стан · 5 питань" },
       meditation: { title: "Моя практика", desc: "Підбір під внутрішній стан · 20 питань" },
       meditationguidance: { title: "Настанови з медитації", desc: "Одна проста і найдієвіша практика" },
+      practice: { title: "Щоденник практик", desc: "Біг, качалка, йога, медитація · стан до і після, нотатки" },
       dailycheck: { title: "Компас стану", desc: "Точно дізнайся, що зараз не так, і що з цим робити · 10 питань" },
       challenges: { title: "Челенджі", desc: "10, 20 або 30 днів практики під свій стан" },
       mood: { title: "Мій день сьогодні", desc: "Відмітити свій стан" },
@@ -285,6 +287,7 @@ const UI = {
       teaquiz: { title: "Find your tea", desc: "Based on your inner state · 5 questions" },
       meditation: { title: "My practice", desc: "Matched to your inner state · 20 questions" },
       meditationguidance: { title: "Meditation guidance", desc: "One simple, most effective practice" },
+      practice: { title: "Practice log", desc: "Running, gym, yoga, meditation · state before and after, notes" },
       dailycheck: { title: "State compass", desc: "Find out exactly what's off, and what to do about it · 10 questions" },
       challenges: { title: "Challenges", desc: "10, 20 or 30 days of practice matched to your state" },
       mood: { title: "My day today", desc: "Mark how you feel" },
@@ -7383,6 +7386,834 @@ function EmptyMetric({ text }) {
 // ─────────────────────────────────────────────
 // ГЛАВНЫЙ ЭКРАН
 // ─────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+// ДНЕВНИК ПРАКТИК · бег / качалка / йога / медитация (один движок)
+// Все имена внутри замыкания — с остальным App.jsx не пересекаются.
+// Сервер: api/practice.js. Тема и язык приходят пропсами (lang, c = THEMES[theme]).
+// ═════════════════════════════════════════════════════════════════
+const PracticeScreen = (() => {
+// Practice.jsx — Tea Bro · Дневник практик
+// Один универсальный движок для направлений: качалка, бег, йога, медитация.
+// Направления отличаются только конфигом (DIRS) и доп. блоком формы.
+// Тема и язык приходят ПРОПСАМИ (lang, c = THEMES[theme]) — модуль не импортирует App.jsx.
+// Данные: сразу локально (localStorage) + очередь на сервер (/api/practice). Без сети ничего не теряется.
+
+const API = "https://teabro-app.vercel.app/api/practice";
+const K = { e: "pr_entries_v1", q: "pr_queue_v1", c: "pr_cfg_v1", d: "pr_draft_v1" };
+
+const X = (ru, uk, en) => ({ ru, uk, en: en ?? ru });
+const tr = (lang, o) => (o == null ? "" : typeof o === "string" ? o : o[lang] ?? o.ru ?? "");
+
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const lsDel = (k) => { try { localStorage.removeItem(k); } catch {} };
+
+// ── даты ─────────────────────────────────────────────
+const pad = (n) => String(n).padStart(2, "0");
+const dk = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return dk(d); };
+const diffDays = (a, b) => Math.round((parse(a) - parse(b)) / 864e5);
+const weekStart = (s) => { const d = parse(s); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return dk(d); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+const WD = { ru: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"], uk: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"], en: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] };
+const MON = {
+  ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+  uk: ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+};
+
+// ── конфиг направлений ───────────────────────────────
+const DIRS = {
+  gym: {
+    icon: "🏋️", name: X("Качалка", "Качалка", "Gym"), durs: [30, 45, 60, 75, 90],
+    subs: [["upper", X("Верх", "Верх", "Upper")], ["lower", X("Низ", "Низ", "Lower")], ["full", X("Всё тело", "Все тіло", "Full body")], ["push", X("Жим", "Жим", "Push")], ["pull", X("Тяга", "Тяга", "Pull")], ["legs", X("Ноги", "Ноги", "Legs")], ["core", X("Кор", "Кор", "Core")]],
+    prompt: X("Что получилось, что поправить в следующий раз?", "Що вийшло, що виправити наступного разу?", "What went well, what to adjust next time?"),
+    tags: [X("рекорд", "рекорд", "PR"), X("через силу", "через силу", "pushed hard"), X("в удовольствие", "із задоволенням", "enjoyable"), X("утром", "зранку", "morning"), X("вечером", "ввечері", "evening")],
+  },
+  run: {
+    icon: "🏃", name: X("Бег", "Біг", "Running"), durs: [15, 20, 30, 45, 60, 90],
+    subs: [["easy", X("Лёгкий", "Легкий", "Easy")], ["tempo", X("Темповой", "Темповий", "Tempo")], ["intervals", X("Интервалы", "Інтервали", "Intervals")], ["long", X("Длинный", "Довгий", "Long")], ["recovery", X("Восстановительный", "Відновлювальний", "Recovery")]],
+    prompt: X("Как дыхание, ноги, настроение по ходу?", "Як дихання, ноги, настрій по ходу?", "How were breathing, legs, mood along the way?"),
+    tags: [X("рекорд", "рекорд", "PR"), X("в удовольствие", "із задоволенням", "enjoyable"), X("утром", "зранку", "morning"), X("вечером", "ввечері", "evening"), X("с кем-то", "з кимось", "with someone")],
+  },
+  yoga: {
+    icon: "🧘", name: X("Йога", "Йога", "Yoga"), durs: [15, 20, 30, 45, 60, 90],
+    subs: [["vinyasa", X("Виньяса", "Віньяса", "Vinyasa")], ["hatha", X("Хатха", "Хатха", "Hatha")], ["yin", X("Инь", "Інь", "Yin")], ["nidra", X("Йога-нидра", "Йога-нідра", "Yoga nidra")], ["stretch", X("Растяжка", "Розтяжка", "Stretch")]],
+    prompt: X("Где был зажим, где отпустило?", "Де був затиск, де відпустило?", "Where was the tension, where did it release?"),
+    tags: [X("перед сном", "перед сном", "before sleep"), X("утром", "зранку", "morning"), X("с видео", "з відео", "guided"), X("в тишине", "в тиші", "in silence")],
+  },
+  med: {
+    icon: "🪷", name: X("Медитация", "Медитація", "Meditation"), durs: [5, 10, 15, 20, 30, 45],
+    subs: [["breath", X("Дыхание", "Дихання", "Breath")], ["bodyscan", X("Скан тела", "Скан тіла", "Body scan")], ["observe", X("Наблюдение", "Спостереження", "Observing")], ["mantra", X("Мантра", "Мантра", "Mantra")], ["nidra", X("Нидра", "Нідра", "Nidra")]],
+    prompt: X("Что заметил в мыслях и в теле?", "Що помітив у думках і в тілі?", "What did you notice in thoughts and in the body?"),
+    tags: [X("рассеянно", "розсіяно", "distracted"), X("глубоко", "глибоко", "deep"), X("перед сном", "перед сном", "before sleep"), X("утром", "зранку", "morning"), X("в тишине", "в тиші", "in silence")],
+  },
+};
+const DIR_KEYS = Object.keys(DIRS);
+
+const SCALES = {
+  e: { name: X("Энергия", "Енергія", "Energy"), em: ["🪫", "😴", "🙂", "⚡", "🔥"] },
+  m: { name: X("Настроение", "Настрій", "Mood"), em: ["😞", "😕", "😐", "🙂", "😄"] },
+  t: { name: X("Напряжение", "Напруга", "Tension"), em: ["😌", "🙂", "😐", "😬", "😣"] },
+};
+const ZONES = [["neck", X("Шея", "Шия", "Neck")], ["shoulders", X("Плечи", "Плечі", "Shoulders")], ["chest", X("Грудь", "Груди", "Chest")], ["arms", X("Руки", "Руки", "Arms")], ["upback", X("Верх спины", "Верх спини", "Upper back")], ["lowback", X("Поясница", "Поперек", "Lower back")], ["hips", X("Бёдра", "Стегна", "Hips")], ["legs", X("Ноги", "Ноги", "Legs")], ["head", X("Голова", "Голова", "Head")]];
+const SURF = [["road", X("Дорога", "Дорога", "Road")], ["park", X("Парк/трейл", "Парк/трейл", "Park/trail")], ["track", X("Стадион", "Стадіон", "Track")], ["mill", X("Дорожка", "Доріжка", "Treadmill")]];
+const WX = ["☀️", "⛅", "🌧", "❄️", "💨"];
+const FEEL = [[1, "😌", X("легко", "легко", "easy")], [2, "👌", X("в самый раз", "якраз", "just right")], [3, "🥵", X("тяжело", "важко", "hard")]];
+const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга", "Подтягивания", "Жим стоя", "Тяга в наклоне", "Отжимания", "Выпады", "Румынская тяга", "Планка"], uk: ["Жим лежачи", "Присід", "Станова тяга", "Підтягування", "Жим стоячи", "Тяга в нахилі", "Віджимання", "Випади", "Румунська тяга", "Планка"], en: ["Bench press", "Squat", "Deadlift", "Pull-ups", "Overhead press", "Bent-over row", "Push-ups", "Lunges", "Romanian deadlift", "Plank"] };
+
+const UI = {
+  title: X("Дневник практик", "Щоденник практик", "Practice log"),
+  add: X("＋ Записать практику", "＋ Записати практику", "＋ Log a session"),
+  repeat: X("↺ Повторить прошлую", "↺ Повторити попередню", "↺ Repeat last"),
+  back: X("← назад", "← назад", "← back"),
+  history: X("История", "Історія", "History"), stats: X("Итоги", "Підсумки", "Stats"), settings: X("Данные", "Дані", "Data"),
+  streak: X("серия", "серія", "streak"), days: X("дн.", "дн.", "d"), week: X("За неделю", "За тиждень", "This week"),
+  sessions: X("практик", "практик", "sessions"), min: X("мин", "хв", "min"), avgEff: X("ср. эффект", "сер. ефект", "avg effect"),
+  last: X("Последние", "Останні", "Recent"), empty: X("Пока пусто. Первая запись — за 10 секунд.", "Поки порожньо. Перший запис — за 10 секунд.", "Nothing yet. Your first entry takes 10 seconds."),
+  date: X("Дата", "Дата", "Date"), today: X("Сегодня", "Сьогодні", "Today"), yest: X("Вчера", "Вчора", "Yesterday"),
+  kind: X("Тип", "Тип", "Type"), duration: X("Длительность", "Тривалість", "Duration"), intensity: X("Интенсивность", "Інтенсивність", "Intensity"),
+  state: X("Состояние до и после", "Стан до і після", "State before and after"), before: X("До", "До", "Before"), after: X("После", "Після", "After"),
+  body: X("Тело: где напряжение", "Тіло: де напруга", "Body: where is tension"),
+  tags: X("Теги", "Теги", "Tags"), addTag: X("свой тег", "свій тег", "own tag"), note: X("Заметка", "Нотатка", "Note"),
+  save: X("Сохранить", "Зберегти", "Save"), saveEdit: X("Сохранить изменения", "Зберегти зміни", "Save changes"),
+  draftBack: X("Черновик восстановлен", "Чернетку відновлено", "Draft restored"), draftDrop: X("начать заново", "почати заново", "start over"),
+  edit: X("Изменить", "Змінити", "Edit"), del: X("Удалить", "Видалити", "Delete"), sure: X("Точно удалить?", "Точно видалити?", "Really delete?"),
+  all: X("Все", "Усі", "All"), search: X("Поиск по заметкам и тегам", "Пошук за нотатками і тегами", "Search notes and tags"),
+  clearDay: X("показать все дни", "показати всі дні", "show all days"),
+  exercise: X("Упражнения", "Вправи", "Exercises"), addEx: X("Добавить упражнение", "Додати вправу", "Add exercise"), addSet: X("+ подход", "+ підхід", "+ set"),
+  reps: X("повт.", "повт.", "reps"), kg: X("кг", "кг", "kg"), lastTime: X("в прошлый раз", "минулого разу", "last time"),
+  tpl: X("Шаблоны", "Шаблони", "Templates"), tplSave: X("Сохранить как шаблон", "Зберегти як шаблон", "Save as template"), tplName: X("название шаблона", "назва шаблону", "template name"),
+  dist: X("Дистанция, км", "Дистанція, км", "Distance, km"), pace: X("темп", "темп", "pace"), surface: X("Покрытие", "Покриття", "Surface"), weather: X("Погода", "Погода", "Weather"), legs: X("Ноги", "Ноги", "Legs"),
+  focus: X("Фокус", "Фокус", "Focus"), attention: X("Качество внимания", "Якість уваги", "Attention quality"),
+  fRelax: X("расслабление", "розслаблення", "relaxation"), fStrength: X("сила", "сила", "strength"), fBalance: X("баланс", "баланс", "balance"), fFlex: X("гибкость", "гнучкість", "flexibility"),
+  works: X("Что работает для тебя", "Що працює для тебе", "What works for you"),
+  worksTxt: X("Лучше всего поднимает состояние", "Найкраще піднімає стан", "Lifts your state the most"),
+  worksNote: X("наблюдение по твоим записям, не рекомендация", "спостереження за твоїми записами, не рекомендація", "an observation from your logs, not advice"),
+  weeks8: X("Минуты по неделям (8 нед.)", "Хвилини за тижнями (8 тиж.)", "Minutes per week (8 wks)"),
+  month: X("За месяц", "За місяць", "This month"), prs: X("Рекорды веса", "Рекорди ваги", "Weight records"),
+  km: X("км", "км", "km"), bestPace: X("лучший темп (от 3 км)", "кращий темп (від 3 км)", "best pace (3 km+)"),
+  byKind: X("По типам", "За типами", "By type"), need: X("нужно 3+ записи с «до/после»", "потрібно 3+ записи з «до/після»", "needs 3+ entries with before/after"),
+  exportT: X("Копировать как текст", "Копіювати як текст", "Copy as text"), exportC: X("Копировать как CSV", "Копіювати як CSV", "Copy as CSV"),
+  copied: X("Скопировано", "Скопійовано", "Copied"), manual: X("Выдели и скопируй вручную:", "Виділи і скопіюй вручну:", "Select and copy manually:"),
+  wipe: X("Удалить все записи и настройки", "Видалити всі записи і налаштування", "Delete all entries and settings"), wipeSure: X("Нажми ещё раз: это необратимо", "Натисни ще раз: це незворотно", "Tap again: this cannot be undone"),
+  syncOk: X("Синхронизировано", "Синхронізовано", "Synced"), syncQ: X("В очереди на отправку", "У черзі на відправку", "Waiting to sync"), syncLocal: X("Только на этом устройстве (вне Telegram)", "Лише на цьому пристрої (поза Telegram)", "On this device only (outside Telegram)"),
+  privacy: X("Заметки видишь только ты. В админку уходят только обезличенные счётчики.", "Нотатки бачиш лише ти. В адмінку йдуть лише знеособлені лічильники.", "Only you see your notes. Admin sees no note text."),
+  tplList: X("Мои шаблоны", "Мої шаблони", "My templates"), myTags: X("Мои теги", "Мої теги", "My tags"),
+  intL: [X("лёгко", "легко", "easy"), X("умеренно", "помірно", "moderate"), X("средне", "середньо", "medium"), X("тяжело", "важко", "hard"), X("максимум", "максимум", "max")],
+};
+
+// ── утилиты расчётов ────────────────────────────────
+const effectOf = (e) => {
+  if (!e.pre || !e.post) return null;
+  let s = 0, n = 0;
+  for (const k of ["e", "m", "t"]) {
+    if (e.pre[k] != null && e.post[k] != null) { s += (k === "t" ? -1 : 1) * (e.post[k] - e.pre[k]); n++; }
+  }
+  return n ? s : null;
+};
+const fmtPace = (dur, km) => { if (!dur || !km) return ""; const sec = Math.round((dur * 60) / km); return `${Math.floor(sec / 60)}:${pad(sec % 60)}`; };
+const cmpNew = (a, b) => (a.d === b.d ? (b.ts || 0) - (a.ts || 0) : a.d < b.d ? 1 : -1);
+const subName = (lang, e) => { const s = DIRS[e.dir]?.subs.find((x) => x[0] === e.sub); return s ? tr(lang, s[1]) : e.sub || ""; };
+
+function cleanForm(f) {
+  const out = { ...f, dur: Math.max(0, Math.round(Number(f.dur) || 0)), ts: Date.now() };
+  out.note = (f.note || "").trim();
+  const x = { ...(f.x || {}) };
+  if (f.dir === "gym") {
+    x.ex = (x.ex || []).map((ex) => ({
+      n: (ex.n || "").trim(),
+      fl: ex.fl || 0,
+      s: (ex.s || []).map((s) => ({ r: Number(s.r) || 0, w: Number(s.w) || 0 })).filter((s) => s.r || s.w),
+    })).filter((ex) => ex.n);
+  }
+  if (f.dir === "run") { x.km = Number(x.km) || 0; }
+  out.x = x;
+  return out;
+}
+
+// ── мелкие компоненты (на уровне модуля, чтобы не терять фокус) ─────
+const Chip = ({ st, on, onClick, children }) => (
+  <button type="button" onClick={onClick} style={st.chip(on)}>{children}</button>
+);
+const Section = ({ st, title, children, right }) => (
+  <div style={st.card}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={st.h2}>{title}</div>{right}
+    </div>
+    {children}
+  </div>
+);
+const Scale = ({ st, c, lang, k, value, onChange }) => (
+  <div style={{ marginBottom: 8 }}>
+    <div style={{ ...st.small, marginBottom: 4 }}>{tr(lang, SCALES[k].name)}</div>
+    <div style={{ display: "flex", gap: 6 }}>
+      {SCALES[k].em.map((em, i) => {
+        const on = value === i + 1;
+        return (
+          <button key={i} type="button" onClick={() => onChange(on ? undefined : i + 1)}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 12, fontSize: 20, cursor: "pointer", border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg }}>
+            {em}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const mk = (c) => ({
+  page: { padding: "16px 16px 110px", color: c.ink, maxWidth: 560, margin: "0 auto", boxSizing: "border-box" },
+  card: { background: c.card || c.softBg, border: `1px solid ${c.line}`, borderRadius: 16, padding: 14, marginBottom: 12 },
+  h1: { fontSize: 22, margin: "6px 0 10px", color: c.ink, fontWeight: 600 },
+  h2: { fontSize: 12, letterSpacing: 1, textTransform: "uppercase", color: c.inkSoft, margin: "0 0 8px" },
+  small: { fontSize: 12, color: c.inkSoft },
+  text: { fontSize: 14, color: c.ink },
+  back: { background: "none", border: "none", color: c.inkSoft, fontSize: 14, padding: "4px 0", cursor: "pointer" },
+  btn: { width: "100%", padding: "14px 16px", borderRadius: 14, border: "none", background: c.primaryBtnBg, color: c.primaryBtnText, fontSize: 16, fontWeight: 600, cursor: "pointer" },
+  ghost: { padding: "10px 14px", borderRadius: 12, border: `1px solid ${c.line}`, background: "transparent", color: c.ink, fontSize: 14, cursor: "pointer" },
+  chip: (on) => ({ padding: "8px 12px", borderRadius: 999, border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg, color: on ? c.accent : c.ink, fontSize: 14, cursor: "pointer", margin: "0 6px 6px 0" }),
+  input: { width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 12, border: `1px solid ${c.line}`, background: c.optionBg, color: c.ink, fontSize: 16, fontFamily: "inherit" },
+  row: { display: "flex", flexWrap: "wrap", alignItems: "center" },
+});
+
+// ═════════════════════════════════════════════════════
+function PracticeScreen({ onBack, lang = "ru", c }) {
+  const st = useMemo(() => mk(c), [c]);
+  const T = (k) => tr(lang, UI[k]);
+  const initData = typeof window !== "undefined" ? window.Telegram?.WebApp?.initData || "" : "";
+
+  const [entries, setEntries] = useState(() => lsGet(K.e, []));
+  const [cfg, setCfg] = useState(() => lsGet(K.c, { tags: [], exs: [], tpl: [] }));
+  const [pending, setPending] = useState(() => lsGet(K.q, []).length);
+  const [online, setOnline] = useState(true);
+  const [view, setView] = useState("home");
+  const [filter, setFilter] = useState("all");
+  const [q, setQ] = useState("");
+  const [dayFilter, setDayFilter] = useState(null);
+  const [calMonth, setCalMonth] = useState(() => dk().slice(0, 7));
+  const [openId, setOpenId] = useState(null);
+  const [confirmDel, setConfirmDel] = useState(null);
+  const [form, setForm] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [draftShown, setDraftShown] = useState(false);
+  const [bodyOpen, setBodyOpen] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  const [tplName, setTplName] = useState("");
+  const [exportTxt, setExportTxt] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [wipeArm, setWipeArm] = useState(false);
+
+  // ── синхронизация: локально сразу, на сервер через очередь ──
+  const qRef = useRef(lsGet(K.q, []));
+  const flushing = useRef(false);
+
+  const call = useCallback(async (action, payload = {}) => {
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ initData, action, ...payload }) });
+    if (!r.ok) { const err = new Error("http " + r.status); err.status = r.status; throw err; }
+    return r.json();
+  }, [initData]);
+
+  const flush = useCallback(async () => {
+    if (!initData || flushing.current) return;
+    flushing.current = true;
+    try {
+      while (qRef.current.length) {
+        const op = qRef.current[0];
+        try {
+          if (op.t === "save") await call("save", { entries: [op.e] });
+          else if (op.t === "delete") await call("delete", { id: op.id });
+          else if (op.t === "cfg") await call("cfg", { cfg: op.cfg });
+          else if (op.t === "wipe") await call("wipe");
+        } catch (err) {
+          // 4xx (кроме 401/429) — запись невалидна, повторять бессмысленно: выкидываем из очереди
+          if (err.status && err.status >= 400 && err.status < 500 && err.status !== 401 && err.status !== 429) {
+            qRef.current = qRef.current.slice(1); lsSet(K.q, qRef.current); setPending(qRef.current.length);
+            continue;
+          }
+          throw err;
+        }
+        qRef.current = qRef.current.slice(1); lsSet(K.q, qRef.current); setPending(qRef.current.length);
+      }
+      setOnline(true);
+    } catch { setOnline(false); } finally { flushing.current = false; }
+  }, [call, initData]);
+
+  const enqueue = useCallback((op) => {
+    let qq = qRef.current;
+    if (op.t === "cfg") qq = qq.filter((o) => o.t !== "cfg");
+    if (op.t === "save") qq = qq.filter((o) => !(o.t === "save" && o.e.id === op.e.id));
+    if (op.t === "delete") qq = qq.filter((o) => !(o.t === "save" && o.e.id === op.id));
+    if (op.t === "wipe") qq = [];
+    qRef.current = [...qq, op]; lsSet(K.q, qRef.current); setPending(qRef.current.length);
+    flush();
+  }, [flush]);
+
+  useEffect(() => {
+    (async () => {
+      await flush();
+      if (!initData) return;
+      try {
+        const r = await call("list");
+        const saves = new Set(qRef.current.filter((o) => o.t === "save").map((o) => o.e.id));
+        const dels = new Set(qRef.current.filter((o) => o.t === "delete").map((o) => o.id));
+        const wiped = qRef.current.some((o) => o.t === "wipe");
+        setEntries((prev) => {
+          const map = new Map();
+          if (!wiped) (r.entries || []).forEach((e) => { if (!dels.has(e.id)) map.set(e.id, e); });
+          prev.forEach((e) => { if (saves.has(e.id)) map.set(e.id, e); });
+          const arr = [...map.values()];
+          lsSet(K.e, arr);
+          return arr;
+        });
+        if (r.cfg && !qRef.current.some((o) => o.t === "cfg" || o.t === "wipe")) { setCfg(r.cfg); lsSet(K.c, r.cfg); }
+        setOnline(true);
+      } catch { setOnline(false); }
+    })();
+    // eslint-disable-next-line
+  }, []);
+
+  const commit = (e) => {
+    setEntries((prev) => { const arr = [e, ...prev.filter((x) => x.id !== e.id)]; lsSet(K.e, arr); return arr; });
+    enqueue({ t: "save", e });
+  };
+  const remove = (id) => {
+    setEntries((prev) => { const arr = prev.filter((x) => x.id !== id); lsSet(K.e, arr); return arr; });
+    enqueue({ t: "delete", id });
+  };
+  const updCfg = (fn) => {
+    setCfg((prev) => { const n = fn(prev); lsSet(K.c, n); enqueue({ t: "cfg", cfg: n }); return n; });
+  };
+
+  // ── производные данные ──
+  const sorted = useMemo(() => [...entries].sort(cmpNew), [entries]);
+  const today = dk();
+  const byDay = useMemo(() => { const m = {}; entries.forEach((e) => { (m[e.d] = m[e.d] || []).push(e); }); return m; }, [entries]);
+  const streak = useMemo(() => {
+    let d = byDay[today] ? today : byDay[addDays(today, -1)] ? addDays(today, -1) : null;
+    let n = 0;
+    while (d && byDay[d]) { n++; d = addDays(d, -1); }
+    return n;
+  }, [byDay, today]);
+  const wk0 = weekStart(today);
+  const weekEntries = useMemo(() => entries.filter((e) => e.d >= wk0), [entries, wk0]);
+  const weekEff = useMemo(() => { const v = weekEntries.map(effectOf).filter((x) => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }, [weekEntries]);
+  const lastOf = (dir) => sorted.find((e) => e.dir === dir);
+
+  const lastEx = (name) => {
+    const n = name.trim().toLowerCase();
+    for (const e of sorted) {
+      if (e.dir !== "gym") continue;
+      const ex = (e.x?.ex || []).find((x) => (x.n || "").toLowerCase() === n);
+      if (ex && ex.s?.length) return ex.s;
+    }
+    return null;
+  };
+
+  const best = useMemo(() => {
+    const out = {};
+    DIR_KEYS.forEach((dir) => {
+      const g = {};
+      entries.filter((e) => e.dir === dir).forEach((e) => {
+        const ef = effectOf(e);
+        if (ef == null) return;
+        (g[e.sub] = g[e.sub] || []).push(ef);
+      });
+      const arr = Object.entries(g).filter(([, v]) => v.length >= 3).map(([sub, v]) => ({ sub, n: v.length, avg: v.reduce((a, b) => a + b, 0) / v.length })).sort((a, b) => b.avg - a.avg);
+      out[dir] = arr;
+    });
+    return out;
+  }, [entries]);
+
+  // ── форма ──
+  const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: DIRS[dir].subs[0][0], dur: DIRS[dir].durs[2], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
+
+  const openNew = (dir) => {
+    const draft = lsGet(K.d, null);
+    if (draft && draft.dir) { setForm(draft); setDraftShown(true); }
+    else { setForm(blank(dir || (filter !== "all" ? filter : null) || sorted[0]?.dir || "gym")); setDraftShown(false); }
+    setEditing(false); setBodyOpen(false); setView("form");
+  };
+  const openRepeat = (dir) => {
+    const l = lastOf(dir);
+    if (!l) return openNew(dir);
+    const copy = JSON.parse(JSON.stringify(l));
+    setForm({ ...copy, id: uid(), d: today, pre: {}, post: {}, zb: [], za: [], note: "" });
+    setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form");
+  };
+  const openEdit = (e) => { setForm(JSON.parse(JSON.stringify(e))); setEditing(true); setDraftShown(false); setBodyOpen(!!(e.zb?.length || e.za?.length)); setView("form"); };
+
+  useEffect(() => { if (view === "form" && form && !editing) lsSet(K.d, form); }, [form, view, editing]);
+
+  const setF = (patch) => setForm((p) => ({ ...p, ...patch }));
+  const setX = (patch) => setForm((p) => ({ ...p, x: { ...p.x, ...patch } }));
+  const setState = (when, k, v) => setForm((p) => { const s = { ...p[when] }; if (v == null) delete s[k]; else s[k] = v; return { ...p, [when]: s }; });
+  const toggle = (key, val) => setForm((p) => ({ ...p, [key]: p[key]?.includes(val) ? p[key].filter((x) => x !== val) : [...(p[key] || []), val] }));
+  const changeDir = (dir) => setForm((p) => ({ ...blank(dir, p.d), id: p.id, pre: p.pre, post: p.post, zb: p.zb, za: p.za, tags: [], note: p.note }));
+
+  const exList = () => form.x?.ex || [];
+  const setEx = (arr) => setX({ ex: arr });
+  const updEx = (i, patch) => setEx(exList().map((e, j) => (j === i ? { ...e, ...patch } : e)));
+  const addEx = (name) => {
+    const n = (name || "").trim(); if (!n) return;
+    const hint = lastEx(n);
+    setEx([...exList(), { n, fl: 0, s: hint ? hint.map((s) => ({ ...s })) : [{ r: "", w: "" }] }]);
+  };
+  const updSet = (i, j, patch) => updEx(i, { s: exList()[i].s.map((s, k) => (k === j ? { ...s, ...patch } : s)) });
+  const addSet = (i) => { const s = exList()[i].s; updEx(i, { s: [...s, s.length ? { ...s[s.length - 1] } : { r: "", w: "" }] }); };
+  const delSet = (i, j) => updEx(i, { s: exList()[i].s.filter((_, k) => k !== j) });
+  const [exInput, setExInput] = useState("");
+
+  const applyTpl = (tpl) => setEx(tpl.ex.map((n) => { const h = lastEx(n); return { n, fl: 0, s: h ? h.map((s) => ({ ...s })) : [{ r: "", w: "" }] }; }));
+  const saveTpl = () => {
+    const names = exList().map((e) => e.n.trim()).filter(Boolean); const n = tplName.trim();
+    if (!n || !names.length) return;
+    updCfg((p) => ({ ...p, tpl: [...(p.tpl || []).filter((t) => t.n !== n), { id: uid(), n, ex: names }].slice(-20) }));
+    setTplName("");
+  };
+
+  const submit = () => {
+    const e = cleanForm(form);
+    commit(e);
+    updCfg((p) => {
+      const defs = DIRS[e.dir].tags.map((t) => tr(lang, t));
+      const tags = [...new Set([...(e.tags || []).filter((t) => !defs.includes(t)), ...(p.tags || [])])].slice(0, 60);
+      const exs = e.dir === "gym" ? [...new Set([...(e.x.ex || []).map((x) => x.n), ...(p.exs || [])])].slice(0, 150) : p.exs || [];
+      return { ...p, tags, exs };
+    });
+    lsDel(K.d); setForm(null); setEditing(false); setView("home");
+  };
+
+  // ── экспорт ──
+  const entryLine = (e) => {
+    const st1 = ["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null ? `${k.toUpperCase()}${e.pre?.[k] ?? "-"}→${e.post?.[k] ?? "-"}` : null)).filter(Boolean).join(" ");
+    return `${e.d} · ${tr(lang, DIRS[e.dir].name)} · ${subName(lang, e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${st1 ? " · " + st1 : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
+  };
+  const doExport = async (kind) => {
+    const list = [...sorted].reverse();
+    let txt;
+    if (kind === "csv") {
+      const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
+      txt = ["date,direction,type,minutes,intensity,km,e_pre,e_post,m_pre,m_post,t_pre,t_post,tags,note",
+        ...list.map((e) => [e.d, e.dir, e.sub, e.dur, e.int, e.x?.km ?? "", e.pre?.e ?? "", e.post?.e ?? "", e.pre?.m ?? "", e.post?.m ?? "", e.pre?.t ?? "", e.post?.t ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
+    } else txt = list.map(entryLine).join("\n");
+    try { await navigator.clipboard.writeText(txt); setCopied(true); setExportTxt(""); setTimeout(() => setCopied(false), 2000); }
+    catch { setExportTxt(txt); }
+  };
+  const doWipe = () => {
+    if (!wipeArm) { setWipeArm(true); return; }
+    setEntries([]); lsSet(K.e, []); const empty = { tags: [], exs: [], tpl: [] }; setCfg(empty); lsSet(K.c, empty); lsDel(K.d);
+    enqueue({ t: "wipe" }); setWipeArm(false);
+  };
+
+  // ── блоки отображения ──
+  const effBadge = (e) => {
+    const ef = effectOf(e); if (ef == null) return null;
+    const col = ef > 0 ? "#7FB069" : ef < 0 ? "#D98C6A" : c.inkSoft;
+    return <span style={{ fontSize: 12, color: col, fontWeight: 600 }}>{ef > 0 ? "▲" : ef < 0 ? "▼" : "•"} {ef > 0 ? "+" : ""}{ef}</span>;
+  };
+
+  const renderEntry = (e) => {
+    const open = openId === e.id;
+    const d = DIRS[e.dir];
+    return (
+      <div key={e.id} style={{ ...st.card, padding: 12 }}>
+        <div onClick={() => { setOpenId(open ? null : e.id); setConfirmDel(null); }} style={{ cursor: "pointer" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+            <div style={{ ...st.text, fontWeight: 600 }}>{d.icon} {subName(lang, e)} <span style={{ ...st.small, fontWeight: 400 }}>· {e.dur} {T("min")}{e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}{e.dir === "run" && e.x?.km ? ` · ${fmtPace(e.dur, e.x.km)}/${T("km")}` : ""}</span></div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>{effBadge(e)}<span style={st.small}>{e.d.slice(5).split("-").reverse().join(".")}</span></div>
+          </div>
+          {!open && e.note && <div style={{ ...st.small, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.note}</div>}
+        </div>
+        {open && (
+          <div style={{ marginTop: 10 }}>
+            {["e", "m", "t"].some((k) => e.pre?.[k] != null || e.post?.[k] != null) && (
+              <div style={{ ...st.row, gap: 12, marginBottom: 8 }}>
+                {["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null) && (
+                  <span key={k} style={st.text}>{tr(lang, SCALES[k].name)}: {e.pre?.[k] != null ? SCALES[k].em[e.pre[k] - 1] : "·"} → {e.post?.[k] != null ? SCALES[k].em[e.post[k] - 1] : "·"}</span>
+                ))}
+              </div>
+            )}
+            {e.dir === "gym" && (e.x?.ex || []).map((ex, i) => (
+              <div key={i} style={{ ...st.text, marginBottom: 4 }}>
+                <b>{ex.n}</b> {ex.fl ? FEEL.find((f) => f[0] === ex.fl)?.[1] : ""} <span style={st.small}>{(ex.s || []).map((s) => `${s.r}×${s.w}`).join("  ")}</span>
+              </div>
+            ))}
+            {e.dir === "run" && (e.x?.surf || e.x?.wx || e.x?.legs) && <div style={{ ...st.small, marginBottom: 6 }}>{e.x.surf ? tr(lang, SURF.find((s) => s[0] === e.x.surf)?.[1]) : ""} {e.x.wx || ""} {e.x.legs ? FEEL.find((f) => f[0] === e.x.legs)?.[1] : ""}</div>}
+            {e.dir === "yoga" && e.x?.focus?.length > 0 && <div style={{ ...st.small, marginBottom: 6 }}>{T("focus")}: {e.x.focus.join(", ")}</div>}
+            {e.dir === "med" && e.x?.q && <div style={{ ...st.small, marginBottom: 6 }}>{T("attention")}: {e.x.q}/5</div>}
+            {(e.zb?.length > 0 || e.za?.length > 0) && <div style={{ ...st.small, marginBottom: 6 }}>{T("body")}: {(e.zb || []).map((z) => tr(lang, ZONES.find((x) => x[0] === z)?.[1])).join(", ") || "·"} → {(e.za || []).map((z) => tr(lang, ZONES.find((x) => x[0] === z)?.[1])).join(", ") || "·"}</div>}
+            {e.tags?.length > 0 && <div style={{ ...st.small, marginBottom: 6 }}>#{e.tags.join(" #")}</div>}
+            {e.note && <div style={{ ...st.text, whiteSpace: "pre-wrap", marginBottom: 10 }}>{e.note}</div>}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button type="button" style={st.ghost} onClick={() => openEdit(e)}>{T("edit")}</button>
+              {confirmDel === e.id
+                ? <button type="button" style={{ ...st.ghost, borderColor: "#D98C6A", color: "#D98C6A" }} onClick={() => { remove(e.id); setConfirmDel(null); setOpenId(null); }}>{T("sure")}</button>
+                : <button type="button" style={st.ghost} onClick={() => setConfirmDel(e.id)}>{T("del")}</button>}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const dirPills = (val, set) => (
+    <div style={{ ...st.row, marginBottom: 6 }}>
+      <Chip st={st} on={val === "all"} onClick={() => set("all")}>{T("all")}</Chip>
+      {DIR_KEYS.map((k) => <Chip key={k} st={st} on={val === k} onClick={() => set(k)}>{DIRS[k].icon} {tr(lang, DIRS[k].name)}</Chip>)}
+    </div>
+  );
+
+  const syncLine = !initData ? T("syncLocal") : pending > 0 || !online ? `${T("syncQ")}: ${pending}` : T("syncOk");
+
+  // ═══ HOME ═══
+  const renderHome = () => {
+    const wkDays = Array.from({ length: 7 }, (_, i) => { const k = addDays(wk0, i); return { k, n: (byDay[k] || []).length, today: k === today }; });
+    const mins = weekEntries.reduce((a, e) => a + (e.dur || 0), 0);
+    const insightDir = DIR_KEYS.find((d) => best[d]?.length);
+    const ins = insightDir ? best[insightDir][0] : null;
+    const lastAny = sorted[0];
+    return (
+      <>
+        <button type="button" style={st.back} onClick={onBack}>{T("back")}</button>
+        <h1 style={st.h1}>{T("title")}</h1>
+        <div style={st.card}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            {wkDays.map((d, i) => (
+              <div key={d.k} style={{ textAlign: "center", flex: 1 }}>
+                <div style={st.small}>{WD[lang]?.[i] || WD.ru[i]}</div>
+                <div style={{ margin: "4px auto 0", width: 30, height: 30, borderRadius: 15, lineHeight: "30px", fontSize: 13, background: d.n ? c.accent : c.trackBg, color: d.n ? c.primaryBtnText : c.inkSoft, outline: d.today ? `2px solid ${c.accent}` : "none", outlineOffset: 2 }}>{d.n || ""}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ ...st.row, gap: 14 }}>
+            <span style={st.text}>🔥 {streak} {T("days")} <span style={st.small}>{T("streak")}</span></span>
+            <span style={st.text}>{weekEntries.length} <span style={st.small}>{T("sessions")}</span></span>
+            <span style={st.text}>{mins} <span style={st.small}>{T("min")}</span></span>
+            {weekEff != null && <span style={st.text}>{weekEff > 0 ? "+" : ""}{weekEff.toFixed(1)} <span style={st.small}>{T("avgEff")}</span></span>}
+          </div>
+        </div>
+        <button type="button" style={st.btn} onClick={() => openNew(lastAny?.dir)}>{T("add")}</button>
+        {lastAny && (
+          <div style={{ marginTop: 8, ...st.row }}>
+            {DIR_KEYS.filter((d) => lastOf(d)).map((d) => <button key={d} type="button" style={{ ...st.ghost, marginRight: 6, marginBottom: 6 }} onClick={() => openRepeat(d)}>{DIRS[d].icon} {T("repeat")}</button>)}
+          </div>
+        )}
+        {ins && (
+          <div style={{ ...st.card, marginTop: 8 }}>
+            <div style={st.h2}>{T("works")}</div>
+            <div style={st.text}>{DIRS[insightDir].icon} {T("worksTxt")}: <b>{tr(lang, DIRS[insightDir].subs.find((s) => s[0] === ins.sub)?.[1]) || ins.sub}</b> ({ins.avg > 0 ? "+" : ""}{ins.avg.toFixed(1)}, {ins.n})</div>
+            <div style={{ ...st.small, marginTop: 4 }}>{T("worksNote")}</div>
+          </div>
+        )}
+        <div style={{ ...st.h2, marginTop: 12 }}>{T("last")}</div>
+        {sorted.length === 0 ? <div style={st.card}><span style={st.small}>{T("empty")}</span></div> : sorted.slice(0, 3).map(renderEntry)}
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("history")}>{T("history")}</button>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("stats")}>{T("stats")}</button>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("settings")}>{T("settings")}</button>
+        </div>
+      </>
+    );
+  };
+
+  // ═══ FORM ═══
+  const renderForm = () => {
+    const f = form; const dcfg = DIRS[f.dir];
+    const defTags = dcfg.tags.map((t) => tr(lang, t));
+    const tagPool = [...new Set([...defTags, ...(cfg.tags || []), ...(f.tags || [])])];
+    const exNames = [...new Set([...(cfg.exs || []), ...(EXS[lang] || EXS.ru)])];
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => { setView("home"); setForm(null); }}>{T("back")}</button>
+        <h1 style={st.h1}>{dcfg.icon} {tr(lang, dcfg.name)}</h1>
+        {draftShown && <div style={{ ...st.card, ...st.row, justifyContent: "space-between" }}><span style={st.small}>{T("draftBack")}</span><button type="button" style={{ ...st.ghost, padding: "4px 10px" }} onClick={() => { lsDel(K.d); setForm(blank(f.dir)); setDraftShown(false); }}>{T("draftDrop")}</button></div>}
+        {!editing && <div style={st.row}>{DIR_KEYS.map((k) => <Chip key={k} st={st} on={f.dir === k} onClick={() => f.dir !== k && changeDir(k)}>{DIRS[k].icon}</Chip>)}</div>}
+
+        <Section st={st} title={T("date")}>
+          <div style={st.row}>
+            <Chip st={st} on={f.d === today} onClick={() => setF({ d: today })}>{T("today")}</Chip>
+            <Chip st={st} on={f.d === addDays(today, -1)} onClick={() => setF({ d: addDays(today, -1) })}>{T("yest")}</Chip>
+            <input type="date" value={f.d} max={today} onChange={(e) => e.target.value && setF({ d: e.target.value })} style={{ ...st.input, width: "auto", marginBottom: 6 }} />
+          </div>
+        </Section>
+
+        <Section st={st} title={T("kind")}>
+          <div style={st.row}>{dcfg.subs.map(([k, n]) => <Chip key={k} st={st} on={f.sub === k} onClick={() => setF({ sub: k })}>{tr(lang, n)}</Chip>)}</div>
+        </Section>
+
+        <Section st={st} title={T("duration")}>
+          <div style={st.row}>
+            {dcfg.durs.map((m) => <Chip key={m} st={st} on={Number(f.dur) === m} onClick={() => setF({ dur: m })}>{m}</Chip>)}
+            <input type="number" inputMode="numeric" value={f.dur} onChange={(e) => setF({ dur: e.target.value })} style={{ ...st.input, width: 80, marginBottom: 6 }} /> <span style={{ ...st.small, margin: "0 0 6px 6px" }}>{T("min")}</span>
+          </div>
+        </Section>
+
+        <Section st={st} title={T("intensity")}>
+          <div style={st.row}>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} st={st} on={f.int === n} onClick={() => setF({ int: n })}>{n} · {tr(lang, UI.intL[n - 1])}</Chip>)}</div>
+        </Section>
+
+        {f.dir === "gym" && (
+          <Section st={st} title={T("exercise")}>
+            {(cfg.tpl || []).length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={st.small}>{T("tpl")}</div>
+                <div style={st.row}>{cfg.tpl.map((t) => <Chip key={t.id} st={st} on={false} onClick={() => applyTpl(t)}>{t.n}</Chip>)}</div>
+              </div>
+            )}
+            {exList().map((ex, i) => {
+              const hint = lastEx(ex.n);
+              return (
+                <div key={i} style={{ borderTop: i ? `1px solid ${c.line}` : "none", paddingTop: i ? 10 : 0, marginTop: i ? 10 : 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <b style={st.text}>{ex.n}</b>
+                    <button type="button" style={{ ...st.back, fontSize: 18 }} onClick={() => setEx(exList().filter((_, j) => j !== i))}>✕</button>
+                  </div>
+                  {hint && <div style={st.small}>{T("lastTime")}: {hint.map((s) => `${s.r}×${s.w}`).join("  ")}</div>}
+                  {ex.s.map((s, j) => (
+                    <div key={j} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+                      <span style={{ ...st.small, width: 18 }}>{j + 1}</span>
+                      <input type="number" inputMode="numeric" placeholder={T("reps")} value={s.r} onChange={(e) => updSet(i, j, { r: e.target.value })} style={{ ...st.input, flex: 1 }} />
+                      <span style={st.small}>×</span>
+                      <input type="number" inputMode="decimal" placeholder={T("kg")} value={s.w} onChange={(e) => updSet(i, j, { w: e.target.value })} style={{ ...st.input, flex: 1 }} />
+                      <button type="button" style={{ ...st.back, fontSize: 16 }} onClick={() => delSet(i, j)}>✕</button>
+                    </div>
+                  ))}
+                  <div style={{ ...st.row, marginTop: 8 }}>
+                    <button type="button" style={{ ...st.ghost, padding: "6px 12px", marginRight: 8, marginBottom: 6 }} onClick={() => addSet(i)}>{T("addSet")}</button>
+                    {FEEL.map(([v, em, n]) => <Chip key={v} st={st} on={ex.fl === v} onClick={() => updEx(i, { fl: ex.fl === v ? 0 : v })}>{em} {tr(lang, n)}</Chip>)}
+                  </div>
+                </div>
+              );
+            })}
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <input list="pr-ex" value={exInput} onChange={(e) => setExInput(e.target.value)} placeholder={T("addEx")} style={st.input} onKeyDown={(e) => { if (e.key === "Enter") { addEx(exInput); setExInput(""); } }} />
+              <datalist id="pr-ex">{exNames.map((n) => <option key={n} value={n} />)}</datalist>
+              <button type="button" style={st.ghost} onClick={() => { addEx(exInput); setExInput(""); }}>＋</button>
+            </div>
+            {exList().length > 0 && (
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <input value={tplName} onChange={(e) => setTplName(e.target.value)} placeholder={T("tplName")} style={st.input} />
+                <button type="button" style={{ ...st.ghost, whiteSpace: "nowrap" }} onClick={saveTpl}>{T("tplSave")}</button>
+              </div>
+            )}
+          </Section>
+        )}
+
+        {f.dir === "run" && (
+          <Section st={st} title={tr(lang, DIRS.run.name)}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8 }}>
+              <input type="number" inputMode="decimal" placeholder={T("dist")} value={f.x.km ?? ""} onChange={(e) => setX({ km: e.target.value })} style={st.input} />
+              {f.x.km && f.dur ? <span style={{ ...st.text, whiteSpace: "nowrap" }}>{fmtPace(Number(f.dur), Number(f.x.km))} /{T("km")}</span> : null}
+            </div>
+            <div style={st.small}>{T("surface")}</div>
+            <div style={st.row}>{SURF.map(([k, n]) => <Chip key={k} st={st} on={f.x.surf === k} onClick={() => setX({ surf: f.x.surf === k ? "" : k })}>{tr(lang, n)}</Chip>)}</div>
+            <div style={st.small}>{T("weather")}</div>
+            <div style={st.row}>{WX.map((w) => <Chip key={w} st={st} on={f.x.wx === w} onClick={() => setX({ wx: f.x.wx === w ? "" : w })}>{w}</Chip>)}</div>
+            <div style={st.small}>{T("legs")}</div>
+            <div style={st.row}>{FEEL.map(([v, em, n]) => <Chip key={v} st={st} on={f.x.legs === v} onClick={() => setX({ legs: f.x.legs === v ? 0 : v })}>{em} {tr(lang, n)}</Chip>)}</div>
+          </Section>
+        )}
+
+        {f.dir === "yoga" && (
+          <Section st={st} title={T("focus")}>
+            <div style={st.row}>
+              {[...ZONES.slice(0, 7).map(([k, n]) => tr(lang, n)), T("fRelax"), T("fStrength"), T("fBalance"), T("fFlex")].map((n) => (
+                <Chip key={n} st={st} on={(f.x.focus || []).includes(n)} onClick={() => setX({ focus: (f.x.focus || []).includes(n) ? f.x.focus.filter((v) => v !== n) : [...(f.x.focus || []), n] })}>{n}</Chip>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {f.dir === "med" && (
+          <Section st={st} title={T("attention")}>
+            <div style={st.row}>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} st={st} on={f.x.q === n} onClick={() => setX({ q: f.x.q === n ? 0 : n })}>{n}</Chip>)}</div>
+          </Section>
+        )}
+
+        <Section st={st} title={T("state")}>
+          <div style={st.small}>{T("before")}</div>
+          {["e", "m", "t"].map((k) => <Scale key={"a" + k} st={st} c={c} lang={lang} k={k} value={f.pre[k]} onChange={(v) => setState("pre", k, v)} />)}
+          <div style={{ ...st.small, marginTop: 8 }}>{T("after")}</div>
+          {["e", "m", "t"].map((k) => <Scale key={"b" + k} st={st} c={c} lang={lang} k={k} value={f.post[k]} onChange={(v) => setState("post", k, v)} />)}
+        </Section>
+
+        <Section st={st} title={T("body")} right={<button type="button" style={st.back} onClick={() => setBodyOpen(!bodyOpen)}>{bodyOpen ? "▲" : "▼"}</button>}>
+          {bodyOpen && (
+            <>
+              <div style={st.small}>{T("before")}</div>
+              <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.zb.includes(k)} onClick={() => toggle("zb", k)}>{tr(lang, n)}</Chip>)}</div>
+              <div style={st.small}>{T("after")}</div>
+              <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.za.includes(k)} onClick={() => toggle("za", k)}>{tr(lang, n)}</Chip>)}</div>
+            </>
+          )}
+        </Section>
+
+        <Section st={st} title={T("tags")}>
+          <div style={st.row}>{tagPool.map((t) => <Chip key={t} st={st} on={f.tags.includes(t)} onClick={() => toggle("tags", t)}>{t}</Chip>)}</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder={T("addTag")} maxLength={30} style={st.input}
+              onKeyDown={(e) => { if (e.key === "Enter" && tagInput.trim()) { const t = tagInput.trim(); if (!f.tags.includes(t)) setF({ tags: [...f.tags, t] }); setTagInput(""); } }} />
+            <button type="button" style={st.ghost} onClick={() => { const t = tagInput.trim(); if (t && !f.tags.includes(t)) setF({ tags: [...f.tags, t] }); setTagInput(""); }}>＋</button>
+          </div>
+        </Section>
+
+        <Section st={st} title={T("note")}>
+          <textarea value={f.note} onChange={(e) => setF({ note: e.target.value })} placeholder={tr(lang, dcfg.prompt)} maxLength={2000} rows={4} style={{ ...st.input, resize: "vertical" }} />
+        </Section>
+
+        <div style={{ position: "sticky", bottom: 0, padding: "10px 0 6px", background: `linear-gradient(transparent, ${c.bg} 40%)` }}>
+          <button type="button" style={st.btn} onClick={submit}>{editing ? T("saveEdit") : T("save")}</button>
+        </div>
+      </>
+    );
+  };
+
+  // ═══ HISTORY ═══
+  const renderHistory = () => {
+    const [yy, mm] = calMonth.split("-").map(Number);
+    const first = new Date(yy, mm - 1, 1); const lead = (first.getDay() + 6) % 7; const dim = new Date(yy, mm, 0).getDate();
+    const cells = [...Array(lead).fill(null), ...Array.from({ length: dim }, (_, i) => `${calMonth}-${pad(i + 1)}`)];
+    const shift = (n) => { const d = new Date(yy, mm - 1 + n, 1); setCalMonth(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`); };
+    const ql = q.trim().toLowerCase();
+    const list = sorted.filter((e) => (filter === "all" || e.dir === filter) && (!dayFilter || e.d === dayFilter) &&
+      (!ql || (e.note || "").toLowerCase().includes(ql) || (e.tags || []).some((t) => t.toLowerCase().includes(ql)) || (e.x?.ex || []).some((x) => (x.n || "").toLowerCase().includes(ql))));
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => { setView("home"); setDayFilter(null); }}>{T("back")}</button>
+        <h1 style={st.h1}>{T("history")}</h1>
+        {dirPills(filter, setFilter)}
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={T("search")} style={{ ...st.input, marginBottom: 10 }} />
+        <div style={st.card}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <button type="button" style={st.back} onClick={() => shift(-1)}>‹</button>
+            <span style={st.text}>{MON[lang]?.[mm - 1] || MON.ru[mm - 1]} {yy}</span>
+            <button type="button" style={st.back} onClick={() => shift(1)}>›</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4 }}>
+            {(WD[lang] || WD.ru).map((w) => <div key={w} style={{ ...st.small, textAlign: "center" }}>{w}</div>)}
+            {cells.map((k, i) => {
+              if (!k) return <div key={"x" + i} />;
+              const n = (byDay[k] || []).filter((e) => filter === "all" || e.dir === filter).length;
+              const sel = dayFilter === k;
+              return (
+                <button key={k} type="button" onClick={() => setDayFilter(sel ? null : k)}
+                  style={{ aspectRatio: "1", borderRadius: 8, fontSize: 12, cursor: "pointer", border: sel ? `2px solid ${c.accent}` : `1px solid ${c.line}`, background: n ? c.accent : c.trackBg, color: n ? c.primaryBtnText : c.inkSoft, opacity: n ? Math.min(1, 0.55 + n * 0.2) : 1 }}>
+                  {Number(k.slice(8))}
+                </button>
+              );
+            })}
+          </div>
+          {dayFilter && <button type="button" style={{ ...st.back, marginTop: 8 }} onClick={() => setDayFilter(null)}>{T("clearDay")}</button>}
+        </div>
+        {list.length === 0 ? <div style={st.card}><span style={st.small}>{T("empty")}</span></div> : list.slice(0, 200).map(renderEntry)}
+      </>
+    );
+  };
+
+  // ═══ STATS ═══
+  const renderStats = () => {
+    const dirs = filter === "all" ? DIR_KEYS : [filter];
+    const mo0 = today.slice(0, 7);
+    const weeks = Array.from({ length: 8 }, (_, i) => addDays(wk0, -7 * (7 - i)));
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => setView("home")}>{T("back")}</button>
+        <h1 style={st.h1}>{T("stats")}</h1>
+        {dirPills(filter, setFilter)}
+        {dirs.map((dir) => {
+          const es = entries.filter((e) => e.dir === dir);
+          if (!es.length) return null;
+          const wkE = es.filter((e) => e.d >= wk0), moE = es.filter((e) => e.d.startsWith(mo0));
+          const sum = (a, f) => a.reduce((s, e) => s + (f(e) || 0), 0);
+          const bars = weeks.map((w) => sum(es.filter((e) => e.d >= w && e.d < addDays(w, 7)), (e) => e.dur));
+          const mx = Math.max(1, ...bars);
+          let extra = null;
+          if (dir === "gym") {
+            const pr = {};
+            es.forEach((e) => (e.x?.ex || []).forEach((ex) => (ex.s || []).forEach((s) => { if (s.w > 0 && s.r > 0 && (!pr[ex.n] || s.w > pr[ex.n].w)) pr[ex.n] = { w: s.w, r: s.r, d: e.d }; })));
+            const top = Object.entries(pr).sort((a, b) => b[1].w - a[1].w).slice(0, 6);
+            if (top.length) extra = <div style={{ marginTop: 10 }}><div style={st.h2}>{T("prs")}</div>{top.map(([n, v]) => <div key={n} style={st.text}>{n}: <b>{v.w} {T("kg")}</b> <span style={st.small}>× {v.r} · {v.d}</span></div>)}</div>;
+          }
+          if (dir === "run") {
+            const km = (a) => sum(a, (e) => Number(e.x?.km));
+            const paces = es.filter((e) => Number(e.x?.km) >= 3 && e.dur).map((e) => (e.dur * 60) / e.x.km);
+            const bp = paces.length ? Math.min(...paces) : null;
+            extra = <div style={{ marginTop: 10 }} ><div style={st.text}>{km(wkE).toFixed(1)} {T("km")} · {T("week")} · {km(moE).toFixed(1)} {T("km")} · {T("month")}</div>{bp && <div style={st.small}>{T("bestPace")}: {Math.floor(bp / 60)}:{pad(Math.round(bp % 60))} /{T("km")}</div>}</div>;
+          }
+          return (
+            <div key={dir} style={st.card}>
+              <div style={{ ...st.text, fontWeight: 600, marginBottom: 8 }}>{DIRS[dir].icon} {tr(lang, DIRS[dir].name)}</div>
+              <div style={{ ...st.row, gap: 16 }}>
+                <span style={st.text}>{wkE.length} · {sum(wkE, (e) => e.dur)} {T("min")} <span style={st.small}>{T("week")}</span></span>
+                <span style={st.text}>{moE.length} · {sum(moE, (e) => e.dur)} {T("min")} <span style={st.small}>{T("month")}</span></span>
+              </div>
+              <div style={{ ...st.small, marginTop: 10 }}>{T("weeks8")}</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 54, marginTop: 4 }}>
+                {bars.map((b, i) => <div key={i} style={{ flex: 1, height: Math.max(3, (b / mx) * 54), background: b ? c.accent : c.trackBg, borderRadius: 4 }} />)}
+              </div>
+              {extra}
+              <div style={{ ...st.h2, marginTop: 12 }}>{T("byKind")}</div>
+              {best[dir].length === 0 ? <div style={st.small}>{T("need")}</div> : best[dir].map((b) => (
+                <div key={b.sub} style={st.text}>{tr(lang, DIRS[dir].subs.find((s) => s[0] === b.sub)?.[1]) || b.sub}: <b>{b.avg > 0 ? "+" : ""}{b.avg.toFixed(1)}</b> <span style={st.small}>({b.n})</span></div>
+              ))}
+            </div>
+          );
+        })}
+        {entries.length === 0 && <div style={st.card}><span style={st.small}>{T("empty")}</span></div>}
+      </>
+    );
+  };
+
+  // ═══ SETTINGS ═══
+  const renderSettings = () => (
+    <>
+      <button type="button" style={st.back} onClick={() => setView("home")}>{T("back")}</button>
+      <h1 style={st.h1}>{T("settings")}</h1>
+      <div style={st.card}><div style={st.text}>{syncLine}</div><div style={{ ...st.small, marginTop: 6 }}>{T("privacy")}</div></div>
+      <div style={st.card}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => doExport("txt")}>{T("exportT")}</button>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => doExport("csv")}>{T("exportC")}</button>
+        </div>
+        {copied && <div style={{ ...st.small, marginTop: 8 }}>✓ {T("copied")}</div>}
+        {exportTxt && <><div style={{ ...st.small, margin: "8px 0 4px" }}>{T("manual")}</div><textarea readOnly value={exportTxt} rows={8} onFocus={(e) => e.target.select()} style={st.input} /></>}
+      </div>
+      {(cfg.tpl || []).length > 0 && (
+        <div style={st.card}>
+          <div style={st.h2}>{T("tplList")}</div>
+          {cfg.tpl.map((t) => (
+            <div key={t.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={st.text}>{t.n} <span style={st.small}>· {t.ex.length}</span></span>
+              <button type="button" style={st.back} onClick={() => updCfg((p) => ({ ...p, tpl: p.tpl.filter((x) => x.id !== t.id) }))}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {(cfg.tags || []).length > 0 && (
+        <div style={st.card}>
+          <div style={st.h2}>{T("myTags")}</div>
+          <div style={st.row}>{cfg.tags.map((t) => <Chip key={t} st={st} on={false} onClick={() => updCfg((p) => ({ ...p, tags: p.tags.filter((x) => x !== t) }))}>{t} ✕</Chip>)}</div>
+        </div>
+      )}
+      <button type="button" style={{ ...st.ghost, width: "100%", borderColor: wipeArm ? "#D98C6A" : c.line, color: wipeArm ? "#D98C6A" : c.inkSoft }} onClick={doWipe}>{wipeArm ? T("wipeSure") : T("wipe")}</button>
+    </>
+  );
+
+  return (
+    <div style={st.page}>
+      {view === "home" && renderHome()}
+      {view === "form" && form && renderForm()}
+      {view === "history" && renderHistory()}
+      {view === "stats" && renderStats()}
+      {view === "settings" && renderSettings()}
+    </div>
+  );
+}
+  return PracticeScreen;
+})();
+
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [currentMood, setCurrentMood] = useState("general");
@@ -7539,6 +8370,7 @@ export default function App() {
     { id: "teaquiz", ...t.menu.teaquiz },
     { id: "meditation", ...t.menu.meditation },
     { id: "meditationguidance", ...t.menu.meditationguidance },
+    { id: "practice", ...t.menu.practice },
     { id: "dailycheck", ...t.menu.dailycheck },
     { id: "challenges", ...t.menu.challenges },
     { id: "mood", ...t.menu.mood },
@@ -7559,6 +8391,7 @@ export default function App() {
   else if (screen === "teaquiz") body = <TeaQuizScreen onBack={() => setScreen("home")} onTeaResult={handleTeaResult} />;
   else if (screen === "mood") body = <MoodScreen onBack={() => setScreen("home")} />;
   else if (screen === "glimmers") body = <GlimmerScreen onBack={() => setScreen("home")} />;
+  else if (screen === "practice") body = <PracticeScreen onBack={() => setScreen("home")} lang={lang} c={THEMES[theme]} />;
   else if (screen === "mypath") body = <MyPathScreen onBack={() => setScreen("home")} />;
   else if (screen === "shop") body = <ShopScreen onBack={() => setScreen("home")} />;
   else if (screen === "admin") body = <AdminScreen onBack={() => setScreen("home")} />;
