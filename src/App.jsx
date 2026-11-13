@@ -1805,6 +1805,20 @@ function HormoneVerdictCard({ verdict, showSteps, burnoutPct, dailyWeak }) {
     else if (burnoutPct <= 30 && verdict.lowKeys.length >= 3) extra.push(tx({ ru: `Выгорание по опроснику низкое (${burnoutPct}%) — значит просадки скорее про режим тела (сон, еда, движение), чем про психологическую усталость.`, uk: `Вигорання за опитувальником низьке (${burnoutPct}%) — отже, просідання скоріше про режим тіла (сон, їжа, рух), ніж про психологічну втому.`, en: `Burnout in the questionnaire is low (${burnoutPct}%) — so the dips are more about the body's routine (sleep, food, movement) than psychological fatigue.` }));
   }
   if (dailyWeak) extra.push(tx({ ru: "В Компасе состояния чаще всего слабее: ", uk: "У Компасі стану частіше слабше: ", en: "In the State compass the weaker one is most often: " }) + tx(dailyWeak) + ".");
+  // Связка с дневником практик: интенсивные тренировки при просевших стрессе/сне (берём из локальных записей)
+  try {
+    if ((verdict.lowKeys || []).some(k => k === "cortisol" || k === "gaba")) {
+      const prs = JSON.parse(localStorage.getItem("pr_entries_v1") || "[]");
+      const since = new Date(); since.setDate(since.getDate() - 14);
+      const sk = `${since.getFullYear()}-${String(since.getMonth() + 1).padStart(2, "0")}-${String(since.getDate()).padStart(2, "0")}`;
+      const hard = prs.filter(e => e.d >= sk && (e.int || 0) >= 4 && e.dir !== "med").length;
+      if (hard >= 2) extra.push(tx({
+        ru: `В дневнике практик за 2 недели интенсивных занятий (4–5 из 5): ${hard}. Пока стресс или сон просажены, разумно сместить акцент на мягкие практики — йога-нидра, инь, дыхание, спокойный бег.`,
+        uk: `У щоденнику практик за 2 тижні інтенсивних занять (4–5 з 5): ${hard}. Поки стрес або сон просіли, розумно змістити акцент на м'які практики — йога-нідра, інь, дихання, спокійний біг.`,
+        en: `Your practice log shows ${hard} intense sessions (4–5 of 5) in the last 2 weeks. While stress or sleep are low, it makes sense to shift toward gentle practices: yoga nidra, yin, breathing, easy runs.`,
+      }));
+    }
+  } catch {}
 
   return (
     <div style={S.stepsBlock}>
@@ -7461,11 +7475,24 @@ const SCALES = {
 const ZONES = [["neck", X("Шея", "Шия", "Neck")], ["shoulders", X("Плечи", "Плечі", "Shoulders")], ["chest", X("Грудь", "Груди", "Chest")], ["arms", X("Руки", "Руки", "Arms")], ["upback", X("Верх спины", "Верх спини", "Upper back")], ["lowback", X("Поясница", "Поперек", "Lower back")], ["hips", X("Бёдра", "Стегна", "Hips")], ["legs", X("Ноги", "Ноги", "Legs")], ["head", X("Голова", "Голова", "Head")]];
 const SURF = [["road", X("Дорога", "Дорога", "Road")], ["park", X("Парк/трейл", "Парк/трейл", "Park/trail")], ["track", X("Стадион", "Стадіон", "Track")], ["mill", X("Дорожка", "Доріжка", "Treadmill")]];
 const WX = ["☀️", "⛅", "🌧", "❄️", "💨"];
+const WEAK = { tension: X("напряжение", "напруга", "tension"), anxiety: X("тревога", "тривога", "anxiety"), fatigue: X("усталость", "втома", "fatigue"), sleep: X("сон", "сон", "sleep") };
+const PRESETS = [["yoga", "nidra"], ["yoga", "yin"], ["med", "breath"], ["run", "recovery"]];
 const FEEL = [[1, "😌", X("легко", "легко", "easy")], [2, "👌", X("в самый раз", "якраз", "just right")], [3, "🥵", X("тяжело", "важко", "hard")]];
 const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга", "Подтягивания", "Жим стоя", "Тяга в наклоне", "Отжимания", "Выпады", "Румынская тяга", "Планка"], uk: ["Жим лежачи", "Присід", "Станова тяга", "Підтягування", "Жим стоячи", "Тяга в нахилі", "Віджимання", "Випади", "Румунська тяга", "Планка"], en: ["Bench press", "Squat", "Deadlift", "Pull-ups", "Overhead press", "Bent-over row", "Push-ups", "Lunges", "Romanian deadlift", "Plank"] };
 
 const UI = {
   title: X("Дневник практик", "Щоденник практик", "Practice log"),
+  hint: X("Подсказка на сегодня", "Підказка на сьогодні", "Hint for today"),
+  hintGentle: X("Подойдёт мягкая практика", "Підійде м'яка практика", "A gentle practice may fit"),
+  hintMood: X("настроение сегодня низкое", "настрій сьогодні низький", "today's mood is low"),
+  hintHorm: X("в тесте гормонов просели стресс или сон", "у тесті гормонів просіли стрес або сон", "stress or sleep dipped in the hormone test"),
+  hintCompass: X("Компас: слабее всего", "Компас: найслабше", "Compass: weakest is"),
+  hintNote: X("наблюдение по твоим отметкам, не медицинская рекомендация", "спостереження за твоїми відмітками, не медична рекомендація", "an observation from your marks, not medical advice"),
+  yb1: X("У тебя после", "У тебе після", "After"), yb2: X("напряжение падает в среднем на", "напруга падає в середньому на", "your tension drops on average by"),
+  nd: X("Настроение на следующий день", "Настрій наступного дня", "Next-day mood"),
+  ndA: X("после дней с практикой", "після днів із практикою", "after practice days"), ndB: X("после дней без неё", "після днів без неї", "after days without"),
+  ndH: X("после тяжёлых (4–5)", "після важких (4–5)", "after hard (4–5)"), ndL: X("после лёгких (1–3)", "після легких (1–3)", "after light (1–3)"),
+  ndNeed: X("нужно 5+ дней с отметкой настроения в каждой группе", "потрібно 5+ днів із відміткою настрою в кожній групі", "needs 5+ days with a mood mark in each group"),
   add: X("＋ Записать практику", "＋ Записати практику", "＋ Log a session"),
   repeat: X("↺ Повторить прошлую", "↺ Повторити попередню", "↺ Repeat last"),
   back: X("← назад", "← назад", "← back"),
@@ -7604,6 +7631,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const [exportTxt, setExportTxt] = useState("");
   const [copied, setCopied] = useState(false);
   const [wipeArm, setWipeArm] = useState(false);
+  const [ctx, setCtx] = useState(null); // данные Компаса, гормонов и настроения (только чтение)
 
   // ── синхронизация: локально сразу, на сервер через очередь ──
   const qRef = useRef(lsGet(K.q, []));
@@ -7674,6 +7702,23 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     // eslint-disable-next-line
   }, []);
 
+  // ── контекст: Компас состояния, тест гормонов, настроение дня (только чтение) ──
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      try {
+        const [dc, hh] = await Promise.all([getHistory("dailycheck_history"), getHistory("hormones_history")]);
+        const keys = [];
+        for (let i = 0; i < 62; i++) { const d = new Date(); d.setDate(d.getDate() - i); keys.push("mood_" + getDateKey(d)); }
+        const vals = await CS.getMultiple(keys);
+        const moods = {};
+        keys.forEach((k) => { try { const e = vals[k] ? JSON.parse(vals[k]) : null; if (e && typeof e.score === "number") moods[k.slice(5)] = e.score; } catch {} });
+        if (!off) setCtx({ dc: dc[dc.length - 1] || null, hh: hh[hh.length - 1] || null, moods });
+      } catch {}
+    })();
+    return () => { off = true; };
+  }, []);
+
   const commit = (e) => {
     setEntries((prev) => { const arr = [e, ...prev.filter((x) => x.id !== e.id)]; lsSet(K.e, arr); return arr; });
     enqueue({ t: "save", e });
@@ -7726,6 +7771,58 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     return out;
   }, [entries]);
 
+  const ak = (s) => { const [y, m, d] = s.split("-").map(Number); return `${y}-${m}-${d}`; }; // ключ даты как в остальном приложении
+  const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  const sessWord = (n) => {
+    if (lang === "en") return n === 1 ? "session" : "sessions";
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return "практика";
+    if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return "практики";
+    return "практик";
+  };
+
+  // у каких практик напряжение «до → после» реально падало (по записям человека, от 3 штук)
+  const tdrop = useMemo(() => {
+    const g = {};
+    entries.forEach((e) => { if (e.pre?.t != null && e.post?.t != null) (g[e.dir + "|" + e.sub] = g[e.dir + "|" + e.sub] || []).push(e.pre.t - e.post.t); });
+    return Object.entries(g).filter(([, v]) => v.length >= 3).map(([k, v]) => { const [dir, sub] = k.split("|"); return { dir, sub, n: v.length, avg: avg(v) }; }).filter((x) => x.avg > 0).sort((a, b) => b.avg - a.avg);
+  }, [entries]);
+
+  // подсказка «сегодня лучше мягко»: срабатывает только по свежим отметкам самого человека
+  const advice = useMemo(() => {
+    if (!ctx) return null;
+    const reasons = [];
+    const dc = ctx.dc;
+    if (dc && Date.now() - dc.ts < 36 * 36e5 && WEAK[dc.weakestKey]) reasons.push(tr(lang, UI.hintCompass) + " " + tr(lang, WEAK[dc.weakestKey]));
+    const mv = ctx.moods[ak(today)];
+    if (typeof mv === "number" && mv <= 4) reasons.push(tr(lang, UI.hintMood));
+    const hh = ctx.hh;
+    if (hh && hh.main && Date.now() - hh.ts < 45 * 864e5) {
+      try {
+        const fs = computeHormoneScores(hh.main, hh.cross || {});
+        const low = (k) => typeof fs[k] === "number" && ((fs[k] - 1) / 4) * 100 <= 37.5;
+        if (low("cortisol") || low("gaba")) reasons.push(tr(lang, UI.hintHorm));
+      } catch {}
+    }
+    return reasons.length ? { reasons, pick: tdrop[0] || null } : null;
+  }, [ctx, tdrop, today, lang]);
+
+  // настроение на следующий день: после дней с практикой и без (только за период ведения дневника)
+  const nextDay = useMemo(() => {
+    if (!ctx || !entries.length) return null;
+    const first = sorted[sorted.length - 1].d;
+    const A = [], B = [], H = [], Lg = [];
+    for (let i = 1; i <= 60; i++) {
+      const d = addDays(today, -i);
+      if (d < first) break;
+      const mv = ctx.moods[ak(addDays(d, 1))];
+      if (typeof mv !== "number") continue;
+      const es = byDay[d];
+      if (es && es.length) { A.push(mv); (Math.max(...es.map((e) => e.int || 0)) >= 4 ? H : Lg).push(mv); } else B.push(mv);
+    }
+    return { A, B, H, Lg };
+  }, [ctx, entries, sorted, byDay, today]);
+
   // ── форма ──
   const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: DIRS[dir].subs[0][0], dur: DIRS[dir].durs[2], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
 
@@ -7742,6 +7839,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     setForm({ ...copy, id: uid(), d: today, pre: {}, post: {}, zb: [], za: [], note: "" });
     setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form");
   };
+  const openPreset = (dir, sub) => { lsDel(K.d); setForm({ ...blank(dir), sub }); setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form"); };
   const openEdit = (e) => { setForm(JSON.parse(JSON.stringify(e))); setEditing(true); setDraftShown(false); setBodyOpen(!!(e.zb?.length || e.za?.length)); setView("form"); };
 
   useEffect(() => { if (view === "form" && form && !editing) lsSet(K.d, form); }, [form, view, editing]);
@@ -7889,11 +7987,25 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </div>
           <div style={{ ...st.row, gap: 14 }}>
             <span style={st.text}>🔥 {streak} {T("days")} <span style={st.small}>{T("streak")}</span></span>
-            <span style={st.text}>{weekEntries.length} <span style={st.small}>{T("sessions")}</span></span>
+            <span style={st.text}>{weekEntries.length} <span style={st.small}>{sessWord(weekEntries.length)}</span></span>
             <span style={st.text}>{mins} <span style={st.small}>{T("min")}</span></span>
             {weekEff != null && <span style={st.text}>{weekEff > 0 ? "+" : ""}{weekEff.toFixed(1)} <span style={st.small}>{T("avgEff")}</span></span>}
           </div>
         </div>
+        {advice && (
+          <div style={st.card}>
+            <div style={st.h2}>{T("hint")}</div>
+            <div style={st.text}>{advice.reasons.join(" · ")}</div>
+            <div style={{ ...st.text, margin: "6px 0 8px" }}>{T("hintGentle")}</div>
+            <div style={st.row}>
+              {PRESETS.map(([d, sb]) => (
+                <Chip key={d + sb} st={st} on={false} onClick={() => openPreset(d, sb)}>{DIRS[d].icon} {tr(lang, DIRS[d].subs.find((x) => x[0] === sb)[1])}</Chip>
+              ))}
+            </div>
+            {advice.pick && <div style={{ ...st.small, marginTop: 6 }}>{T("yb1")} «{subName(lang, advice.pick)}» {T("yb2")} {advice.pick.avg.toFixed(1)} ({advice.pick.n})</div>}
+            <div style={{ ...st.small, marginTop: 4 }}>{T("hintNote")}</div>
+          </div>
+        )}
         <button type="button" style={st.btn} onClick={() => openNew(lastAny?.dir)}>{T("add")}</button>
         {lastAny && (
           <div style={{ marginTop: 8, ...st.row }}>
@@ -8161,6 +8273,18 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
             </div>
           );
         })}
+        {nextDay && (
+          <div style={st.card}>
+            <div style={st.h2}>{T("nd")}</div>
+            {nextDay.A.length >= 5 && nextDay.B.length >= 5 ? (
+              <>
+                <div style={st.text}>{T("ndA")}: <b>{avg(nextDay.A).toFixed(1)}</b> <span style={st.small}>({nextDay.A.length})</span> · {T("ndB")}: <b>{avg(nextDay.B).toFixed(1)}</b> <span style={st.small}>({nextDay.B.length})</span></div>
+                {nextDay.H.length >= 4 && nextDay.Lg.length >= 4 && <div style={{ ...st.text, marginTop: 4 }}>{T("ndH")}: <b>{avg(nextDay.H).toFixed(1)}</b> <span style={st.small}>({nextDay.H.length})</span> · {T("ndL")}: <b>{avg(nextDay.Lg).toFixed(1)}</b> <span style={st.small}>({nextDay.Lg.length})</span></div>}
+                <div style={{ ...st.small, marginTop: 6 }}>{T("worksNote")}</div>
+              </>
+            ) : <div style={st.small}>{T("ndNeed")}</div>}
+          </div>
+        )}
         {entries.length === 0 && <div style={st.card}><span style={st.small}>{T("empty")}</span></div>}
       </>
     );
@@ -8370,9 +8494,9 @@ export default function App() {
     { id: "teaquiz", ...t.menu.teaquiz },
     { id: "meditation", ...t.menu.meditation },
     { id: "meditationguidance", ...t.menu.meditationguidance },
-    { id: "practice", ...t.menu.practice },
-    { id: "dailycheck", ...t.menu.dailycheck },
     { id: "challenges", ...t.menu.challenges },
+    { id: "dailycheck", ...t.menu.dailycheck },
+    { id: "practice", ...t.menu.practice },
     { id: "mood", ...t.menu.mood },
     { id: "glimmers", ...t.menu.glimmers },
     { id: "mypath", ...t.menu.mypath },
