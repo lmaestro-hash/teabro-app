@@ -7497,6 +7497,46 @@ const customDir = (sp) => ({ icon: sp.icon || "🏅", name: sp.n || "—", durs:
 // вид убрали из списка, а старые записи остались — показываем их по снимку имени/значка
 const fallbackDir = (k, e) => ({ icon: e?.x?.si || "🏅", name: e?.x?.sn || k, durs: [30, 45, 60], subs: [], prompt: GEN_PROMPT, tags: GEN_TAGS, metric: null });
 const SPORT_EMOJI = ["🏅", "🏀", "🏐", "🏓", "🏒", "⛸️", "🏄", "🚣", "🤾", "🎯", "🛹", "🏇"];
+// ── свои челленджи: план из «слотов» (вид, тип, минимум минут, дни недели), прогресс считается из записей ──
+const wdIndex = (s) => (parse(s).getDay() + 6) % 7; // Пн = 0
+const ALLWD = [0, 1, 2, 3, 4, 5, 6];
+const CHAL_TPL = [
+  { n: X("7 дней дыхания", "7 днів дихання", "7 days of breathing"), len: 7, slots: [{ dir: "med", sub: "breath", min: 10, wd: ALLWD }] },
+  { n: X("21 день йоги", "21 день йоги", "21 days of yoga"), len: 21, slots: [{ dir: "yoga", sub: "", min: 15, wd: ALLWD }] },
+  { n: X("Бег 3 раза в неделю · 4 недели", "Біг 3 рази на тиждень · 4 тижні", "Running 3×/week · 4 weeks"), len: 28, slots: [{ dir: "run", sub: "", min: 20, wd: [0, 2, 4] }] },
+  { n: X("Силовые 3 раза в неделю · 4 недели", "Силові 3 рази на тиждень · 4 тижні", "Strength 3×/week · 4 weeks"), len: 28, slots: [{ dir: "gym", sub: "", min: 45, wd: [0, 2, 4] }] },
+  { n: X("Баланс: сила, бег, йога · 4 недели", "Баланс: сила, біг, йога · 4 тижні", "Balance: strength, run, yoga · 4 weeks"), len: 28, slots: [{ dir: "gym", sub: "", min: 45, wd: [0, 3] }, { dir: "run", sub: "", min: 20, wd: [1, 5] }, { dir: "yoga", sub: "", min: 30, wd: [6] }] },
+];
+const WD_SETS = [[ALLWD, X("каждый день", "щодня", "every day")], [[0, 1, 2, 3, 4], X("будни", "будні", "weekdays")], [[0, 2, 4], X("Пн·Ср·Пт", "Пн·Ср·Пт", "Mon·Wed·Fri")], [[5, 6], X("выходные", "вихідні", "weekend")]];
+const chalProgress = (ch, entries, today) => {
+  const byD = {};
+  entries.forEach((e) => { (byD[e.d] = byD[e.d] || []).push(e); });
+  let total = 0, done = 0, pastDue = 0, pastDone = 0, run = 0, best = 0;
+  const matched = [];
+  const cells = Array.from({ length: ch.len }, (_, i) => {
+    const d = addDays(ch.s, i);
+    const slots = ch.slots.filter((sl) => sl.wd.includes(wdIndex(d)));
+    if (!slots.length) return { d, st: "rest", n: 0, k: 0, items: [] };
+    const pool = [...(byD[d] || [])];
+    let k = 0;
+    const items = slots.map((sl) => {
+      const ix = pool.findIndex((e) => e.dir === sl.dir && (!sl.sub || e.sub === sl.sub) && (e.dur || 0) >= sl.min);
+      const hit = ix >= 0;
+      if (hit) { matched.push(pool[ix]); pool.splice(ix, 1); k++; }
+      return { sl, hit };
+    });
+    total += slots.length; done += k;
+    const st = k === slots.length ? "done" : d > today ? "future" : d === today ? "today" : k > 0 ? "partial" : "missed";
+    if (d < today) { pastDue += slots.length; pastDone += k; }
+    if (d <= today) { if (st === "done") { run++; best = Math.max(best, run); } else if (st !== "today") run = 0; }
+    return { d, st, n: slots.length, k, items };
+  });
+  const last = addDays(ch.s, ch.len - 1);
+  const finished = today > last;
+  const left = finished ? 0 : today < ch.s ? ch.len : diffDays(last, today) + 1;
+  const effs = matched.map(effectOf).filter((x) => x != null);
+  return { cells, total, done, pct: total ? Math.round((done / total) * 100) : 0, streak: run, best, behind: pastDue - pastDone, left, finished, started: today >= ch.s, eff: effs.length >= 3 ? effs.reduce((a, b) => a + b, 0) / effs.length : null };
+};
 const PRESETS = [["yoga", "nidra"], ["yoga", "yin"], ["med", "breath"], ["run", "recovery"]];
 const FEEL = [[1, "😌", X("легко", "легко", "easy")], [2, "👌", X("в самый раз", "якраз", "just right")], [3, "🥵", X("тяжело", "важко", "hard")]];
 const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга", "Подтягивания", "Жим стоя", "Тяга в наклоне", "Отжимания", "Выпады", "Румынская тяга", "Планка"], uk: ["Жим лежачи", "Присід", "Станова тяга", "Підтягування", "Жим стоячи", "Тяга в нахилі", "Віджимання", "Випади", "Румунська тяга", "Планка"], en: ["Bench press", "Squat", "Deadlift", "Pull-ups", "Overhead press", "Bent-over row", "Push-ups", "Lunges", "Romanian deadlift", "Plank"] };
@@ -7504,6 +7544,24 @@ const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга
 const UI = {
   title: X("Дневник практик", "Щоденник практик", "Practice log"),
   sportsAdd: X("＋ Добавить вид спорта", "＋ Додати вид спорту", "＋ Add a sport"),
+  chalTitle: X("Мои челленджи", "Мої челенджі", "My challenges"), chalBtn: X("🏆 Челленджи", "🏆 Челенджі", "🏆 Challenges"),
+  chalNew: X("＋ Свой челлендж", "＋ Свій челендж", "＋ My own challenge"), chalDefault: X("Мой челлендж", "Мій челендж", "My challenge"),
+  chalTpl: X("Готовые планы (можно изменить)", "Готові плани (можна змінити)", "Ready plans (editable)"),
+  chalName: X("название (необязательно)", "назва (необов'язково)", "name (optional)"),
+  chalLen: X("Длительность, дней", "Тривалість, днів", "Length, days"), chalStart: X("Старт", "Старт", "Start"), chalTomorrow: X("Завтра", "Завтра", "Tomorrow"),
+  chalPlan: X("План практик", "План практик", "Practice plan"), chalAddSlot: X("＋ практика в план", "＋ практика в план", "＋ add a practice"),
+  chalMin: X("минимум, мин", "мінімум, хв", "minimum, min"), chalAny: X("любой тип", "будь-який тип", "any type"), chalDays: X("Дни недели", "Дні тижня", "Weekdays"),
+  chalCreate: X("Создать челлендж", "Створити челендж", "Create challenge"),
+  chalToday: X("Сегодня по плану", "Сьогодні за планом", "Today's plan"), chalRest: X("Сегодня день отдыха", "Сьогодні день відпочинку", "Rest day today"),
+  chalDo: X("Сделать", "Зробити", "Do it"), chalDone: X("выполнено", "виконано", "done"), chalLeft: X("дней осталось", "днів залишилось", "days left"),
+  chalStreak: X("серия", "серія", "streak"), chalBest: X("лучшая", "краща", "best"),
+  chalOnTrack: X("в графике", "за графіком", "on track"), chalBehind: X("пропущено практик", "пропущено практик", "missed sessions"),
+  chalFinished: X("Завершён", "Завершено", "Finished"), chalNotStarted: X("Старт", "Старт", "Starts"), chalExtend: X("+7 дней", "+7 днів", "+7 days"),
+  chalDelete: X("Удалить челлендж", "Видалити челендж", "Delete challenge"),
+  chalEffect: X("Средний эффект практик челленджа", "Середній ефект практик челенджу", "Average effect of challenge sessions"),
+  chalEmpty: X("Пока нет челленджей. Собери свой план или возьми готовый.", "Поки немає челенджів. Збери свій план або візьми готовий.", "No challenges yet. Build your own plan or take a ready one."),
+  chalActive: X("Идут", "Тривають", "Active"), chalFin: X("Завершённые", "Завершені", "Finished"),
+  chalLegend: X("● выполнено · ◐ частично · ✕ пропуск · ○ отдых", "● виконано · ◐ частково · ✕ пропуск · ○ відпочинок", "● done · ◐ partial · ✕ missed · ○ rest"),
   sportsTitle: X("Виды практик", "Види практик", "Practice types"),
   ready: X("Готовые", "Готові", "Ready-made"), own: X("Свой вид", "Свій вид", "Your own"),
   ownName: X("название, например: теннис", "назва, наприклад: теніс", "name, e.g. tennis"),
@@ -7665,6 +7723,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const [ctx, setCtx] = useState(null); // данные Компаса, гормонов и настроения (только чтение)
   const [spName, setSpName] = useState(""); const [spIcon, setSpIcon] = useState("🏅"); const [spMetric, setSpMetric] = useState(""); const [spSubs, setSpSubs] = useState("");
   const [sportsBack, setSportsBack] = useState("home");
+  const [cb, setCb] = useState(null); // черновик конструктора челленджа
+  const [chalId, setChalId] = useState(null);
+  const [chalDel, setChalDel] = useState(false);
 
   // виды практик: 4 встроенных + добавленные человеком (готовые или свои)
   const dirs = useMemo(() => {
@@ -7868,6 +7929,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     return { A, B, H, Lg };
   }, [ctx, entries, sorted, byDay, today]);
 
+  // прогресс каждого своего челленджа — всегда считается заново из записей (единый источник правды)
+  const chalPr = useMemo(() => (cfg.chal || []).map((ch) => ({ ch, pr: chalProgress(ch, entries, today) })), [cfg.chal, entries, today]);
+
   // ── форма ──
   const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: dirOf(dir).subs[0]?.[0] || "", dur: dirOf(dir).durs[2] ?? dirOf(dir).durs[0], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
 
@@ -7884,7 +7948,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     setForm({ ...copy, id: uid(), d: today, pre: {}, post: {}, zb: [], za: [], note: "" });
     setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form");
   };
-  const openPreset = (dir, sub) => { lsDel(K.d); setForm({ ...blank(dir), sub }); setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form"); };
+  const openPreset = (dir, sub, dur) => { lsDel(K.d); const b0 = blank(dir); setForm({ ...b0, sub: sub || b0.sub, dur: dur || b0.dur }); setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form"); };
   const openEdit = (e) => { setForm(JSON.parse(JSON.stringify(e))); setEditing(true); setDraftShown(false); setBodyOpen(!!(e.zb?.length || e.za?.length)); setView("form"); };
 
   useEffect(() => { if (view === "form" && form && !editing) lsSet(K.d, form); }, [form, view, editing]);
@@ -8038,6 +8102,16 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
             {weekEff != null && <span style={st.text}>{weekEff > 0 ? "+" : ""}{weekEff.toFixed(1)} <span style={st.small}>{T("avgEff")}</span></span>}
           </div>
         </div>
+        {chalPr.filter((x) => !x.pr.finished).slice(0, 2).map(({ ch, pr }) => {
+          const tc = pr.cells.find((c0) => c0.d === today);
+          return (
+            <div key={ch.id} style={{ ...st.card, cursor: "pointer" }} onClick={() => { setChalId(ch.id); setChalDel(false); setView("chal"); }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}><b style={st.text}>🏆 {ch.n}</b><span style={st.small}>{pr.pct}%</span></div>
+              <div style={{ height: 6, borderRadius: 3, background: c.trackBg, margin: "8px 0" }}><div style={{ width: pr.pct + "%", height: "100%", borderRadius: 3, background: c.accent }} /></div>
+              <div style={st.small}>{!pr.started ? `${T("chalNotStarted")}: ${ch.s}` : !tc || tc.st === "rest" ? T("chalRest") : tc.items.map((x) => `${x.hit ? "✓" : "○"} ${dirOf(x.sl.dir).icon} ${x.sl.min}+`).join("  ")}</div>
+            </div>
+          );
+        })}
         {advice && (
           <div style={st.card}>
             <div style={st.h2}>{T("hint")}</div>
@@ -8072,7 +8146,10 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("stats")}>{T("stats")}</button>
           <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("settings")}>{T("settings")}</button>
         </div>
-        <button type="button" style={{ ...st.ghost, width: "100%", marginTop: 8 }} onClick={() => { setSportsBack("home"); setView("sports"); }}>{T("sportsAdd")}</button>
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("chals")}>{T("chalBtn")}</button>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => { setSportsBack("home"); setView("sports"); }}>{T("sportsAdd")}</button>
+        </div>
       </>
     );
   };
@@ -8357,6 +8434,165 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     );
   };
 
+  // ═══ CHALLENGES (свои челленджи) ═══
+  const newChal = (tpl) => {
+    setCb({ id: uid(), n: tpl ? tr(lang, tpl.n) : "", s: today, len: tpl?.len || 14, slots: (tpl?.slots || [{ dir: "yoga", sub: "", min: 20, wd: ALLWD }]).map((sl) => ({ ...sl, wd: [...sl.wd], id: uid() })) });
+    setView("chalnew");
+  };
+  const updSlot = (i, patch) => setCb((p) => ({ ...p, slots: p.slots.map((sl, j) => (j === i ? { ...sl, ...patch } : sl)) }));
+  const saveChal = () => {
+    const slots = cb.slots.filter((sl) => sl.wd.length).map((sl) => ({ id: sl.id, dir: sl.dir, sub: sl.sub || "", min: Math.max(0, Math.round(Number(sl.min) || 0)), wd: [...sl.wd].sort() })).slice(0, 8);
+    if (!slots.length) return;
+    const ch = { id: cb.id, n: ((cb.n || "").trim() || `${T("chalDefault")} ${(cfg.chal || []).length + 1}`).slice(0, 40), s: cb.s, len: Math.min(365, Math.max(1, Math.round(Number(cb.len) || 1))), slots };
+    updCfg((p) => ({ ...p, chal: [ch, ...(p.chal || []).filter((x) => x.id !== ch.id)].slice(0, 12) }));
+    setCb(null); setChalId(ch.id); setChalDel(false); setView("chal");
+  };
+  const chalCard = ({ ch, pr }) => (
+    <div key={ch.id} style={{ ...st.card, cursor: "pointer" }} onClick={() => { setChalId(ch.id); setChalDel(false); setView("chal"); }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}><b style={st.text}>🏆 {ch.n}</b><span style={st.small}>{pr.pct}%</span></div>
+      <div style={{ height: 6, borderRadius: 3, background: c.trackBg, margin: "8px 0" }}><div style={{ width: pr.pct + "%", height: "100%", borderRadius: 3, background: c.accent }} /></div>
+      <div style={st.small}>{pr.done}/{pr.total} {T("chalDone")} · {pr.finished ? T("chalFinished") : `${pr.left} ${T("chalLeft")}`}</div>
+    </div>
+  );
+  const renderChals = () => (
+    <>
+      <button type="button" style={st.back} onClick={() => setView("home")}>{T("back")}</button>
+      <h1 style={st.h1}>{T("chalTitle")}</h1>
+      <button type="button" style={st.btn} onClick={() => newChal(null)}>{T("chalNew")}</button>
+      <div style={{ ...st.h2, marginTop: 14 }}>{T("chalTpl")}</div>
+      <div style={st.row}>{CHAL_TPL.map((t, i) => <Chip key={i} st={st} on={false} onClick={() => newChal(t)}>{tr(lang, t.n)}</Chip>)}</div>
+      {chalPr.length === 0 && <div style={{ ...st.card, marginTop: 8 }}><span style={st.small}>{T("chalEmpty")}</span></div>}
+      {chalPr.some((x) => !x.pr.finished) && <div style={{ ...st.h2, marginTop: 12 }}>{T("chalActive")}</div>}
+      {chalPr.filter((x) => !x.pr.finished).map(chalCard)}
+      {chalPr.some((x) => x.pr.finished) && <div style={{ ...st.h2, marginTop: 12 }}>{T("chalFin")}</div>}
+      {chalPr.filter((x) => x.pr.finished).map(chalCard)}
+    </>
+  );
+  const renderChalNew = () => {
+    if (!cb) return null;
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => { setCb(null); setView("chals"); }}>{T("back")}</button>
+        <h1 style={st.h1}>{T("chalNew")}</h1>
+        <Section st={st} title={T("chalTpl")}>
+          <div style={st.row}>{CHAL_TPL.map((t, i) => <Chip key={i} st={st} on={false} onClick={() => newChal(t)}>{tr(lang, t.n)}</Chip>)}</div>
+        </Section>
+        <Section st={st} title={T("chalName")}>
+          <input value={cb.n} onChange={(e) => setCb({ ...cb, n: e.target.value })} maxLength={40} placeholder={T("chalDefault")} style={st.input} />
+        </Section>
+        <Section st={st} title={T("chalLen")}>
+          <div style={st.row}>
+            {[7, 14, 21, 30, 60].map((n) => <Chip key={n} st={st} on={Number(cb.len) === n} onClick={() => setCb({ ...cb, len: n })}>{n}</Chip>)}
+            <input type="number" inputMode="numeric" value={cb.len} onChange={(e) => setCb({ ...cb, len: e.target.value })} style={{ ...st.input, width: 80, marginBottom: 6 }} />
+          </div>
+        </Section>
+        <Section st={st} title={T("chalStart")}>
+          <div style={st.row}>
+            <Chip st={st} on={cb.s === today} onClick={() => setCb({ ...cb, s: today })}>{T("today")}</Chip>
+            <Chip st={st} on={cb.s === addDays(today, 1)} onClick={() => setCb({ ...cb, s: addDays(today, 1) })}>{T("chalTomorrow")}</Chip>
+            <input type="date" value={cb.s} onChange={(e) => e.target.value && setCb({ ...cb, s: e.target.value })} style={{ ...st.input, width: "auto", marginBottom: 6 }} />
+          </div>
+        </Section>
+        <div style={st.h2}>{T("chalPlan")}</div>
+        {cb.slots.map((sl, i) => {
+          const dd = dirOf(sl.dir);
+          return (
+            <div key={sl.id} style={st.card}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <b style={st.text}>{dd.icon} {tr(lang, dd.name)}</b>
+                {cb.slots.length > 1 && <button type="button" style={{ ...st.back, fontSize: 18 }} onClick={() => setCb({ ...cb, slots: cb.slots.filter((_, j) => j !== i) })}>✕</button>}
+              </div>
+              <div style={{ ...st.row, marginTop: 8 }}>{dirKeys.map((k) => <Chip key={k} st={st} on={sl.dir === k} onClick={() => updSlot(i, { dir: k, sub: "" })}>{dirOf(k).icon}</Chip>)}</div>
+              {dd.subs.length > 0 && (
+                <div style={st.row}>
+                  <Chip st={st} on={!sl.sub} onClick={() => updSlot(i, { sub: "" })}>{T("chalAny")}</Chip>
+                  {dd.subs.map(([k, n]) => <Chip key={k} st={st} on={sl.sub === k} onClick={() => updSlot(i, { sub: k })}>{tr(lang, n)}</Chip>)}
+                </div>
+              )}
+              <div style={st.small}>{T("chalMin")}</div>
+              <div style={st.row}>{[10, 15, 20, 30, 45, 60, 90].map((m) => <Chip key={m} st={st} on={Number(sl.min) === m} onClick={() => updSlot(i, { min: m })}>{m}+</Chip>)}</div>
+              <div style={st.small}>{T("chalDays")}</div>
+              <div style={st.row}>
+                {WD_SETS.map(([set, n], k) => <Chip key={k} st={st} on={set.length === sl.wd.length && set.every((v) => sl.wd.includes(v))} onClick={() => updSlot(i, { wd: [...set] })}>{tr(lang, n)}</Chip>)}
+              </div>
+              <div style={st.row}>
+                {(WD[lang] || WD.ru).map((w, k) => <Chip key={k} st={st} on={sl.wd.includes(k)} onClick={() => updSlot(i, { wd: sl.wd.includes(k) ? sl.wd.filter((v) => v !== k) : [...sl.wd, k] })}>{w}</Chip>)}
+              </div>
+            </div>
+          );
+        })}
+        {cb.slots.length < 8 && <button type="button" style={{ ...st.ghost, width: "100%", marginBottom: 12 }} onClick={() => setCb({ ...cb, slots: [...cb.slots, { id: uid(), dir: "yoga", sub: "", min: 20, wd: [0, 2, 4] }] })}>{T("chalAddSlot")}</button>}
+        <div style={{ position: "sticky", bottom: 0, padding: "10px 0 6px", background: `linear-gradient(transparent, ${c.bg} 40%)` }}>
+          <button type="button" style={st.btn} onClick={saveChal}>{T("chalCreate")}</button>
+        </div>
+      </>
+    );
+  };
+  const renderChal = () => {
+    const it = chalPr.find((x) => x.ch.id === chalId);
+    if (!it) return <button type="button" style={st.back} onClick={() => setView("chals")}>{T("back")}</button>;
+    const { ch, pr } = it;
+    const tc = pr.cells.find((c0) => c0.d === today);
+    const grid = [...Array(wdIndex(ch.s)).fill(null), ...pr.cells];
+    const cellStyle = (cell) => {
+      const b0 = { aspectRatio: "1", borderRadius: 8, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${c.line}`, color: c.inkSoft, background: c.trackBg, outline: cell.d === today ? `2px solid ${c.accent}` : "none", outlineOffset: 1 };
+      if (cell.st === "done") return { ...b0, background: c.accent, color: c.primaryBtnText, border: `1px solid ${c.accent}` };
+      if (cell.st === "partial") return { ...b0, border: `2px solid ${c.accent}`, color: c.ink };
+      if (cell.st === "missed") return { ...b0, border: "1px solid #D98C6A", color: "#D98C6A" };
+      if (cell.st === "rest") return { ...b0, opacity: 0.45 };
+      return b0;
+    };
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => setView("chals")}>{T("back")}</button>
+        <h1 style={st.h1}>🏆 {ch.n}</h1>
+        <div style={st.card}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}><span style={{ ...st.text, fontSize: 28, fontWeight: 600 }}>{pr.pct}%</span><span style={st.small}>{pr.done}/{pr.total} {T("chalDone")}</span></div>
+          <div style={{ height: 8, borderRadius: 4, background: c.trackBg, margin: "8px 0 10px" }}><div style={{ width: pr.pct + "%", height: "100%", borderRadius: 4, background: c.accent }} /></div>
+          <div style={{ ...st.row, gap: 14 }}>
+            <span style={st.text}>🔥 {pr.streak} <span style={st.small}>{T("chalStreak")}</span></span>
+            <span style={st.text}>{pr.best} <span style={st.small}>{T("chalBest")}</span></span>
+            <span style={st.text}>{pr.left} <span style={st.small}>{T("chalLeft")}</span></span>
+          </div>
+          <div style={{ ...st.small, marginTop: 8 }}>
+            {pr.finished ? `${T("chalFinished")} · ${ch.s} → ${addDays(ch.s, ch.len - 1)}` : !pr.started ? `${T("chalNotStarted")}: ${ch.s}` : pr.behind > 0 ? `${T("chalBehind")}: ${pr.behind}` : T("chalOnTrack")}
+          </div>
+        </div>
+        {pr.started && !pr.finished && (
+          <div style={st.card}>
+            <div style={st.h2}>{T("chalToday")}</div>
+            {!tc || tc.st === "rest" ? <div style={st.text}>{T("chalRest")}</div> : tc.items.map((x, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={st.text}>{x.hit ? "✓" : "○"} {dirOf(x.sl.dir).icon} {x.sl.sub ? subNameOf({ dir: x.sl.dir, sub: x.sl.sub }) : tr(lang, dirOf(x.sl.dir).name)} · {x.sl.min}+ {T("min")}</span>
+                {!x.hit && <button type="button" style={{ ...st.ghost, padding: "6px 12px" }} onClick={() => openPreset(x.sl.dir, x.sl.sub, x.sl.min)}>{T("chalDo")}</button>}
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={st.card}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4 }}>
+            {(WD[lang] || WD.ru).map((w) => <div key={w} style={{ ...st.small, textAlign: "center" }}>{w}</div>)}
+            {grid.map((cell, i) => cell ? <div key={cell.d} style={cellStyle(cell)}>{cell.st === "missed" ? "✕" : Number(cell.d.slice(8))}</div> : <div key={"b" + i} />)}
+          </div>
+          <div style={{ ...st.small, marginTop: 8 }}>{T("chalLegend")}</div>
+        </div>
+        <div style={st.card}>
+          <div style={st.h2}>{T("chalPlan")}</div>
+          {ch.slots.map((sl) => (
+            <div key={sl.id} style={{ ...st.text, marginBottom: 4 }}>{dirOf(sl.dir).icon} {sl.sub ? subNameOf({ dir: sl.dir, sub: sl.sub }) : tr(lang, dirOf(sl.dir).name)} · {sl.min}+ {T("min")} · <span style={st.small}>{sl.wd.length === 7 ? tr(lang, WD_SETS[0][1]) : sl.wd.map((k) => (WD[lang] || WD.ru)[k]).join(" ")}</span></div>
+          ))}
+          {pr.eff != null && <div style={{ ...st.small, marginTop: 8 }}>{T("chalEffect")}: <b>{pr.eff > 0 ? "+" : ""}{pr.eff.toFixed(1)}</b></div>}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => updCfg((p) => ({ ...p, chal: (p.chal || []).map((x) => (x.id === ch.id ? { ...x, len: Math.min(365, x.len + 7) } : x)) }))}>{T("chalExtend")}</button>
+          {chalDel
+            ? <button type="button" style={{ ...st.ghost, flex: 1, borderColor: "#D98C6A", color: "#D98C6A" }} onClick={() => { updCfg((p) => ({ ...p, chal: (p.chal || []).filter((x) => x.id !== ch.id) })); setChalDel(false); setView("chals"); }}>{T("sure")}</button>
+            : <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setChalDel(true)}>{T("chalDelete")}</button>}
+        </div>
+      </>
+    );
+  };
+
   // ═══ SPORTS (виды практик) ═══
   const addSport = (sp) => updCfg((p) => ({ ...p, sports: [...(p.sports || []).filter((x) => x.id !== sp.id), sp].slice(0, 12) }));
   const addCustom = () => {
@@ -8452,6 +8688,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
       {view === "stats" && renderStats()}
       {view === "settings" && renderSettings()}
       {view === "sports" && renderSports()}
+      {view === "chals" && renderChals()}
+      {view === "chalnew" && renderChalNew()}
+      {view === "chal" && renderChal()}
     </div>
   );
 }
@@ -8607,7 +8846,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  // build: menu-swap-1 sports-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
+  // build: menu-swap-1 sports-1 chal-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },
