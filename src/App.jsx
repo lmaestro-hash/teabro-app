@@ -8487,6 +8487,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
+  // build: menu-swap-1 (Челленджи выше, Дневник практик ниже Компаса)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },
