@@ -7476,12 +7476,42 @@ const ZONES = [["neck", X("Шея", "Шия", "Neck")], ["shoulders", X("Пле�
 const SURF = [["road", X("Дорога", "Дорога", "Road")], ["park", X("Парк/трейл", "Парк/трейл", "Park/trail")], ["track", X("Стадион", "Стадіон", "Track")], ["mill", X("Дорожка", "Доріжка", "Treadmill")]];
 const WX = ["☀️", "⛅", "🌧", "❄️", "💨"];
 const WEAK = { tension: X("напряжение", "напруга", "tension"), anxiety: X("тревога", "тривога", "anxiety"), fatigue: X("усталость", "втома", "fatigue"), sleep: X("сон", "сон", "sleep") };
+const GEN_PROMPT = X("Как прошло? Что заметил?", "Як минуло? Що помітив?", "How did it go? What did you notice?");
+const GEN_TAGS = [X("в удовольствие", "із задоволенням", "enjoyable"), X("утром", "зранку", "morning"), X("вечером", "ввечері", "evening"), X("с кем-то", "з кимось", "with someone")];
+const sb = (k, ru, uk, en) => [k, X(ru, uk, en)];
+const xs = (icon, name, metric, subs) => ({ icon, name, durs: [20, 30, 45, 60, 90], subs, prompt: GEN_PROMPT, tags: GEN_TAGS, metric });
+// готовые дополнительные виды (человек включает нужные одним тапом)
+const EXTRA = {
+  bike: xs("🚴", X("Велосипед", "Велосипед", "Cycling"), "km", [sb("easy", "Лёгкая", "Легка", "Easy"), sb("long", "Длинная", "Довга", "Long"), sb("intervals", "Интервалы", "Інтервали", "Intervals"), sb("commute", "По делам", "У справах", "Commute")]),
+  swim: xs("🏊", X("Плавание", "Плавання", "Swimming"), "m", [sb("easy", "Лёгкое", "Легке", "Easy"), sb("intervals", "Интервалы", "Інтервали", "Intervals"), sb("technique", "Техника", "Техніка", "Technique"), sb("open", "Открытая вода", "Відкрита вода", "Open water")]),
+  walk: xs("🚶", X("Ходьба", "Ходьба", "Walking"), "km", [sb("easy", "Прогулка", "Прогулянка", "Stroll"), sb("brisk", "Быстрая", "Швидка", "Brisk"), sb("nordic", "Скандинавская", "Скандинавська", "Nordic")]),
+  hike: xs("🥾", X("Поход", "Похід", "Hiking"), "km", [sb("day", "Однодневный", "Одноденний", "Day hike"), sb("multi", "Многодневный", "Багатоденний", "Multi-day")]),
+  mma: xs("🥊", X("Единоборства", "Єдиноборства", "Martial arts"), null, [sb("spar", "Спарринг", "Спаринг", "Sparring"), sb("tech", "Техника", "Техніка", "Technique"), sb("drill", "Отработка", "Відпрацювання", "Drills")]),
+  team: xs("⚽", X("Игровые виды", "Ігрові види", "Team sports"), null, [sb("game", "Игра", "Гра", "Game"), sb("train", "Тренировка", "Тренування", "Training")]),
+  racket: xs("🎾", X("Ракетки", "Ракетки", "Racket sports"), null, [sb("game", "Игра", "Гра", "Game"), sb("train", "Тренировка", "Тренування", "Training")]),
+  climb: xs("🧗", X("Скалолазание", "Скелелазіння", "Climbing"), null, [sb("boulder", "Боулдеринг", "Боулдерінг", "Bouldering"), sb("routes", "Трассы", "Траси", "Routes"), sb("train", "Тренировка", "Тренування", "Training")]),
+  mobility: xs("🤸", X("Мобильность", "Мобільність", "Mobility"), null, [sb("stretch", "Растяжка", "Розтяжка", "Stretch"), sb("joints", "Суставная", "Суглобова", "Joint work"), sb("recovery", "Восстановление", "Відновлення", "Recovery")]),
+};
+// свой вид: хранится в настройках человека { id, n, icon, metric, subs }
+const customDir = (sp) => ({ icon: sp.icon || "🏅", name: sp.n || "—", durs: [20, 30, 45, 60, 90], subs: (sp.subs || []).map((x) => [x, x]), prompt: GEN_PROMPT, tags: GEN_TAGS, metric: sp.metric || null, custom: true });
+// вид убрали из списка, а старые записи остались — показываем их по снимку имени/значка
+const fallbackDir = (k, e) => ({ icon: e?.x?.si || "🏅", name: e?.x?.sn || k, durs: [30, 45, 60], subs: [], prompt: GEN_PROMPT, tags: GEN_TAGS, metric: null });
+const SPORT_EMOJI = ["🏅", "🏀", "🏐", "🏓", "🏒", "⛸️", "🏄", "🚣", "🤾", "🎯", "🛹", "🏇"];
 const PRESETS = [["yoga", "nidra"], ["yoga", "yin"], ["med", "breath"], ["run", "recovery"]];
 const FEEL = [[1, "😌", X("легко", "легко", "easy")], [2, "👌", X("в самый раз", "якраз", "just right")], [3, "🥵", X("тяжело", "важко", "hard")]];
 const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга", "Подтягивания", "Жим стоя", "Тяга в наклоне", "Отжимания", "Выпады", "Румынская тяга", "Планка"], uk: ["Жим лежачи", "Присід", "Станова тяга", "Підтягування", "Жим стоячи", "Тяга в нахилі", "Віджимання", "Випади", "Румунська тяга", "Планка"], en: ["Bench press", "Squat", "Deadlift", "Pull-ups", "Overhead press", "Bent-over row", "Push-ups", "Lunges", "Romanian deadlift", "Plank"] };
 
 const UI = {
   title: X("Дневник практик", "Щоденник практик", "Practice log"),
+  sportsAdd: X("＋ Добавить вид спорта", "＋ Додати вид спорту", "＋ Add a sport"),
+  sportsTitle: X("Виды практик", "Види практик", "Practice types"),
+  ready: X("Готовые", "Готові", "Ready-made"), own: X("Свой вид", "Свій вид", "Your own"),
+  ownName: X("название, например: теннис", "назва, наприклад: теніс", "name, e.g. tennis"),
+  ownSubs: X("типы через запятую (необязательно)", "типи через кому (необов'язково)", "types, comma-separated (optional)"),
+  metricL: X("Дистанция", "Дистанція", "Distance"), none: X("нет", "ні", "none"),
+  addBtn: X("Добавить", "Додати", "Add"), mySports: X("Мои виды", "Мої види", "My types"),
+  sportsNote: X("Старые записи останутся, даже если убрать вид.", "Старі записи залишаться, навіть якщо прибрати вид.", "Past entries stay even if you remove a type."),
+  distM: X("Дистанция, м", "Дистанція, м", "Distance, m"), kmh: X("км/ч", "км/год", "km/h"), per100: X("/100 м", "/100 м", "/100 m"), mUnit: X("м", "м", "m"),
   hint: X("Подсказка на сегодня", "Підказка на сьогодні", "Hint for today"),
   hintGentle: X("Подойдёт мягкая практика", "Підійде м'яка практика", "A gentle practice may fit"),
   hintMood: X("настроение сегодня низкое", "настрій сьогодні низький", "today's mood is low"),
@@ -7557,6 +7587,7 @@ function cleanForm(f) {
     })).filter((ex) => ex.n);
   }
   if (f.dir === "run") { x.km = Number(x.km) || 0; }
+  if (x.d != null) x.d = Number(x.d) || 0;
   out.x = x;
   return out;
 }
@@ -7632,6 +7663,20 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const [copied, setCopied] = useState(false);
   const [wipeArm, setWipeArm] = useState(false);
   const [ctx, setCtx] = useState(null); // данные Компаса, гормонов и настроения (только чтение)
+  const [spName, setSpName] = useState(""); const [spIcon, setSpIcon] = useState("🏅"); const [spMetric, setSpMetric] = useState(""); const [spSubs, setSpSubs] = useState("");
+  const [sportsBack, setSportsBack] = useState("home");
+
+  // виды практик: 4 встроенных + добавленные человеком (готовые или свои)
+  const dirs = useMemo(() => {
+    const o = { ...DIRS };
+    (cfg.sports || []).forEach((sp) => { const d = sp.p ? EXTRA[sp.id] : customDir(sp); if (d) o[sp.id] = d; });
+    return o;
+  }, [cfg.sports]);
+  const dirKeys = useMemo(() => Object.keys(dirs), [dirs]);
+  const allKeys = useMemo(() => [...new Set([...dirKeys, ...entries.map((e) => e.dir)])], [dirKeys, entries]);
+  const dirOf = (k, e) => dirs[k] || EXTRA[k] || fallbackDir(k, e || entries.find((x) => x.dir === k));
+  const subNameOf = (e) => { const s = dirOf(e.dir, e).subs.find((x) => x[0] === e.sub); return s ? tr(lang, s[1]) : e.sub || ""; };
+  const unitOf = (k) => (dirOf(k).metric === "m" ? T("mUnit") : T("km"));
 
   // ── синхронизация: локально сразу, на сервер через очередь ──
   const qRef = useRef(lsGet(K.q, []));
@@ -7758,7 +7803,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
 
   const best = useMemo(() => {
     const out = {};
-    DIR_KEYS.forEach((dir) => {
+    allKeys.forEach((dir) => {
       const g = {};
       entries.filter((e) => e.dir === dir).forEach((e) => {
         const ef = effectOf(e);
@@ -7769,7 +7814,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
       out[dir] = arr;
     });
     return out;
-  }, [entries]);
+  }, [entries, allKeys]);
 
   const ak = (s) => { const [y, m, d] = s.split("-").map(Number); return `${y}-${m}-${d}`; }; // ключ даты как в остальном приложении
   const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
@@ -7785,7 +7830,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const tdrop = useMemo(() => {
     const g = {};
     entries.forEach((e) => { if (e.pre?.t != null && e.post?.t != null) (g[e.dir + "|" + e.sub] = g[e.dir + "|" + e.sub] || []).push(e.pre.t - e.post.t); });
-    return Object.entries(g).filter(([, v]) => v.length >= 3).map(([k, v]) => { const [dir, sub] = k.split("|"); return { dir, sub, n: v.length, avg: avg(v) }; }).filter((x) => x.avg > 0).sort((a, b) => b.avg - a.avg);
+    return Object.entries(g).filter(([, v]) => v.length >= 3).map(([k, v]) => { const ix = k.indexOf("|"); return { dir: k.slice(0, ix), sub: k.slice(ix + 1), n: v.length, avg: avg(v) }; }).filter((x) => x.avg > 0).sort((a, b) => b.avg - a.avg);
   }, [entries]);
 
   // подсказка «сегодня лучше мягко»: срабатывает только по свежим отметкам самого человека
@@ -7824,7 +7869,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   }, [ctx, entries, sorted, byDay, today]);
 
   // ── форма ──
-  const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: DIRS[dir].subs[0][0], dur: DIRS[dir].durs[2], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
+  const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: dirOf(dir).subs[0]?.[0] || "", dur: dirOf(dir).durs[2] ?? dirOf(dir).durs[0], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
 
   const openNew = (dir) => {
     const draft = lsGet(K.d, null);
@@ -7873,9 +7918,10 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
 
   const submit = () => {
     const e = cleanForm(form);
+    const dd = dirs[e.dir]; if (dd?.custom) e.x = { ...e.x, sn: dd.name, si: dd.icon };
     commit(e);
     updCfg((p) => {
-      const defs = DIRS[e.dir].tags.map((t) => tr(lang, t));
+      const defs = dirOf(e.dir).tags.map((t) => tr(lang, t));
       const tags = [...new Set([...(e.tags || []).filter((t) => !defs.includes(t)), ...(p.tags || [])])].slice(0, 60);
       const exs = e.dir === "gym" ? [...new Set([...(e.x.ex || []).map((x) => x.n), ...(p.exs || [])])].slice(0, 150) : p.exs || [];
       return { ...p, tags, exs };
@@ -7886,7 +7932,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   // ── экспорт ──
   const entryLine = (e) => {
     const st1 = ["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null ? `${k.toUpperCase()}${e.pre?.[k] ?? "-"}→${e.post?.[k] ?? "-"}` : null)).filter(Boolean).join(" ");
-    return `${e.d} · ${tr(lang, DIRS[e.dir].name)} · ${subName(lang, e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${st1 ? " · " + st1 : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
+    return `${e.d} · ${tr(lang, dirOf(e.dir, e).name)} · ${subNameOf(e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${e.x?.d ? ` · ${e.x.d} ${unitOf(e.dir)}` : ""}${st1 ? " · " + st1 : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
   };
   const doExport = async (kind) => {
     const list = [...sorted].reverse();
@@ -7894,7 +7940,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     if (kind === "csv") {
       const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
       txt = ["date,direction,type,minutes,intensity,km,e_pre,e_post,m_pre,m_post,t_pre,t_post,tags,note",
-        ...list.map((e) => [e.d, e.dir, e.sub, e.dur, e.int, e.x?.km ?? "", e.pre?.e ?? "", e.post?.e ?? "", e.pre?.m ?? "", e.post?.m ?? "", e.pre?.t ?? "", e.post?.t ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
+        ...list.map((e) => [e.d, tr(lang, dirOf(e.dir, e).name), e.sub, e.dur, e.int, e.x?.km ?? "", e.pre?.e ?? "", e.post?.e ?? "", e.pre?.m ?? "", e.post?.m ?? "", e.pre?.t ?? "", e.post?.t ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
     } else txt = list.map(entryLine).join("\n");
     try { await navigator.clipboard.writeText(txt); setCopied(true); setExportTxt(""); setTimeout(() => setCopied(false), 2000); }
     catch { setExportTxt(txt); }
@@ -7914,12 +7960,12 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
 
   const renderEntry = (e) => {
     const open = openId === e.id;
-    const d = DIRS[e.dir];
+    const d = dirOf(e.dir, e);
     return (
       <div key={e.id} style={{ ...st.card, padding: 12 }}>
         <div onClick={() => { setOpenId(open ? null : e.id); setConfirmDel(null); }} style={{ cursor: "pointer" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <div style={{ ...st.text, fontWeight: 600 }}>{d.icon} {subName(lang, e)} <span style={{ ...st.small, fontWeight: 400 }}>· {e.dur} {T("min")}{e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}{e.dir === "run" && e.x?.km ? ` · ${fmtPace(e.dur, e.x.km)}/${T("km")}` : ""}</span></div>
+            <div style={{ ...st.text, fontWeight: 600 }}>{d.icon} {subNameOf(e) || tr(lang, d.name)} <span style={{ ...st.small, fontWeight: 400 }}>· {e.dur} {T("min")}{e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}{e.x?.d ? ` · ${e.x.d} ${unitOf(e.dir)}` : ""}{e.dir === "run" && e.x?.km ? ` · ${fmtPace(e.dur, e.x.km)}/${T("km")}` : ""}</span></div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>{effBadge(e)}<span style={st.small}>{e.d.slice(5).split("-").reverse().join(".")}</span></div>
           </div>
           {!open && e.note && <div style={{ ...st.small, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.note}</div>}
@@ -7959,7 +8005,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const dirPills = (val, set) => (
     <div style={{ ...st.row, marginBottom: 6 }}>
       <Chip st={st} on={val === "all"} onClick={() => set("all")}>{T("all")}</Chip>
-      {DIR_KEYS.map((k) => <Chip key={k} st={st} on={val === k} onClick={() => set(k)}>{DIRS[k].icon} {tr(lang, DIRS[k].name)}</Chip>)}
+      {allKeys.map((k) => <Chip key={k} st={st} on={val === k} onClick={() => set(k)}>{dirOf(k).icon} {tr(lang, dirOf(k).name)}</Chip>)}
     </div>
   );
 
@@ -7969,7 +8015,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const renderHome = () => {
     const wkDays = Array.from({ length: 7 }, (_, i) => { const k = addDays(wk0, i); return { k, n: (byDay[k] || []).length, today: k === today }; });
     const mins = weekEntries.reduce((a, e) => a + (e.dur || 0), 0);
-    const insightDir = DIR_KEYS.find((d) => best[d]?.length);
+    const insightDir = allKeys.find((d) => best[d]?.length);
     const ins = insightDir ? best[insightDir][0] : null;
     const lastAny = sorted[0];
     return (
@@ -7999,23 +8045,23 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
             <div style={{ ...st.text, margin: "6px 0 8px" }}>{T("hintGentle")}</div>
             <div style={st.row}>
               {PRESETS.map(([d, sb]) => (
-                <Chip key={d + sb} st={st} on={false} onClick={() => openPreset(d, sb)}>{DIRS[d].icon} {tr(lang, DIRS[d].subs.find((x) => x[0] === sb)[1])}</Chip>
+                <Chip key={d + sb} st={st} on={false} onClick={() => openPreset(d, sb)}>{dirOf(d).icon} {tr(lang, dirOf(d).subs.find((x) => x[0] === sb)[1])}</Chip>
               ))}
             </div>
-            {advice.pick && <div style={{ ...st.small, marginTop: 6 }}>{T("yb1")} «{subName(lang, advice.pick)}» {T("yb2")} {advice.pick.avg.toFixed(1)} ({advice.pick.n})</div>}
+            {advice.pick && <div style={{ ...st.small, marginTop: 6 }}>{T("yb1")} «{subNameOf(advice.pick)}» {T("yb2")} {advice.pick.avg.toFixed(1)} ({advice.pick.n})</div>}
             <div style={{ ...st.small, marginTop: 4 }}>{T("hintNote")}</div>
           </div>
         )}
         <button type="button" style={st.btn} onClick={() => openNew(lastAny?.dir)}>{T("add")}</button>
         {lastAny && (
           <div style={{ marginTop: 8, ...st.row }}>
-            {DIR_KEYS.filter((d) => lastOf(d)).map((d) => <button key={d} type="button" style={{ ...st.ghost, marginRight: 6, marginBottom: 6 }} onClick={() => openRepeat(d)}>{DIRS[d].icon} {T("repeat")}</button>)}
+            {dirKeys.filter((d) => lastOf(d)).map((d) => <button key={d} type="button" style={{ ...st.ghost, marginRight: 6, marginBottom: 6 }} onClick={() => openRepeat(d)}>{dirOf(d).icon} {T("repeat")}</button>)}
           </div>
         )}
         {ins && (
           <div style={{ ...st.card, marginTop: 8 }}>
             <div style={st.h2}>{T("works")}</div>
-            <div style={st.text}>{DIRS[insightDir].icon} {T("worksTxt")}: <b>{tr(lang, DIRS[insightDir].subs.find((s) => s[0] === ins.sub)?.[1]) || ins.sub}</b> ({ins.avg > 0 ? "+" : ""}{ins.avg.toFixed(1)}, {ins.n})</div>
+            <div style={st.text}>{dirOf(insightDir).icon} {T("worksTxt")}: <b>{tr(lang, dirOf(insightDir).subs.find((s) => s[0] === ins.sub)?.[1]) || ins.sub}</b> ({ins.avg > 0 ? "+" : ""}{ins.avg.toFixed(1)}, {ins.n})</div>
             <div style={{ ...st.small, marginTop: 4 }}>{T("worksNote")}</div>
           </div>
         )}
@@ -8026,13 +8072,14 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("stats")}>{T("stats")}</button>
           <button type="button" style={{ ...st.ghost, flex: 1 }} onClick={() => setView("settings")}>{T("settings")}</button>
         </div>
+        <button type="button" style={{ ...st.ghost, width: "100%", marginTop: 8 }} onClick={() => { setSportsBack("home"); setView("sports"); }}>{T("sportsAdd")}</button>
       </>
     );
   };
 
   // ═══ FORM ═══
   const renderForm = () => {
-    const f = form; const dcfg = DIRS[f.dir];
+    const f = form; const dcfg = dirOf(f.dir);
     const defTags = dcfg.tags.map((t) => tr(lang, t));
     const tagPool = [...new Set([...defTags, ...(cfg.tags || []), ...(f.tags || [])])];
     const exNames = [...new Set([...(cfg.exs || []), ...(EXS[lang] || EXS.ru)])];
@@ -8041,7 +8088,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
         <button type="button" style={st.back} onClick={() => { setView("home"); setForm(null); }}>{T("back")}</button>
         <h1 style={st.h1}>{dcfg.icon} {tr(lang, dcfg.name)}</h1>
         {draftShown && <div style={{ ...st.card, ...st.row, justifyContent: "space-between" }}><span style={st.small}>{T("draftBack")}</span><button type="button" style={{ ...st.ghost, padding: "4px 10px" }} onClick={() => { lsDel(K.d); setForm(blank(f.dir)); setDraftShown(false); }}>{T("draftDrop")}</button></div>}
-        {!editing && <div style={st.row}>{DIR_KEYS.map((k) => <Chip key={k} st={st} on={f.dir === k} onClick={() => f.dir !== k && changeDir(k)}>{DIRS[k].icon}</Chip>)}</div>}
+        {!editing && <div style={st.row}>{dirKeys.map((k) => <Chip key={k} st={st} on={f.dir === k} onClick={() => f.dir !== k && changeDir(k)}>{dirOf(k).icon}</Chip>)}<Chip st={st} on={false} onClick={() => { setSportsBack("form"); setView("sports"); }}>＋</Chip></div>}
 
         <Section st={st} title={T("date")}>
           <div style={st.row}>
@@ -8051,9 +8098,11 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </div>
         </Section>
 
-        <Section st={st} title={T("kind")}>
-          <div style={st.row}>{dcfg.subs.map(([k, n]) => <Chip key={k} st={st} on={f.sub === k} onClick={() => setF({ sub: k })}>{tr(lang, n)}</Chip>)}</div>
-        </Section>
+        {dcfg.subs.length > 0 && (
+          <Section st={st} title={T("kind")}>
+            <div style={st.row}>{dcfg.subs.map(([k, n]) => <Chip key={k} st={st} on={f.sub === k} onClick={() => setF({ sub: k })}>{tr(lang, n)}</Chip>)}</div>
+          </Section>
+        )}
 
         <Section st={st} title={T("duration")}>
           <div style={st.row}>
@@ -8144,6 +8193,19 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </Section>
         )}
 
+        {dcfg.metric && (
+          <Section st={st} title={T("metricL")}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <input type="number" inputMode="decimal" placeholder={dcfg.metric === "m" ? T("distM") : T("dist")} value={f.x.d ?? ""} onChange={(e) => setX({ d: e.target.value })} style={st.input} />
+              {Number(f.x.d) > 0 && Number(f.dur) > 0 && (
+                <span style={{ ...st.text, whiteSpace: "nowrap" }}>
+                  {dcfg.metric === "m" ? `${fmtPace(Number(f.dur), Number(f.x.d) / 100)} ${T("per100")}` : `${(Number(f.x.d) / (Number(f.dur) / 60)).toFixed(1)} ${T("kmh")}`}
+                </span>
+              )}
+            </div>
+          </Section>
+        )}
+
         <Section st={st} title={T("state")}>
           <div style={st.small}>{T("before")}</div>
           {["e", "m", "t"].map((k) => <Scale key={"a" + k} st={st} c={c} lang={lang} k={k} value={f.pre[k]} onChange={(v) => setState("pre", k, v)} />)}
@@ -8226,7 +8288,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
 
   // ═══ STATS ═══
   const renderStats = () => {
-    const dirs = filter === "all" ? DIR_KEYS : [filter];
+    const showDirs = filter === "all" ? allKeys : [filter];
     const mo0 = today.slice(0, 7);
     const weeks = Array.from({ length: 8 }, (_, i) => addDays(wk0, -7 * (7 - i)));
     return (
@@ -8234,7 +8296,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
         <button type="button" style={st.back} onClick={() => setView("home")}>{T("back")}</button>
         <h1 style={st.h1}>{T("stats")}</h1>
         {dirPills(filter, setFilter)}
-        {dirs.map((dir) => {
+        {showDirs.map((dir) => {
           const es = entries.filter((e) => e.dir === dir);
           if (!es.length) return null;
           const wkE = es.filter((e) => e.d >= wk0), moE = es.filter((e) => e.d.startsWith(mo0));
@@ -8254,9 +8316,14 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
             const bp = paces.length ? Math.min(...paces) : null;
             extra = <div style={{ marginTop: 10 }} ><div style={st.text}>{km(wkE).toFixed(1)} {T("km")} · {T("week")} · {km(moE).toFixed(1)} {T("km")} · {T("month")}</div>{bp && <div style={st.small}>{T("bestPace")}: {Math.floor(bp / 60)}:{pad(Math.round(bp % 60))} /{T("km")}</div>}</div>;
           }
+          if (dirOf(dir).metric) {
+            const sd = (a) => sum(a, (e) => Number(e.x?.d));
+            const u = unitOf(dir);
+            extra = <div style={{ marginTop: 10 }}><div style={st.text}>{sd(wkE).toFixed(1)} {u} · {T("week")} · {sd(moE).toFixed(1)} {u} · {T("month")}</div></div>;
+          }
           return (
             <div key={dir} style={st.card}>
-              <div style={{ ...st.text, fontWeight: 600, marginBottom: 8 }}>{DIRS[dir].icon} {tr(lang, DIRS[dir].name)}</div>
+              <div style={{ ...st.text, fontWeight: 600, marginBottom: 8 }}>{dirOf(dir).icon} {tr(lang, dirOf(dir).name)}</div>
               <div style={{ ...st.row, gap: 16 }}>
                 <span style={st.text}>{wkE.length} · {sum(wkE, (e) => e.dur)} {T("min")} <span style={st.small}>{T("week")}</span></span>
                 <span style={st.text}>{moE.length} · {sum(moE, (e) => e.dur)} {T("min")} <span style={st.small}>{T("month")}</span></span>
@@ -8268,7 +8335,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
               {extra}
               <div style={{ ...st.h2, marginTop: 12 }}>{T("byKind")}</div>
               {best[dir].length === 0 ? <div style={st.small}>{T("need")}</div> : best[dir].map((b) => (
-                <div key={b.sub} style={st.text}>{tr(lang, DIRS[dir].subs.find((s) => s[0] === b.sub)?.[1]) || b.sub}: <b>{b.avg > 0 ? "+" : ""}{b.avg.toFixed(1)}</b> <span style={st.small}>({b.n})</span></div>
+                <div key={b.sub} style={st.text}>{tr(lang, dirOf(dir).subs.find((s) => s[0] === b.sub)?.[1]) || b.sub}: <b>{b.avg > 0 ? "+" : ""}{b.avg.toFixed(1)}</b> <span style={st.small}>({b.n})</span></div>
               ))}
             </div>
           );
@@ -8286,6 +8353,58 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </div>
         )}
         {entries.length === 0 && <div style={st.card}><span style={st.small}>{T("empty")}</span></div>}
+      </>
+    );
+  };
+
+  // ═══ SPORTS (виды практик) ═══
+  const addSport = (sp) => updCfg((p) => ({ ...p, sports: [...(p.sports || []).filter((x) => x.id !== sp.id), sp].slice(0, 12) }));
+  const addCustom = () => {
+    const n = spName.trim().slice(0, 20);
+    if (!n) return;
+    const subs = spSubs.split(",").map((x) => x.trim().slice(0, 20)).filter(Boolean).slice(0, 8);
+    addSport({ id: "c_" + uid().slice(-8), n, icon: spIcon.trim() || "🏅", metric: spMetric || null, subs });
+    setSpName(""); setSpSubs(""); setSpMetric(""); setSpIcon("🏅");
+  };
+  const renderSports = () => {
+    const have = new Set((cfg.sports || []).map((x) => x.id));
+    return (
+      <>
+        <button type="button" style={st.back} onClick={() => setView(sportsBack === "form" && form ? "form" : "home")}>{T("back")}</button>
+        <h1 style={st.h1}>{T("sportsTitle")}</h1>
+        <Section st={st} title={T("ready")}>
+          <div style={st.row}>
+            {Object.keys(EXTRA).filter((k) => !have.has(k)).map((k) => <Chip key={k} st={st} on={false} onClick={() => addSport({ id: k, p: 1 })}>{EXTRA[k].icon} {tr(lang, EXTRA[k].name)}</Chip>)}
+          </div>
+        </Section>
+        <Section st={st} title={T("own")}>
+          <div style={st.row}>{SPORT_EMOJI.map((em) => <Chip key={em} st={st} on={spIcon === em} onClick={() => setSpIcon(em)}>{em}</Chip>)}</div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input value={spIcon} onChange={(e) => setSpIcon(e.target.value)} maxLength={8} style={{ ...st.input, width: 70, textAlign: "center" }} />
+            <input value={spName} onChange={(e) => setSpName(e.target.value)} maxLength={20} placeholder={T("ownName")} style={st.input} />
+          </div>
+          <input value={spSubs} onChange={(e) => setSpSubs(e.target.value)} placeholder={T("ownSubs")} style={{ ...st.input, marginBottom: 8 }} />
+          <div style={st.small}>{T("metricL")}</div>
+          <div style={st.row}>
+            {[["", T("none")], ["km", T("km")], ["m", T("mUnit")]].map(([v, n]) => <Chip key={v || "none"} st={st} on={spMetric === v} onClick={() => setSpMetric(v)}>{n}</Chip>)}
+          </div>
+          <button type="button" style={{ ...st.btn, marginTop: 6 }} onClick={addCustom}>{T("addBtn")}</button>
+        </Section>
+        {(cfg.sports || []).length > 0 && (
+          <Section st={st} title={T("mySports")}>
+            {cfg.sports.map((sp) => {
+              const d = sp.p ? EXTRA[sp.id] : customDir(sp);
+              if (!d) return null;
+              return (
+                <div key={sp.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={st.text}>{d.icon} {tr(lang, d.name)}</span>
+                  <button type="button" style={st.back} onClick={() => updCfg((p) => ({ ...p, sports: (p.sports || []).filter((x) => x.id !== sp.id) }))}>✕</button>
+                </div>
+              );
+            })}
+            <div style={st.small}>{T("sportsNote")}</div>
+          </Section>
+        )}
       </>
     );
   };
@@ -8332,6 +8451,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
       {view === "history" && renderHistory()}
       {view === "stats" && renderStats()}
       {view === "settings" && renderSettings()}
+      {view === "sports" && renderSports()}
     </div>
   );
 }
@@ -8487,7 +8607,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  // build: menu-swap-1 (Челленджи выше, Дневник практик ниже Компаса)
+  // build: menu-swap-1 sports-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },

@@ -11,7 +11,9 @@
 import { kv } from "@vercel/kv";
 import { verifyTelegramAuth } from "./verifyTelegramAuth.js";
 
-const DIRS = ["gym", "run", "yoga", "med"];
+// build: practice-dirs-1
+// Направление — безопасный slug: встроенные gym/run/yoga/med, готовые (bike, swim…) и свои (c_xxxxxxxx).
+const DIR_RE = /^[a-z][a-z0-9_]{1,24}$/;
 const MAX_ENTRIES = 5000;
 const MAX_BATCH = 50;
 const MAX_X_CHARS = 6000;
@@ -39,7 +41,7 @@ function cleanEntry(e) {
   if (!e || typeof e !== "object") return null;
   const id = str(e.id, 40);
   if (!/^[A-Za-z0-9_-]{4,40}$/.test(id)) return null;
-  if (!DIRS.includes(e.dir)) return null;
+  if (typeof e.dir !== "string" || !DIR_RE.test(e.dir)) return null;
   if (typeof e.d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(e.d)) return null;
   let x = {};
   if (e.x && typeof e.x === "object") {
