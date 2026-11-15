@@ -8701,7 +8701,7 @@ export default function App() {
   const [screen, setScreen] = useState("home");
   const [currentMood, setCurrentMood] = useState("general");
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem("teabro-theme") || "dark"; } catch { return "dark"; } });
-  const [lang, setLang] = useState(() => { try { const saved = localStorage.getItem("teabro-lang"); return (saved === "ru" || saved === "uk") ? saved : "ru"; } catch { return "ru"; } });
+  const [lang, setLang] = useState(() => { try { const saved = localStorage.getItem("teabro-lang"); return (saved === "ru" || saved === "uk" || saved === "en") ? saved : "ru"; } catch { return "ru"; } });
   S = buildStyles(theme);
   useEffect(() => { try { localStorage.setItem("teabro-theme", theme); } catch {} }, [theme]);
   useEffect(() => { scrollTopNow(); }, [screen]);
@@ -8846,7 +8846,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  // build: menu-swap-1 sports-1 chal-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
+  // build: menu-swap-1 sports-1 chal-1 lang-en-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },
@@ -8884,6 +8884,7 @@ export default function App() {
       <div style={styles.controls}>
         <button type="button" style={lang === "ru" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("ru")}>RU</button>
         <button type="button" style={lang === "uk" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("uk")}>UK</button>
+        <button type="button" style={lang === "en" ? styles.langBtnActive : styles.langBtn} onClick={() => setLang("en")}>EN</button>
         <button type="button" style={styles.themeBtn} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}</button>
       </div>
       <div style={styles.homeHeader}>
