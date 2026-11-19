@@ -7544,6 +7544,11 @@ const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга
 const UI = {
   title: X("Дневник практик", "Щоденник практик", "Practice log"),
   sportsAdd: X("＋ Добавить вид спорта", "＋ Додати вид спорту", "＋ Add a sport"),
+  feelBefore: X("Как было до?", "Як було до?", "How did you feel before?"), feelBeforeAdd: X("＋ отметить, как было до", "＋ відзначити, як було до", "＋ add how you felt before"),
+  feelAfter: X("Как ты сейчас?", "Як ти зараз?", "How do you feel now?"), ownState: X("своё", "своє", "own"),
+  stName: X("название состояния", "назва стану", "state name"), stTone: X("Это состояние…", "Цей стан…", "This state is…"),
+  stPleasant: X("приятное", "приємний", "pleasant"), stNeutral: X("нейтральное", "нейтральний", "neutral"), stHard: X("тяжёлое", "важкий", "hard"),
+  stAdd: X("Добавить", "Додати", "Add"), myStates: X("Мои состояния", "Мої стани", "My states"),
   chalTitle: X("Мои челленджи", "Мої челенджі", "My challenges"), chalBtn: X("🏆 Челленджи", "🏆 Челенджі", "🏆 Challenges"),
   chalNew: X("＋ Свой челлендж", "＋ Свій челендж", "＋ My own challenge"), chalDefault: X("Мой челлендж", "Мій челендж", "My challenge"),
   chalTpl: X("Готовые планы (можно изменить)", "Готові плани (можна змінити)", "Ready plans (editable)"),
@@ -7576,7 +7581,7 @@ const UI = {
   hintHorm: X("в тесте гормонов просели стресс или сон", "у тесті гормонів просіли стрес або сон", "stress or sleep dipped in the hormone test"),
   hintCompass: X("Компас: слабее всего", "Компас: найслабше", "Compass: weakest is"),
   hintNote: X("наблюдение по твоим отметкам, не медицинская рекомендация", "спостереження за твоїми відмітками, не медична рекомендація", "an observation from your marks, not medical advice"),
-  yb1: X("У тебя после", "У тебе після", "After"), yb2: X("напряжение падает в среднем на", "напруга падає в середньому на", "your tension drops on average by"),
+  yb1: X("У тебя после", "У тебе після", "After"), yb2: X("состояние в среднем улучшается на", "стан у середньому покращується на", "your state improves on average by"),
   nd: X("Настроение на следующий день", "Настрій наступного дня", "Next-day mood"),
   ndA: X("после дней с практикой", "після днів із практикою", "after practice days"), ndB: X("после дней без неё", "після днів без неї", "after days without"),
   ndH: X("после тяжёлых (4–5)", "після важких (4–5)", "after hard (4–5)"), ndL: X("после лёгких (1–3)", "після легких (1–3)", "after light (1–3)"),
@@ -7621,7 +7626,10 @@ const UI = {
 };
 
 // ── утилиты расчётов ────────────────────────────────
+// простое состояние до/после: те же эмодзи и баллы, что в «Мой день сегодня»; свои состояния хранят снимок в записи (x.st)
+const emoV = (id, e) => { const em = EMOTIONS.find((x) => x.id === id); if (em) return em.score; const sn = e.x?.st?.[id]; return sn ? sn.v : null; };
 const effectOf = (e) => {
+  if (e.x?.sb && e.x?.sa) { const a = emoV(e.x.sb, e), b = emoV(e.x.sa, e); if (a != null && b != null) return b - a; }
   if (!e.pre || !e.post) return null;
   let s = 0, n = 0;
   for (const k of ["e", "m", "t"]) {
@@ -7646,6 +7654,8 @@ function cleanForm(f) {
   }
   if (f.dir === "run") { x.km = Number(x.km) || 0; }
   if (x.d != null) x.d = Number(x.d) || 0;
+  if (!x.sb) delete x.sb;
+  if (!x.sa) delete x.sa;
   out.x = x;
   return out;
 }
@@ -7726,6 +7736,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const [cb, setCb] = useState(null); // черновик конструктора челленджа
   const [chalId, setChalId] = useState(null);
   const [chalDel, setChalDel] = useState(false);
+  const [preOpen, setPreOpen] = useState(false); const [addFor, setAddFor] = useState(null);
+  const [stEmoji, setStEmoji] = useState("🙂"); const [stName, setStName] = useState(""); const [stTone, setStTone] = useState(8);
+  useEffect(() => { if (view !== "form") { setPreOpen(false); setAddFor(null); } }, [view]);
 
   // виды практик: 4 встроенных + добавленные человеком (готовые или свои)
   const dirs = useMemo(() => {
@@ -7734,6 +7747,18 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     return o;
   }, [cfg.sports]);
   const dirKeys = useMemo(() => Object.keys(dirs), [dirs]);
+  // состояния: те же, что в «Мой день сегодня», + свои (как свои глимеры)
+  const allStates = useMemo(() => [
+    ...EMOTIONS.map((em) => ({ id: em.id, emoji: em.emoji, label: emotionLabel(em.id, lang), v: em.score })),
+    ...(cfg.sts || []).map((x) => ({ id: x.id, emoji: x.e, label: x.n, v: x.v, custom: true })),
+  ], [cfg.sts, lang]);
+  const stateOf = (id, e) => {
+    if (!id) return null;
+    const em = EMOTIONS.find((x) => x.id === id);
+    if (em) return { emoji: em.emoji, label: emotionLabel(em.id, lang), v: em.score };
+    const cs = (cfg.sts || []).find((x) => x.id === id) || e?.x?.st?.[id];
+    return cs ? { emoji: cs.e, label: cs.n, v: cs.v } : { emoji: "•", label: id, v: null };
+  };
   const allKeys = useMemo(() => [...new Set([...dirKeys, ...entries.map((e) => e.dir)])], [dirKeys, entries]);
   const dirOf = (k, e) => dirs[k] || EXTRA[k] || fallbackDir(k, e || entries.find((x) => x.dir === k));
   const subNameOf = (e) => { const s = dirOf(e.dir, e).subs.find((x) => x[0] === e.sub); return s ? tr(lang, s[1]) : e.sub || ""; };
@@ -7825,6 +7850,15 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     return () => { off = true; };
   }, []);
 
+  const addOwnState = () => {
+    const n = stName.trim().slice(0, 20);
+    if (!n || !addFor) return;
+    const id = "u_" + uid().slice(-8).toLowerCase();
+    updCfg((p) => ({ ...p, sts: [...(p.sts || []), { id, e: stEmoji.trim() || "🙂", n, v: stTone }].slice(-30) }));
+    setForm((p) => ({ ...p, x: { ...p.x, [addFor]: id } }));
+    setStName(""); setStEmoji("🙂"); setStTone(8); setAddFor(null);
+  };
+
   const commit = (e) => {
     setEntries((prev) => { const arr = [e, ...prev.filter((x) => x.id !== e.id)]; lsSet(K.e, arr); return arr; });
     enqueue({ t: "save", e });
@@ -7887,10 +7921,10 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     return "практик";
   };
 
-  // у каких практик напряжение «до → после» реально падало (по записям человека, от 3 штук)
+  // у каких практик состояние «до → после» реально улучшалось (по записям человека, от 3 штук)
   const tdrop = useMemo(() => {
     const g = {};
-    entries.forEach((e) => { if (e.pre?.t != null && e.post?.t != null) (g[e.dir + "|" + e.sub] = g[e.dir + "|" + e.sub] || []).push(e.pre.t - e.post.t); });
+    entries.forEach((e) => { const ef = effectOf(e); if (ef != null) (g[e.dir + "|" + e.sub] = g[e.dir + "|" + e.sub] || []).push(ef); });
     return Object.entries(g).filter(([, v]) => v.length >= 3).map(([k, v]) => { const ix = k.indexOf("|"); return { dir: k.slice(0, ix), sub: k.slice(ix + 1), n: v.length, avg: avg(v) }; }).filter((x) => x.avg > 0).sort((a, b) => b.avg - a.avg);
   }, [entries]);
 
@@ -7945,7 +7979,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     const l = lastOf(dir);
     if (!l) return openNew(dir);
     const copy = JSON.parse(JSON.stringify(l));
-    setForm({ ...copy, id: uid(), d: today, pre: {}, post: {}, zb: [], za: [], note: "" });
+    { const { sb, sa, st: st0, ...xr } = copy.x || {}; setForm({ ...copy, id: uid(), d: today, pre: {}, post: {}, zb: [], za: [], note: "", x: xr }); }
     setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form");
   };
   const openPreset = (dir, sub, dur) => { lsDel(K.d); const b0 = blank(dir); setForm({ ...b0, sub: sub || b0.sub, dur: dur || b0.dur }); setEditing(false); setDraftShown(false); setBodyOpen(false); setView("form"); };
@@ -7957,7 +7991,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const setX = (patch) => setForm((p) => ({ ...p, x: { ...p.x, ...patch } }));
   const setState = (when, k, v) => setForm((p) => { const s = { ...p[when] }; if (v == null) delete s[k]; else s[k] = v; return { ...p, [when]: s }; });
   const toggle = (key, val) => setForm((p) => ({ ...p, [key]: p[key]?.includes(val) ? p[key].filter((x) => x !== val) : [...(p[key] || []), val] }));
-  const changeDir = (dir) => setForm((p) => ({ ...blank(dir, p.d), id: p.id, pre: p.pre, post: p.post, zb: p.zb, za: p.za, tags: [], note: p.note }));
+  const changeDir = (dir) => setForm((p) => { const xs = {}; if (p.x?.sb) xs.sb = p.x.sb; if (p.x?.sa) xs.sa = p.x.sa; return { ...blank(dir, p.d), id: p.id, pre: p.pre, post: p.post, zb: p.zb, za: p.za, tags: [], note: p.note, x: xs }; });
 
   const exList = () => form.x?.ex || [];
   const setEx = (arr) => setX({ ex: arr });
@@ -7983,6 +8017,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const submit = () => {
     const e = cleanForm(form);
     const dd = dirs[e.dir]; if (dd?.custom) e.x = { ...e.x, sn: dd.name, si: dd.icon };
+    const snap = {};
+    [e.x.sb, e.x.sa].forEach((id) => { const cs = id && (cfg.sts || []).find((x) => x.id === id); if (cs) snap[id] = { e: cs.e, n: cs.n, v: cs.v }; });
+    if (Object.keys(snap).length) e.x = { ...e.x, st: snap };
     commit(e);
     updCfg((p) => {
       const defs = dirOf(e.dir).tags.map((t) => tr(lang, t));
@@ -7995,7 +8032,8 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
 
   // ── экспорт ──
   const entryLine = (e) => {
-    const st1 = ["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null ? `${k.toUpperCase()}${e.pre?.[k] ?? "-"}→${e.post?.[k] ?? "-"}` : null)).filter(Boolean).join(" ");
+    const sbx = e.x?.sb ? stateOf(e.x.sb, e) : null, sax = e.x?.sa ? stateOf(e.x.sa, e) : null;
+    const st1 = (sbx || sax) ? `${sbx ? sbx.label : "-"}→${sax ? sax.label : "-"}` : ["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null ? `${k.toUpperCase()}${e.pre?.[k] ?? "-"}→${e.post?.[k] ?? "-"}` : null)).filter(Boolean).join(" ");
     return `${e.d} · ${tr(lang, dirOf(e.dir, e).name)} · ${subNameOf(e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${e.x?.d ? ` · ${e.x.d} ${unitOf(e.dir)}` : ""}${st1 ? " · " + st1 : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
   };
   const doExport = async (kind) => {
@@ -8003,8 +8041,8 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
     let txt;
     if (kind === "csv") {
       const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
-      txt = ["date,direction,type,minutes,intensity,km,e_pre,e_post,m_pre,m_post,t_pre,t_post,tags,note",
-        ...list.map((e) => [e.d, tr(lang, dirOf(e.dir, e).name), e.sub, e.dur, e.int, e.x?.km ?? "", e.pre?.e ?? "", e.post?.e ?? "", e.pre?.m ?? "", e.post?.m ?? "", e.pre?.t ?? "", e.post?.t ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
+      txt = ["date,direction,type,minutes,intensity,km,state_before,state_after,tags,note",
+        ...list.map((e) => [e.d, tr(lang, dirOf(e.dir, e).name), e.sub, e.dur, e.int, e.x?.km ?? "", stateOf(e.x?.sb, e)?.label ?? "", stateOf(e.x?.sa, e)?.label ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
     } else txt = list.map(entryLine).join("\n");
     try { await navigator.clipboard.writeText(txt); setCopied(true); setExportTxt(""); setTimeout(() => setCopied(false), 2000); }
     catch { setExportTxt(txt); }
@@ -8036,6 +8074,11 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
         </div>
         {open && (
           <div style={{ marginTop: 10 }}>
+            {(e.x?.sb || e.x?.sa) && (
+              <div style={{ ...st.text, marginBottom: 8 }}>
+                {stateOf(e.x.sb, e) ? `${stateOf(e.x.sb, e).emoji} ${stateOf(e.x.sb, e).label}` : "·"} → {stateOf(e.x.sa, e) ? `${stateOf(e.x.sa, e).emoji} ${stateOf(e.x.sa, e).label}` : "·"}
+              </div>
+            )}
             {["e", "m", "t"].some((k) => e.pre?.[k] != null || e.post?.[k] != null) && (
               <div style={{ ...st.row, gap: 12, marginBottom: 8 }}>
                 {["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null) && (
@@ -8153,6 +8196,43 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
       </>
     );
   };
+
+  // сетка состояний как в «Мой день сегодня»: эмодзи + подпись, один тап; «＋ своё» — как свои глимеры
+  const stateGrid = (val, onPick, which) => (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
+        {allStates.map((sx) => {
+          const on = val === sx.id;
+          return (
+            <button key={sx.id} type="button" onClick={() => onPick(on ? "" : sx.id)}
+              style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <span style={{ fontSize: 22 }}>{sx.emoji}</span>
+              <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: "center", wordBreak: "break-word", color: on ? c.accent : c.inkSoft }}>{sx.label}</span>
+            </button>
+          );
+        })}
+        {(cfg.sts || []).length < 30 && (
+          <button type="button" onClick={() => setAddFor(addFor === which ? null : which)}
+            style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px dashed ${c.line}`, background: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <span style={{ fontSize: 22 }}>＋</span><span style={{ fontSize: 10, color: c.inkSoft }}>{T("ownState")}</span>
+          </button>
+        )}
+      </div>
+      {addFor === which && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input value={stEmoji} onChange={(e) => setStEmoji(e.target.value)} maxLength={8} style={{ ...st.input, width: 70, textAlign: "center" }} />
+            <input value={stName} onChange={(e) => setStName(e.target.value)} maxLength={20} placeholder={T("stName")} style={st.input} />
+          </div>
+          <div style={st.small}>{T("stTone")}</div>
+          <div style={st.row}>
+            {[[8, T("stPleasant")], [5, T("stNeutral")], [3, T("stHard")]].map(([v, n]) => <Chip key={v} st={st} on={stTone === v} onClick={() => setStTone(v)}>{n}</Chip>)}
+          </div>
+          <button type="button" style={{ ...st.btn, marginTop: 4 }} onClick={addOwnState}>{T("stAdd")}</button>
+        </div>
+      )}
+    </>
+  );
 
   // ═══ FORM ═══
   const renderForm = () => {
@@ -8283,11 +8363,11 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </Section>
         )}
 
-        <Section st={st} title={T("state")}>
-          <div style={st.small}>{T("before")}</div>
-          {["e", "m", "t"].map((k) => <Scale key={"a" + k} st={st} c={c} lang={lang} k={k} value={f.pre[k]} onChange={(v) => setState("pre", k, v)} />)}
-          <div style={{ ...st.small, marginTop: 8 }}>{T("after")}</div>
-          {["e", "m", "t"].map((k) => <Scale key={"b" + k} st={st} c={c} lang={lang} k={k} value={f.post[k]} onChange={(v) => setState("post", k, v)} />)}
+        <Section st={st} title={T("feelBefore")} right={f.x.sb || preOpen ? null : <button type="button" style={{ ...st.back, color: c.accent }} onClick={() => setPreOpen(true)}>{T("feelBeforeAdd")}</button>}>
+          {(f.x.sb || preOpen) && stateGrid(f.x.sb, (v) => setX({ sb: v }), "sb")}
+        </Section>
+        <Section st={st} title={T("feelAfter")}>
+          {stateGrid(f.x.sa, (v) => setX({ sa: v }), "sa")}
         </Section>
 
         <Section st={st} title={T("body")} right={<button type="button" style={st.back} onClick={() => setBodyOpen(!bodyOpen)}>{bodyOpen ? "▲" : "▼"}</button>}>
@@ -8676,6 +8756,12 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           <div style={st.row}>{cfg.tags.map((t) => <Chip key={t} st={st} on={false} onClick={() => updCfg((p) => ({ ...p, tags: p.tags.filter((x) => x !== t) }))}>{t} ✕</Chip>)}</div>
         </div>
       )}
+      {(cfg.sts || []).length > 0 && (
+        <div style={st.card}>
+          <div style={st.h2}>{T("myStates")}</div>
+          <div style={st.row}>{cfg.sts.map((x) => <Chip key={x.id} st={st} on={false} onClick={() => updCfg((p) => ({ ...p, sts: (p.sts || []).filter((y) => y.id !== x.id) }))}>{x.e} {x.n} ✕</Chip>)}</div>
+        </div>
+      )}
       <button type="button" style={{ ...st.ghost, width: "100%", borderColor: wipeArm ? "#D98C6A" : c.line, color: wipeArm ? "#D98C6A" : c.inkSoft }} onClick={doWipe}>{wipeArm ? T("wipeSure") : T("wipe")}</button>
     </>
   );
@@ -8846,7 +8932,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  // build: menu-swap-1 sports-1 chal-1 lang-en-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
+  // build: menu-swap-1 sports-1 chal-1 lang-en-1 states-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },
