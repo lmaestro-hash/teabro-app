@@ -7537,6 +7537,26 @@ const chalProgress = (ch, entries, today) => {
   const effs = matched.map(effectOf).filter((x) => x != null);
   return { cells, total, done, pct: total ? Math.round((done / total) * 100) : 0, streak: run, best, behind: pastDue - pastDone, left, finished, started: today >= ch.s, eff: effs.length >= 3 ? effs.reduce((a, b) => a + b, 0) / effs.length : null };
 };
+// ── состояния под направление: свои смайлы для спорта, йоги и медитации (баллы 1–10, как в «Мой день сегодня») ──
+const ps = (id, emoji, v, ru, uk, en) => ({ id, emoji, v, label: X(ru, uk, en) });
+const PSET = {
+  sport: [ps("s_strong", "💪", 9, "Сила", "Сила", "Strong"), ps("s_energy", "⚡", 8, "Бодрость", "Бадьорість", "Energized"), ps("s_drive", "🔥", 9, "Драйв", "Драйв", "Pumped"), ps("s_light", "😌", 8, "Лёгкость", "Легкість", "Light"), ps("s_happy", "😅", 7, "Приятная усталость", "Приємна втома", "Pleasantly tired"),
+    ps("s_drained", "😩", 4, "Выжатость", "Виснаження", "Drained"), ps("s_heavy", "🥵", 3, "Перегруз", "Перевантаження", "Overloaded"), ps("s_sore", "🤕", 4, "Забитость", "Забитість", "Sore"), ps("s_slug", "😴", 3, "Вялость", "Млявість", "Sluggish"), ps("s_meh", "😐", 5, "Никак", "Ніяк", "Meh")],
+  yoga: [ps("y_relax", "😌", 8, "Расслабление", "Розслаблення", "Relaxed"), ps("y_calm", "🌿", 8, "Спокойствие", "Спокій", "Calm"), ps("y_light", "🪶", 9, "Лёгкость", "Легкість", "Lightness"), ps("y_flex", "🤸", 8, "Гибкость", "Гнучкість", "Flexible"), ps("y_center", "🧘", 9, "Собранность", "Зібраність", "Centered"),
+    ps("y_ground", "🌅", 8, "Опора", "Опора", "Grounded"), ps("y_release", "🍃", 8, "Отпустило", "Відпустило", "Released"), ps("y_tense", "😬", 3, "Зажатость", "Затиснутість", "Tense"), ps("y_scatter", "😵", 4, "Рассеянность", "Розсіяність", "Scattered"), ps("y_sleepy", "😴", 5, "Сонливость", "Сонливість", "Sleepy")],
+  med: [ps("m_still", "🌌", 9, "Тишина", "Тиша", "Stillness"), ps("m_clear", "🔍", 9, "Ясность", "Ясність", "Clarity"), ps("m_peace", "😌", 8, "Покой", "Спокій", "Peace"), ps("m_deep", "🌊", 9, "Глубина", "Глибина", "Depth"), ps("m_open", "💗", 8, "Открытость", "Відкритість", "Openness"),
+    ps("m_drowsy", "😴", 4, "Сонливость", "Сонливість", "Drowsy"), ps("m_busy", "🌀", 3, "Поток мыслей", "Потік думок", "Busy mind"), ps("m_anx", "😟", 3, "Тревога", "Тривога", "Anxious"), ps("m_restless", "😣", 3, "Беспокойство", "Неспокій", "Restless"), ps("m_neutral", "😐", 5, "Нейтрально", "Нейтрально", "Neutral")],
+};
+const PSTATE_MAP = Object.fromEntries(Object.values(PSET).flat().map((x) => [x.id, x]));
+const setKey = (dir) => (dir === "yoga" || dir === "mobility" ? "yoga" : dir === "med" ? "med" : "sport");
+// «Сегодня качаю руки, ноги, спину — оценка 1–5 по каждой группе»
+const MUSCLES = [["arms", X("Руки", "Руки", "Arms")], ["shoulders", X("Плечи", "Плечі", "Shoulders")], ["chest", X("Грудь", "Груди", "Chest")], ["back", X("Спина", "Спина", "Back")], ["core", X("Пресс, кор", "Прес, кор", "Core")], ["legs", X("Ноги", "Ноги", "Legs")], ["glutes", X("Ягодицы", "Сідниці", "Glutes")]];
+const YOGA_AREAS = ["neck", "shoulders", "upback", "lowback", "hips", "legs", "chest", "arms"].map((id) => ZONES.find((z) => z[0] === id));
+const RATE = {
+  gym: { em: ["😴", "🙂", "💪", "🔥", "🥵"], lb: [X("слегка", "злегка", "light"), X("легко", "легко", "easy"), X("хорошо", "добре", "good"), X("сильно", "сильно", "hard"), X("до предела", "до межі", "to the limit")] },
+  yoga: { em: ["😣", "😕", "😐", "😌", "🪶"], lb: [X("зажато", "затиснуто", "tight"), X("туго", "туго", "stiff"), X("нормально", "нормально", "okay"), X("легко", "легко", "easy"), X("свободно", "вільно", "free")] },
+};
+const mgKind = (dir) => (dir === "gym" ? "gym" : dir === "yoga" || dir === "mobility" ? "yoga" : null);
 const PRESETS = [["yoga", "nidra"], ["yoga", "yin"], ["med", "breath"], ["run", "recovery"]];
 const FEEL = [[1, "😌", X("легко", "легко", "easy")], [2, "👌", X("в самый раз", "якраз", "just right")], [3, "🥵", X("тяжело", "важко", "hard")]];
 const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга", "Подтягивания", "Жим стоя", "Тяга в наклоне", "Отжимания", "Выпады", "Румынская тяга", "Планка"], uk: ["Жим лежачи", "Присід", "Станова тяга", "Підтягування", "Жим стоячи", "Тяга в нахилі", "Віджимання", "Випади", "Румунська тяга", "Планка"], en: ["Bench press", "Squat", "Deadlift", "Pull-ups", "Overhead press", "Bent-over row", "Push-ups", "Lunges", "Romanian deadlift", "Plank"] };
@@ -7544,6 +7564,14 @@ const EXS = { ru: ["Жим лёжа", "Присед", "Становая тяга
 const UI = {
   title: X("Дневник практик", "Щоденник практик", "Practice log"),
   sportsAdd: X("＋ Добавить вид спорта", "＋ Додати вид спорту", "＋ Add a sport"),
+  feelAfterSport: X("Как ты после тренировки?", "Як ти після тренування?", "How do you feel after training?"),
+  feelAfterYoga: X("Как ты после практики?", "Як ти після практики?", "How do you feel after practice?"),
+  feelAfterMed: X("Как ты после медитации?", "Як ти після медитації?", "How do you feel after meditation?"),
+  moreStates: X("общие состояния ▾", "загальні стани ▾", "general states ▾"), hideStates: X("скрыть общие ▴", "сховати загальні ▴", "hide general ▴"),
+  mgGym: X("Группы мышц и нагрузка", "Групи м'язів і навантаження", "Muscle groups and load"), mgGymHint: X("тап по смайлу — оценка 1–5, повторный тап снимает", "тап по смайлу — оцінка 1–5, повторний тап знімає", "tap an emoji to rate 1–5, tap again to clear"),
+  mgYoga: X("Области тела", "Ділянки тіла", "Body areas"), mgYogaHint: X("как сейчас: от «зажато» до «свободно»", "як зараз: від «затиснуто» до «вільно»", "how it feels now: tight → free"),
+  mgStats: X("Группы мышц · 14 дней", "Групи м'язів · 14 днів", "Muscle groups · 14 days"), timesWord: X("раз", "разів", "times"),
+  intY: [X("очень мягко", "дуже м'яко", "very gentle"), X("мягко", "м'яко", "gentle"), X("средне", "середньо", "medium"), X("активно", "активно", "active"), X("интенсивно", "інтенсивно", "intense")],
   feelBefore: X("Как было до?", "Як було до?", "How did you feel before?"), feelBeforeAdd: X("＋ отметить, как было до", "＋ відзначити, як було до", "＋ add how you felt before"),
   feelAfter: X("Как ты сейчас?", "Як ти зараз?", "How do you feel now?"), ownState: X("своё", "своє", "own"),
   stName: X("название состояния", "назва стану", "state name"), stTone: X("Это состояние…", "Цей стан…", "This state is…"),
@@ -7627,7 +7655,7 @@ const UI = {
 
 // ── утилиты расчётов ────────────────────────────────
 // простое состояние до/после: те же эмодзи и баллы, что в «Мой день сегодня»; свои состояния хранят снимок в записи (x.st)
-const emoV = (id, e) => { const em = EMOTIONS.find((x) => x.id === id); if (em) return em.score; const sn = e.x?.st?.[id]; return sn ? sn.v : null; };
+const emoV = (id, e) => { if (PSTATE_MAP[id]) return PSTATE_MAP[id].v; const em = EMOTIONS.find((x) => x.id === id); if (em) return em.score; const sn = e.x?.st?.[id]; return sn ? sn.v : null; };
 const effectOf = (e) => {
   if (e.x?.sb && e.x?.sa) { const a = emoV(e.x.sb, e), b = emoV(e.x.sa, e); if (a != null && b != null) return b - a; }
   if (!e.pre || !e.post) return null;
@@ -7654,6 +7682,7 @@ function cleanForm(f) {
   }
   if (f.dir === "run") { x.km = Number(x.km) || 0; }
   if (x.d != null) x.d = Number(x.d) || 0;
+  if (x.mg) { x.mg = Object.fromEntries(Object.entries(x.mg).filter(([, v]) => v > 0)); if (!Object.keys(x.mg).length) delete x.mg; }
   if (!x.sb) delete x.sb;
   if (!x.sa) delete x.sa;
   out.x = x;
@@ -7736,9 +7765,9 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const [cb, setCb] = useState(null); // черновик конструктора челленджа
   const [chalId, setChalId] = useState(null);
   const [chalDel, setChalDel] = useState(false);
-  const [preOpen, setPreOpen] = useState(false); const [addFor, setAddFor] = useState(null);
+  const [preOpen, setPreOpen] = useState(false); const [addFor, setAddFor] = useState(null); const [moreStates, setMoreStates] = useState(false);
   const [stEmoji, setStEmoji] = useState("🙂"); const [stName, setStName] = useState(""); const [stTone, setStTone] = useState(8);
-  useEffect(() => { if (view !== "form") { setPreOpen(false); setAddFor(null); } }, [view]);
+  useEffect(() => { if (view !== "form") { setPreOpen(false); setAddFor(null); setMoreStates(false); } }, [view]);
 
   // виды практик: 4 встроенных + добавленные человеком (готовые или свои)
   const dirs = useMemo(() => {
@@ -7754,6 +7783,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   ], [cfg.sts, lang]);
   const stateOf = (id, e) => {
     if (!id) return null;
+    if (PSTATE_MAP[id]) return { emoji: PSTATE_MAP[id].emoji, label: tr(lang, PSTATE_MAP[id].label), v: PSTATE_MAP[id].v };
     const em = EMOTIONS.find((x) => x.id === id);
     if (em) return { emoji: em.emoji, label: emotionLabel(em.id, lang), v: em.score };
     const cs = (cfg.sts || []).find((x) => x.id === id) || e?.x?.st?.[id];
@@ -7967,7 +7997,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const chalPr = useMemo(() => (cfg.chal || []).map((ch) => ({ ch, pr: chalProgress(ch, entries, today) })), [cfg.chal, entries, today]);
 
   // ── форма ──
-  const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: dirOf(dir).subs[0]?.[0] || "", dur: dirOf(dir).durs[2] ?? dirOf(dir).durs[0], int: 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
+  const blank = (dir, date = today) => ({ id: uid(), d: date, dir, sub: dirOf(dir).subs[0]?.[0] || "", dur: dirOf(dir).durs[2] ?? dirOf(dir).durs[0], int: dir === "med" ? 0 : 3, pre: {}, post: {}, zb: [], za: [], tags: [], note: "", x: {} });
 
   const openNew = (dir) => {
     const draft = lsGet(K.d, null);
@@ -8034,15 +8064,15 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   const entryLine = (e) => {
     const sbx = e.x?.sb ? stateOf(e.x.sb, e) : null, sax = e.x?.sa ? stateOf(e.x.sa, e) : null;
     const st1 = (sbx || sax) ? `${sbx ? sbx.label : "-"}→${sax ? sax.label : "-"}` : ["e", "m", "t"].map((k) => (e.pre?.[k] != null || e.post?.[k] != null ? `${k.toUpperCase()}${e.pre?.[k] ?? "-"}→${e.post?.[k] ?? "-"}` : null)).filter(Boolean).join(" ");
-    return `${e.d} · ${tr(lang, dirOf(e.dir, e).name)} · ${subNameOf(e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${e.x?.d ? ` · ${e.x.d} ${unitOf(e.dir)}` : ""}${st1 ? " · " + st1 : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
+    return `${e.d} · ${tr(lang, dirOf(e.dir, e).name)} · ${subNameOf(e)} · ${e.dur} ${T("min")}${e.x?.km ? ` · ${e.x.km} ${T("km")}` : ""}${e.x?.d ? ` · ${e.x.d} ${unitOf(e.dir)}` : ""}${st1 ? " · " + st1 : ""}${e.x?.mg ? " · " + Object.entries(e.x.mg).map(([k, v]) => `${k}:${v}`).join(" ") : ""}${e.tags?.length ? " · #" + e.tags.join(" #") : ""}${e.note ? "\n    " + e.note.replace(/\n/g, "\n    ") : ""}`;
   };
   const doExport = async (kind) => {
     const list = [...sorted].reverse();
     let txt;
     if (kind === "csv") {
       const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
-      txt = ["date,direction,type,minutes,intensity,km,state_before,state_after,tags,note",
-        ...list.map((e) => [e.d, tr(lang, dirOf(e.dir, e).name), e.sub, e.dur, e.int, e.x?.km ?? "", stateOf(e.x?.sb, e)?.label ?? "", stateOf(e.x?.sa, e)?.label ?? "", (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
+      txt = ["date,direction,type,minutes,intensity,km,state_before,state_after,groups,tags,note",
+        ...list.map((e) => [e.d, tr(lang, dirOf(e.dir, e).name), e.sub, e.dur, e.int, e.x?.km ?? "", stateOf(e.x?.sb, e)?.label ?? "", stateOf(e.x?.sa, e)?.label ?? "", Object.entries(e.x?.mg || {}).map(([k, v]) => `${k}:${v}`).join(";"), (e.tags || []).join(";"), e.note].map(esc).join(","))].join("\n");
     } else txt = list.map(entryLine).join("\n");
     try { await navigator.clipboard.writeText(txt); setCopied(true); setExportTxt(""); setTimeout(() => setCopied(false), 2000); }
     catch { setExportTxt(txt); }
@@ -8074,6 +8104,11 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
         </div>
         {open && (
           <div style={{ marginTop: 10 }}>
+            {e.x?.mg && mgKind(e.dir) && (
+              <div style={{ ...st.text, marginBottom: 8 }}>
+                {(mgKind(e.dir) === "gym" ? MUSCLES : YOGA_AREAS).filter(([id]) => e.x.mg[id]).map(([id, n]) => `${tr(lang, n)} ${RATE[mgKind(e.dir)].em[e.x.mg[id] - 1]}${e.x.mg[id]}`).join(" · ")}
+              </div>
+            )}
             {(e.x?.sb || e.x?.sa) && (
               <div style={{ ...st.text, marginBottom: 8 }}>
                 {stateOf(e.x.sb, e) ? `${stateOf(e.x.sb, e).emoji} ${stateOf(e.x.sb, e).label}` : "·"} → {stateOf(e.x.sa, e) ? `${stateOf(e.x.sa, e).emoji} ${stateOf(e.x.sa, e).label}` : "·"}
@@ -8198,41 +8233,82 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
   };
 
   // сетка состояний как в «Мой день сегодня»: эмодзи + подпись, один тап; «＋ своё» — как свои глимеры
-  const stateGrid = (val, onPick, which) => (
-    <>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
-        {allStates.map((sx) => {
-          const on = val === sx.id;
-          return (
-            <button key={sx.id} type="button" onClick={() => onPick(on ? "" : sx.id)}
-              style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              <span style={{ fontSize: 22 }}>{sx.emoji}</span>
-              <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: "center", wordBreak: "break-word", color: on ? c.accent : c.inkSoft }}>{sx.label}</span>
+  const stateGrid = (val, onPick, which) => {
+    const setItems = (PSET[setKey(form.dir)] || PSET.sport).map((x) => ({ id: x.id, emoji: x.emoji, label: tr(lang, x.label) }));
+    const mirror = moreStates ? allStates.filter((x) => !x.custom) : [];
+    let items = [...setItems, ...mirror, ...allStates.filter((x) => x.custom)];
+    if (val && !items.some((x) => x.id === val)) { const so = stateOf(val, form); if (so) items = [{ id: val, emoji: so.emoji, label: so.label }, ...items]; }
+    return (
+      <>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
+          {items.map((sx) => {
+            const on = val === sx.id;
+            return (
+              <button key={sx.id} type="button" onClick={() => onPick(on ? "" : sx.id)}
+                style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                <span style={{ fontSize: 22 }}>{sx.emoji}</span>
+                <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: "center", wordBreak: "break-word", color: on ? c.accent : c.inkSoft }}>{sx.label}</span>
+              </button>
+            );
+          })}
+          {(cfg.sts || []).length < 30 && (
+            <button type="button" onClick={() => setAddFor(addFor === which ? null : which)}
+              style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px dashed ${c.line}`, background: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <span style={{ fontSize: 22, color: c.ink }}>＋</span><span style={{ fontSize: 10, color: c.inkSoft }}>{T("ownState")}</span>
             </button>
-          );
-        })}
-        {(cfg.sts || []).length < 30 && (
-          <button type="button" onClick={() => setAddFor(addFor === which ? null : which)}
-            style={{ padding: "8px 2px", borderRadius: 12, cursor: "pointer", border: `1px dashed ${c.line}`, background: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <span style={{ fontSize: 22 }}>＋</span><span style={{ fontSize: 10, color: c.inkSoft }}>{T("ownState")}</span>
-          </button>
-        )}
-      </div>
-      {addFor === which && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <input value={stEmoji} onChange={(e) => setStEmoji(e.target.value)} maxLength={8} style={{ ...st.input, width: 70, textAlign: "center" }} />
-            <input value={stName} onChange={(e) => setStName(e.target.value)} maxLength={20} placeholder={T("stName")} style={st.input} />
-          </div>
-          <div style={st.small}>{T("stTone")}</div>
-          <div style={st.row}>
-            {[[8, T("stPleasant")], [5, T("stNeutral")], [3, T("stHard")]].map(([v, n]) => <Chip key={v} st={st} on={stTone === v} onClick={() => setStTone(v)}>{n}</Chip>)}
-          </div>
-          <button type="button" style={{ ...st.btn, marginTop: 4 }} onClick={addOwnState}>{T("stAdd")}</button>
+          )}
         </div>
-      )}
-    </>
-  );
+        <button type="button" style={{ ...st.back, marginTop: 6 }} onClick={() => setMoreStates(!moreStates)}>{moreStates ? T("hideStates") : T("moreStates")}</button>
+        {addFor === which && (
+          <div style={{ marginTop: 6 }}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <input value={stEmoji} onChange={(e) => setStEmoji(e.target.value)} maxLength={8} style={{ ...st.input, width: 70, textAlign: "center" }} />
+              <input value={stName} onChange={(e) => setStName(e.target.value)} maxLength={20} placeholder={T("stName")} style={st.input} />
+            </div>
+            <div style={st.small}>{T("stTone")}</div>
+            <div style={st.row}>
+              {[[8, T("stPleasant")], [5, T("stNeutral")], [3, T("stHard")]].map(([v, n]) => <Chip key={v} st={st} on={stTone === v} onClick={() => setStTone(v)}>{n}</Chip>)}
+            </div>
+            <button type="button" style={{ ...st.btn, marginTop: 4 }} onClick={addOwnState}>{T("stAdd")}</button>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // оценка по группам мышц (качалка) / областям тела (йога): строка «название + 5 смайлов»
+  const renderMg = () => {
+    const kind = mgKind(form.dir);
+    if (!kind) return null;
+    const groups = kind === "gym" ? MUSCLES : YOGA_AREAS;
+    const rt = RATE[kind];
+    const cur = form.x.mg || {};
+    const setMg = (id, v) => { const m = { ...cur }; if (v > 0) m[id] = v; else delete m[id]; setX({ mg: m }); };
+    return (
+      <Section st={st} title={T(kind === "gym" ? "mgGym" : "mgYoga")}>
+        <div style={{ ...st.small, marginBottom: 8 }}>{T(kind === "gym" ? "mgGymHint" : "mgYogaHint")}</div>
+        {groups.map(([id, n]) => (
+          <div key={id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginBottom: 8 }}>
+            <div style={{ width: 88, flexShrink: 0 }}>
+              <div style={st.text}>{tr(lang, n)}</div>
+              <div style={{ fontSize: 10, color: c.inkSoft, minHeight: 12 }}>{cur[id] ? tr(lang, rt.lb[cur[id] - 1]) : ""}</div>
+            </div>
+            <div style={{ display: "flex", gap: 4, flex: 1, justifyContent: "flex-end" }}>
+              {rt.em.map((em, i) => {
+                const on = cur[id] === i + 1;
+                return (
+                  <button key={i} type="button" onClick={() => setMg(id, on ? 0 : i + 1)}
+                    style={{ flex: 1, maxWidth: 46, height: 40, borderRadius: 10, fontSize: 18, cursor: "pointer", border: `1px solid ${on ? c.accent : c.line}`, background: on ? c.optionSelectedBg : c.optionBg, opacity: cur[id] && !on ? 0.55 : 1 }}>
+                    {em}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </Section>
+    );
+  };
 
   // ═══ FORM ═══
   const renderForm = () => {
@@ -8268,9 +8344,11 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </div>
         </Section>
 
-        <Section st={st} title={T("intensity")}>
-          <div style={st.row}>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} st={st} on={f.int === n} onClick={() => setF({ int: n })}>{n} · {tr(lang, UI.intL[n - 1])}</Chip>)}</div>
-        </Section>
+        {f.dir !== "med" && (
+          <Section st={st} title={T("intensity")}>
+            <div style={st.row}>{[1, 2, 3, 4, 5].map((n) => <Chip key={n} st={st} on={f.int === n} onClick={() => setF({ int: n })}>{n} · {tr(lang, (mgKind(f.dir) === "yoga" ? UI.intY : UI.intL)[n - 1])}</Chip>)}</div>
+          </Section>
+        )}
 
         {f.dir === "gym" && (
           <Section st={st} title={T("exercise")}>
@@ -8363,23 +8441,27 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           </Section>
         )}
 
+        {renderMg()}
+
         <Section st={st} title={T("feelBefore")} right={f.x.sb || preOpen ? null : <button type="button" style={{ ...st.back, color: c.accent }} onClick={() => setPreOpen(true)}>{T("feelBeforeAdd")}</button>}>
           {(f.x.sb || preOpen) && stateGrid(f.x.sb, (v) => setX({ sb: v }), "sb")}
         </Section>
-        <Section st={st} title={T("feelAfter")}>
+        <Section st={st} title={T(f.dir === "yoga" || f.dir === "mobility" ? "feelAfterYoga" : f.dir === "med" ? "feelAfterMed" : "feelAfterSport")}>
           {stateGrid(f.x.sa, (v) => setX({ sa: v }), "sa")}
         </Section>
 
-        <Section st={st} title={T("body")} right={<button type="button" style={st.back} onClick={() => setBodyOpen(!bodyOpen)}>{bodyOpen ? "▲" : "▼"}</button>}>
-          {bodyOpen && (
-            <>
-              <div style={st.small}>{T("before")}</div>
-              <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.zb.includes(k)} onClick={() => toggle("zb", k)}>{tr(lang, n)}</Chip>)}</div>
-              <div style={st.small}>{T("after")}</div>
-              <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.za.includes(k)} onClick={() => toggle("za", k)}>{tr(lang, n)}</Chip>)}</div>
-            </>
-          )}
-        </Section>
+        {!mgKind(f.dir) && (
+          <Section st={st} title={T("body")} right={<button type="button" style={st.back} onClick={() => setBodyOpen(!bodyOpen)}>{bodyOpen ? "▲" : "▼"}</button>}>
+            {bodyOpen && (
+              <>
+                <div style={st.small}>{T("before")}</div>
+                <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.zb.includes(k)} onClick={() => toggle("zb", k)}>{tr(lang, n)}</Chip>)}</div>
+                <div style={st.small}>{T("after")}</div>
+                <div style={st.row}>{ZONES.map(([k, n]) => <Chip key={k} st={st} on={f.za.includes(k)} onClick={() => toggle("za", k)}>{tr(lang, n)}</Chip>)}</div>
+              </>
+            )}
+          </Section>
+        )}
 
         <Section st={st} title={T("tags")}>
           <div style={st.row}>{tagPool.map((t) => <Chip key={t} st={st} on={f.tags.includes(t)} onClick={() => toggle("tags", t)}>{t}</Chip>)}</div>
@@ -8461,11 +8543,18 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
           const bars = weeks.map((w) => sum(es.filter((e) => e.d >= w && e.d < addDays(w, 7)), (e) => e.dur));
           const mx = Math.max(1, ...bars);
           let extra = null;
+          let extra2 = null;
           if (dir === "gym") {
             const pr = {};
             es.forEach((e) => (e.x?.ex || []).forEach((ex) => (ex.s || []).forEach((s) => { if (s.w > 0 && s.r > 0 && (!pr[ex.n] || s.w > pr[ex.n].w)) pr[ex.n] = { w: s.w, r: s.r, d: e.d }; })));
             const top = Object.entries(pr).sort((a, b) => b[1].w - a[1].w).slice(0, 6);
             if (top.length) extra = <div style={{ marginTop: 10 }}><div style={st.h2}>{T("prs")}</div>{top.map(([n, v]) => <div key={n} style={st.text}>{n}: <b>{v.w} {T("kg")}</b> <span style={st.small}>× {v.r} · {v.d}</span></div>)}</div>;
+          }
+          if (dir === "gym") {
+            const since = addDays(today, -13), cnt = {};
+            es.filter((e) => e.d >= since).forEach((e) => Object.entries(e.x?.mg || {}).forEach(([k, v]) => { (cnt[k] = cnt[k] || { n: 0, s: 0 }); cnt[k].n++; cnt[k].s += v; }));
+            const rows = MUSCLES.filter(([id]) => cnt[id]).sort((a, b) => cnt[b[0]].n - cnt[a[0]].n);
+            if (rows.length) extra2 = <div style={{ marginTop: 10 }}><div style={st.h2}>{T("mgStats")}</div>{rows.map(([id, n]) => <div key={id} style={st.text}>{tr(lang, n)}: <b>{cnt[id].n} {T("timesWord")}</b> <span style={st.small}>· {RATE.gym.em[Math.min(4, Math.max(0, Math.round(cnt[id].s / cnt[id].n) - 1))]} {(cnt[id].s / cnt[id].n).toFixed(1)}</span></div>)}</div>;
           }
           if (dir === "run") {
             const km = (a) => sum(a, (e) => Number(e.x?.km));
@@ -8490,6 +8579,7 @@ function PracticeScreen({ onBack, lang = "ru", c }) {
                 {bars.map((b, i) => <div key={i} style={{ flex: 1, height: Math.max(3, (b / mx) * 54), background: b ? c.accent : c.trackBg, borderRadius: 4 }} />)}
               </div>
               {extra}
+              {extra2}
               <div style={{ ...st.h2, marginTop: 12 }}>{T("byKind")}</div>
               {best[dir].length === 0 ? <div style={st.small}>{T("need")}</div> : best[dir].map((b) => (
                 <div key={b.sub} style={st.text}>{tr(lang, dirOf(dir).subs.find((s) => s[0] === b.sub)?.[1]) || b.sub}: <b>{b.avg > 0 ? "+" : ""}{b.avg.toFixed(1)}</b> <span style={st.small}>({b.n})</span></div>
@@ -8932,7 +9022,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  // build: menu-swap-1 sports-1 chal-1 lang-en-1 states-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
+  // build: menu-swap-1 sports-1 chal-1 lang-en-1 states-1 adapt-1 (Челленджи выше, Дневник практик ниже Компаса; виды спорта)
   const menuItems = [
     { id: "quiz", ...t.menu.quiz },
     { id: "selfhonesty", ...t.menu.selfhonesty },
